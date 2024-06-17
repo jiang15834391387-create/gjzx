@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>smartlink</artifactId>
+        <groupId>org.smartlink</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>smartlink-demo</module>
+        <module>smartlink-generator</module>
+        <module>smartlink-job</module>
+        <module>smartlink-system</module>
+        <module>smartlink-workflow</module>
+    </modules>
+
+    <artifactId>smartlink-modules</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+        smartlink-modules 业务模块
+    </description>
+
+</project>

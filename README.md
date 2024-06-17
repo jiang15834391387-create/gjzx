@@ -4,17 +4,17 @@
 - - -
 ## 平台简介
 
-[![码云Gitee](https://gitee.com/dromara/RuoYi-Vue-Plus/badge/star.svg?theme=blue)](https://gitee.com/dromara/RuoYi-Vue-Plus)
-[![GitHub](https://img.shields.io/github/stars/dromara/RuoYi-Vue-Plus.svg?style=social&label=Stars)](https://github.com/dromara/RuoYi-Vue-Plus)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://gitee.com/dromara/RuoYi-Vue-Plus/blob/master/LICENSE)
-[![使用IntelliJ IDEA开发维护](https://img.shields.io/badge/IntelliJ%20IDEA-提供支持-blue.svg)](https://www.jetbrains.com/?from=RuoYi-Vue-Plus)
+[![码云Gitee](https://gitee.com/dromara/smartlink/badge/star.svg?theme=blue)](https://gitee.com/dromara/smartlink)
+[![GitHub](https://img.shields.io/github/stars/dromara/smartlink.svg?style=social&label=Stars)](https://github.com/dromara/smartlink)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://gitee.com/dromara/smartlink/blob/master/LICENSE)
+[![使用IntelliJ IDEA开发维护](https://img.shields.io/badge/IntelliJ%20IDEA-提供支持-blue.svg)](https://www.jetbrains.com/?from=smartlink)
 <br>
-[![RuoYi-Vue-Plus](https://img.shields.io/badge/RuoYi_Vue_Plus-5.2.0-success.svg)](https://gitee.com/dromara/RuoYi-Vue-Plus)
+[![smartlink](https://img.shields.io/badge/smartlink_Vue_Plus-5.2.0-success.svg)](https://gitee.com/dromara/smartlink)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.1-blue.svg)]()
 [![JDK-17](https://img.shields.io/badge/JDK-17-green.svg)]()
 [![JDK-21](https://img.shields.io/badge/JDK-21-green.svg)]()
 
-> RuoYi-Vue-Plus 是重写 RuoYi-Vue 针对 `分布式集群与多租户` 场景全方位升级(不兼容原框架)
+> smartlink 是重写 smartlink-Vue 针对 `分布式集群与多租户` 场景全方位升级(不兼容原框架)
 
 > 项目代码、文档 均开源免费可商用 遵循开源协议在项目中保留开源协议文件即可<br>
 活到老写到老 为兴趣而开源 为学习而开源 为让大家真正可以学到技术而开源
@@ -28,14 +28,14 @@
 ## 赞助商
 
 MaxKey 业界领先单点登录产品 - https://gitee.com/dromara/MaxKey <br>
-CCFlow 驰聘低代码-流程-表单 - https://gitee.com/opencc/RuoYi-JFlow <br>
+CCFlow 驰聘低代码-流程-表单 - https://gitee.com/opencc/smartlink-JFlow <br>
 数舵科技 软件定制开发APP小程序等 - http://www.shuduokeji.com/ <br>
 引迈信息 软件开发平台 - https://www.jnpfsoft.com/index.html?from=plus-doc <br>
 [如何成为赞助商 加群联系作者详谈](https://plus-doc.dromara.org/#/common/add_group)
 
-# 本框架与RuoYi的功能差异
+# 本框架与smartlink的功能差异
 
-| 功能          | 本框架                                                                                                               | RuoYi                                                                              |
+| 功能          | 本框架                                                                                                               | smartlink                                                                              |
 |-------------|-------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
 | 前端项目        | 采用 Vue3 + TS + ElementPlus 重写                                                                                     | 基于Vue2/Vue3 + JS                                                                   | 
 | 后端项目结构      | 采用插件化 + 扩展包形式 结构解耦 易于扩展                                                                                           | 模块相互注入耦合严重难以扩展                                                                     | 
@@ -83,9 +83,9 @@ CCFlow 驰聘低代码-流程-表单 - https://gitee.com/opencc/RuoYi-JFlow <br>
 | Demo案例      | 提供框架功能的实际使用案例 单独一个模块提供了很多很全                                                                                       | 无                                                                                  |
 
 
-## 本框架与RuoYi的业务差异
+## 本框架与smartlink的业务差异
 
-| 业务     | 功能说明                                                                 | 本框架 | RuoYi            |
+| 业务     | 功能说明                                                                 | 本框架 | smartlink            |
 |--------|----------------------------------------------------------------------|-----|------------------|
 | 租户管理   | 系统内租户的管理 如:租户套餐、过期时间、用户数量、企业信息等                                      | 支持  | 无                |
 | 租户套餐管理 | 系统内租户所能使用的套餐管理 如:套餐内所包含的菜单等                                          | 支持  | 无                |
@@ -115,14 +115,14 @@ CCFlow 驰聘低代码-流程-表单 - https://gitee.com/opencc/RuoYi-JFlow <br>
 
 使用框架前请仔细阅读文档重点注意事项
 <br>
->[初始化项目 必看](https://plus-doc.dromara.org/#/ruoyi-vue-plus/quickstart/init)
->>[https://plus-doc.dromara.org/#/ruoyi-vue-plus/quickstart/init](https://plus-doc.dromara.org/#/ruoyi-vue-plus/quickstart/init)
+>[初始化项目 必看](https://plus-doc.dromara.org/#/smartlink/quickstart/init)
+>>[https://plus-doc.dromara.org/#/smartlink/quickstart/init](https://plus-doc.dromara.org/#/smartlink/quickstart/init)
 >
 >[专栏与视频 入门必看](https://plus-doc.dromara.org/#/common/column)
 >>[https://plus-doc.dromara.org/#/common/column](https://plus-doc.dromara.org/#/common/column)
 >
->[部署项目 必看](https://plus-doc.dromara.org/#/ruoyi-vue-plus/quickstart/deploy)
->>[https://plus-doc.dromara.org/#/ruoyi-vue-plus/quickstart/deploy](https://plus-doc.dromara.org/#/ruoyi-vue-plus/quickstart/deploy)
+>[部署项目 必看](https://plus-doc.dromara.org/#/smartlink/quickstart/deploy)
+>>[https://plus-doc.dromara.org/#/smartlink/quickstart/deploy](https://plus-doc.dromara.org/#/smartlink/quickstart/deploy)
 >
 >[如何加群](https://plus-doc.dromara.org/#/common/add_group)
 >>[https://plus-doc.dromara.org/#/common/add_group](https://plus-doc.dromara.org/#/common/add_group)

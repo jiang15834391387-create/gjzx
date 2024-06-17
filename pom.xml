@@ -4,13 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.dromara</groupId>
-    <artifactId>ruoyi-vue-plus</artifactId>
+    <groupId>org.smartlink</groupId>
+    <artifactId>smartlink</artifactId>
     <version>${revision}</version>
 
-    <name>RuoYi-Vue-Plus</name>
-    <url>https://gitee.com/dromara/RuoYi-Vue-Plus</url>
-    <description>RuoYi-Vue-Plus多租户管理系统</description>
+    <name>smartlink</name>
+    <description>smartlink档案管理系统</description>
 
     <properties>
         <revision>5.2.0-BETA2</revision>
@@ -130,8 +129,8 @@
 
             <!-- common 的依赖配置-->
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-bom</artifactId>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-common-bom</artifactId>
                 <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -340,33 +339,33 @@
             </dependency>
 
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-system</artifactId>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-system</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-job</artifactId>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-job</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-generator</artifactId>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-generator</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-demo</artifactId>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-demo</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!--  工作流模块  -->
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-workflow</artifactId>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-workflow</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -374,10 +373,10 @@
     </dependencyManagement>
 
     <modules>
-        <module>ruoyi-admin</module>
-        <module>ruoyi-common</module>
-        <module>ruoyi-extend</module>
-        <module>ruoyi-modules</module>
+        <module>smartlink-admin</module>
+        <module>smartlink-common</module>
+        <module>smartlink-extend</module>
+        <module>smartlink-modules</module>
     </modules>
     <packaging>pom</packaging>
 

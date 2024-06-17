@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>smartlink</artifactId>
+        <groupId>org.smartlink</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>smartlink-common-bom</module>
+        <module>smartlink-common-social</module>
+        <module>smartlink-common-core</module>
+        <module>smartlink-common-doc</module>
+        <module>smartlink-common-excel</module>
+        <module>smartlink-common-idempotent</module>
+        <module>smartlink-common-job</module>
+        <module>smartlink-common-log</module>
+        <module>smartlink-common-mail</module>
+        <module>smartlink-common-mybatis</module>
+        <module>smartlink-common-oss</module>
+        <module>smartlink-common-ratelimiter</module>
+        <module>smartlink-common-redis</module>
+        <module>smartlink-common-satoken</module>
+        <module>smartlink-common-security</module>
+        <module>smartlink-common-sms</module>
+        <module>smartlink-common-web</module>
+        <module>smartlink-common-translation</module>
+        <module>smartlink-common-sensitive</module>
+        <module>smartlink-common-json</module>
+        <module>smartlink-common-encrypt</module>
+        <module>smartlink-common-tenant</module>
+        <module>smartlink-common-websocket</module>
+    </modules>
+
+    <artifactId>smartlink-common</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+        common 通用模块
+    </description>
+
+</project>

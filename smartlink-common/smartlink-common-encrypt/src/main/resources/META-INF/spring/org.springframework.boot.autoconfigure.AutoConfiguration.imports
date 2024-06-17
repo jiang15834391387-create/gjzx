@@ -1,0 +1,3 @@
+org.smartlink.common.encrypt.config.EncryptorAutoConfiguration
+org.smartlink.common.encrypt.config.ApiDecryptAutoConfiguration
+

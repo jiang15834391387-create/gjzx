@@ -1,0 +1,2 @@
+org.smartlink.common.redis.config.RedisConfig
+org.smartlink.common.redis.config.CacheConfig

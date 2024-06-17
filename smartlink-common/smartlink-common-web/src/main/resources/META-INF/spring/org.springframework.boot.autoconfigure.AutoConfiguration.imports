@@ -1,0 +1,5 @@
+org.smartlink.common.web.config.CaptchaConfig
+org.smartlink.common.web.config.FilterConfig
+org.smartlink.common.web.config.I18nConfig
+org.smartlink.common.web.config.ResourcesConfig
+org.smartlink.common.web.config.UndertowConfig
