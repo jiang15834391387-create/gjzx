@@ -1,7 +1,7 @@
 package org.smartlink.web.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import org.smartlink.common.core.config.smartlinkConfig;
+import org.smartlink.common.core.config.SmartlinkConfig;
 import org.smartlink.common.core.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ public class IndexController {
     /**
      * 系统基础配置
      */
-    private final smartlinkConfig smartlinkConfig;
+    private final SmartlinkConfig smartlinkConfig;
 
     /**
      * 访问首页，提示语

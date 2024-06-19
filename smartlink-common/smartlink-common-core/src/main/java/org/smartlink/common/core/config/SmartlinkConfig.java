@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Data
 @Component
 @ConfigurationProperties(prefix = "smartlink")
-public class smartlinkConfig {
+public class SmartlinkConfig {
 
     /**
      * 项目名称
