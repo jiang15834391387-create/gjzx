@@ -1,4 +1,4 @@
-package org.smartlink.workflow.service.impl;
+package org.dromara.workflow.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
@@ -9,27 +9,27 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.smartlink.common.core.exception.ServiceException;
-import org.smartlink.common.core.utils.StreamUtils;
-import org.smartlink.common.core.utils.StringUtils;
-import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
-import org.smartlink.common.tenant.helper.TenantHelper;
-import org.smartlink.workflow.common.constant.FlowConstant;
-import org.smartlink.workflow.domain.WfCategory;
-import org.smartlink.workflow.domain.WfDefinitionConfig;
-import org.smartlink.workflow.domain.WfNodeConfig;
-import org.smartlink.workflow.domain.bo.ProcessDefinitionBo;
-import org.smartlink.workflow.domain.bo.WfDefinitionConfigBo;
-import org.smartlink.workflow.domain.vo.ProcessDefinitionVo;
-import org.smartlink.workflow.domain.vo.WfDefinitionConfigVo;
-import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
-import org.smartlink.workflow.service.IActProcessDefinitionService;
-import org.smartlink.workflow.service.IWfCategoryService;
-import org.smartlink.workflow.service.IWfDefinitionConfigService;
-import org.smartlink.workflow.service.IWfNodeConfigService;
-import org.smartlink.workflow.utils.ModelUtils;
-import org.smartlink.workflow.utils.QueryUtils;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.utils.StreamUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.tenant.helper.TenantHelper;
+import org.dromara.workflow.common.constant.FlowConstant;
+import org.dromara.workflow.domain.WfCategory;
+import org.dromara.workflow.domain.WfDefinitionConfig;
+import org.dromara.workflow.domain.WfNodeConfig;
+import org.dromara.workflow.domain.bo.ProcessDefinitionBo;
+import org.dromara.workflow.domain.bo.WfDefinitionConfigBo;
+import org.dromara.workflow.domain.vo.ProcessDefinitionVo;
+import org.dromara.workflow.domain.vo.WfDefinitionConfigVo;
+import org.dromara.workflow.mapper.WfDefinitionConfigMapper;
+import org.dromara.workflow.service.IActProcessDefinitionService;
+import org.dromara.workflow.service.IWfCategoryService;
+import org.dromara.workflow.service.IWfDefinitionConfigService;
+import org.dromara.workflow.service.IWfNodeConfigService;
+import org.dromara.workflow.utils.ModelUtils;
+import org.dromara.workflow.utils.QueryUtils;
 import org.flowable.bpmn.model.UserTask;
 import org.flowable.engine.ProcessMigrationService;
 import org.flowable.engine.RepositoryService;
@@ -55,6 +55,7 @@ import java.util.zip.ZipInputStream;
  *
  * @author may
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionService {
@@ -208,7 +209,7 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
             wfNodeConfigService.deleteByDefIds(processDefinitionIds);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -233,7 +234,7 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException("操作失败:" + e.getMessage());
         }
     }
@@ -262,6 +263,7 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
                 .migrateProcessInstances(fromProcessDefinitionId);
             return true;
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -291,7 +293,7 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }

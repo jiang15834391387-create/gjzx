@@ -1,15 +1,16 @@
-package org.smartlink.common.websocket.interceptor;
+package org.dromara.common.websocket.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.smartlink.common.core.domain.model.LoginUser;
-import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.common.websocket.constant.WebSocketConstants;
+import org.dromara.common.core.domain.model.LoginUser;
+import org.dromara.common.satoken.utils.LoginHelper;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
+
+import static org.dromara.common.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
 
 /**
  * WebSocket握手请求的拦截器
@@ -30,8 +31,22 @@ public class PlusWebSocketInterceptor implements HandshakeInterceptor {
      */
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) {
+        // 检查是否登录 是否有token
         LoginUser loginUser = LoginHelper.getLoginUser();
-        attributes.put(WebSocketConstants.LOGIN_USER_KEY, loginUser);
+
+        // 解决 ws 不走 mvc 拦截器问题(cloud 版本不受影响)
+        // 检查 header 与 param 里的 clientid 与 token 里的是否一致
+        String headerCid = ServletUtils.getRequest().getHeader(LoginHelper.CLIENT_KEY);
+        String paramCid = ServletUtils.getParameter(LoginHelper.CLIENT_KEY);
+        String clientId = StpUtil.getExtra(LoginHelper.CLIENT_KEY).toString();
+        if (!StringUtils.equalsAny(clientId, headerCid, paramCid)) {
+            // token 无效
+            throw NotLoginException.newInstance(StpUtil.getLoginType(),
+                "-100", "客户端ID与Token不匹配",
+                StpUtil.getTokenValue());
+        }
+
+        attributes.put(LOGIN_USER_KEY, loginUser);
         return true;
     }
 

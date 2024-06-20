@@ -1,4 +1,4 @@
-package org.smartlink.workflow.service.impl;
+package org.dromara.workflow.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -7,36 +7,34 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-import org.smartlink.common.core.domain.dto.RoleDTO;
-import org.smartlink.common.core.domain.dto.UserDTO;
-import org.smartlink.common.core.exception.ServiceException;
-import org.smartlink.common.core.service.UserService;
-import org.smartlink.common.core.utils.StreamUtils;
-import org.smartlink.common.core.utils.StringUtils;
-import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
-import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.common.tenant.helper.TenantHelper;
-import org.smartlink.workflow.common.constant.FlowConstant;
-import org.smartlink.common.core.enums.BusinessStatusEnum;
-import org.smartlink.workflow.common.enums.TaskStatusEnum;
-import org.smartlink.workflow.domain.ActHiTaskinst;
-import org.smartlink.workflow.domain.WfTaskBackNode;
-import org.smartlink.workflow.domain.bo.*;
-import org.smartlink.workflow.domain.vo.*;
-import org.smartlink.workflow.flowable.cmd.*;
-import org.smartlink.workflow.domain.bo.*;
-import org.smartlink.workflow.domain.vo.*;
-import org.smartlink.workflow.flowable.handler.FlowProcessEventHandler;
-import org.smartlink.workflow.mapper.ActHiTaskinstMapper;
-import org.smartlink.workflow.mapper.ActTaskMapper;
-import org.smartlink.workflow.service.IActTaskService;
-import org.smartlink.workflow.service.IWfDefinitionConfigService;
-import org.smartlink.workflow.service.IWfNodeConfigService;
-import org.smartlink.workflow.service.IWfTaskBackNodeService;
-import org.smartlink.workflow.utils.ModelUtils;
-import org.smartlink.workflow.utils.QueryUtils;
-import org.smartlink.workflow.utils.WorkflowUtils;
+import org.dromara.common.core.domain.dto.RoleDTO;
+import org.dromara.common.core.domain.dto.UserDTO;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.UserService;
+import org.dromara.common.core.utils.StreamUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.common.tenant.helper.TenantHelper;
+import org.dromara.workflow.common.constant.FlowConstant;
+import org.dromara.common.core.enums.BusinessStatusEnum;
+import org.dromara.workflow.common.enums.TaskStatusEnum;
+import org.dromara.workflow.domain.ActHiTaskinst;
+import org.dromara.workflow.domain.WfTaskBackNode;
+import org.dromara.workflow.domain.bo.*;
+import org.dromara.workflow.domain.vo.*;
+import org.dromara.workflow.flowable.cmd.*;
+import org.dromara.workflow.flowable.handler.FlowProcessEventHandler;
+import org.dromara.workflow.mapper.ActHiTaskinstMapper;
+import org.dromara.workflow.mapper.ActTaskMapper;
+import org.dromara.workflow.service.IActTaskService;
+import org.dromara.workflow.service.IWfDefinitionConfigService;
+import org.dromara.workflow.service.IWfNodeConfigService;
+import org.dromara.workflow.service.IWfTaskBackNodeService;
+import org.dromara.workflow.utils.ModelUtils;
+import org.dromara.workflow.utils.QueryUtils;
+import org.dromara.workflow.utils.WorkflowUtils;
 import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.*;
@@ -52,7 +50,6 @@ import org.flowable.task.api.TaskQuery;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.flowable.variable.api.persistence.entity.VariableInstance;
-import org.smartlink.workflow.flowable.cmd.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,13 +57,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.smartlink.workflow.common.constant.FlowConstant.*;
+import static org.dromara.workflow.common.constant.FlowConstant.*;
 
 /**
  * 任务 服务层实现
  *
  * @author may
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ActTaskServiceImpl implements IActTaskService {
@@ -81,8 +79,9 @@ public class ActTaskServiceImpl implements IActTaskService {
     private final ActHiTaskinstMapper actHiTaskinstMapper;
     private final IWfNodeConfigService wfNodeConfigService;
     private final IWfDefinitionConfigService wfDefinitionConfigService;
-    private final UserService userService;
     private final FlowProcessEventHandler flowProcessEventHandler;
+    private final UserService userService;
+    private final OssService ossService;
 
     /**
      * 启动任务
@@ -178,7 +177,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 return true;
             }
             //附件上传
-            AttachmentCmd attachmentCmd = new AttachmentCmd(completeTaskBo.getFileId(), task.getId(), task.getProcessInstanceId());
+            AttachmentCmd attachmentCmd = new AttachmentCmd(completeTaskBo.getFileId(), task.getId(), task.getProcessInstanceId(), ossService);
             managementService.executeCommand(attachmentCmd);
             String businessStatus = WorkflowUtils.getBusinessStatus(processInstance.getBusinessKey());
             //流程提交监听
@@ -187,8 +186,8 @@ public class ActTaskServiceImpl implements IActTaskService {
             }
             runtimeService.updateBusinessStatus(task.getProcessInstanceId(), BusinessStatusEnum.WAITING.getStatus());
             //办理监听
-            String keyNode = processInstance.getProcessDefinitionKey() + "_" + task.getTaskDefinitionKey();
-            flowProcessEventHandler.processTaskHandler(keyNode, task.getId(), processInstance.getBusinessKey());
+            flowProcessEventHandler.processTaskHandler(processInstance.getProcessDefinitionKey(), task.getTaskDefinitionKey(),
+                task.getId(), processInstance.getBusinessKey());
             //办理意见
             taskService.addComment(completeTaskBo.getTaskId(), task.getProcessInstanceId(), TaskStatusEnum.PASS.getStatus(), StringUtils.isBlank(completeTaskBo.getMessage()) ? "同意" : completeTaskBo.getMessage());
             //办理任务
@@ -228,6 +227,7 @@ public class ActTaskServiceImpl implements IActTaskService {
             }
             return true;
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -242,7 +242,7 @@ public class ActTaskServiceImpl implements IActTaskService {
      */
     @Async
     public void sendMessage(List<Task> list, String name, List<String> messageType, String message) {
-        WorkflowUtils.sendMessage(list, name, messageType, message);
+        WorkflowUtils.sendMessage(list, name, messageType, message, userService);
     }
 
     /**
@@ -276,7 +276,7 @@ public class ActTaskServiceImpl implements IActTaskService {
             List<WfNodeConfigVo> wfNodeConfigVoList = wfNodeConfigService.selectByDefIds(processDefinitionIds);
             for (TaskVo task : taskList) {
                 task.setBusinessStatusName(BusinessStatusEnum.findByStatus(task.getBusinessStatus()));
-                task.setParticipantVo(WorkflowUtils.getCurrentTaskParticipant(task.getId()));
+                task.setParticipantVo(WorkflowUtils.getCurrentTaskParticipant(task.getId(), userService));
                 task.setMultiInstance(WorkflowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey()) != null);
                 if (CollUtil.isNotEmpty(wfNodeConfigVoList)) {
                     wfNodeConfigVoList.stream().filter(e -> e.getDefinitionId().equals(task.getProcessDefinitionId()) && FlowConstant.TRUE.equals(e.getApplyUserTask())).findFirst().ifPresent(task::setWfNodeConfigVo);
@@ -341,7 +341,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                     });
                 }
                 taskVo.setAssignee(StringUtils.isNotBlank(task.getAssignee()) ? Long.valueOf(task.getAssignee()) : null);
-                taskVo.setParticipantVo(WorkflowUtils.getCurrentTaskParticipant(task.getId()));
+                taskVo.setParticipantVo(WorkflowUtils.getCurrentTaskParticipant(task.getId(), userService));
                 taskVo.setMultiInstance(WorkflowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey()) != null);
                 if (CollUtil.isNotEmpty(wfNodeConfigVoList)) {
                     wfNodeConfigVoList.stream().filter(e -> e.getDefinitionId().equals(task.getProcessDefinitionId()) && FlowConstant.TRUE.equals(e.getApplyUserTask())).findFirst().ifPresent(taskVo::setWfNodeConfigVo);
@@ -476,7 +476,7 @@ public class ActTaskServiceImpl implements IActTaskService {
             taskService.complete(newTask.getId());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -546,7 +546,7 @@ public class ActTaskServiceImpl implements IActTaskService {
             taskService.setAssignee(task.getId(), transmitBo.getUserId());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -594,7 +594,7 @@ public class ActTaskServiceImpl implements IActTaskService {
             taskService.complete(newTask.getId());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -644,7 +644,7 @@ public class ActTaskServiceImpl implements IActTaskService {
             taskService.complete(newTask.getId());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -724,6 +724,7 @@ public class ActTaskServiceImpl implements IActTaskService {
             //删除驳回后的流程节点
             wfTaskBackNodeService.deleteBackTaskNode(processInstanceId, backProcessBo.getTargetActivityId());
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
         return task.getProcessInstanceId();
@@ -744,6 +745,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 taskService.setAssignee(task.getId(), userId);
             }
         } catch (Exception e) {
+            log.error("修改失败：" + e.getMessage(), e);
             throw new ServiceException("修改失败：" + e.getMessage());
         }
         return true;

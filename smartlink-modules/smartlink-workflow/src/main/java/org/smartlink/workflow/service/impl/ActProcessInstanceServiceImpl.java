@@ -1,4 +1,4 @@
-package org.smartlink.workflow.service.impl;
+package org.dromara.workflow.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
@@ -9,31 +9,30 @@ import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.smartlink.common.core.exception.ServiceException;
-import org.smartlink.common.core.utils.StreamUtils;
-import org.smartlink.common.core.utils.StringUtils;
-import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
-import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.workflow.common.constant.FlowConstant;
-import org.smartlink.common.core.enums.BusinessStatusEnum;
-import org.smartlink.workflow.common.enums.TaskStatusEnum;
-import org.smartlink.workflow.domain.ActHiProcinst;
-import org.smartlink.workflow.domain.bo.ProcessInstanceBo;
-import org.smartlink.workflow.domain.bo.ProcessInvalidBo;
-import org.smartlink.workflow.domain.bo.TaskUrgingBo;
-import org.smartlink.workflow.domain.vo.*;
-import org.smartlink.workflow.domain.vo.*;
-import org.smartlink.workflow.flowable.CustomDefaultProcessDiagramGenerator;
-import org.smartlink.workflow.flowable.cmd.DeleteExecutionCmd;
-import org.smartlink.workflow.flowable.cmd.ExecutionChildByExecutionIdCmd;
-import org.smartlink.workflow.flowable.handler.FlowProcessEventHandler;
-import org.smartlink.workflow.service.IActHiProcinstService;
-import org.smartlink.workflow.service.IActProcessInstanceService;
-import org.smartlink.workflow.service.IWfNodeConfigService;
-import org.smartlink.workflow.service.IWfTaskBackNodeService;
-import org.smartlink.workflow.utils.QueryUtils;
-import org.smartlink.workflow.utils.WorkflowUtils;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.utils.StreamUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.workflow.common.constant.FlowConstant;
+import org.dromara.common.core.enums.BusinessStatusEnum;
+import org.dromara.workflow.common.enums.TaskStatusEnum;
+import org.dromara.workflow.domain.ActHiProcinst;
+import org.dromara.workflow.domain.bo.ProcessInstanceBo;
+import org.dromara.workflow.domain.bo.ProcessInvalidBo;
+import org.dromara.workflow.domain.bo.TaskUrgingBo;
+import org.dromara.workflow.domain.vo.*;
+import org.dromara.workflow.flowable.CustomDefaultProcessDiagramGenerator;
+import org.dromara.workflow.flowable.cmd.DeleteExecutionCmd;
+import org.dromara.workflow.flowable.cmd.ExecutionChildByExecutionIdCmd;
+import org.dromara.workflow.flowable.handler.FlowProcessEventHandler;
+import org.dromara.workflow.service.IActHiProcinstService;
+import org.dromara.workflow.service.IActProcessInstanceService;
+import org.dromara.workflow.service.IWfNodeConfigService;
+import org.dromara.workflow.service.IWfTaskBackNodeService;
+import org.dromara.workflow.utils.QueryUtils;
+import org.dromara.workflow.utils.WorkflowUtils;
 import org.flowable.bpmn.model.*;
 import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricActivityInstance;
@@ -78,6 +77,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
     private final IWfTaskBackNodeService wfTaskBackNodeService;
     private final IWfNodeConfigService wfNodeConfigService;
     private final FlowProcessEventHandler flowProcessEventHandler;
+    private final UserService userService;
 
     @Value("${flowable.activity-font-name}")
     private String activityFontName;
@@ -324,7 +324,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
                     historyInfoVo.setEndTime(infoVo.getEndTime() == null ? null : infoVo.getEndTime());
                     historyInfoVo.setRunDuration(infoVo.getEndTime() == null ? null : infoVo.getRunDuration());
                     if (ObjectUtil.isEmpty(infoVo.getAssignee())) {
-                        ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(infoVo.getId());
+                        ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(infoVo.getId(), userService);
                         if (ObjectUtil.isNotEmpty(participantVo) && CollUtil.isNotEmpty(participantVo.getCandidate())) {
                             historyInfoVo.setAssignee(StreamUtils.join(participantVo.getCandidate(), Convert::toStr));
                         }
@@ -339,7 +339,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
                         historyInfoVo.setEndTime(e.getEndTime() == null ? null : e.getEndTime());
                         historyInfoVo.setRunDuration(e.getEndTime() == null ? null : e.getRunDuration());
                         if (ObjectUtil.isEmpty(e.getAssignee())) {
-                            ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(e.getId());
+                            ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(e.getId(), userService);
                             if (ObjectUtil.isNotEmpty(participantVo) && CollUtil.isNotEmpty(participantVo.getCandidate())) {
                                 historyInfoVo.setAssignee(StreamUtils.join(participantVo.getCandidate(), Convert::toStr));
                             }
@@ -395,7 +395,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
             }
             //设置人员id
             if (ObjectUtil.isEmpty(historicTaskInstance.getAssignee())) {
-                ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(historicTaskInstance.getId());
+                ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(historicTaskInstance.getId(), userService);
                 if (ObjectUtil.isNotEmpty(participantVo) && CollUtil.isNotEmpty(participantVo.getCandidate())) {
                     actHistoryInfoVo.setAssignee(StreamUtils.join(participantVo.getCandidate(), Convert::toStr));
                 }
@@ -487,7 +487,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
                 historicProcessInstance.getBusinessKey(), BusinessStatusEnum.INVALID.getStatus(), false);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -522,7 +522,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
             wfTaskBackNodeService.deleteByInstanceIds(processInstanceIds);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -546,7 +546,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
             wfTaskBackNodeService.deleteByInstanceIds(processInstanceIds);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw new ServiceException(e.getMessage());
         }
     }
@@ -596,7 +596,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
                 processInstance.getBusinessKey(), BusinessStatusEnum.CANCEL.getStatus(), false);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("撤销失败:" + e.getMessage(), e);
             throw new ServiceException("撤销失败:" + e.getMessage());
         }
     }
@@ -676,7 +676,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
                 message = "您的【" + processInstance.getName() + "】单据还未审批，请您及时处理。";
             }
             List<Task> list = QueryUtils.taskQuery(taskUrgingBo.getProcessInstanceId()).list();
-            WorkflowUtils.sendMessage(list, processInstance.getName(), taskUrgingBo.getMessageType(), message);
+            WorkflowUtils.sendMessage(list, processInstance.getName(), taskUrgingBo.getMessageType(), message, userService);
         } catch (ServiceException e) {
             throw new ServiceException(e.getMessage());
         }
