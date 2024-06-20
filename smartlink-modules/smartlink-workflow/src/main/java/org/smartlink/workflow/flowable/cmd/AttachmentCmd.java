@@ -1,16 +1,15 @@
-package org.dromara.workflow.flowable.cmd;
+package org.smartlink.workflow.flowable.cmd;
 
 import cn.hutool.core.collection.CollUtil;
-import org.dromara.common.core.domain.dto.OssDTO;
-import org.dromara.common.core.service.OssService;
-import org.dromara.common.core.utils.SpringUtils;
-import org.dromara.common.core.utils.StringUtils;
-import org.dromara.common.satoken.utils.LoginHelper;
 import org.flowable.common.engine.impl.interceptor.Command;
 import org.flowable.common.engine.impl.interceptor.CommandContext;
 import org.flowable.engine.impl.persistence.entity.AttachmentEntity;
 import org.flowable.engine.impl.persistence.entity.AttachmentEntityManager;
 import org.flowable.engine.impl.util.CommandContextUtil;
+import org.smartlink.common.core.domain.dto.OssDTO;
+import org.smartlink.common.core.service.OssService;
+import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.satoken.utils.LoginHelper;
 
 import java.util.Date;
 import java.util.List;

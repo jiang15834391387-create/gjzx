@@ -1,8 +1,12 @@
-package org.dromara.common.websocket.interceptor;
+package org.smartlink.common.websocket.interceptor;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.stp.StpUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.common.core.domain.model.LoginUser;
-import org.dromara.common.satoken.utils.LoginHelper;
+import org.smartlink.common.core.domain.model.LoginUser;
+import org.smartlink.common.core.utils.ServletUtils;
+import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.satoken.utils.LoginHelper;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.socket.WebSocketHandler;
@@ -10,7 +14,8 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import java.util.Map;
 
-import static org.dromara.common.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
+import static org.smartlink.common.websocket.constant.WebSocketConstants.LOGIN_USER_KEY;
+
 
 /**
  * WebSocket握手请求的拦截器
