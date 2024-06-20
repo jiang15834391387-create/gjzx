@@ -77,4 +77,22 @@ public interface ISysOssService {
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
+    /**
+     * 上传 MultipartFile 到对象存储服务，并保存文件信息到数据库
+     *
+     * @param fileBytes 要上传的 字节数组
+     * @param originalfileName 要上传的 文件名
+     * @return 上传成功后的 SysOssVo 对象，包含文件信息
+     */
+
+    SysOssVo upload(byte[] fileBytes,String originalfileName);
+
+    /**
+     * 删除OSS对象存储
+     *
+     * @param id     OSS对象ID
+     * @param isValid 判断是否需要校验
+     * @return 结果
+     */
+    Boolean deleteWithValidById(Long id, Boolean isValid);
 }

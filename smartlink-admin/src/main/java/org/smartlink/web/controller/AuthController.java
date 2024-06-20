@@ -2,9 +2,12 @@ package org.smartlink.web.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.codec.Base64;
+import cn.dev33.satoken.stp.SaLoginModel;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthResponse;
@@ -14,6 +17,7 @@ import me.zhyd.oauth.utils.AuthStateUtils;
 import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginBody;
+import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.RegisterBody;
 import org.smartlink.common.core.domain.model.SocialLoginBody;
 import org.smartlink.common.core.utils.*;
@@ -29,10 +33,8 @@ import org.smartlink.common.websocket.utils.WebSocketUtils;
 import org.smartlink.system.domain.bo.SysTenantBo;
 import org.smartlink.system.domain.vo.SysClientVo;
 import org.smartlink.system.domain.vo.SysTenantVo;
-import org.smartlink.system.service.ISysClientService;
-import org.smartlink.system.service.ISysConfigService;
-import org.smartlink.system.service.ISysSocialService;
-import org.smartlink.system.service.ISysTenantService;
+import org.smartlink.system.domain.vo.SysUserVo;
+import org.smartlink.system.service.*;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.smartlink.web.domain.vo.TenantListVo;
@@ -71,6 +73,8 @@ public class AuthController {
     private final ISysSocialService socialUserService;
     private final ISysClientService clientService;
     private final ScheduledExecutorService scheduledExecutorService;
+
+    private final ISysUserService userService;
 
 
     /**
@@ -214,6 +218,30 @@ public class AuthController {
         vo.setVoList(CollUtil.isNotEmpty(list) ? list : voList);
         vo.setTenantEnabled(TenantHelper.isEnable());
         return R.ok(vo);
+    }
+
+    @GetMapping("/getToken")
+    public R<LoginVo> getToken(){
+        SysClientVo client = clientService.queryByClientId("e5cd7e4891bf95d1d19206ce24a7b32e");
+        SysUserVo user = userService.selectUserById(1l);
+        LoginUser loginUser = loginService.buildLoginUser(user);
+        loginUser.setClientKey(client.getClientKey());
+        loginUser.setDeviceType(client.getDeviceType());
+        SaLoginModel model = new SaLoginModel();
+        model.setDevice(client.getDeviceType());
+        // 自定义分配 不同用户体系 不同 token 授权时间 不设置默认走全局 yml 配置
+        // 例如: 后台用户30分钟过期 app用户1天过期
+        model.setTimeout(client.getTimeout());
+        model.setActiveTimeout(client.getActiveTimeout());
+        model.setExtra(LoginHelper.CLIENT_KEY, client.getClientId());
+        // 生成token
+        LoginHelper.login(loginUser, model);
+        LoginVo loginVo = new LoginVo();
+        loginVo.setAccessToken("Bearer "+StpUtil.getTokenValue());
+        loginVo.setExpireIn(StpUtil.getTokenTimeout());
+        loginVo.setClientId(client.getClientId());
+        return R.ok(loginVo);
+
     }
 
 }

@@ -38,6 +38,7 @@
         <mapstruct-plus.lombok.version>0.2.0</mapstruct-plus.lombok.version>
         <lombok.version>1.18.32</lombok.version>
         <bouncycastle.version>1.76</bouncycastle.version>
+        <mongodbplus.version>2.0.9.3</mongodbplus.version>
         <justauth.version>1.16.6</justauth.version>
         <!-- 离线IP地址定位库 -->
         <ip2region.version>2.7.0</ip2region.version>
@@ -312,6 +313,12 @@
                 <version>${alibaba-ttl.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.gitee.anwena</groupId>
+                <artifactId>mongo-plus-boot-starter</artifactId>
+                <version>${mongodbplus.version}</version>
+            </dependency>
+
             <!-- 加密包引入 -->
             <dependency>
                 <groupId>org.bouncycastle</groupId>
@@ -359,6 +366,12 @@
             <dependency>
                 <groupId>org.smartlink</groupId>
                 <artifactId>smartlink-demo</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-server</artifactId>
                 <version>${revision}</version>
             </dependency>
 

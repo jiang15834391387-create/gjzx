@@ -3,6 +3,7 @@ package org.smartlink.system.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -250,6 +251,15 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         return baseMapper.deleteBatchIds(ids) > 0;
     }
 
+    @Override
+    public SysOssVo upload(byte[] fileBytes,String originalfileName) {
+        String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
+        OssClient storage = OssFactory.instance();
+        UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
+        // 保存文件信息
+        return buildResultEntity(originalfileName, suffix, storage.getConfigKey(), uploadResult);
+    }
+
     /**
      * 桶类型为 private 的URL 修改为临时URL时长为120s
      *
@@ -263,5 +273,24 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
             oss.setUrl(storage.getPrivateUrl(oss.getFileName(), 120));
         }
         return oss;
+    }
+
+
+    /**
+     * 删除OSS对象存储
+     *
+     * @param id     OSS对象ID
+     * @param isValid 判断是否需要校验
+     * @return 结果
+     */
+    @Override
+    public Boolean deleteWithValidById(Long id, Boolean isValid) {
+        if (isValid) {
+            // 做一些业务上的校验,判断是否需要校验
+        }
+        SysOssVo sysOssVo = baseMapper.selectVoById(id);
+        OssClient storage = OssFactory.instance(sysOssVo.getService());
+        storage.delete(sysOssVo.getUrl());
+        return baseMapper.deleteById(id) > 0;
     }
 }

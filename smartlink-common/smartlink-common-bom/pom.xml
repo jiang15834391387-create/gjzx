@@ -82,6 +82,14 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- mongo数据库服务 -->
+            <dependency>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-common-mongo</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+
             <!-- 限流 -->
             <dependency>
                 <groupId>org.smartlink</groupId>

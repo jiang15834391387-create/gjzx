@@ -21,6 +21,7 @@ import org.smartlink.demo.domain.bo.TestDemoImportVo;
 import org.smartlink.demo.domain.vo.TestDemoVo;
 import org.smartlink.demo.service.ITestDemoService;
 import lombok.RequiredArgsConstructor;
+import org.smartlink.server.task.service.DataTaskServer;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,8 @@ import java.util.concurrent.TimeUnit;
 public class TestDemoController extends BaseController {
 
     private final ITestDemoService testDemoService;
+
+    private final DataTaskServer dataTaskServerl;
 
     /**
      * 查询测试单表列表
@@ -144,4 +147,5 @@ public class TestDemoController extends BaseController {
                           @PathVariable Long[] ids) {
         return toAjax(testDemoService.deleteWithValidByIds(Arrays.asList(ids), true));
     }
+
 }

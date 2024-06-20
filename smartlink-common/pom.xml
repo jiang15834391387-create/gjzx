@@ -20,6 +20,7 @@
         <module>smartlink-common-log</module>
         <module>smartlink-common-mail</module>
         <module>smartlink-common-mybatis</module>
+        <module>smartlink-common-mongo</module>
         <module>smartlink-common-oss</module>
         <module>smartlink-common-ratelimiter</module>
         <module>smartlink-common-redis</module>
