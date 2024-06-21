@@ -1,6 +1,9 @@
 package org.smartlink.server.task.domain.vo;
 
+import cn.hutool.core.lang.tree.Tree;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class DataTaskVo {
@@ -38,4 +41,7 @@ public class DataTaskVo {
      * 单据状态0待登记、1待扫描、2扫描完成、3驳回修改、4驳回重扫、5修改完成、6补扫完成、7未装册、8已装册
      */
     private String taskState;
+
+
+    private List<Tree<String>> imageTree;
 }

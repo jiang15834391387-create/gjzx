@@ -1,37 +1,36 @@
 package org.smartlink.demo.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.ValidatorUtils;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 import org.smartlink.common.core.validate.QueryGroup;
-import org.smartlink.common.web.core.BaseController;
-import org.smartlink.common.idempotent.annotation.RepeatSubmit;
-import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.excel.core.ExcelResult;
 import org.smartlink.common.excel.utils.ExcelUtil;
+import org.smartlink.common.idempotent.annotation.RepeatSubmit;
 import org.smartlink.common.log.annotation.Log;
 import org.smartlink.common.log.enums.BusinessType;
+import org.smartlink.common.mybatis.core.page.PageQuery;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.web.core.BaseController;
 import org.smartlink.demo.domain.TestDemo;
 import org.smartlink.demo.domain.bo.TestDemoBo;
 import org.smartlink.demo.domain.bo.TestDemoImportVo;
 import org.smartlink.demo.domain.vo.TestDemoVo;
 import org.smartlink.demo.service.ITestDemoService;
-import lombok.RequiredArgsConstructor;
-import org.smartlink.server.task.service.DataTaskServer;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,7 +47,6 @@ public class TestDemoController extends BaseController {
 
     private final ITestDemoService testDemoService;
 
-    private final DataTaskServer dataTaskServerl;
 
     /**
      * 查询测试单表列表

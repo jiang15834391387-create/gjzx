@@ -273,6 +273,5 @@ justauth:
 
 kkfile:
   onlinePreviewUrl: http://192.168.106.130:8012/onlinePreview?url=
-  url: http://192.168.106.130:8012
 frontEnd:
   url: http://127.0.0.1

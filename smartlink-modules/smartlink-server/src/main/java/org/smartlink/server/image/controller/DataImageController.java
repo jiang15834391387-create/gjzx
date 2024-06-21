@@ -1,7 +1,6 @@
 package org.smartlink.server.image.controller;
 
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
@@ -19,11 +18,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLEncoder;
 import java.util.Base64;
-import java.util.UUID;
 
 @Validated
 @RequiredArgsConstructor
@@ -33,10 +30,6 @@ public class DataImageController extends BaseController {
 
     @Value("${kkfile.onlinePreviewUrl}")
     private String onlinePreviewUrl;
-
-    @Value("${kkfile.url}")
-    private String kkFileUrl;
-
 
     private final DataImageServer dataImageServer;
 
@@ -62,6 +55,7 @@ public class DataImageController extends BaseController {
         dataImage.setFileType(upload.getFileSuffix());
         dataImage.setPreviewUrl(onlinePreviewUrl+URLEncoder.encode( Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
         dataImage.setSourceFileUrl(upload.getUrl());
+        dataImage.setParentId("fj");
         dataImage.setOssId(upload.getOssId());
         if (dataImageServer.save(dataImage)) {
             return R.ok(dataImage);
@@ -87,12 +81,6 @@ public class DataImageController extends BaseController {
         Update update = new Update().pull("images", Query.query(Criteria.where("fileId").is(fileId)));
         mongoTemplate.updateMulti(query, update, "dataTask");
         return R.ok();
-    }
-
-
-    @GetMapping("/getkkfileUrl")
-    public R<String> getkkfileUrl() {
-        return R.ok("操作成功！",kkFileUrl);
     }
 
 

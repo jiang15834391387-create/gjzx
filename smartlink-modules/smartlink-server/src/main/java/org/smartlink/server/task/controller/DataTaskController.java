@@ -1,15 +1,19 @@
 package org.smartlink.server.task.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.lang.tree.Tree;
+import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
 import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
 import org.smartlink.server.task.domain.bo.TaskAndImages;
+import org.smartlink.server.task.domain.vo.DataTaskVo;
 import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
 import org.smartlink.system.service.ISysOssService;
@@ -41,8 +45,31 @@ public class DataTaskController extends BaseController {
     }
 
     @GetMapping("/getTaskInfo")
-    public DataTask getTaskInfo(String businessSerialNo) {
-        return dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo,businessSerialNo).one();
+    public R<DataTaskVo> getTaskInfo(String businessSerialNo) {
+        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        List<DataImage> images = one.getImages();
+        //TODO 临时加的类型，后面需要手动添加表
+        DataImage fj = new DataImage();
+        fj.setParentId("0");
+        fj.setFileId("fj");
+        fj.setFileName("附件");
+        images.add(fj);
+        List<Tree<String>> build = TreeUtil.build(images,"0",  (image, tree) -> {
+            tree.setId(image.getFileId());
+            tree.setParentId(image.getParentId());
+            tree.setName(image.getFileName());
+            tree.setWeight(image.getSort());
+            tree.putExtra("sourceFileUrl", image.getSourceFileUrl());
+            tree.putExtra("previewUrl", image.getPreviewUrl());
+            tree.putExtra("fileName", image.getFileName());
+            tree.putExtra("ossId", image.getOssId());
+        });
+
+       DataTaskVo dataTaskVo = new DataTaskVo();
+       BeanUtil.copyProperties(one,dataTaskVo);
+       dataTaskVo.setImageTree(build);
+       return R.ok(dataTaskVo);
+
     }
 
     @PostMapping("/addTask")
@@ -98,8 +125,9 @@ public class DataTaskController extends BaseController {
 
     @GetMapping("/getTaskUrl")
     public R<String> getTaskUrl(String businessSerialNo) {
-        String s = frontEndUrl+ "/documentInfo/" + businessSerialNo;
-        return R.ok(s);
+
+        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
+        return R.ok("",s);
 
     }
 

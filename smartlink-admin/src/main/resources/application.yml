@@ -124,8 +124,7 @@ security:
     # actuator 监控配置
     - /actuator
     - /actuator/**
-    # image 文件下载
-    - /server/image/downloadFile
+
 
 # 多租户配置
 tenant:

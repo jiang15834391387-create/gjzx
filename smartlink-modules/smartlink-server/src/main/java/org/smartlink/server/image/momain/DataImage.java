@@ -39,4 +39,13 @@ public class DataImage {
      * 对象存储主键
      */
     private Long ossId;
+    /**
+     * 图片顺序
+     */
+    private String sort;
+    /**
+     * 父节点
+     */
+    private String parentId;
+
 }
