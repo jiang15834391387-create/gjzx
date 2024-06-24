@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Validated
@@ -47,7 +48,7 @@ public class DataTaskController extends BaseController {
     @GetMapping("/getTaskInfo")
     public R<DataTaskVo> getTaskInfo(String businessSerialNo) {
         DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
-        List<DataImage> images = one.getImages();
+        List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
         //TODO 临时加的类型，后面需要手动添加表
         DataImage fj = new DataImage();
         fj.setParentId("0");
