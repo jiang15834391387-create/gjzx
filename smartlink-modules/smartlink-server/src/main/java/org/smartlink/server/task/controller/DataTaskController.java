@@ -48,6 +48,9 @@ public class DataTaskController extends BaseController {
     @GetMapping("/getTaskInfo")
     public R<DataTaskVo> getTaskInfo(String businessSerialNo) {
         DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        if(one==null){
+            return R.fail(businessSerialNo+"单据不存在");
+        }
         List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
         //TODO 临时加的类型，后面需要手动添加表
         DataImage fj = new DataImage();
@@ -119,9 +122,9 @@ public class DataTaskController extends BaseController {
         List<DataImage> list = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
         boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, taskAndImages.getBusinessSerialNo()).set(DataTask::getImages, list).update();
         if(update){
-            return R.ok();
+            return R.ok("更新成功！");
         }
-        return R.fail();
+        return R.ok("操作成功,本次没有更新");
     }
 
     @GetMapping("/getTaskUrl")
