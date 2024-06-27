@@ -42,6 +42,7 @@ import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
 import org.smartlink.common.core.utils.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,6 +76,9 @@ public class AuthController {
     private final ScheduledExecutorService scheduledExecutorService;
 
     private final ISysUserService userService;
+
+    @Value("${frontEnd.url}")
+    private String frontEndUrl;
 
 
     /**
@@ -241,6 +245,26 @@ public class AuthController {
         loginVo.setExpireIn(StpUtil.getTokenTimeout());
         loginVo.setClientId(client.getClientId());
         return R.ok(loginVo);
+
+    }
+
+
+    @GetMapping("/getPreviewTaskUrl")
+    public R<String> getPreviewTaskUrl(String businessSerialNo) {
+        StpUtil.renewTimeout(604800);
+        StpUtil.updateLastActiveToNow();
+        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
+        return R.ok("",s);
+
+    }
+
+
+    @GetMapping("/getScanTaskUrl")
+    public R<String> getScanTaskUrl(String businessSerialNo) {
+        getToken();
+        //TODO 暂无 后续要加扫描页
+//        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
+        return R.ok("","");
 
     }
 

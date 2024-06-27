@@ -30,8 +30,7 @@ import java.util.List;
 @RequestMapping("/server/task")
 public class DataTaskController extends BaseController {
 
-    @Value("${frontEnd.url}")
-    private String frontEndUrl;
+
     private final ISysOssService iSysOssService;
     private final DataTaskServer dataTaskServer;
 
@@ -115,8 +114,6 @@ public class DataTaskController extends BaseController {
         return R.fail();
 
     }
-
-
     @PostMapping("/relevanceDocument")
     public R<Void> relevanceDocument(@RequestBody TaskAndImages taskAndImages) {
         List<DataImage> list = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
@@ -125,14 +122,6 @@ public class DataTaskController extends BaseController {
             return R.ok("更新成功！");
         }
         return R.ok("操作成功,本次没有更新");
-    }
-
-    @GetMapping("/getTaskUrl")
-    public R<String> getTaskUrl(String businessSerialNo) {
-
-        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
-        return R.ok("",s);
-
     }
 
 
