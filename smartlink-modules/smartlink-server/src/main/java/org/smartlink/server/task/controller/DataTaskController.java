@@ -97,15 +97,17 @@ public class DataTaskController extends BaseController {
         if(dataTask==null){
             return R.ok("已经删除过了！");
         }
-        //删除oss文件
-        List<Long> ossIds = dataTask.getImages().stream().map(DataImage::getOssId).toList();
-        if(ossIds.size()>0){
-            iSysOssService.deleteWithValidByIds(ossIds,false);
+        //如果文件不为null
+        if(dataTask.getImages()!=null){
+            //删除oss文件
+            List<Long> ossIds = dataTask.getImages().stream().map(DataImage::getOssId).toList();
+            if(ossIds.size()>0){
+                iSysOssService.deleteWithValidByIds(ossIds,false);
+            }
+            //删除文件数据
+            List<String> list = dataTask.getImages().stream().map(DataImage::getFileId).toList();
+            dataImageServer.lambdaUpdate().in(DataImage::getFileId, list).remove();
         }
-        //删除文件数据
-        List<String> list = dataTask.getImages().stream().map(DataImage::getFileId).toList();
-        dataImageServer.lambdaUpdate().in(DataImage::getFileId, list).remove();
-
         //删除单据
         boolean remove = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, businessSerialNo).remove();
         if(remove){
