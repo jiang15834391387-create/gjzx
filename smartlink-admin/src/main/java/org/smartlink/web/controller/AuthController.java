@@ -261,10 +261,10 @@ public class AuthController {
 
     @GetMapping("/getScanTaskUrl")
     public R<String> getScanTaskUrl(String businessSerialNo) {
-        getToken();
-        //TODO 暂无 后续要加扫描页
-//        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
-        return R.ok("","");
+        StpUtil.renewTimeout(604800);
+        StpUtil.updateLastActiveToNow();
+        String s = frontEndUrl+ "/documentScan?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
+        return R.ok("",s);
 
     }
 

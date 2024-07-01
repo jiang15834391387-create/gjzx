@@ -4,6 +4,7 @@ package org.smartlink.server.image.controller;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
+import org.smartlink.server.image.domain.bo.DeleteImageBo;
 import org.smartlink.server.image.domain.bo.UploadImageBo;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
@@ -18,9 +19,14 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Validated
 @RequiredArgsConstructor
@@ -46,6 +52,11 @@ public class DataImageController extends BaseController {
         return null;
     }
 
+    /**
+     *  上传文件，不在单据下
+     * @param uploadImageBo 文件bo
+     * @return
+     */
     @PostMapping("/uploadImage")
     public R<DataImage> uploadImage(@RequestBody UploadImageBo uploadImageBo) {
         byte[] decodedBytes = Base64.getDecoder().decode(uploadImageBo.getFileBase64());
@@ -64,12 +75,50 @@ public class DataImageController extends BaseController {
     }
 
 
+    /**
+     * 单据下上传文件
+     * @param file 文件
+     * @param businessSerialNo 流水号
+     * @return
+     */
+    @PostMapping("/uploadImageFile")
+    public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file,String businessSerialNo) {
+        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        if(one==null){
+            return R.fail("单据不存在！");
+        }
+        SysOssVo upload = iSysOssService.upload(file);
+        DataImage dataImage = new DataImage();
+        dataImage.setFileName(file.getOriginalFilename());
+        dataImage.setFileType(upload.getFileSuffix());
+        dataImage.setPreviewUrl(onlinePreviewUrl+URLEncoder.encode( Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        dataImage.setSourceFileUrl(upload.getUrl());
+        dataImage.setParentId("fj");
+        dataImage.setOssId(upload.getOssId());
+        dataImageServer.save(dataImage);
+        List<DataImage> images = one.getImages();
+        if(images==null||images.size()==0){
+            images = new ArrayList<>();
+        }
+        images.add(dataImage);
+        boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, businessSerialNo).set(DataTask::getImages, images).update();
+        if (update) {
+            return R.ok(dataImage);
+        }
+        return R.fail("上传失败！");
+    }
+
+
     @PostMapping("/editImage")
     public R<Void> editImage(@RequestBody DataImage image) {
         return null;
     }
 
-
+    /**
+     * 删除文件
+     * @param fileId 文件ID
+     * @return 成功失败
+     */
     @GetMapping("/deleteImage")
     public R<Void> deleteImage(String fileId) {
         DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
@@ -81,6 +130,30 @@ public class DataImageController extends BaseController {
         Update update = new Update().pull("images", Query.query(Criteria.where("fileId").is(fileId)));
         mongoTemplate.updateMulti(query, update, "dataTask");
         return R.ok();
+    }
+
+    /**
+     * 批量删除文件(单据下)
+     * @param deleteImageBo 文件删除对象
+     * @return 成功失败
+     */
+    @PostMapping("/deleteImages")
+    public R<Void> deleteImages(@RequestBody DeleteImageBo deleteImageBo) {
+        List<String> fileIds = Arrays.asList(deleteImageBo.getFileIds().split(","));
+        for (String fileId : fileIds) {
+            DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
+            if(one!=null){
+                iSysOssService.deleteWithValidById(one.getOssId(),false);
+            }
+            dataImageServer.lambdaUpdate().eq(DataImage::getFileId, fileId).remove();
+        }
+        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, deleteImageBo.getBusinessSerialNo()).one();
+        List<DataImage> collect = one.getImages().stream().filter(e -> !fileIds.contains(e.getFileId())).collect(Collectors.toList());
+        boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, deleteImageBo.getBusinessSerialNo()).set(DataTask::getImages, collect).update();
+        if (update) {
+            return R.ok();
+        }
+        return R.fail();
     }
 
 
