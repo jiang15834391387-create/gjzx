@@ -39,8 +39,7 @@ public class DataTaskController extends BaseController {
 
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
-        return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages
-        ).like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()),
+        return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages).like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()),
             DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo()).page(pageParam);
     }
 

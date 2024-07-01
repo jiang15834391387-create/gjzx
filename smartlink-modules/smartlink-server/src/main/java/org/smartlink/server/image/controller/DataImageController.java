@@ -83,10 +83,7 @@ public class DataImageController extends BaseController {
      */
     @PostMapping("/uploadImageFile")
     public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file,String businessSerialNo) {
-        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
-        if(one==null){
-            return R.fail("单据不存在！");
-        }
+
         SysOssVo upload = iSysOssService.upload(file);
         DataImage dataImage = new DataImage();
         dataImage.setFileName(file.getOriginalFilename());
@@ -96,16 +93,17 @@ public class DataImageController extends BaseController {
         dataImage.setParentId("fj");
         dataImage.setOssId(upload.getOssId());
         dataImageServer.save(dataImage);
-        List<DataImage> images = one.getImages();
-        if(images==null||images.size()==0){
-            images = new ArrayList<>();
-        }
-        images.add(dataImage);
-        boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, businessSerialNo).set(DataTask::getImages, images).update();
-        if (update) {
+
+
+        Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
+        Update update = new Update().push("images", dataImage);
+
+        mongoTemplate.updateFirst(query, update, DataTask.class);
+
+
             return R.ok(dataImage);
-        }
-        return R.fail("上传失败！");
+
+
     }
 
 
