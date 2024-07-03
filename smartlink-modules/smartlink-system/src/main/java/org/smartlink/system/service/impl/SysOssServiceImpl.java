@@ -289,6 +289,9 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
             // 做一些业务上的校验,判断是否需要校验
         }
         SysOssVo sysOssVo = baseMapper.selectVoById(id);
+        if(sysOssVo==null){
+            return true;
+        }
         OssClient storage = OssFactory.instance(sysOssVo.getService());
         storage.delete(sysOssVo.getUrl());
         return baseMapper.deleteById(id) > 0;
