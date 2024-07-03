@@ -125,5 +125,17 @@ public class DataTaskController extends BaseController {
         return R.ok("操作成功,本次没有更新");
     }
 
+    @GetMapping("/getTaskInfoImages")
+    public R<List<DataImage>> getTaskInfoImages(String businessSerialNo) {
+
+        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        if(one==null){
+            return R.fail(businessSerialNo+"单据不存在");
+        }
+        List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
+        return R.ok(images);
+
+    }
+
 
 }
