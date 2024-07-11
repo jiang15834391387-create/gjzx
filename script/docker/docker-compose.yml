@@ -78,9 +78,9 @@ services:
       # 时区上海
       TZ: Asia/Shanghai
       # 管理后台用户名
-      MINIO_ROOT_USER: smartlink
+      MINIO_ROOT_USER: ruoyi
       # 管理后台密码，最小8个字符
-      MINIO_ROOT_PASSWORD: smartlink123
+      MINIO_ROOT_PASSWORD: ruoyi123
       # https需要指定域名
       #MINIO_SERVER_URL: "https://xxx.com:9000"
       #MINIO_BROWSER_REDIRECT_URL: "https://xxx.com:9001"
@@ -99,58 +99,58 @@ services:
     privileged: true
     network_mode: "host"
 
-  smartlink-server1:
-    image: smartlink/smartlink-server:5.2.0
-    container_name: smartlink-server1
+  ruoyi-server1:
+    image: ruoyi/ruoyi-server:5.2.1
+    container_name: ruoyi-server1
     environment:
       # 时区上海
       TZ: Asia/Shanghai
       SERVER_PORT: 8080
     volumes:
       # 配置文件
-      - /docker/server1/logs/:/smartlink/server/logs/
+      - /docker/server1/logs/:/ruoyi/server/logs/
       # skywalking 探针
-#      - /docker/skywalking/agent/:/smartlink/skywalking/agent
+#      - /docker/skywalking/agent/:/ruoyi/skywalking/agent
     privileged: true
     network_mode: "host"
 
-  smartlink-server2:
-    image: smartlink/smartlink-server:5.2.0
-    container_name: smartlink-server2
+  ruoyi-server2:
+    image: ruoyi/ruoyi-server:5.2.1
+    container_name: ruoyi-server2
     environment:
       # 时区上海
       TZ: Asia/Shanghai
       SERVER_PORT: 8081
     volumes:
       # 配置文件
-      - /docker/server2/logs/:/smartlink/server/logs/
+      - /docker/server2/logs/:/ruoyi/server/logs/
       # skywalking 探针
-#      - /docker/skywalking/agent/:/smartlink/skywalking/agent
+#      - /docker/skywalking/agent/:/ruoyi/skywalking/agent
     privileged: true
     network_mode: "host"
 
-  smartlink-monitor-admin:
-    image: smartlink/smartlink-monitor-admin:5.2.0
-    container_name: smartlink-monitor-admin
+  ruoyi-monitor-admin:
+    image: ruoyi/ruoyi-monitor-admin:5.2.1
+    container_name: ruoyi-monitor-admin
     environment:
       # 时区上海
       TZ: Asia/Shanghai
     volumes:
       # 配置文件
-      - /docker/monitor/logs/:/smartlink/monitor/logs
+      - /docker/monitor/logs/:/ruoyi/monitor/logs
     privileged: true
     network_mode: "host"
 
-  smartlink-snailjob-server:
-    image: smartlink/smartlink-snailjob-server:5.2.0
-    container_name: smartlink-snailjob-server
+  ruoyi-snailjob-server:
+    image: ruoyi/ruoyi-snailjob-server:5.2.1
+    container_name: ruoyi-snailjob-server
     environment:
       # 时区上海
       TZ: Asia/Shanghai
     ports:
       - "8800:8800"
-      - "1788:1788"
+      - "17888:17888"
     volumes:
-      - /docker/snailjob/logs/:/smartlink/snailjob/logs
+      - /docker/snailjob/logs/:/ruoyi/snailjob/logs
     privileged: true
     network_mode: "host"

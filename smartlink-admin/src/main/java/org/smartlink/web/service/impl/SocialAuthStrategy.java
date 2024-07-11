@@ -1,4 +1,4 @@
-package org.smartlink.web.service.impl;
+package org.dromara.web.service.impl;
 
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
@@ -11,25 +11,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
-import org.smartlink.common.core.domain.model.LoginUser;
-import org.smartlink.common.core.domain.model.SocialLoginBody;
-import org.smartlink.common.core.enums.UserStatus;
-import org.smartlink.common.core.exception.ServiceException;
-import org.smartlink.common.core.exception.user.UserException;
-import org.smartlink.common.core.utils.ValidatorUtils;
-import org.smartlink.common.json.utils.JsonUtils;
-import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.common.social.config.properties.SocialProperties;
-import org.smartlink.common.social.utils.SocialUtils;
-import org.smartlink.common.tenant.helper.TenantHelper;
-import org.smartlink.system.domain.vo.SysClientVo;
-import org.smartlink.system.domain.vo.SysSocialVo;
-import org.smartlink.system.domain.vo.SysUserVo;
-import org.smartlink.system.mapper.SysUserMapper;
-import org.smartlink.system.service.ISysSocialService;
-import org.smartlink.web.domain.vo.LoginVo;
-import org.smartlink.web.service.IAuthStrategy;
-import org.smartlink.web.service.SysLoginService;
+import org.dromara.common.core.domain.model.LoginUser;
+import org.dromara.common.core.domain.model.SocialLoginBody;
+import org.dromara.common.core.enums.UserStatus;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.exception.user.UserException;
+import org.dromara.common.core.utils.StreamUtils;
+import org.dromara.common.core.utils.ValidatorUtils;
+import org.dromara.common.json.utils.JsonUtils;
+import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.common.social.config.properties.SocialProperties;
+import org.dromara.common.social.utils.SocialUtils;
+import org.dromara.common.tenant.helper.TenantHelper;
+import org.dromara.system.domain.vo.SysClientVo;
+import org.dromara.system.domain.vo.SysSocialVo;
+import org.dromara.system.domain.vo.SysUserVo;
+import org.dromara.system.mapper.SysUserMapper;
+import org.dromara.system.service.ISysSocialService;
+import org.dromara.web.domain.vo.LoginVo;
+import org.dromara.web.service.IAuthStrategy;
+import org.dromara.web.service.SysLoginService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -69,10 +70,10 @@ public class SocialAuthStrategy implements IAuthStrategy {
         AuthUser authUserData = response.getData();
         if ("GITEE".equals(authUserData.getSource())) {
             // 如用户使用 gitee 登录顺手 star 给作者一点支持 拒绝白嫖
-            HttpUtil.createRequest(Method.PUT, "https://gitee.com/api/v5/user/starred/dromara/smartlink")
+            HttpUtil.createRequest(Method.PUT, "https://gitee.com/api/v5/user/starred/dromara/RuoYi-Vue-Plus")
                     .formStr(MapUtil.of("access_token", authUserData.getToken().getAccessToken()))
                     .executeAsync();
-            HttpUtil.createRequest(Method.PUT, "https://gitee.com/api/v5/user/starred/dromara/smartlink-Cloud-Plus")
+            HttpUtil.createRequest(Method.PUT, "https://gitee.com/api/v5/user/starred/dromara/RuoYi-Cloud-Plus")
                     .formStr(MapUtil.of("access_token", authUserData.getToken().getAccessToken()))
                     .executeAsync();
         }
@@ -83,7 +84,7 @@ public class SocialAuthStrategy implements IAuthStrategy {
         }
         SysSocialVo social;
         if (TenantHelper.isEnable()) {
-            Optional<SysSocialVo> opt = list.stream().filter(x -> x.getTenantId().equals(loginBody.getTenantId())).findAny();
+            Optional<SysSocialVo> opt = StreamUtils.findAny(list, x -> x.getTenantId().equals(loginBody.getTenantId()));
             if (opt.isEmpty()) {
                 throw new ServiceException("对不起，你没有权限登录当前租户！");
             }

@@ -1,4 +1,4 @@
-package org.smartlink.workflow.service.impl;
+package org.dromara.workflow.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
@@ -9,8 +9,32 @@ import cn.hutool.core.util.ObjectUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-
-import org.flowable.bpmn.model.*;
+import org.dromara.common.core.enums.BusinessStatusEnum;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.service.UserService;
+import org.dromara.common.core.utils.StreamUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.workflow.common.constant.FlowConstant;
+import org.dromara.workflow.common.enums.TaskStatusEnum;
+import org.dromara.workflow.domain.ActHiProcinst;
+import org.dromara.workflow.domain.bo.ProcessInstanceBo;
+import org.dromara.workflow.domain.bo.ProcessInvalidBo;
+import org.dromara.workflow.domain.bo.TaskUrgingBo;
+import org.dromara.workflow.domain.vo.*;
+import org.dromara.workflow.flowable.CustomDefaultProcessDiagramGenerator;
+import org.dromara.workflow.flowable.cmd.DeleteExecutionCmd;
+import org.dromara.workflow.flowable.cmd.ExecutionChildByExecutionIdCmd;
+import org.dromara.workflow.flowable.handler.FlowProcessEventHandler;
+import org.dromara.workflow.service.IActHiProcinstService;
+import org.dromara.workflow.service.IActProcessInstanceService;
+import org.dromara.workflow.service.IWfNodeConfigService;
+import org.dromara.workflow.service.IWfTaskBackNodeService;
+import org.dromara.workflow.utils.QueryUtils;
+import org.dromara.workflow.utils.WorkflowUtils;
+import org.flowable.bpmn.model.BpmnModel;
 import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
@@ -23,31 +47,6 @@ import org.flowable.engine.task.Attachment;
 import org.flowable.engine.task.Comment;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstance;
-import org.smartlink.common.core.enums.BusinessStatusEnum;
-import org.smartlink.common.core.exception.ServiceException;
-import org.smartlink.common.core.service.UserService;
-import org.smartlink.common.core.utils.StreamUtils;
-import org.smartlink.common.core.utils.StringUtils;
-import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
-import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.workflow.common.constant.FlowConstant;
-import org.smartlink.workflow.common.enums.TaskStatusEnum;
-import org.smartlink.workflow.domain.ActHiProcinst;
-import org.smartlink.workflow.domain.bo.ProcessInstanceBo;
-import org.smartlink.workflow.domain.bo.ProcessInvalidBo;
-import org.smartlink.workflow.domain.bo.TaskUrgingBo;
-import org.smartlink.workflow.domain.vo.*;
-import org.smartlink.workflow.flowable.CustomDefaultProcessDiagramGenerator;
-import org.smartlink.workflow.flowable.cmd.DeleteExecutionCmd;
-import org.smartlink.workflow.flowable.cmd.ExecutionChildByExecutionIdCmd;
-import org.smartlink.workflow.flowable.handler.FlowProcessEventHandler;
-import org.smartlink.workflow.service.IActHiProcinstService;
-import org.smartlink.workflow.service.IActProcessInstanceService;
-import org.smartlink.workflow.service.IWfNodeConfigService;
-import org.smartlink.workflow.service.IWfTaskBackNodeService;
-import org.smartlink.workflow.utils.QueryUtils;
-import org.smartlink.workflow.utils.WorkflowUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -58,7 +57,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 流程实例 服务层实现
@@ -258,23 +256,23 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
         List<HistoricActivityInstance> highLightedFlowList = QueryUtils.hisActivityInstanceQuery(processInstanceId).orderByHistoricActivityInstanceStartTime().asc().list();
         for (HistoricActivityInstance tempActivity : highLightedFlowList) {
             Map<String, Object> task = new HashMap<>();
-            if (!FlowConstant.SEQUENCE_FLOW.equals(tempActivity.getActivityType()) &&
-                !FlowConstant.PARALLEL_GATEWAY.equals(tempActivity.getActivityType()) &&
-                !FlowConstant.EXCLUSIVE_GATEWAY.equals(tempActivity.getActivityType()) &&
-                !FlowConstant.INCLUSIVE_GATEWAY.equals(tempActivity.getActivityType())
-            ) {
-                task.put("key", tempActivity.getActivityId());
-                task.put("completed", tempActivity.getEndTime() != null);
-                task.put("activityType", tempActivity.getActivityType());
-                taskList.add(task);
+            switch (tempActivity.getActivityType()) {
+                case FlowConstant.SEQUENCE_FLOW, FlowConstant.PARALLEL_GATEWAY,
+                     FlowConstant.EXCLUSIVE_GATEWAY, FlowConstant.INCLUSIVE_GATEWAY -> {}
+                default -> {
+                    task.put("key", tempActivity.getActivityId());
+                    task.put("completed", tempActivity.getEndTime() != null);
+                    task.put("activityType", tempActivity.getActivityType());
+                    taskList.add(task);
+                }
             }
         }
         ProcessInstance processInstance = QueryUtils.instanceQuery(processInstanceId).singleResult();
         if (processInstance != null) {
-            taskList = taskList.stream().filter(e -> !e.get("activityType").equals(FlowConstant.END_EVENT)).collect(Collectors.toList());
+            taskList = StreamUtils.filter(taskList, e -> !e.get("activityType").equals(FlowConstant.END_EVENT));
         }
         //查询出运行中节点
-        List<Map<String, Object>> runtimeNodeList = taskList.stream().filter(e -> !(Boolean) e.get("completed")).collect(Collectors.toList());
+        List<Map<String, Object>> runtimeNodeList = StreamUtils.filter(taskList, e -> !(Boolean) e.get("completed"));
         if (CollUtil.isNotEmpty(runtimeNodeList)) {
             Iterator<Map<String, Object>> iterator = taskList.iterator();
             while (iterator.hasNext()) {
@@ -390,7 +388,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
             }
             //附件
             if (CollUtil.isNotEmpty(attachmentList)) {
-                List<Attachment> attachments = attachmentList.stream().filter(e -> e.getTaskId().equals(historicTaskInstance.getId())).collect(Collectors.toList());
+                List<Attachment> attachments = StreamUtils.filter(attachmentList, e -> e.getTaskId().equals(historicTaskInstance.getId()));
                 if (CollUtil.isNotEmpty(attachments)) {
                     actHistoryInfoVo.setAttachmentList(attachments);
                 }

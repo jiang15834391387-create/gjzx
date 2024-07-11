@@ -1,28 +1,28 @@
-package org.smartlink.workflow.service.impl;
+package org.dromara.workflow.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.common.core.exception.ServiceException;
+import org.dromara.common.core.utils.StreamUtils;
+import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.satoken.utils.LoginHelper;
+import org.dromara.workflow.domain.WfTaskBackNode;
+import org.dromara.workflow.domain.vo.MultiInstanceVo;
+import org.dromara.workflow.mapper.WfTaskBackNodeMapper;
+import org.dromara.workflow.service.IWfTaskBackNodeService;
+import org.dromara.workflow.utils.WorkflowUtils;
 import org.flowable.task.api.Task;
-import org.smartlink.common.core.exception.ServiceException;
-import org.smartlink.common.core.utils.StringUtils;
-import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.workflow.domain.WfTaskBackNode;
-import org.smartlink.workflow.domain.vo.MultiInstanceVo;
-import org.smartlink.workflow.mapper.WfTaskBackNodeMapper;
-import org.smartlink.workflow.service.IWfTaskBackNodeService;
-import org.smartlink.workflow.utils.WorkflowUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.smartlink.workflow.common.constant.FlowConstant.MULTI_INSTANCE;
-import static org.smartlink.workflow.common.constant.FlowConstant.USER_TASK;
+import static org.dromara.workflow.common.constant.FlowConstant.MULTI_INSTANCE;
+import static org.dromara.workflow.common.constant.FlowConstant.USER_TASK;
 
 
 /**
@@ -57,7 +57,7 @@ public class WfTaskBackNodeServiceImpl implements IWfTaskBackNodeService {
             wfTaskBackNode.setOrderNo(0);
             wfTaskBackNodeMapper.insert(wfTaskBackNode);
         } else {
-            WfTaskBackNode taskNode = list.stream().filter(e -> e.getNodeId().equals(wfTaskBackNode.getNodeId()) && e.getOrderNo() == 0).findFirst().orElse(null);
+            WfTaskBackNode taskNode = StreamUtils.findFirst(list, e -> e.getNodeId().equals(wfTaskBackNode.getNodeId()) && e.getOrderNo() == 0);
             if (ObjectUtil.isEmpty(taskNode)) {
                 wfTaskBackNode.setOrderNo(list.get(0).getOrderNo() + 1);
                 WfTaskBackNode node = getListByInstanceIdAndNodeId(wfTaskBackNode.getInstanceId(), wfTaskBackNode.getNodeId());
@@ -107,7 +107,7 @@ public class WfTaskBackNodeServiceImpl implements IWfTaskBackNodeService {
                     }
                 }
                 if (CollUtil.isNotEmpty(ids)) {
-                    wfTaskBackNodeMapper.deleteBatchIds(ids);
+                    wfTaskBackNodeMapper.deleteByIds(ids);
                 }
             }
             return true;
