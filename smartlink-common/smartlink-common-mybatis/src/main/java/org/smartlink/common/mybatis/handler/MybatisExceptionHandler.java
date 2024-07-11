@@ -1,10 +1,10 @@
-package org.dromara.common.mybatis.handler;
+package org.smartlink.common.mybatis.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.dromara.common.core.domain.R;
-import org.dromara.common.core.utils.StringUtils;
+import org.smartlink.common.core.utils.StringUtils;
 import org.mybatis.spring.MyBatisSystemException;
+import org.smartlink.common.core.domain.R;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

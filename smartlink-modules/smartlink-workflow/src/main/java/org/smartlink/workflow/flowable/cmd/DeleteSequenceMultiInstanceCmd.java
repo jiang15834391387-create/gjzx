@@ -2,7 +2,7 @@ package org.smartlink.workflow.flowable.cmd;
 
 import cn.hutool.core.util.ObjectUtil;
 import lombok.AllArgsConstructor;
-import org.dromara.common.core.utils.StreamUtils;
+import org.smartlink.common.core.utils.StreamUtils;
 import org.flowable.common.engine.impl.interceptor.Command;
 import org.flowable.common.engine.impl.interceptor.CommandContext;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;

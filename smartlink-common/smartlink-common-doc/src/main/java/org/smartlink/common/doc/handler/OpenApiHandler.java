@@ -11,7 +11,7 @@ import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.dromara.common.core.utils.StreamUtils;
+import org.smartlink.common.core.utils.StreamUtils;
 import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springdoc.core.customizers.ServerBaseUrlCustomizer;
 import org.springdoc.core.properties.SpringDocConfigProperties;
