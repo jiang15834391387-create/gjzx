@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Literal;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.momain.DataImage;
@@ -18,6 +19,10 @@ import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
 import org.smartlink.system.service.ISysOssService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +40,8 @@ public class DataTaskController extends BaseController {
     private final DataTaskServer dataTaskServer;
 
     private final DataImageServer dataImageServer;
+
+    private final MongoTemplate mongoTemplate;
 
 
     @PostMapping("/getTaskList")
@@ -123,6 +130,20 @@ public class DataTaskController extends BaseController {
             return R.ok("更新成功！");
         }
         return R.ok("操作成功,本次没有更新");
+    }
+
+
+    @PostMapping("/additionDocument")
+    public R<Void> additionDocument(@RequestBody TaskAndImages taskAndImages) {
+
+        List<DataImage> list  = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
+        for (DataImage  dataImage: list) {
+            Query query = new Query(Criteria.where("businessSerialNo").is(taskAndImages.getBusinessSerialNo()));
+            Update update = new Update().push("images", dataImage);
+            mongoTemplate.updateFirst(query, update, DataTask.class);
+        }
+
+        return R.ok("更新成功！");
     }
 
     @GetMapping("/getTaskInfoImages")
