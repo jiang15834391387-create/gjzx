@@ -7,6 +7,7 @@ import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.DeleteImageBo;
+import org.smartlink.server.image.domain.bo.UpdateImageBo;
 import org.smartlink.server.image.domain.bo.UploadImageBo;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -48,27 +50,27 @@ public class DataImageController extends BaseController {
     private final MongoTemplate mongoTemplate;
 
 
+
     @GetMapping("/getImageInfo")
     public DataTask getImageInfo(DataImage image) {
         return null;
     }
 
     /**
-     * 上传文件，不在单据下
-     *
+     *  上传文件，不在单据下
      * @param uploadImageBo 文件bo
      * @return
      */
     @PostMapping("/uploadImage")
     public R<DataImage> uploadImage(@RequestBody UploadImageBo uploadImageBo) {
         byte[] decodedBytes = Base64.getDecoder().decode(uploadImageBo.getFileBase64());
-        SysOssVo upload = iSysOssService.upload(decodedBytes, uploadImageBo.getFileName());
+        SysOssVo upload = iSysOssService.upload(decodedBytes,uploadImageBo.getFileName());
         DataImage dataImage = new DataImage();
         dataImage.setFileName(uploadImageBo.getFileName());
         dataImage.setFileType(upload.getFileSuffix());
-        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        dataImage.setPreviewUrl(onlinePreviewUrl+URLEncoder.encode( Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
         dataImage.setSourceFileUrl(upload.getUrl());
-        dataImage.setParentId("fj");
+        dataImage.setParentId(uploadImageBo.getParentId());
         dataImage.setOssId(upload.getOssId());
         if (dataImageServer.save(dataImage)) {
             return R.ok(dataImage);
@@ -79,35 +81,27 @@ public class DataImageController extends BaseController {
 
     /**
      * 单据下上传文件
-     *
-     * @param file             文件
+     * @param file 文件
      * @param businessSerialNo 流水号
      * @return
      */
     @PostMapping("/uploadImageFile")
-    public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo) {
-
+    public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file,String businessSerialNo,String parentId) {
         SysOssVo upload = iSysOssService.upload(file);
         DataImage dataImage = new DataImage();
         dataImage.setFileName(file.getOriginalFilename());
         dataImage.setFileType(upload.getFileSuffix());
-        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        dataImage.setPreviewUrl(onlinePreviewUrl+URLEncoder.encode( Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
         dataImage.setSourceFileUrl(upload.getUrl());
-        dataImage.setParentId("fj");
+        dataImage.setParentId(parentId);
         dataImage.setOssId(upload.getOssId());
         dataImageServer.save(dataImage);
-
-
         Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
         Update update = new Update().push("images", dataImage);
-
         mongoTemplate.updateFirst(query, update, DataTask.class);
-
-
         return R.ok(dataImage);
-
-
     }
+
 
     /**
      * 下载文件
@@ -125,22 +119,37 @@ public class DataImageController extends BaseController {
     }
 
 
+
     @PostMapping("/editImage")
     public R<Void> editImage(@RequestBody DataImage image) {
         return null;
     }
 
+
+    @PostMapping("/changeImageType")
+    public R<Void> changeClassification(@RequestBody UpdateImageBo image) {
+        //修改图片的类型
+        dataImageServer.lambdaUpdate().set(DataImage::getParentId,image.getParentId()).eq(DataImage::getFileId, image.getFileId()).update();
+        // 查询条件，找到具体的 dataTask 文档
+        Query query = new Query(Criteria.where("businessSerialNo").is(image.getBusinessSerialNo()).and("images" + ".fileId").is(image.getFileId()));
+        // 更新内容，设置 images 数组中 fileid=1 的元素的 type 属性的新值
+        Update update = new Update().set("images.$.parentId", image.getParentId());
+        // 执行更新
+        mongoTemplate.updateFirst(query, update, "dataTask");
+
+        return R.ok();
+    }
+
     /**
      * 删除文件
-     *
      * @param fileId 文件ID
      * @return 成功失败
      */
     @GetMapping("/deleteImage")
     public R<Void> deleteImage(String fileId) {
         DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
-        if (one != null) {
-            iSysOssService.deleteWithValidById(one.getOssId(), false);
+        if(one!=null){
+            iSysOssService.deleteWithValidById(one.getOssId(),false);
         }
         dataImageServer.lambdaUpdate().eq(DataImage::getFileId, fileId).remove();
         Query query = new Query(Criteria.where("images").elemMatch(Criteria.where("fileId").is(fileId)));
@@ -151,7 +160,6 @@ public class DataImageController extends BaseController {
 
     /**
      * 批量删除文件(单据下)
-     *
      * @param deleteImageBo 文件删除对象
      * @return 成功失败
      */
@@ -160,8 +168,8 @@ public class DataImageController extends BaseController {
         List<String> fileIds = Arrays.asList(deleteImageBo.getFileIds().split(","));
         for (String fileId : fileIds) {
             DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
-            if (one != null) {
-                iSysOssService.deleteWithValidById(one.getOssId(), false);
+            if(one!=null){
+                iSysOssService.deleteWithValidById(one.getOssId(),false);
             }
             dataImageServer.lambdaUpdate().eq(DataImage::getFileId, fileId).remove();
         }
@@ -173,6 +181,7 @@ public class DataImageController extends BaseController {
         }
         return R.fail();
     }
+
 
 
 }

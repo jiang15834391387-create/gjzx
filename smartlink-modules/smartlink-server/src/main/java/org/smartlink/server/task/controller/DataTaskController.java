@@ -13,6 +13,9 @@ import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
+import org.smartlink.server.nodeType.domain.DataNodeType;
+import org.smartlink.server.nodeType.mapper.DataNodeTypeMapper;
+import org.smartlink.server.nodeType.service.IDataNodeTypeService;
 import org.smartlink.server.task.domain.bo.TaskAndImages;
 import org.smartlink.server.task.domain.vo.DataTaskVo;
 import org.smartlink.server.task.momain.DataTask;
@@ -43,6 +46,9 @@ public class DataTaskController extends BaseController {
 
     private final MongoTemplate mongoTemplate;
 
+    private final DataNodeTypeMapper dataNodeTypeMapper;
+
+
 
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
@@ -57,12 +63,14 @@ public class DataTaskController extends BaseController {
             return R.fail(businessSerialNo+"单据不存在");
         }
         List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
-        //TODO 临时加的类型，后面需要手动添加表
-        DataImage fj = new DataImage();
-        fj.setParentId("0");
-        fj.setFileId("fj");
-        fj.setFileName("附件");
-        images.add(fj);
+        List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
+        for (DataNodeType dataNodeType : dataNodeTypes) {
+            DataImage fj = new DataImage();
+            fj.setParentId(dataNodeType.getParentId());
+            fj.setFileId(dataNodeType.getId());
+            fj.setFileName(dataNodeType.getNodeName());
+            images.add(fj);
+        }
         List<Tree<String>> build = TreeUtil.build(images,"0",  (image, tree) -> {
             tree.setId(image.getFileId());
             tree.setParentId(image.getParentId());
