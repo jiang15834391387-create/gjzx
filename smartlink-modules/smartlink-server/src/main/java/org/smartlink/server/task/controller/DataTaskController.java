@@ -83,11 +83,14 @@ public class DataTaskController extends BaseController {
 
     @PostMapping("/addTask")
     public R<Void> addTask(@RequestBody DataTask task) {
-        Boolean save = dataTaskServer.save(task);
-        if (save) {
-            return R.ok();
+        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, task.getBusinessSerialNo()).one();
+        Boolean save ;
+        if(one==null){
+             save = dataTaskServer.save(task);
+        }else {
+            save = dataTaskServer.updateByColumn(task, DataTask::getBusinessSerialNo);
         }
-        return R.fail();
+        return R.ok();
     }
 
 
