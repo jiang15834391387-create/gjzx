@@ -1,8 +1,10 @@
 package org.smartlink.server.image.controller;
 
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.DeleteImageBo;
 import org.smartlink.server.image.domain.bo.UploadImageBo;
@@ -21,8 +23,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -46,25 +48,25 @@ public class DataImageController extends BaseController {
     private final MongoTemplate mongoTemplate;
 
 
-
     @GetMapping("/getImageInfo")
     public DataTask getImageInfo(DataImage image) {
         return null;
     }
 
     /**
-     *  上传文件，不在单据下
+     * 上传文件，不在单据下
+     *
      * @param uploadImageBo 文件bo
      * @return
      */
     @PostMapping("/uploadImage")
     public R<DataImage> uploadImage(@RequestBody UploadImageBo uploadImageBo) {
         byte[] decodedBytes = Base64.getDecoder().decode(uploadImageBo.getFileBase64());
-        SysOssVo upload = iSysOssService.upload(decodedBytes,uploadImageBo.getFileName());
+        SysOssVo upload = iSysOssService.upload(decodedBytes, uploadImageBo.getFileName());
         DataImage dataImage = new DataImage();
         dataImage.setFileName(uploadImageBo.getFileName());
         dataImage.setFileType(upload.getFileSuffix());
-        dataImage.setPreviewUrl(onlinePreviewUrl+URLEncoder.encode( Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
         dataImage.setSourceFileUrl(upload.getUrl());
         dataImage.setParentId("fj");
         dataImage.setOssId(upload.getOssId());
@@ -77,18 +79,19 @@ public class DataImageController extends BaseController {
 
     /**
      * 单据下上传文件
-     * @param file 文件
+     *
+     * @param file             文件
      * @param businessSerialNo 流水号
      * @return
      */
     @PostMapping("/uploadImageFile")
-    public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file,String businessSerialNo) {
+    public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo) {
 
         SysOssVo upload = iSysOssService.upload(file);
         DataImage dataImage = new DataImage();
         dataImage.setFileName(file.getOriginalFilename());
         dataImage.setFileType(upload.getFileSuffix());
-        dataImage.setPreviewUrl(onlinePreviewUrl+URLEncoder.encode( Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
         dataImage.setSourceFileUrl(upload.getUrl());
         dataImage.setParentId("fj");
         dataImage.setOssId(upload.getOssId());
@@ -101,9 +104,24 @@ public class DataImageController extends BaseController {
         mongoTemplate.updateFirst(query, update, DataTask.class);
 
 
-            return R.ok(dataImage);
+        return R.ok(dataImage);
 
 
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param fileId 文件ID
+     * @return byte[]
+     */
+    @GetMapping("/downloadFile")
+    public void downloadFile(HttpServletResponse response, @RequestParam("fileId") String fileId) throws IOException {
+        final DataImage fileInfo = this.dataImageServer.getById(fileId);
+        if (fileInfo == null) {
+            throw new ServiceException("文件不存在");
+        }
+        this.iSysOssService.download(fileInfo.getOssId(), response);
     }
 
 
@@ -114,14 +132,15 @@ public class DataImageController extends BaseController {
 
     /**
      * 删除文件
+     *
      * @param fileId 文件ID
      * @return 成功失败
      */
     @GetMapping("/deleteImage")
     public R<Void> deleteImage(String fileId) {
         DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
-        if(one!=null){
-            iSysOssService.deleteWithValidById(one.getOssId(),false);
+        if (one != null) {
+            iSysOssService.deleteWithValidById(one.getOssId(), false);
         }
         dataImageServer.lambdaUpdate().eq(DataImage::getFileId, fileId).remove();
         Query query = new Query(Criteria.where("images").elemMatch(Criteria.where("fileId").is(fileId)));
@@ -132,6 +151,7 @@ public class DataImageController extends BaseController {
 
     /**
      * 批量删除文件(单据下)
+     *
      * @param deleteImageBo 文件删除对象
      * @return 成功失败
      */
@@ -140,8 +160,8 @@ public class DataImageController extends BaseController {
         List<String> fileIds = Arrays.asList(deleteImageBo.getFileIds().split(","));
         for (String fileId : fileIds) {
             DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
-            if(one!=null){
-                iSysOssService.deleteWithValidById(one.getOssId(),false);
+            if (one != null) {
+                iSysOssService.deleteWithValidById(one.getOssId(), false);
             }
             dataImageServer.lambdaUpdate().eq(DataImage::getFileId, fileId).remove();
         }
@@ -153,7 +173,6 @@ public class DataImageController extends BaseController {
         }
         return R.fail();
     }
-
 
 
 }
