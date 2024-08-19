@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Literal;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
+import org.smartlink.server.image.domain.bo.ImageTreeBo;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
 import org.smartlink.server.nodeType.domain.DataNodeType;
@@ -30,7 +31,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Validated
 @RequiredArgsConstructor
@@ -52,8 +56,10 @@ public class DataTaskController extends BaseController {
 
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
-        return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages).like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()),
-            DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo()).page(pageParam);
+        return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages)
+            .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
+            .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
+            .page(pageParam);
     }
 
     @GetMapping("/getTaskInfo")
@@ -62,16 +68,46 @@ public class DataTaskController extends BaseController {
         if(one==null){
             return R.fail(businessSerialNo+"单据不存在");
         }
+        //树节点集合
+        List<ImageTreeBo> imageTreeList = new ArrayList<>();
+        //单据下影像集合
         List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
+        //非其他的节点ID
+        String[] array = {"1", "2", "3"};
+        List<String> noOtherIds = Arrays.asList(array);
+        //文件信息转换为树对象
+        for (DataImage image : images) {
+            //将老数据的ID都当成其他
+            if(!noOtherIds.contains(image.getParentId())){
+                image.setParentId("4");
+            }
+            ImageTreeBo nodeTypeImage = new ImageTreeBo();
+            BeanUtil.copyProperties(image,nodeTypeImage);
+            nodeTypeImage.setType("image");
+            imageTreeList.add(nodeTypeImage);
+        }
+        //节点信息转换为树对象
         List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
         for (DataNodeType dataNodeType : dataNodeTypes) {
-            DataImage fj = new DataImage();
-            fj.setParentId(dataNodeType.getParentId());
-            fj.setFileId(dataNodeType.getId());
-            fj.setFileName(dataNodeType.getNodeName());
-            images.add(fj);
+            ImageTreeBo nodeTypeImage = new ImageTreeBo();
+            nodeTypeImage.setFileId(dataNodeType.getId());
+            nodeTypeImage.setParentId(dataNodeType.getParentId());
+            nodeTypeImage.setFileName(dataNodeType.getNodeName());
+            if(StrUtil.equals(dataNodeType.getId(),"0")){
+                //根节点数量
+                nodeTypeImage.setTotal((long) images.size());
+            }else {
+                //当前节点数量
+                long count = images.stream().filter(e -> StrUtil.equals(e.getParentId(), dataNodeType.getId())).count();
+                nodeTypeImage.setTotal(count);
+            }
+            nodeTypeImage.setType("node");
+//            if(nodeTypeImage.getTotal()==0){
+//                continue;
+//            }
+            imageTreeList.add(nodeTypeImage);
         }
-        List<Tree<String>> build = TreeUtil.build(images,"0",  (image, tree) -> {
+        List<Tree<String>> build = TreeUtil.build(imageTreeList,"-1",  (image, tree) -> {
             tree.setId(image.getFileId());
             tree.setParentId(image.getParentId());
             tree.setName(image.getFileName());
@@ -80,6 +116,8 @@ public class DataTaskController extends BaseController {
             tree.putExtra("previewUrl", image.getPreviewUrl());
             tree.putExtra("fileName", image.getFileName());
             tree.putExtra("ossId", image.getOssId());
+            tree.putExtra("total", image.getTotal());
+            tree.putExtra("type", image.getType());
         });
 
        DataTaskVo dataTaskVo = new DataTaskVo();
