@@ -30,10 +30,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Validated
@@ -68,18 +65,21 @@ public class DataTaskController extends BaseController {
         if(one==null){
             return R.fail(businessSerialNo+"单据不存在");
         }
+        //树节点对象
+        List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
         //树节点集合
         List<ImageTreeBo> imageTreeList = new ArrayList<>();
         //单据下影像集合
         List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
-        //非其他的节点ID
-        String[] array = {"1", "2", "3"};
-        List<String> noOtherIds = Arrays.asList(array);
+        //节点ID
+        List<String> typeIds = dataNodeTypes.stream().map(DataNodeType::getId).toList();
+        //其他节点ID
+        Optional<DataNodeType> other = dataNodeTypes.stream().filter(e -> StrUtil.equals(e.getNodeName(), "其他")).findFirst();
         //文件信息转换为树对象
         for (DataImage image : images) {
-            //将老数据的ID都当成其他
-            if(!noOtherIds.contains(image.getParentId())){
-                image.setParentId("4");
+            //将其他ID都当成其他
+            if(!typeIds.contains(image.getParentId())){
+                image.setParentId(other.get().getId());
             }
             ImageTreeBo nodeTypeImage = new ImageTreeBo();
             BeanUtil.copyProperties(image,nodeTypeImage);
@@ -87,7 +87,6 @@ public class DataTaskController extends BaseController {
             imageTreeList.add(nodeTypeImage);
         }
         //节点信息转换为树对象
-        List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
         for (DataNodeType dataNodeType : dataNodeTypes) {
             ImageTreeBo nodeTypeImage = new ImageTreeBo();
             nodeTypeImage.setFileId(dataNodeType.getId());
