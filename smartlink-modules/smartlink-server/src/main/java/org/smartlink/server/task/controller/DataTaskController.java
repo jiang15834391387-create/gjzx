@@ -101,9 +101,9 @@ public class DataTaskController extends BaseController {
                 nodeTypeImage.setTotal(count);
             }
             nodeTypeImage.setType("node");
-//            if(nodeTypeImage.getTotal()==0){
-//                continue;
-//            }
+            if(nodeTypeImage.getTotal()==0){
+                continue;
+            }
             imageTreeList.add(nodeTypeImage);
         }
         List<Tree<String>> build = TreeUtil.build(imageTreeList,"-1",  (image, tree) -> {
