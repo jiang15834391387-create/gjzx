@@ -117,6 +117,7 @@ public class DataTaskController extends BaseController {
             tree.putExtra("ossId", image.getOssId());
             tree.putExtra("total", image.getTotal());
             tree.putExtra("type", image.getType());
+            tree.putExtra("name", image.getFileName());
         });
 
        DataTaskVo dataTaskVo = new DataTaskVo();
