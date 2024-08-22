@@ -1,10 +1,10 @@
 package org.smartlink.system.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.system.domain.bo.SysOssBo;
 import org.smartlink.system.domain.vo.SysOssVo;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -69,6 +69,14 @@ public interface ISysOssService {
     void download(Long ossId, HttpServletResponse response) throws IOException;
 
     /**
+     * 文件下载
+     *
+     * @param ossId OSS对象ID
+     * @throws IOException 抛出IO异常
+     */
+    byte[] downloadByte(Long ossId) throws IOException;
+
+    /**
      * 删除OSS对象存储
      *
      * @param ids     OSS对象ID串
@@ -80,17 +88,17 @@ public interface ISysOssService {
     /**
      * 上传 MultipartFile 到对象存储服务，并保存文件信息到数据库
      *
-     * @param fileBytes 要上传的 字节数组
+     * @param fileBytes        要上传的 字节数组
      * @param originalfileName 要上传的 文件名
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
 
-    SysOssVo upload(byte[] fileBytes,String originalfileName);
+    SysOssVo upload(byte[] fileBytes, String originalfileName);
 
     /**
      * 删除OSS对象存储
      *
-     * @param id     OSS对象ID
+     * @param id      OSS对象ID
      * @param isValid 判断是否需要校验
      * @return 结果
      */

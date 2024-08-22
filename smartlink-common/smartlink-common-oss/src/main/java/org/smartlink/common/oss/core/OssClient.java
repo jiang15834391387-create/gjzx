@@ -14,6 +14,7 @@ import org.smartlink.common.oss.exception.OssException;
 import org.smartlink.common.oss.properties.OssProperties;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.async.AsyncRequestBody;
 import software.amazon.awssdk.core.async.AsyncResponseTransformer;
@@ -290,6 +291,32 @@ public class OssClient {
             try (ResponseInputStream<GetObjectResponse> responseStream = responseFuture.completionFuture().join().result()) { // auto-closeable stream
                 return responseStream.transferTo(out); // 阻塞调用线程 blocks the calling thread
             }
+        } catch (Exception e) {
+            throw new OssException("文件下载失败，错误信息:[" + e.getMessage() + "]");
+        }
+    }
+
+    /**
+     * 下载文件从 Amazon S3 到 byte[]
+     *
+     * @throws OssException 如果下载失败，抛出自定义异常
+     */
+    public byte[] downloadByte(String key) {
+        try {
+            // 构建下载请求
+            DownloadRequest<ResponseBytes<GetObjectResponse>> downloadRequest = DownloadRequest.builder()
+                // 文件对象
+                .getObjectRequest(y -> y.bucket(properties.getBucketName())
+                    .key(key)
+                    .build())
+                .addTransferListener(LoggingTransferListener.create())
+                // 使用订阅转换器
+                .responseTransformer(AsyncResponseTransformer.toBytes())
+                .build();
+            // 使用 S3TransferManager 下载文件
+            Download<ResponseBytes<GetObjectResponse>> responseFuture = transferManager.download(downloadRequest);
+            final ResponseBytes<GetObjectResponse> result = responseFuture.completionFuture().join().result();
+            return result.asByteArray();
         } catch (Exception e) {
             throw new OssException("文件下载失败，错误信息:[" + e.getMessage() + "]");
         }

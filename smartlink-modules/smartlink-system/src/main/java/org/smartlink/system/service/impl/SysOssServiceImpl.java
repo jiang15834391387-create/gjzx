@@ -3,12 +3,12 @@ package org.smartlink.system.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.smartlink.common.core.constant.CacheNames;
 import org.smartlink.common.core.domain.dto.OssDTO;
 import org.smartlink.common.core.exception.ServiceException;
@@ -29,7 +29,6 @@ import org.smartlink.system.domain.bo.SysOssBo;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.mapper.SysOssMapper;
 import org.smartlink.system.service.ISysOssService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -180,6 +179,19 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         response.setContentLengthLong(contentLength);
     }
 
+    @Override
+    public byte[] downloadByte(Long ossId) throws IOException {
+        SysOssVo sysOss = SpringUtils.getAopProxy(this).getById(ossId);
+        if (ObjectUtil.isNull(sysOss)) {
+            throw new ServiceException("文件数据不存在!");
+        }
+        OssClient storage = OssFactory.instance(sysOss.getService());
+        if (ObjectUtil.isNotNull(storage)) {
+            return storage.downloadByte(sysOss.getFileName());
+        }
+        return new byte[0];
+    }
+
     /**
      * 上传 MultipartFile 到对象存储服务，并保存文件信息到数据库
      *
@@ -252,7 +264,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     }
 
     @Override
-    public SysOssVo upload(byte[] fileBytes,String originalfileName) {
+    public SysOssVo upload(byte[] fileBytes, String originalfileName) {
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
         OssClient storage = OssFactory.instance();
         UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
@@ -279,7 +291,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     /**
      * 删除OSS对象存储
      *
-     * @param id     OSS对象ID
+     * @param id      OSS对象ID
      * @param isValid 判断是否需要校验
      * @return 结果
      */
@@ -289,7 +301,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
             // 做一些业务上的校验,判断是否需要校验
         }
         SysOssVo sysOssVo = baseMapper.selectVoById(id);
-        if(sysOssVo==null){
+        if (sysOssVo == null) {
             return true;
         }
         OssClient storage = OssFactory.instance(sysOssVo.getService());

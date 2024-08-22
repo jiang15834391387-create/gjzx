@@ -1,10 +1,13 @@
 package org.smartlink.server.image.controller;
 
 
+import cn.hutool.core.collection.CollUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
+import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.core.utils.file.FileUtils;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.DeleteImageBo;
 import org.smartlink.server.image.domain.bo.UploadImageBo;
@@ -23,12 +26,13 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Validated
 @RequiredArgsConstructor
@@ -105,15 +109,13 @@ public class DataImageController extends BaseController {
 
 
         return R.ok(dataImage);
-
-
     }
 
     /**
      * 下载文件
      *
-     * @param fileId 文件ID
-     * @return byte[]
+     * @param fileId   文件ID
+     * @param response 响应流
      */
     @GetMapping("/downloadFile")
     public void downloadFile(HttpServletResponse response, @RequestParam("fileId") String fileId) throws IOException {
@@ -122,6 +124,91 @@ public class DataImageController extends BaseController {
             throw new ServiceException("文件不存在");
         }
         this.iSysOssService.download(fileInfo.getOssId(), response);
+    }
+
+    /**
+     * 根据单据主键打包下载多个文件
+     * 测试url：http://47.97.23.199:28080/prod-api/server/image/taskPackageDownload?businessSerialNo=3
+     *
+     * @param businessSerialNo 单据流水号
+     * @param response         响应流
+     * @throws IOException IO异常
+     */
+    @GetMapping("/taskPackageDownload")
+    public byte[] taskPackageDownload(@RequestParam("businessSerialNo") String businessSerialNo, HttpServletResponse response) throws IOException {
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        if (task == null) {
+            throw new ServiceException("单据不存在");
+        }
+        final List<DataImage> images = task.getImages();
+        if (CollUtil.isEmpty(images)) {
+            throw new ServiceException("单据下没有文件");
+        }
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ZipOutputStream zipOut = new ZipOutputStream(bos);
+        int i = 0;
+        for (DataImage image : images) {
+            i++;
+            byte[] bytes = this.iSysOssService.downloadByte(image.getOssId());
+            zipOut.putNextEntry(new ZipEntry(i + "." + image.getFileName()));
+            zipOut.write(bytes);
+            zipOut.closeEntry();
+        }
+        zipOut.finish();
+        zipOut.close();
+        FileUtils.setAttachmentResponseHeader(response, task.getBillNum() + ".zip");
+        bos.flush();
+        byte[] result = bos.toByteArray();
+        bos.close();
+
+        return result;
+
+    }
+
+    /**
+     * 传递fileIds打包下载多个文件
+     *
+     * @param fileIds  文件ID数组
+     * @param response 响应流
+     * @throws IOException IO异常
+     */
+    @PostMapping("/multiplePackageDownload")
+    public byte[] multiplePackageDownload(@RequestBody List<String> fileIds, HttpServletResponse response) throws IOException {
+
+        if (CollUtil.isEmpty(fileIds)) {
+            throw new ServiceException("文件ID数组不能为空！");
+        }
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ZipOutputStream zipOut = new ZipOutputStream(bos);
+
+        String fileName = "压缩文件";
+
+        int i = 0;
+        for (String fileId : fileIds) {
+            if (StringUtils.isEmpty(fileId)) {
+                throw new ServiceException("文件ID不能为空！");
+            }
+            DataImage dataImage = dataImageServer.getById(fileId);
+            if (dataImage == null) {
+                throw new ServiceException("文件不存在！");
+            }
+            i++;
+            fileName = dataImage.getFileName();
+            byte[] bytes = this.iSysOssService.downloadByte(dataImage.getOssId());
+
+            zipOut.putNextEntry(new ZipEntry(dataImage.getFileName()));
+            zipOut.write(bytes);
+            zipOut.closeEntry();
+        }
+        zipOut.finish();
+        zipOut.close();
+        FileUtils.setAttachmentResponseHeader(response, fileName + "等" + fileIds.size() + "个文件.zip");
+        bos.flush();
+        byte[] result = bos.toByteArray();
+        bos.close();
+        return result;
     }
 
 
