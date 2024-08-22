@@ -197,7 +197,7 @@ public class DataImageController extends BaseController {
             fileName = dataImage.getFileName();
             byte[] bytes = this.iSysOssService.downloadByte(dataImage.getOssId());
 
-            zipOut.putNextEntry(new ZipEntry(dataImage.getFileName()));
+            zipOut.putNextEntry(new ZipEntry(i + "." + dataImage.getFileName()));
             zipOut.write(bytes);
             zipOut.closeEntry();
         }
