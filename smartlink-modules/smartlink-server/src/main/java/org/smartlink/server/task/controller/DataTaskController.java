@@ -11,8 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Literal;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
+import org.smartlink.server.image.domain.bo.ImageTreeBo;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
+import org.smartlink.server.nodeType.domain.DataNodeType;
+import org.smartlink.server.nodeType.mapper.DataNodeTypeMapper;
+import org.smartlink.server.nodeType.service.IDataNodeTypeService;
 import org.smartlink.server.task.domain.bo.TaskAndImages;
 import org.smartlink.server.task.domain.vo.DataTaskVo;
 import org.smartlink.server.task.momain.DataTask;
@@ -26,8 +30,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Validated
 @RequiredArgsConstructor
@@ -43,11 +47,16 @@ public class DataTaskController extends BaseController {
 
     private final MongoTemplate mongoTemplate;
 
+    private final DataNodeTypeMapper dataNodeTypeMapper;
+
+
 
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
-        return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages).like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()),
-            DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo()).page(pageParam);
+        return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages)
+            .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
+            .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
+            .page(pageParam);
     }
 
     @GetMapping("/getTaskInfo")
@@ -56,14 +65,48 @@ public class DataTaskController extends BaseController {
         if(one==null){
             return R.fail(businessSerialNo+"单据不存在");
         }
+        //树节点对象
+        List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
+        //树节点集合
+        List<ImageTreeBo> imageTreeList = new ArrayList<>();
+        //单据下影像集合
         List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
-        //TODO 临时加的类型，后面需要手动添加表
-        DataImage fj = new DataImage();
-        fj.setParentId("0");
-        fj.setFileId("fj");
-        fj.setFileName("附件");
-        images.add(fj);
-        List<Tree<String>> build = TreeUtil.build(images,"0",  (image, tree) -> {
+        //节点ID
+        List<String> typeIds = dataNodeTypes.stream().map(DataNodeType::getId).toList();
+        //其他节点ID
+        Optional<DataNodeType> other = dataNodeTypes.stream().filter(e -> StrUtil.equals(e.getNodeName(), "其他")).findFirst();
+        //文件信息转换为树对象
+        for (DataImage image : images) {
+            //将其他ID都当成其他
+            if(!typeIds.contains(image.getParentId())){
+                image.setParentId(other.get().getId());
+            }
+            ImageTreeBo nodeTypeImage = new ImageTreeBo();
+            BeanUtil.copyProperties(image,nodeTypeImage);
+            nodeTypeImage.setType("image");
+            imageTreeList.add(nodeTypeImage);
+        }
+        //节点信息转换为树对象
+        for (DataNodeType dataNodeType : dataNodeTypes) {
+            ImageTreeBo nodeTypeImage = new ImageTreeBo();
+            nodeTypeImage.setFileId(dataNodeType.getId());
+            nodeTypeImage.setParentId(dataNodeType.getParentId());
+            nodeTypeImage.setFileName(dataNodeType.getNodeName());
+            if(StrUtil.equals(dataNodeType.getId(),"0")){
+                //根节点数量
+                nodeTypeImage.setTotal((long) images.size());
+            }else {
+                //当前节点数量
+                long count = images.stream().filter(e -> StrUtil.equals(e.getParentId(), dataNodeType.getId())).count();
+                nodeTypeImage.setTotal(count);
+            }
+            nodeTypeImage.setType("node");
+            if(nodeTypeImage.getTotal()==0){
+                continue;
+            }
+            imageTreeList.add(nodeTypeImage);
+        }
+        List<Tree<String>> build = TreeUtil.build(imageTreeList,"-1",  (image, tree) -> {
             tree.setId(image.getFileId());
             tree.setParentId(image.getParentId());
             tree.setName(image.getFileName());
@@ -72,6 +115,9 @@ public class DataTaskController extends BaseController {
             tree.putExtra("previewUrl", image.getPreviewUrl());
             tree.putExtra("fileName", image.getFileName());
             tree.putExtra("ossId", image.getOssId());
+            tree.putExtra("total", image.getTotal());
+            tree.putExtra("type", image.getType());
+            tree.putExtra("name", image.getFileName());
         });
 
        DataTaskVo dataTaskVo = new DataTaskVo();
