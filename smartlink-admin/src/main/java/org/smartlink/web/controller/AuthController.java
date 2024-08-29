@@ -268,4 +268,14 @@ public class AuthController {
 
     }
 
+
+    @GetMapping("/getLocateImagePosition")
+    public R<String> getLocateImagePosition(String businessSerialNo,String fileId) {
+        StpUtil.renewTimeout(604800);
+        StpUtil.updateLastActiveToNow();
+        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&fileId="+ fileId+"&token="+ StpUtil.getTokenValue();
+        return R.ok("",s);
+
+    }
+
 }
