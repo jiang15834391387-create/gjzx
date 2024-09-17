@@ -1,38 +1,63 @@
 package org.smartlink.server.task.controller;
 
-import cn.dev33.satoken.stp.StpUtil;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeUtil;
+import com.alibaba.fastjson.JSON;
+import com.aspose.slides.p2cbca448.ong;
+import com.aspose.words.Document;
+import com.esotericsoftware.minlog.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import cn.hutool.core.util.StrUtil;
 import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Literal;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.tika.Tika;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.ImageTreeBo;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
+import org.smartlink.server.image.service.impl.DataImageService;
 import org.smartlink.server.nodeType.domain.DataNodeType;
 import org.smartlink.server.nodeType.mapper.DataNodeTypeMapper;
-import org.smartlink.server.nodeType.service.IDataNodeTypeService;
+import org.smartlink.server.task.util.*;
 import org.smartlink.server.task.domain.bo.TaskAndImages;
 import org.smartlink.server.task.domain.vo.DataTaskVo;
 import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
+import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.service.ISysOssService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -48,29 +73,29 @@ public class DataTaskController extends BaseController {
     private final MongoTemplate mongoTemplate;
 
     private final DataNodeTypeMapper dataNodeTypeMapper;
-
+    private final DataImageService dataImageService;
 
 
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
         return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages)
-            .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
-            .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
-            .page(pageParam);
+                .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
+                .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
+                .page(pageParam);
     }
 
     @GetMapping("/getTaskInfo")
     public R<DataTaskVo> getTaskInfo(String businessSerialNo) {
         DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
-        if(one==null){
-            return R.fail(businessSerialNo+"单据不存在");
+        if (one == null) {
+            return R.fail(businessSerialNo + "单据不存在");
         }
         //树节点对象
         List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
         //树节点集合
         List<ImageTreeBo> imageTreeList = new ArrayList<>();
         //单据下影像集合
-        List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
+        List<DataImage> images = one.getImages() == null ? new ArrayList<>() : one.getImages();
         //节点ID
         List<String> typeIds = dataNodeTypes.stream().map(DataNodeType::getId).toList();
         //其他节点ID
@@ -78,11 +103,11 @@ public class DataTaskController extends BaseController {
         //文件信息转换为树对象
         for (DataImage image : images) {
             //将其他ID都当成其他
-            if(!typeIds.contains(image.getParentId())){
+            if (!typeIds.contains(image.getParentId())) {
                 image.setParentId(other.get().getId());
             }
             ImageTreeBo nodeTypeImage = new ImageTreeBo();
-            BeanUtil.copyProperties(image,nodeTypeImage);
+            BeanUtil.copyProperties(image, nodeTypeImage);
             nodeTypeImage.setType("image");
             imageTreeList.add(nodeTypeImage);
         }
@@ -92,21 +117,21 @@ public class DataTaskController extends BaseController {
             nodeTypeImage.setFileId(dataNodeType.getId());
             nodeTypeImage.setParentId(dataNodeType.getParentId());
             nodeTypeImage.setFileName(dataNodeType.getNodeName());
-            if(StrUtil.equals(dataNodeType.getId(),"0")){
+            if (StrUtil.equals(dataNodeType.getId(), "0")) {
                 //根节点数量
                 nodeTypeImage.setTotal((long) images.size());
-            }else {
+            } else {
                 //当前节点数量
                 long count = images.stream().filter(e -> StrUtil.equals(e.getParentId(), dataNodeType.getId())).count();
                 nodeTypeImage.setTotal(count);
             }
             nodeTypeImage.setType("node");
-            if(nodeTypeImage.getTotal()==0){
+            if (nodeTypeImage.getTotal() == 0) {
                 continue;
             }
             imageTreeList.add(nodeTypeImage);
         }
-        List<Tree<String>> build = TreeUtil.build(imageTreeList,"-1",  (image, tree) -> {
+        List<Tree<String>> build = TreeUtil.build(imageTreeList, "-1", (image, tree) -> {
             tree.setId(image.getFileId());
             tree.setParentId(image.getParentId());
             tree.setName(image.getFileName());
@@ -120,20 +145,20 @@ public class DataTaskController extends BaseController {
             tree.putExtra("name", image.getFileName());
         });
 
-       DataTaskVo dataTaskVo = new DataTaskVo();
-       BeanUtil.copyProperties(one,dataTaskVo);
-       dataTaskVo.setImageTree(build);
-       return R.ok(dataTaskVo);
+        DataTaskVo dataTaskVo = new DataTaskVo();
+        BeanUtil.copyProperties(one, dataTaskVo);
+        dataTaskVo.setImageTree(build);
+        return R.ok(dataTaskVo);
 
     }
 
     @PostMapping("/addTask")
     public R<Void> addTask(@RequestBody DataTask task) {
         DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, task.getBusinessSerialNo()).one();
-        Boolean save ;
-        if(one==null){
-             save = dataTaskServer.save(task);
-        }else {
+        Boolean save;
+        if (one == null) {
+            save = dataTaskServer.save(task);
+        } else {
             save = dataTaskServer.updateByColumn(task, DataTask::getBusinessSerialNo);
         }
         return R.ok();
@@ -147,19 +172,19 @@ public class DataTaskController extends BaseController {
 
 
     @GetMapping("/deleteTask")
-    public R<Void> deleteTask(String businessSerialNo,String isDeleteFile) {
+    public R<Void> deleteTask(String businessSerialNo, String isDeleteFile) {
         DataTask dataTask = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
-        if(dataTask==null){
+        if (dataTask == null) {
             return R.ok("已经删除过了！");
         }
         //是否删除文件
-        if(StrUtil.isNotEmpty(isDeleteFile)&&isDeleteFile.equals("1")){
+        if (StrUtil.isNotEmpty(isDeleteFile) && isDeleteFile.equals("1")) {
             //如果文件不为null
-            if(dataTask.getImages()!=null){
+            if (dataTask.getImages() != null) {
                 //删除oss文件
                 List<Long> ossIds = dataTask.getImages().stream().map(DataImage::getOssId).toList();
-                if(ossIds.size()>0){
-                    iSysOssService.deleteWithValidByIds(ossIds,false);
+                if (ossIds.size() > 0) {
+                    iSysOssService.deleteWithValidByIds(ossIds, false);
                 }
                 //删除文件数据
                 List<String> list = dataTask.getImages().stream().map(DataImage::getFileId).toList();
@@ -168,17 +193,18 @@ public class DataTaskController extends BaseController {
         }
         //删除单据
         boolean remove = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, businessSerialNo).remove();
-        if(remove){
+        if (remove) {
             return R.ok();
         }
         return R.fail();
 
     }
+
     @PostMapping("/relevanceDocument")
     public R<Void> relevanceDocument(@RequestBody TaskAndImages taskAndImages) {
         List<DataImage> list = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
         boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, taskAndImages.getBusinessSerialNo()).set(DataTask::getImages, list).update();
-        if(update){
+        if (update) {
             return R.ok("更新成功！");
         }
         return R.ok("操作成功,本次没有更新");
@@ -188,8 +214,8 @@ public class DataTaskController extends BaseController {
     @PostMapping("/additionDocument")
     public R<Void> additionDocument(@RequestBody TaskAndImages taskAndImages) {
 
-        List<DataImage> list  = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
-        for (DataImage  dataImage: list) {
+        List<DataImage> list = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
+        for (DataImage dataImage : list) {
             Query query = new Query(Criteria.where("businessSerialNo").is(taskAndImages.getBusinessSerialNo()));
             Update update = new Update().push("images", dataImage);
             mongoTemplate.updateFirst(query, update, DataTask.class);
@@ -202,13 +228,95 @@ public class DataTaskController extends BaseController {
     public R<List<DataImage>> getTaskInfoImages(String businessSerialNo) {
 
         DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
-        if(one==null){
-            return R.fail(businessSerialNo+"单据不存在");
+        if (one == null) {
+            return R.fail(businessSerialNo + "单据不存在");
         }
-        List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
+        List<DataImage> images = one.getImages() == null ? new ArrayList<>() : one.getImages();
         return R.ok(images);
 
     }
 
+    @PostMapping(value = "/getPDF")
+    public R<String> getPDF(@RequestBody Map<String, Object> requestBody) {
+        Object object = requestBody.get("fieldIds");
+        if (object == null || !(object instanceof List)) {
+            return R.fail("参数错误");
+        }
+        List<String> fieldIds = (List<String>) requestBody.get("fieldIds");
+        if (CollectionUtils.isEmpty(fieldIds)) {
+            return R.fail("文件id为空");
+        }
+        log.info("文件转换pdf, fieldIds:{}", JSON.toJSONString(fieldIds));
+        List<DataImage> imageList = dataImageService.lambdaQuery().in(DataImage::getFileId, fieldIds).list();
+        log.info("获取文件详情， imageList：{}", JSON.toJSONString(imageList));
 
+        if (CollectionUtils.isEmpty(imageList)) {
+            return R.fail("文件不存在");
+        }
+
+        List<String> imageUrls = imageList.stream()
+                .map(DataImage::getSourceFileUrl)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(imageUrls)) {
+            return R.fail("文件不存在");
+        }
+
+        List<byte[]> byteList = new ArrayList<>();
+
+        try {
+            // 检测文件类型
+            Tika tika = new Tika();
+            List<String> base64EncodedPages = new ArrayList<>();
+
+            for (String url : imageUrls) {
+                // 根据url地址，获取文件的byte数组
+                byte[] fileBytesFromUrl = ImageUtil.getFileBytesFromUrl(url);
+                // 获取文件类型
+                String mimeType = tika.detect(new URL(url));
+                String extension = ImageUtil.getExtensionFromMimeType(mimeType);
+
+                byte[] bytes = null;
+                switch (extension.toLowerCase()) {
+                    case "xls":
+                    case "xlsx":
+                        bytes = ExcelToPdf.excelToPdf(fileBytesFromUrl);
+                        break;
+                    case "doc":
+                    case "docx":
+                        bytes = WordToPdf.wordToPdf(fileBytesFromUrl);
+                        break;
+                    case "ppt":
+                    case "pptx":
+                        bytes = PptToPdf.pptToPdf(fileBytesFromUrl);
+                        break;
+                    case "jpg":
+                    case "jpeg":
+                    case "png":
+                    case "gif":
+                        bytes = ImageUtil.convertImageToPdf(fileBytesFromUrl, extension);
+                        break;
+                    case "ofd":
+                        bytes = OfdUtils.ofdToPdf(fileBytesFromUrl);
+                        break;
+                    case "txt":
+                        bytes = TxtToPdf.txtToPdf(fileBytesFromUrl);
+                        break;
+                    case "pdf":
+                        bytes = fileBytesFromUrl;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("不支持的文件类型: " + extension);
+                }
+                byteList.add(bytes);
+            }
+            byte[] bytes = ImageUtil.mergePdfDocuments(byteList);
+            String base64Pdf = Base64.getEncoder().encodeToString(bytes);
+            return R.ok("", base64Pdf);
+        } catch (Exception e) {
+            log.error("文件转换pdf异常, imageUrls:{}", JSON.toJSONString(imageUrls), e);
+            return R.fail("发生未知异常");
+        }
+    }
 }
+

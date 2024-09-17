@@ -40,6 +40,11 @@
         <bouncycastle.version>1.76</bouncycastle.version>
         <mongodbplus.version>2.0.9.3</mongodbplus.version>
         <justauth.version>1.16.6</justauth.version>
+        <!-- PDF相关依赖 -->
+        <words.version>20.12</words.version>
+        <slides.version>15.9.0</slides.version>
+        <pdf.version>22.3</pdf.version>
+        <cells.version>22.8</cells.version>
         <!-- 离线IP地址定位库 -->
         <ip2region.version>2.7.0</ip2region.version>
 
@@ -380,6 +385,18 @@
                 <groupId>org.smartlink</groupId>
                 <artifactId>smartlink-workflow</artifactId>
                 <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.aspose</groupId>
+                <artifactId>aspose-words</artifactId>
+                <version>${words.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.aspose</groupId>
+                <artifactId>aspose-cells</artifactId>
+                <version>${cells.version}</version>
             </dependency>
 
         </dependencies>

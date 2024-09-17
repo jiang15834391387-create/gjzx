@@ -4,6 +4,7 @@ package org.smartlink.server.image.controller;
 import cn.hutool.core.collection.CollUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.annotations.Delete;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.StringUtils;

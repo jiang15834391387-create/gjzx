@@ -22,11 +22,10 @@ snail-job:
   namespace: ${spring.profiles.active}
   # 随主应用端口飘逸
   port: 2${server.port}
-
 --- # 数据源配置
 spring:
   datasource:
-    type: com.zaxxer.hikari.HikariDataSource
+    type: com.alibaba.druid.pool.DruidDataSource
     # 动态数据源文档 https://www.kancloud.cn/tracy5546/dynamic-datasource/content
     dynamic:
       # 性能分析插件(有性能损耗 不建议生产环境使用)
@@ -39,38 +38,38 @@ spring:
         # 主库数据源
         master:
           type: ${spring.datasource.type}
-          driverClassName: com.mysql.cj.jdbc.Driver
+          driverClassName: dm.jdbc.driver.DmDriver
           # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
-          url: jdbc:mysql://localhost:3306/data_image?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
-          username: root
-          password: root
+          url: jdbc:dm://localhost:5236/?SCHEMA=SYSDBA&clobAsString=true&compatibleMode=oracle
+          username: SYSDBA
+          password: SYSDBA
         # 从库数据源
         slave:
           lazy: true
           type: ${spring.datasource.type}
-          driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/data_image?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
-          username: root
-          password: root
-#        oracle:
-#          type: ${spring.datasource.type}
-#          driverClassName: oracle.jdbc.OracleDriver
-#          url: jdbc:oracle:thin:@//localhost:1521/XE
-#          username: ROOT
-#          password: root
-#        postgres:
-#          type: ${spring.datasource.type}
-#          driverClassName: org.postgresql.Driver
-#          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-#          username: root
-#          password: root
-#        sqlserver:
-#          type: ${spring.datasource.type}
-#          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
-#          username: SA
-#          password: root
+          driverClassName: dm.jdbc.driver.DmDriver
+          url: jdbc:dm://localhost:5236/?SCHEMA=SYSDBA&clobAsString=true&compatibleMode=oracle
+          username: SYSDBA
+          password: SYSDBA
+      #        oracle:
+      #          type: ${spring.datasource.type}
+      #          driverClassName: oracle.jdbc.OracleDriver
+      #          url: jdbc:oracle:thin:@//localhost:1521/XE
+      #          username: ROOT
+      #          password: root
+      #        postgres:
+      #          type: ${spring.datasource.type}
+      #          driverClassName: org.postgresql.Driver
+      #          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+      #          username: root
+      #          password: root
+      #        sqlserver:
+      #          type: ${spring.datasource.type}
+      #          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      #          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
+      #          username: SA
+      #          password: root
       hikari:
         # 最大连接池数量
         maxPoolSize: 20
@@ -95,9 +94,9 @@ mongo-plus:
       host: 127.0.0.1   #ip
       port: 27017   #端口
       database: test    #数据库名
-#      username: test    #用户名，没有可不填（若账号中出现@,!等等符号，不需要再进行转码！！！）
-#      password: test    #密码，同上（若密码中出现@,!等等符号，不需要再进行转码！！！）
-      authenticationDatabase: admin     #验证数据库
+      #      username: test    #用户名，没有可不填（若账号中出现@,!等等符号，不需要再进行转码！！！）
+      #      password: test    #密码，同上（若密码中出现@,!等等符号，不需要再进行转码！！！）
+      #      authenticationDatabase: admin     #验证数据库
       connectTimeoutMS: 50000   #在超时之前等待连接打开的最长时间（以毫秒为单位）
   log: true
 
@@ -111,7 +110,7 @@ spring.data:
     # 数据库索引
     database: 6
     # 密码(如没有密码请注释掉)
-    # password:
+#    password: 123456
     # 连接超时时间
     timeout: 10s
     # 是否开启ssl
