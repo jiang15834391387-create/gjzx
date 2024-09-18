@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import com.baomidou.mybatisplus.annotation.TableField;
 
 import java.io.Serial;
 import java.util.Date;
@@ -62,6 +63,7 @@ public class SysTenant extends BaseEntity {
     /**
      * 域名
      */
+    @TableField("\"DOMAIN\"")
     private String domain;
 
     /**

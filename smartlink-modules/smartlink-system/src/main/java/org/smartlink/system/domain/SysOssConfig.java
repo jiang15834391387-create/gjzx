@@ -1,5 +1,6 @@
 package org.smartlink.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -55,6 +56,7 @@ public class SysOssConfig extends BaseEntity {
     /**
      * 自定义域名
      */
+    @TableField("\"DOMAIN\"")
     private String domain;
 
     /**
