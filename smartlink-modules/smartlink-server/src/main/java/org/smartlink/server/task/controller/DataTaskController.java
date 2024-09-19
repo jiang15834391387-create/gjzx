@@ -1,5 +1,6 @@
 package org.smartlink.server.task.controller;
 
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.tree.Tree;
@@ -8,6 +9,7 @@ import cn.hutool.core.util.StrUtil;
 import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.ast.Literal;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -127,6 +130,8 @@ public class DataTaskController extends BaseController {
 
     }
 
+
+
     @PostMapping("/addTask")
     public R<Void> addTask(@RequestBody DataTask task) {
         DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, task.getBusinessSerialNo()).one();
@@ -206,6 +211,22 @@ public class DataTaskController extends BaseController {
             return R.fail(businessSerialNo+"单据不存在");
         }
         List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
+        return R.ok(images);
+
+    }
+
+    @SaIgnore
+    @GetMapping("/getTaskInfoForThirdParties")
+    public R<List<DataImage>> getTaskInfoForThirdParties(String businessSerialNo) {
+        if (StrUtil.isEmpty(businessSerialNo)) {
+            return R.ok("入参为null，请重新传参");
+        }
+        DataTask dataTask = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        if(dataTask==null){
+            return R.fail(businessSerialNo+"单据不存在");
+        }
+        //单据下影像集合
+        List<DataImage> images = dataTask.getImages() == null ? new ArrayList<>(): dataTask.getImages();
         return R.ok(images);
 
     }
