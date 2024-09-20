@@ -113,6 +113,17 @@
 <!--            <artifactId>apm-toolkit-trace</artifactId>-->
 <!--            <version>${与你的agent探针版本保持一致}</version>-->
 <!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
 
     </dependencies>
 

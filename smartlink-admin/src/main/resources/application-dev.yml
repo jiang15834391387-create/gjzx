@@ -275,3 +275,9 @@ kkfile:
   onlinePreviewUrl: http://192.168.106.130:8012/onlinePreview?url=
 frontEnd:
   url: http://127.0.0.1
+runJian:
+  ceShi:
+     url: https://yq.runjian.com:31516
+     appKey: yz-yxxt
+     appSecret: 30c3e6d495834663ba978636e91c9951
+     tokenUrl: /v1/oauth2/accessToken

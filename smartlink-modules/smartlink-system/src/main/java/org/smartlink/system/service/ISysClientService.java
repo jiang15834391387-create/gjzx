@@ -1,5 +1,6 @@
 package org.smartlink.system.service;
 
+import org.smartlink.system.domain.SysClient;
 import org.smartlink.system.domain.vo.SysClientVo;
 import org.smartlink.system.domain.bo.SysClientBo;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
@@ -56,4 +57,5 @@ public interface ISysClientService {
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
+    SysClientVo findByClientKey(String clientKey);
 }

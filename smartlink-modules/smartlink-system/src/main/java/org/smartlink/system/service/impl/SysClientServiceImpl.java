@@ -148,4 +148,9 @@ public class SysClientServiceImpl implements ISysClientService {
         }
         return baseMapper.deleteBatchIds(ids) > 0;
     }
+
+    @Override
+    public SysClientVo findByClientKey(String clientKey) {
+        return baseMapper.selectVoOne(new LambdaQueryWrapper<SysClient>().eq(SysClient::getClientKey, clientKey));
+    }
 }
