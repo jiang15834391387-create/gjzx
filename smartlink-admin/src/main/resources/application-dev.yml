@@ -281,3 +281,4 @@ runJian:
      appKey: yz-yxxt
      appSecret: 30c3e6d495834663ba978636e91c9951
      tokenUrl: /v1/oauth2/accessToken
+     fileUploadUrl: /file/v1/putObject
