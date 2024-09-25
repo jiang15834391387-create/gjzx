@@ -1,37 +1,40 @@
 package org.smartlink.server.task.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Literal;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.tika.Tika;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.ImageTreeBo;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
+import org.smartlink.server.image.service.impl.DataImageService;
 import org.smartlink.server.nodeType.domain.DataNodeType;
 import org.smartlink.server.nodeType.mapper.DataNodeTypeMapper;
-import org.smartlink.server.nodeType.service.IDataNodeTypeService;
 import org.smartlink.server.task.domain.bo.TaskAndImages;
 import org.smartlink.server.task.domain.vo.DataTaskVo;
 import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
+import org.smartlink.server.task.util.*;
 import org.smartlink.system.service.ISysOssService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +54,9 @@ public class DataTaskController extends BaseController {
     private final MongoTemplate mongoTemplate;
 
     private final DataNodeTypeMapper dataNodeTypeMapper;
+
+    private final DataImageService dataImageService;
+
 
 
 
@@ -213,6 +219,88 @@ public class DataTaskController extends BaseController {
         List<DataImage> images = one.getImages() == null ? new ArrayList<>(): one.getImages();
         return R.ok(images);
 
+    }
+    @PostMapping(value = "/getPDF")
+    public R<String> getPDF(@RequestBody Map<String, Object> requestBody){
+        Object object = requestBody.get("fieldIds");
+        if (object == null || !(object instanceof List)) {
+            return R.fail("参数错误");
+        }
+        List<String> fieldIds = (List<String>) requestBody.get("fieldIds");
+        if (CollectionUtils.isEmpty(fieldIds)) {
+            return R.fail("文件id为空");
+        }
+        log.info("文件转换pdf, fieldIds:{}", JSON.toJSONString(fieldIds));
+        List<DataImage> imageList = dataImageService.lambdaQuery().in(DataImage::getFileId, fieldIds).list();
+        log.info("获取文件详情， imageList：{}", JSON.toJSONString(imageList));
+
+        if (CollectionUtils.isEmpty(imageList)) {
+            return R.fail("文件不存在");
+        }
+
+        List<String> imageUrls = imageList.stream()
+                .map(DataImage::getSourceFileUrl)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(imageUrls)) {
+            return R.fail("文件不存在");
+        }
+
+        List<byte[]> byteList = new ArrayList<>();
+
+        try {
+            // 检测文件类型
+            Tika tika = new Tika();
+            List<String> base64EncodedPages = new ArrayList<>();
+
+            for (String url : imageUrls) {
+                // 根据url地址，获取文件的byte数组
+                byte[] fileBytesFromUrl = ImageUtil.getFileBytesFromUrl(url);
+                // 获取文件类型
+                String mimeType = tika.detect(new URL(url));
+                String extension = ImageUtil.getExtensionFromMimeType(mimeType);
+
+                byte[] bytes = null;
+                switch (extension.toLowerCase()) {
+                    case "xls":
+                    case "xlsx":
+                        bytes = ExcelToPdf.excelToPdf(fileBytesFromUrl);
+                        break;
+                    case "doc":
+                    case "docx":
+                        bytes = WordToPdf.wordToPdf(fileBytesFromUrl);
+                        break;
+                    case "ppt":
+                    case "pptx":
+                        bytes = PptToPdf.pptToPdf(fileBytesFromUrl);
+                        break;
+                    case "jpg":
+                    case "jpeg":
+                    case "png":
+                    case "gif":
+                        bytes = ImageUtil.convertImageToPdf(fileBytesFromUrl, extension);
+                        break;
+                    case "ofd":
+                        bytes = OfdUtils.ofdToPdf(fileBytesFromUrl);
+                        break;
+                    case "txt":
+                        bytes = TxtToPdf.txtToPdf(fileBytesFromUrl);
+                        break;
+                    case "pdf":
+                        bytes = fileBytesFromUrl;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("不支持的文件类型: " + extension);
+                }
+                byteList.add(bytes);
+            }
+            byte[] bytes = ImageUtil.mergePdfDocuments(byteList);
+            String base64Pdf = Base64.getEncoder().encodeToString(bytes);
+            return R.ok("", base64Pdf);
+        } catch (Exception e) {
+            log.error("文件转换pdf异常, imageUrls:{}", JSON.toJSONString(imageUrls), e);
+            return R.fail("发生未知异常");
+        }
     }
 
     @SaIgnore
