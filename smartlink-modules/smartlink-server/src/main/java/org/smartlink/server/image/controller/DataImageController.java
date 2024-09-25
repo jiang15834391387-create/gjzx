@@ -14,7 +14,6 @@ import org.smartlink.server.image.domain.bo.UpdateImageBo;
 import org.smartlink.server.image.domain.bo.UploadImageBo;
 import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
-import org.smartlink.server.image.util.requestHeaderUtil;
 import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
 import org.smartlink.system.domain.vo.SysOssVo;
@@ -30,13 +29,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -58,12 +54,6 @@ public class DataImageController extends BaseController {
 
     private final MongoTemplate mongoTemplate;
 
-    @Value("${runJian.ceShi.url}")
-    private  String runJianUrl;
-
-    @Value("${runJian.ceShi.fileUploadUrl}")
-    private  String fileUploadUrl;
-
 
     @GetMapping("/getImageInfo")
     public DataTask getImageInfo(DataImage image) {
@@ -77,7 +67,7 @@ public class DataImageController extends BaseController {
      * @return
      */
     @PostMapping("/uploadImage")
-    public R<DataImage> uploadImage(@RequestBody UploadImageBo uploadImageBo) {
+    public R<DataImage> uploadImage(@RequestBody UploadImageBo uploadImageBo) throws IOException {
         byte[] decodedBytes = Base64.getDecoder().decode(uploadImageBo.getFileBase64());
         SysOssVo upload = iSysOssService.upload(decodedBytes, uploadImageBo.getFileName());
         DataImage dataImage = new DataImage();
@@ -109,19 +99,6 @@ public class DataImageController extends BaseController {
      */
     @PostMapping("/uploadImageFile")
     public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId) throws IOException {
-        String accessToken = "";
-        //获取连接
-        String baseUrl = runJianUrl + fileUploadUrl;
-        String urlStr = baseUrl + "?accessToken=" + accessToken;
-        URL url = new URL(urlStr);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-        connection.setRequestMethod("POST");
-        connection.setDoOutput(true);
-        connection.setRequestProperty("Content-Type", "multipart/form-data");
-        //获取请求头基本参数
-        Map<String, Object> map = requestHeaderUtil.getRequestHeader();
-
         //上传文件。更换文件系统
         SysOssVo upload = iSysOssService.upload(file);
         DataImage dataImage = new DataImage();

@@ -20,10 +20,13 @@ import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.core.utils.file.FileUtils;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.oss.constant.OssConstant;
 import org.smartlink.common.oss.core.OssClient;
 import org.smartlink.common.oss.entity.UploadResult;
 import org.smartlink.common.oss.enumd.AccessPolicyType;
+import org.smartlink.common.oss.factory.MultiFileSysFactory;
 import org.smartlink.common.oss.factory.OssFactory;
+import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.system.domain.SysOss;
 import org.smartlink.system.domain.bo.SysOssBo;
 import org.smartlink.system.domain.vo.SysOssVo;
@@ -51,6 +54,7 @@ import java.util.Map;
 public class SysOssServiceImpl implements ISysOssService, OssService {
 
     private final SysOssMapper baseMapper;
+    private MultiFileSysFactory multiFileSysFactory;
 
     /**
      * 查询OSS对象存储列表
@@ -200,18 +204,21 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
      * @throws ServiceException 如果上传过程中发生异常，则抛出 ServiceException 异常
      */
     @Override
-    public SysOssVo upload(MultipartFile file) {
+    public SysOssVo upload(MultipartFile file) throws IOException {
         String originalfileName = file.getOriginalFilename();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
-        OssClient storage = OssFactory.instance();
-        UploadResult uploadResult;
-        try {
-            uploadResult = storage.uploadSuffix(file.getBytes(), suffix);
-        } catch (IOException e) {
-            throw new ServiceException(e.getMessage());
-        }
+        //重写文件服务器工厂
+        UploadResult uploadResult = multiFileSysFactory.uploadSuffix(file, suffix);
+        String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
+//        OssClient storage = OssFactory.instance();
+//        UploadResult uploadResult;
+//        try {
+//            uploadResult = storage.uploadSuffix(file.getBytes(), suffix);
+//        } catch (IOException e) {
+//            throw new ServiceException(e.getMessage());
+//        }
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, storage.getConfigKey(), uploadResult);
+        return buildResultEntity(originalfileName, suffix, configKey, uploadResult);
     }
 
     /**
@@ -221,13 +228,16 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
     @Override
-    public SysOssVo upload(File file) {
+    public SysOssVo upload(File file) throws IOException {
         String originalfileName = file.getName();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
-        OssClient storage = OssFactory.instance();
-        UploadResult uploadResult = storage.uploadSuffix(file, suffix);
+        //重写文件服务器工厂
+        UploadResult uploadResult = multiFileSysFactory.uploadSuffix(file, suffix);
+        String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
+//        OssClient storage = OssFactory.instance();
+//        UploadResult uploadResult = storage.uploadSuffix(file, suffix);
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, storage.getConfigKey(), uploadResult);
+        return buildResultEntity(originalfileName, suffix, configKey, uploadResult);
     }
 
     @NotNull
@@ -264,12 +274,14 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     }
 
     @Override
-    public SysOssVo upload(byte[] fileBytes, String originalfileName) {
+    public SysOssVo upload(byte[] fileBytes, String originalfileName) throws IOException {
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
-        OssClient storage = OssFactory.instance();
-        UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
+        UploadResult uploadResult = multiFileSysFactory.uploadSuffix(fileBytes, suffix);
+        String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
+//        OssClient storage = OssFactory.instance();
+//        UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, storage.getConfigKey(), uploadResult);
+        return buildResultEntity(originalfileName, suffix, configKey, uploadResult);
     }
 
     /**

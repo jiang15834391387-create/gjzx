@@ -37,4 +37,6 @@ public interface OssConstant {
      */
     String IS_HTTPS = "Y";
 
+    String RUN_JIAN_CONFIG_KEY = "runjian ";
+
 }

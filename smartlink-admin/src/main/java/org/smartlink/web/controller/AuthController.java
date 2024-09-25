@@ -1,35 +1,27 @@
 package org.smartlink.web.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.hutool.core.codec.Base64;
+import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletRequest;
-
-
-import java.io.IOException;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginBody;
+import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.RegisterBody;
 import org.smartlink.common.core.domain.model.SocialLoginBody;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
-import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.social.config.properties.SocialLoginConfigProperties;
 import org.smartlink.common.social.config.properties.SocialProperties;
@@ -40,6 +32,7 @@ import org.smartlink.common.websocket.utils.WebSocketUtils;
 import org.smartlink.system.domain.bo.SysTenantBo;
 import org.smartlink.system.domain.vo.SysClientVo;
 import org.smartlink.system.domain.vo.SysTenantVo;
+import org.smartlink.system.domain.vo.SysUserVo;
 import org.smartlink.system.service.*;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
@@ -47,22 +40,17 @@ import org.smartlink.web.domain.vo.TenantListVo;
 import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
-import org.smartlink.web.util.ResponseUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static me.zhyd.oauth.cache.AuthCacheConfig.timeout;
 
 /**
  * 认证
@@ -84,23 +72,12 @@ public class AuthController {
     private final ISysSocialService socialUserService;
     private final ISysClientService clientService;
     private final ScheduledExecutorService scheduledExecutorService;
-    private final ISysClientService iSysClientService;
+
     private final ISysUserService userService;
 
     @Value("${frontEnd.url}")
     private String frontEndUrl;
 
-    @Value("${runJian.ceShi.url}")
-    private  String runJianUrl;
-
-    @Value("${runJian.ceShi.appKey}")
-    private  String runJianAppKey;
-
-    @Value("${runJian.ceShi.appSecret}")
-    private  String runJianAppSecret;
-
-    @Value("${runJian.ceShi.tokenUrl}")
-    private  String tokenUrl;
 
     /**
      * 登录方法
@@ -245,50 +222,28 @@ public class AuthController {
         return R.ok(vo);
     }
 
-
     @GetMapping("/getToken")
-    public R<LoginVo> getToken() throws IOException {
-
-        //构建请求，获取access_token
-        String url = runJianUrl + tokenUrl;
-        // 创建HttpClient实例
-        HttpClient httpClient = HttpClientBuilder.create().build();
-        // 创建POST请求
-        HttpPost request = new HttpPost(url);
-        // 添加请求头
-        request.addHeader("Content-Type", "application/json");
-
-        // 添加请求体（JSON数据）
-        String jsonBody = "{\"appKey\": \"" + runJianAppKey + "\",\n" +
-                "\"appSecret\": \"" + runJianAppSecret + "\"\n" +
-                "}";
-        request.setEntity(new StringEntity(jsonBody));
-        HttpResponse response = httpClient.execute(request);
-        //解析响应为map集合
-        Map<String, Object> mapResponse = ResponseUtil.handleResponse(response);
-        //获取其中的值
-        int errcode = (Integer) mapResponse.get("errcode");
-        String errmsg = (String) mapResponse.get("errmsg");
-        Map<String, Object> data = (Map<String, Object>) mapResponse.get("data");
-        String accessToken = (String) data.get("accessToken");
-        long expireIn = (long)(int) data.get("expireIn");
-        //将获取的accesstoken存入redis
-        RedisUtils.setCacheObject("accessToken", accessToken,Duration.ofMillis(timeout));
-
-        if (errcode != 200) {
-            log.info("获取内部文件系统token有误，请检查appKey:{},appSecret:{}", runJianAppKey, runJianAppSecret);
-            return R.fail("获取内部文件系统token有误，请检查文件系统是否有误或发送的appKey和appSecret");
-        }
-        //获取请求是app还是pc
-//        HttpServletRequest httpServletRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-//        String clientKey = httpServletRequest.getHeader("User-Agent");
-//        // 通过clientKey查询SysClient对象
-//        SysClientVo sysClientVo = iSysClientService.findByClientKey(clientKey);
-        //构建返回对象
+    public R<LoginVo> getToken(){
+        SysClientVo client = clientService.queryByClientId("e5cd7e4891bf95d1d19206ce24a7b32e");
+        SysUserVo user = userService.selectUserById(1l);
+        LoginUser loginUser = loginService.buildLoginUser(user);
+        loginUser.setClientKey(client.getClientKey());
+        loginUser.setDeviceType(client.getDeviceType());
+        SaLoginModel model = new SaLoginModel();
+        model.setDevice(client.getDeviceType());
+        // 自定义分配 不同用户体系 不同 token 授权时间 不设置默认走全局 yml 配置
+        // 例如: 后台用户30分钟过期 app用户1天过期
+        model.setTimeout(client.getTimeout());
+        model.setActiveTimeout(client.getActiveTimeout());
+        model.setExtra(LoginHelper.CLIENT_KEY, client.getClientId());
+        // 生成token
+        LoginHelper.login(loginUser, model);
         LoginVo loginVo = new LoginVo();
-        loginVo.setAccessToken(accessToken);
-        loginVo.setExpireIn(expireIn);
+        loginVo.setAccessToken("Bearer "+StpUtil.getTokenValue());
+        loginVo.setExpireIn(StpUtil.getTokenTimeout());
+        loginVo.setClientId(client.getClientId());
         return R.ok(loginVo);
+
     }
 
 
@@ -296,8 +251,8 @@ public class AuthController {
     public R<String> getPreviewTaskUrl(String businessSerialNo) {
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
-        String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&token=" + StpUtil.getTokenValue();
-        return R.ok("", s);
+        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
+        return R.ok("",s);
 
     }
 
@@ -306,18 +261,18 @@ public class AuthController {
     public R<String> getScanTaskUrl(String businessSerialNo) {
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
-        String s = frontEndUrl + "/documentScan?businessSerialNo=" + businessSerialNo + "&token=" + StpUtil.getTokenValue();
-        return R.ok("", s);
+        String s = frontEndUrl+ "/documentScan?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
+        return R.ok("",s);
 
     }
 
 
     @GetMapping("/getLocateImagePosition")
-    public R<String> getLocateImagePosition(String businessSerialNo, String fileId) {
+    public R<String> getLocateImagePosition(String businessSerialNo,String fileId) {
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
-        String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&fileId=" + fileId + "&token=" + StpUtil.getTokenValue();
-        return R.ok("", s);
+        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&fileId="+ fileId+"&token="+ StpUtil.getTokenValue();
+        return R.ok("",s);
 
     }
 
