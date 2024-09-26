@@ -92,8 +92,8 @@ public class RunJianUtil {
                     throw new RuntimeException("响应结果为空");
                 }
                 if ((Integer) mapResponse.get("errcode") != HttpURLConnection.HTTP_OK) {
-                    log.info("获取文件系统返回结果错误,响应结果为:{}", response);
-                    throw new RuntimeException("获取文件系统返回结果错误");
+                    log.info("获取文件系统accessToken返回结果错误,响应结果为:{}", response);
+                    throw new RuntimeException("获取文件系统accessToken返回结果错误");
                 }
                 //获取其中的数据
                 Map<String, Object> data = (Map<String, Object>) mapResponse.get("data");
