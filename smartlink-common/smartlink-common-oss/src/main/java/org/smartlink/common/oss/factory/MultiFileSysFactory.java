@@ -1,5 +1,7 @@
 package org.smartlink.common.oss.factory;
 
+import cn.hutool.core.util.ObjectUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.StringUtils;
@@ -94,6 +96,7 @@ public class MultiFileSysFactory {
         }
 
     }
+
     /**
      * 文件上传
      *
@@ -101,7 +104,7 @@ public class MultiFileSysFactory {
      * @param suffix
      * @return
      */
-    public UploadResult uploadSuffix(byte[] fileBytes, String suffix) throws IOException {
+    public UploadResult uploadSuffix(byte[] fileBytes, String suffix) {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
@@ -109,13 +112,17 @@ public class MultiFileSysFactory {
         }
         // 判断是否润建公司文件服务器
         if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(configKey)) {
-            //调用service去构建返回值
-            File tempFile = File.createTempFile("temp", null);
-            try (OutputStream outputStream = new FileOutputStream(tempFile)) {
-                outputStream.write(fileBytes);
+            try {
+                //调用service去构建返回值
+                File tempFile = File.createTempFile("temp", null);
+                try (OutputStream outputStream = new FileOutputStream(tempFile)) {
+                    outputStream.write(fileBytes);
+                }
+                return getUploadResult(tempFile);
+            } catch (Exception e) {
+                log.error("文件上传错误,流式转换异常:{}",e.toString());
+                throw new OssException("文件上传错误,流式转换异常:{}" + e.getMessage());
             }
-
-            return getUploadResult(tempFile);
         } else {
             OssClient storage = OssFactory.instance();
             UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
@@ -124,7 +131,8 @@ public class MultiFileSysFactory {
 
     }
 
-    private UploadResult getUploadResult(File file) throws IOException {
+    //文件上传通用
+    private UploadResult getUploadResult(File file) {
         //调用service去构建返回值
         Map map = strategyService.upload(file);
         Map dataMap = (Map) map.get("data");
@@ -135,4 +143,49 @@ public class MultiFileSysFactory {
         uploadResult.setFilename(dataMap.get("originalFilename").toString());
         return uploadResult;
     }
+
+    public Long download(String serviceName, String fileName, HttpServletResponse response) throws IOException {
+        if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
+            //是润建服务器狭下载文件
+            long contentLength = strategyService.download(response);
+            return contentLength;
+        } else {
+            OssClient storage = OssFactory.instance(serviceName);
+            long contentLength = storage.download(fileName, response.getOutputStream());
+            return contentLength;
+        }
+    }
+    public byte[] downloadByte(String serviceName, String fileName){
+        if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
+            //是润建服务器狭下载文件
+            strategyService.downloadByte();
+            //问题
+            return new byte[0];
+        } else {
+            OssClient storage = OssFactory.instance(serviceName);
+            if (ObjectUtil.isNotNull(storage)) {
+                return storage.downloadByte(fileName);
+            }
+            return new byte[0];
+        }
+    }
+
+    public void deleteWithValidById(String serviceName,String url) {
+        if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
+        }else {
+            OssClient storage = OssFactory.instance(serviceName);
+            storage.delete(url);
+        }
+    }
+
+    public void deleteWithValidByIds(String serviceName, String url) {
+        if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
+
+        }else {
+            OssClient storage = OssFactory.instance(serviceName);
+            storage.delete(url);
+        }
+    }
+
+
 }

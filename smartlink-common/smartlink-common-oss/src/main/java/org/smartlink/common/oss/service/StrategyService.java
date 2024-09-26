@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -24,20 +23,25 @@ public interface StrategyService {
      * @param file 要上传的文件对象
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
-    Map upload(File file) throws IOException;
+    Map upload(File file);
 
     /**
      * 文件下载方法，支持一次性下载完整文件
      *
-     * @param ossId    OSS对象ID
      * @param response HttpServletResponse对象，用于设置响应头和向客户端发送文件内容
      */
-    void download(Long ossId, HttpServletResponse response) throws IOException;
+    long download(HttpServletResponse response) ;
+
+    /**
+     * 返回文件字节流
+     * @return
+     */
+    byte[] downloadByte();
 
     // TODO 文件关联业务主键
-    void relObjectId() throws IOException;
+    void relObjectId() ;
 
-    void fileInfo() throws IOException;
+    void fileInfo() ;
 
-    String fileViewUrl() throws IOException;
+    String fileViewUrl() ;
 }

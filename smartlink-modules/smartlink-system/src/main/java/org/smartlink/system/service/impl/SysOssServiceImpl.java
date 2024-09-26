@@ -56,6 +56,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     private final SysOssMapper baseMapper;
     private MultiFileSysFactory multiFileSysFactory;
 
+
     /**
      * 查询OSS对象存储列表
      *
@@ -144,7 +145,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         lqw.eq(StringUtils.isNotBlank(bo.getFileSuffix()), SysOss::getFileSuffix, bo.getFileSuffix());
         lqw.eq(StringUtils.isNotBlank(bo.getUrl()), SysOss::getUrl, bo.getUrl());
         lqw.between(params.get("beginCreateTime") != null && params.get("endCreateTime") != null,
-            SysOss::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
+                SysOss::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
         lqw.eq(ObjectUtil.isNotNull(bo.getCreateBy()), SysOss::getCreateBy, bo.getCreateBy());
         lqw.eq(StringUtils.isNotBlank(bo.getService()), SysOss::getService, bo.getService());
         lqw.orderByAsc(SysOss::getOssId);
@@ -178,8 +179,15 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         }
         FileUtils.setAttachmentResponseHeader(response, sysOss.getOriginalName());
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
-        OssClient storage = OssFactory.instance(sysOss.getService());
-        long contentLength = storage.download(sysOss.getFileName(), response.getOutputStream());
+
+        String serviceName = sysOss.getService();
+        String fileName = sysOss.getFileName();
+        long contentLength = multiFileSysFactory.download(serviceName, fileName, response);
+
+//        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
+//        OssClient storage = OssFactory.instance(serviceName);
+//        long contentLength = storage.download(sysOss.getFileName(), response.getOutputStream());
+
         response.setContentLengthLong(contentLength);
     }
 
@@ -189,11 +197,13 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         if (ObjectUtil.isNull(sysOss)) {
             throw new ServiceException("文件数据不存在!");
         }
-        OssClient storage = OssFactory.instance(sysOss.getService());
-        if (ObjectUtil.isNotNull(storage)) {
-            return storage.downloadByte(sysOss.getFileName());
-        }
-        return new byte[0];
+        return multiFileSysFactory.downloadByte(sysOss.getService(), sysOss.getFileName());
+
+//        OssClient storage = OssFactory.instance(sysOss.getService());
+//        if (ObjectUtil.isNotNull(storage)) {
+//            return storage.downloadByte(sysOss.getFileName());
+//        }
+//        return new byte[0];
     }
 
     /**
@@ -267,8 +277,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         }
         List<SysOss> list = baseMapper.selectBatchIds(ids);
         for (SysOss sysOss : list) {
-            OssClient storage = OssFactory.instance(sysOss.getService());
-            storage.delete(sysOss.getUrl());
+            multiFileSysFactory.deleteWithValidByIds(sysOss.getService(), sysOss.getUrl());
         }
         return baseMapper.deleteBatchIds(ids) > 0;
     }
@@ -291,12 +300,16 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
      * @return oss 匹配Url的OSS对象
      */
     private SysOssVo matchingUrl(SysOssVo oss) {
-        OssClient storage = OssFactory.instance(oss.getService());
-        // 仅修改桶类型为 private 的URL，临时URL时长为120s
-        if (AccessPolicyType.PRIVATE == storage.getAccessPolicy()) {
-            oss.setUrl(storage.getPrivateUrl(oss.getFileName(), 120));
+        if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(oss.getService())) {
+            return oss;
+        } else {
+            OssClient storage = OssFactory.instance(oss.getService());
+            // 仅修改桶类型为 private 的URL，临时URL时长为120s
+            if (AccessPolicyType.PRIVATE == storage.getAccessPolicy()) {
+                oss.setUrl(storage.getPrivateUrl(oss.getFileName(), 120));
+            }
+            return oss;
         }
-        return oss;
     }
 
 
@@ -316,8 +329,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         if (sysOssVo == null) {
             return true;
         }
-        OssClient storage = OssFactory.instance(sysOssVo.getService());
-        storage.delete(sysOssVo.getUrl());
+        multiFileSysFactory.deleteWithValidById(sysOssVo.getService(), sysOssVo.getUrl());
         return baseMapper.deleteById(id) > 0;
     }
 }
