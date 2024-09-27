@@ -54,7 +54,7 @@ import java.util.Map;
 public class SysOssServiceImpl implements ISysOssService, OssService {
 
     private final SysOssMapper baseMapper;
-    private MultiFileSysFactory multiFileSysFactory;
+    private final MultiFileSysFactory multiFileSysFactory;
 
 
     /**
@@ -182,7 +182,8 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
 
         String serviceName = sysOss.getService();
         String fileName = sysOss.getFileName();
-        long contentLength = multiFileSysFactory.download(serviceName, fileName, response);
+        //这个ossId是保存时在自动生成的，不是wenjian
+        long contentLength = multiFileSysFactory.download(sysOss.getFileId(),serviceName, fileName, response);
 
 //        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
 //        OssClient storage = OssFactory.instance(serviceName);
@@ -197,7 +198,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         if (ObjectUtil.isNull(sysOss)) {
             throw new ServiceException("文件数据不存在!");
         }
-        return multiFileSysFactory.downloadByte(sysOss.getService(), sysOss.getFileName());
+        return multiFileSysFactory.downloadByte(sysOss.getFileId(),sysOss.getService(), sysOss.getFileName());
 
 //        OssClient storage = OssFactory.instance(sysOss.getService());
 //        if (ObjectUtil.isNotNull(storage)) {
@@ -218,7 +219,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         String originalfileName = file.getOriginalFilename();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
         //重写文件服务器工厂
-        UploadResult uploadResult = multiFileSysFactory.uploadSuffix(file, suffix);
+        Map map = multiFileSysFactory.uploadSuffix(file, suffix);
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
 //        OssClient storage = OssFactory.instance();
 //        UploadResult uploadResult;
@@ -228,7 +229,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
 //            throw new ServiceException(e.getMessage());
 //        }
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, configKey, uploadResult);
+        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"),(String)map.get("id"));
     }
 
     /**
@@ -242,22 +243,24 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         String originalfileName = file.getName();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
         //重写文件服务器工厂
-        UploadResult uploadResult = multiFileSysFactory.uploadSuffix(file, suffix);
+        Map map = multiFileSysFactory.uploadSuffix(file, suffix);
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
 //        OssClient storage = OssFactory.instance();
 //        UploadResult uploadResult = storage.uploadSuffix(file, suffix);
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, configKey, uploadResult);
+        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"),(String)map.get("id"));
     }
 
     @NotNull
-    private SysOssVo buildResultEntity(String originalfileName, String suffix, String configKey, UploadResult uploadResult) {
+    private SysOssVo buildResultEntity(String originalfileName, String suffix, String configKey, UploadResult uploadResult,String fileId) {
         SysOss oss = new SysOss();
+        //改成存貯ossId（上传文件服务器的文件Id）
         oss.setUrl(uploadResult.getUrl());
         oss.setFileSuffix(suffix);
         oss.setFileName(uploadResult.getFilename());
         oss.setOriginalName(originalfileName);
         oss.setService(configKey);
+        oss.setFileId(fileId);
         baseMapper.insert(oss);
         SysOssVo sysOssVo = MapstructUtils.convert(oss, SysOssVo.class);
         return this.matchingUrl(sysOssVo);
@@ -285,12 +288,12 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     @Override
     public SysOssVo upload(byte[] fileBytes, String originalfileName) throws IOException {
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
-        UploadResult uploadResult = multiFileSysFactory.uploadSuffix(fileBytes, suffix);
+        Map map = multiFileSysFactory.uploadSuffix(fileBytes, suffix);
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
 //        OssClient storage = OssFactory.instance();
 //        UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, configKey, uploadResult);
+        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"),(String)map.get("id"));
     }
 
     /**

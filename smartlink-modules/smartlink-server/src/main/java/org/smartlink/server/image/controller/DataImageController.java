@@ -104,7 +104,10 @@ public class DataImageController extends BaseController {
         DataImage dataImage = new DataImage();
         dataImage.setFileName(file.getOriginalFilename());
         dataImage.setFileType(upload.getFileSuffix());
-        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+//        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        //存储预览地址，使用的是他根据文件id区查询的预览地址
+        dataImage.setPreviewUrl(upload.getUrl());
+        //存储预览地址，因为没有返回url地址
         dataImage.setSourceFileUrl(upload.getUrl());
         dataImage.setParentId(parentId);
         dataImage.setOssId(upload.getOssId());

@@ -68,5 +68,6 @@ public class SysOssVo implements Serializable {
      */
     private String service;
 
+    private String fileId;
 
 }

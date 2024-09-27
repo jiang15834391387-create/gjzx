@@ -12,6 +12,8 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.smartlink.common.oss.exception.OssException;
 import org.smartlink.common.oss.service.StrategyService;
 import org.smartlink.common.oss.util.HttpClientCustomUtil;
@@ -67,12 +69,11 @@ public class StrategyServiceImplRunJian implements StrategyService {
         String putObject = BaseUrl + putObjectUrl;
         //拼接accesstoken
         String putObjectUrl = runJianUtil.spliceAccessToken(putObject);
-        CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
-        try {
+//        CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
+        try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(putObjectUrl);
             //添加基本请求头
             runJianUtil.setHttpClientHeader(httpPost);
-
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
             //添加参数
             Path filePath = file.toPath();
@@ -89,9 +90,9 @@ public class StrategyServiceImplRunJian implements StrategyService {
             HttpEntity httpEntity = multipartEntityBuilder.build();
             httpPost.setEntity(httpEntity);
             //构建测试数据
-            String path = "C:\\Users\\DELL\\Pictures\\Camera Roll\\1.png,";
-            String objectId = "test-png";
-            String objectType = "用户头像";
+            String path = "";
+            String objectId = "";
+            String objectType = "";
             multipartEntityBuilder.addTextBody("path", path);
             multipartEntityBuilder.addTextBody("objectId", objectId);
             multipartEntityBuilder.addTextBody("objectType", objectType);
@@ -99,6 +100,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
             CloseableHttpResponse response = httpClient.execute(httpPost);
 
             Map<String, Object> stringObjectMap = ResponseUtil.handleResponse(response);
+
             if ((Integer) stringObjectMap.get("errcode") != HttpServletResponse.SC_OK) {
                 log.info("文件上传服务器错误,响应内容:{}", stringObjectMap);
                 throw new IOException("文件上传服务器错误");
@@ -111,11 +113,11 @@ public class StrategyServiceImplRunJian implements StrategyService {
     }
 
     @Override
-    public long download(HttpServletResponse response) {
+    public long download(String ossId,HttpServletResponse response) {
         String url = BaseUrl + getPutObjectUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
-        String fileId = "1838466485701021698,1838756901222584322";
+        String fileId = ossId;
         String compressType = "zip";
         try {
             // 使用URIBuilder构建带有查询参数的URL
@@ -130,16 +132,22 @@ public class StrategyServiceImplRunJian implements StrategyService {
             CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
             // 执行请求
             try (CloseableHttpResponse closeableHttpResponse = httpClient.execute(httpGet)) {
+                int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
+                if (statusCode != HttpServletResponse.SC_OK) {
+                    throw new OssException("获取文件异常");
+                }
                 // 获取响应实体
                 HttpEntity entity = closeableHttpResponse.getEntity();
+
                 if (entity == null) {
                     throw new OssException("文件下载失败");
                 }
+                byte[] fileByteArray = EntityUtils.toByteArray(entity);
                 OutputStream out = response.getOutputStream();
                 // 将实体内容写入到servlet响应输出流
-                entity.writeTo(out);
-                out.flush();
-                long contentLength = entity.getContentLength();
+//                entity.writeTo(out);
+                out.write(fileByteArray);
+                int contentLength = fileByteArray.length;
                 return contentLength;
             }
         } catch (Exception e) {
@@ -147,12 +155,80 @@ public class StrategyServiceImplRunJian implements StrategyService {
         }
     }
 
+//    public static void main(String[] args) {
+//        CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
+//        String accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJmaW8iLCJpYXQiOjE3MjczNjEzODUsImp0aSI6ImVYb3RlWGg0ZEE9PSJ9.IZQebOkZZFRlGSSszVFZTQ0fNiShR2799xC-jzESK4k";
+//        String requestUrl = "https://yq.runjian.com:31516/file/v1/getObject" + "?accessToken=" + accessToken;;
+//
+//        // 设置请求URL,拼接token
+//        String fileId = "1839314078039511042";
+//        String compressType = "zip";
+//        try {
+//            // 使用URIBuilder构建带有查询参数的URL
+//            URIBuilder uriBuilder = new URIBuilder(requestUrl);
+//            uriBuilder.addParameter("fileId", fileId);
+//            uriBuilder.addParameter("compressType", compressType);
+//            URI uri = uriBuilder.build();
+//            // 创建HttpGet请求
+//            HttpGet httpGet = new HttpGet(uri);
+//            // 设置自定义的HTTP头
+//            RunJianUtil runJianUtil1 = new RunJianUtil();
+////            runJianUtil1.setHttpClientHeader(httpGet);
+//
+//            long currentedTimeMillis = System.currentTimeMillis() / 1000;
+//            //获取秒单位
+//            String timestamp = String.valueOf(currentedTimeMillis);
+//            // 创建一个UUID
+//            String nonce = UUID.randomUUID().toString().replaceAll("-", "");
+//            //获取签名
+//            String signature = SignatureUtil.signature("30c3e6d495834663ba978636e91c9951", timestamp, nonce, "10011");
+//
+//            httpGet.setHeader("x-fio-appid", "yz-yxxt");
+//            httpGet.setHeader("x-fio-timestamp", timestamp);
+//            httpGet.setHeader("x-fio-nonce", nonce);
+//            httpGet.setHeader("x-fio-signature", signature);
+//            httpGet.setHeader("x-fio-uid", "10011");
+//
+//            CloseableHttpClient httpClient0 = HttpClientCustomUtil.getHttpClient();
+//            // 执行请求
+//            try (CloseableHttpResponse closeableHttpResponse = httpClient0.execute(httpGet)) {
+//                int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
+//                if (statusCode != HttpServletResponse.SC_OK) {
+//                    throw new OssException("获取文件异常");
+//                }
+//                // 获取响应实体
+//                HttpEntity entity = closeableHttpResponse.getEntity();
+//                System.out.println("entity = " + entity);
+//
+//                if (entity == null) {
+//                    throw new OssException("文件下载失败");
+//                }
+//
+//                byte[] byteArray = EntityUtils.toByteArray(entity);
+//                System.out.println("byteArray:" + byteArray.length);
+//                File file = new File("C:\\Users\\DELL\\Desktop\\test.png");
+//                OutputStream outputStream = new FileOutputStream(file);
+//                outputStream.write(byteArray);
+//                System.out.println("213");
+////                entity.writeTo(outputStream);
+//
+////                OutputStream out = response.getOutputStream();
+////                // 将实体内容写入到servlet响应输出流
+////                entity.writeTo(out);
+////                long contentLength = entity.getContentLength();
+////                return contentLength;
+//            }
+//        } catch (Exception e) {
+//            throw new OssException("文件下载失败，错误信息:[" + e.getMessage() + "]");
+//        }
+//    }
+
     @Override
-    public byte[] downloadByte() {
+    public byte[] downloadByte(String fileId) {
         String url = BaseUrl + getPutObjectUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
-        String fileId = "1838466485701021698,1838756901222584322";
+//        String fileId = "1838466485701021698,1838756901222584322";
         String compressType = "zip";
         try {
             // 使用URIBuilder构建带有查询参数的URL

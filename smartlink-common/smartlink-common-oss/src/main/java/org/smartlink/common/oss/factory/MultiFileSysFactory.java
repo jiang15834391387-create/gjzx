@@ -15,12 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -45,7 +43,7 @@ public class MultiFileSysFactory {
      * @param suffix
      * @return
      */
-    public UploadResult uploadSuffix(File file, String suffix) throws IOException {
+    public Map uploadSuffix(File file, String suffix) throws IOException {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
@@ -57,7 +55,9 @@ public class MultiFileSysFactory {
         } else {
             OssClient storage = OssFactory.instance();
             UploadResult uploadResult = storage.uploadSuffix(file, suffix);
-            return uploadResult;
+            Map map = new HashMap();
+            map.put("uploadResult", uploadResult);
+            return map;
         }
 
     }
@@ -69,7 +69,7 @@ public class MultiFileSysFactory {
      * @param suffix
      * @return
      */
-    public UploadResult uploadSuffix(MultipartFile file, String suffix) throws IOException {
+    public Map uploadSuffix(MultipartFile file, String suffix) throws IOException {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
@@ -78,10 +78,12 @@ public class MultiFileSysFactory {
         // 判断是否润建公司文件服务器
         if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(configKey)) {
             // 创建临时文件,用于传输
-            File tempFile = File.createTempFile("temp", null);
-            tempFile.deleteOnExit(); // 程序退出时删除临时文件
-            // 使用Files.copy方法复制文件内容
-            Files.copy(file.getInputStream(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            File tempFile;
+            try (InputStream in = file.getInputStream()) {
+                // 创建一个临时文件
+                tempFile = File.createTempFile("image", ".jpg");
+                Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
 
             return getUploadResult(tempFile);
         } else {
@@ -92,7 +94,9 @@ public class MultiFileSysFactory {
             } catch (IOException e) {
                 throw new ServiceException(e.getMessage());
             }
-            return uploadResult;
+            Map map = new HashMap();
+            map.put("uploadResult", uploadResult);
+            return map;
         }
 
     }
@@ -104,7 +108,7 @@ public class MultiFileSysFactory {
      * @param suffix
      * @return
      */
-    public UploadResult uploadSuffix(byte[] fileBytes, String suffix) {
+    public Map uploadSuffix(byte[] fileBytes, String suffix) {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
@@ -126,13 +130,15 @@ public class MultiFileSysFactory {
         } else {
             OssClient storage = OssFactory.instance();
             UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
-            return uploadResult;
+            Map map = new HashMap();
+            map.put("uploadResult", uploadResult);
+            return map;
         }
 
     }
 
     //文件上传通用
-    private UploadResult getUploadResult(File file) {
+    private Map getUploadResult(File file) {
         //调用service去构建返回值
         Map map = strategyService.upload(file);
         Map dataMap = (Map) map.get("data");
@@ -141,13 +147,15 @@ public class MultiFileSysFactory {
         UploadResult uploadResult = UploadResult.builder().url("").filename("").build();
         uploadResult.setUrl(fileViewUrl);
         uploadResult.setFilename(dataMap.get("originalFilename").toString());
-        return uploadResult;
+        dataMap.put("uploadResult", uploadResult);
+        return dataMap;
     }
 
-    public Long download(String serviceName, String fileName, HttpServletResponse response) throws IOException {
+
+    public Long download(String ossId,String serviceName, String fileName, HttpServletResponse response) throws IOException {
         if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
             //是润建服务器狭下载文件
-            long contentLength = strategyService.download(response);
+            long contentLength = strategyService.download(ossId,response);
             return contentLength;
         } else {
             OssClient storage = OssFactory.instance(serviceName);
@@ -155,10 +163,10 @@ public class MultiFileSysFactory {
             return contentLength;
         }
     }
-    public byte[] downloadByte(String serviceName, String fileName){
+    public byte[] downloadByte(String fileId,String serviceName, String fileName){
         if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
             //是润建服务器狭下载文件
-            strategyService.downloadByte();
+            strategyService.downloadByte(fileId);
             //问题
             return new byte[0];
         } else {
