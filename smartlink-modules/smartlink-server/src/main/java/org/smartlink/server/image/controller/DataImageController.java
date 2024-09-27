@@ -83,13 +83,6 @@ public class DataImageController extends BaseController {
         return R.fail();
     }
 
-
-    public static void main(String[] args) {
-        long currentedTimeMillis = System.currentTimeMillis();
-        long currentedTimeSeconds = currentedTimeMillis / 1000;
-
-        System.out.println(currentedTimeSeconds);
-    }
     /**
      * 单据下上传文件
      *

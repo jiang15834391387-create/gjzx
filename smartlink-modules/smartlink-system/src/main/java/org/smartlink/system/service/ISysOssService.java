@@ -77,6 +77,14 @@ public interface ISysOssService {
     byte[] downloadByte(Long ossId) throws IOException;
 
     /**
+     *
+     * @param ossIds [id1,id2,id3]
+     * @param response
+     * @throws IOException
+     */
+    void downloadByString(List<Long> ossIds, HttpServletResponse response) throws IOException;
+
+    /**
      * 删除OSS对象存储
      *
      * @param ids     OSS对象ID串

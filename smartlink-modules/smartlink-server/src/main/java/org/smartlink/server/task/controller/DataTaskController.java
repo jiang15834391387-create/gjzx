@@ -1,15 +1,13 @@
 package org.smartlink.server.task.controller;
 
-import cn.dev33.satoken.annotation.SaIgnore;
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
 import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Literal;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.ImageTreeBo;
@@ -17,13 +15,11 @@ import org.smartlink.server.image.momain.DataImage;
 import org.smartlink.server.image.service.DataImageServer;
 import org.smartlink.server.nodeType.domain.DataNodeType;
 import org.smartlink.server.nodeType.mapper.DataNodeTypeMapper;
-import org.smartlink.server.nodeType.service.IDataNodeTypeService;
 import org.smartlink.server.task.domain.bo.TaskAndImages;
 import org.smartlink.server.task.domain.vo.DataTaskVo;
 import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
 import org.smartlink.system.service.ISysOssService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -31,8 +27,10 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Validated
 @RequiredArgsConstructor
@@ -137,6 +135,23 @@ public class DataTaskController extends BaseController {
         }else {
             save = dataTaskServer.updateByColumn(task, DataTask::getBusinessSerialNo);
         }
+        if (!save) {
+            return R.fail("新增或修改单据任务错误");
+        }
+        return R.ok();
+    }
+
+    @GetMapping("/packageDownload")
+    public R packageDownload(@RequestParam("businessSerialNo") String businessSerialNo, HttpServletResponse response) throws IOException {
+        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        if (one == null) {
+            return R.fail("单据不存在");
+        }
+        List<DataImage> imageList = one.getImages();
+        //获取存储的ossId列表
+        List<Long> ossIds = imageList.stream().map(DataImage::getOssId).toList();
+        iSysOssService.downloadByString(ossIds,response);
+
         return R.ok();
     }
 

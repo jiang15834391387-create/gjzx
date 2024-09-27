@@ -13,6 +13,7 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
+import org.smartlink.common.core.constant.CacheConstants;
 import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginBody;
@@ -22,6 +23,7 @@ import org.smartlink.common.core.domain.model.SocialLoginBody;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
+import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.social.config.properties.SocialLoginConfigProperties;
 import org.smartlink.common.social.config.properties.SocialProperties;
@@ -37,15 +39,18 @@ import org.smartlink.system.service.*;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.smartlink.web.domain.vo.TenantListVo;
+import org.smartlink.web.accessToken.AccessTokenVerify;
 import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
+import org.smartlink.web.util.StzdSignatureUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -223,12 +228,21 @@ public class AuthController {
     }
 
     @GetMapping("/getToken")
-    public R<LoginVo> getToken(){
-        SysClientVo client = clientService.queryByClientId("e5cd7e4891bf95d1d19206ce24a7b32e");
+    public R<LoginVo> getToken(@RequestParam("appKey")String appKey,
+                               @RequestParam("timestamp")String timestamp,
+                               @RequestParam("signature")String signature,
+                               @RequestParam("tenantId")String tenantId
+                               ){
+        SysClientVo client = clientService.findByClientKey(appKey);
+        String generateSignature = StzdSignatureUtil.generateSignature(appKey, timestamp, client.getClientSecret());
+        if (!generateSignature.equals(signature)) {
+            R.fail("签名不正确");
+        }
         SysUserVo user = userService.selectUserById(1l);
         LoginUser loginUser = loginService.buildLoginUser(user);
         loginUser.setClientKey(client.getClientKey());
         loginUser.setDeviceType(client.getDeviceType());
+
         SaLoginModel model = new SaLoginModel();
         model.setDevice(client.getDeviceType());
         // 自定义分配 不同用户体系 不同 token 授权时间 不设置默认走全局 yml 配置
@@ -242,11 +256,16 @@ public class AuthController {
         loginVo.setAccessToken("Bearer "+StpUtil.getTokenValue());
         loginVo.setExpireIn(StpUtil.getTokenTimeout());
         loginVo.setClientId(client.getClientId());
-        return R.ok(loginVo);
 
+        //将token放入redis
+        Long expireIn = loginVo.getExpireIn();
+        Duration duration = Duration.ofSeconds(expireIn);
+        RedisUtils.setCacheObject(CacheConstants.YINGXIANG_ACCESSTOKEN,loginVo.getAccessToken(),duration);
+
+        return R.ok(loginVo);
     }
 
-
+    @AccessTokenVerify
     @GetMapping("/getPreviewTaskUrl")
     public R<String> getPreviewTaskUrl(String businessSerialNo) {
         StpUtil.renewTimeout(604800);
@@ -256,9 +275,11 @@ public class AuthController {
 
     }
 
-
+    @AccessTokenVerify
     @GetMapping("/getScanTaskUrl")
     public R<String> getScanTaskUrl(String businessSerialNo) {
+//        InetAddress localHost = InetAddress.getLocalHost();
+
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
         String s = frontEndUrl+ "/documentScan?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();

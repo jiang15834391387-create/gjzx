@@ -26,6 +26,7 @@ import org.smartlink.common.oss.entity.UploadResult;
 import org.smartlink.common.oss.enumd.AccessPolicyType;
 import org.smartlink.common.oss.factory.MultiFileSysFactory;
 import org.smartlink.common.oss.factory.OssFactory;
+import org.smartlink.common.oss.service.StrategyService;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.system.domain.SysOss;
 import org.smartlink.system.domain.bo.SysOssBo;
@@ -55,6 +56,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
 
     private final SysOssMapper baseMapper;
     private final MultiFileSysFactory multiFileSysFactory;
+    private final StrategyService strategyService;
 
 
     /**
@@ -205,6 +207,13 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
 //            return storage.downloadByte(sysOss.getFileName());
 //        }
 //        return new byte[0];
+    }
+
+    @Override
+    public void downloadByString(List<Long> ossIds, HttpServletResponse response) throws IOException {
+        String ossIdsString = ossIds.toString();
+        //润建公司批量下载文件，直接调用他们的批量下载方法
+        strategyService.download(ossIdsString, response);
     }
 
     /**
