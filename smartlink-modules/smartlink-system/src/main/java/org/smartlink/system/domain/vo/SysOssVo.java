@@ -68,6 +68,9 @@ public class SysOssVo implements Serializable {
      */
     private String service;
 
+    /**
+     * 润建公司返回文件Id
+     */
     private String fileId;
 
 }
