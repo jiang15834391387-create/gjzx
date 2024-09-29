@@ -113,12 +113,12 @@ public class StrategyServiceImplRunJian implements StrategyService {
     }
 
     @Override
-    public long download(String ossId,HttpServletResponse response) {
+    public long download(String fileIds,HttpServletResponse response) {
         String url = BaseUrl + getPutObjectUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
-        String fileId = ossId;
-        String compressType = "zip";
+        String fileId = fileIds;
+        String compressType = "";
         try {
             // 使用URIBuilder构建带有查询参数的URL
             URIBuilder uriBuilder = new URIBuilder(requestUrl);

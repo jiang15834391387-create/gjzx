@@ -78,11 +78,11 @@ public interface ISysOssService {
 
     /**
      *
-     * @param ossIds [id1,id2,id3]
+     * @param fileIds [id1,id2,id3]
      * @param response
      * @throws IOException
      */
-    void downloadByString(List<Long> ossIds, HttpServletResponse response) throws IOException;
+    void downloadByString(List<String> fileIds, HttpServletResponse response) throws IOException;
 
     /**
      * 删除OSS对象存储

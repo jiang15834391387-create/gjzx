@@ -30,7 +30,7 @@ public interface StrategyService {
      *
      * @param response HttpServletResponse对象，用于设置响应头和向客户端发送文件内容
      */
-    long download(String ossId,HttpServletResponse response) ;
+    long download(String fileIds,HttpServletResponse response) ;
 
     /**
      * 返回文件字节流

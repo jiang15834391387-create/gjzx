@@ -22,7 +22,7 @@ captcha:
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 8080
+  port: 8088
   servlet:
     # 应用的访问路径
     context-path: /
@@ -289,3 +289,14 @@ flowable:
     enabled: false
   app:
     enabled: false
+runjian:
+  appKey: yz-yxxt
+  appSecret: 30c3e6d495834663ba978636e91c9951
+  baseUrl: https://yq.runjian.com:31516
+  accessTokenUrl: /v1/oauth2/accessToken
+  putObjectUrl: /file/v1/putObject
+  getObjectUrl: /file/v1/getObject
+  relObjectIdUrl: /file/v1/relObjectId
+  fileInfoUrl: /file/v1/fileInfo
+  fileViewUrl: /file/v1/fileViewUrl
+  uid: 99238

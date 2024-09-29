@@ -94,6 +94,7 @@ public class DataImageController extends BaseController {
     public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId) throws IOException {
         //上传文件。更换文件系统
         SysOssVo upload = iSysOssService.upload(file);
+
         DataImage dataImage = new DataImage();
         dataImage.setFileName(file.getOriginalFilename());
         dataImage.setFileType(upload.getFileSuffix());
@@ -104,7 +105,9 @@ public class DataImageController extends BaseController {
         dataImage.setSourceFileUrl(upload.getUrl());
         dataImage.setParentId(parentId);
         dataImage.setOssId(upload.getOssId());
-        dataImageServer.save(dataImage);
+        Boolean save = dataImageServer.save(dataImage);
+        System.out.println("save = " + save);
+
         Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
         Update update = new Update().push("images", dataImage);
         mongoTemplate.updateFirst(query, update, DataTask.class);
@@ -242,6 +245,7 @@ public class DataImageController extends BaseController {
      */
     @GetMapping("/deleteImage")
     public R<Void> deleteImage(String fileId) {
+        //传进来的是文件Id，
         DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
         if (one != null) {
             iSysOssService.deleteWithValidById(one.getOssId(), false);

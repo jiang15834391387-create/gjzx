@@ -141,7 +141,13 @@ public class MultiFileSysFactory {
     private Map getUploadResult(File file) {
         //调用service去构建返回值
         Map map = strategyService.upload(file);
+        //构建返回参数
         Map dataMap = (Map) map.get("data");
+        //上传完文件后，根据类型编码关联交易类型
+        String fileId = (String)dataMap.get("id");
+
+//        strategyService.relObjectId(fileId,);
+
         //通过文件id去查询文件预览路径
         String fileViewUrl = strategyService.fileViewUrl();
         UploadResult uploadResult = UploadResult.builder().url("").filename("").build();
