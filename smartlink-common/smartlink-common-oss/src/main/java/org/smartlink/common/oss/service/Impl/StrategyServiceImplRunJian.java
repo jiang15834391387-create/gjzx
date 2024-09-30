@@ -27,7 +27,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -268,6 +270,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
             HttpPost httpPost = new HttpPost(requestUrl);
             runJianUtil.setHttpClientHeader(httpPost);
             httpPost.setHeader("Content-Type", "application/json");
+
             //构建测试数据
             String fileId = "1838466485701021698";
             String objectId = "2";
