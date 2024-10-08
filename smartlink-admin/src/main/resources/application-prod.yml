@@ -29,11 +29,11 @@ snail-job:
 --- # 数据源配置
 spring:
   datasource:
-    type: com.zaxxer.hikari.HikariDataSource
+    type: com.alibaba.druid.pool.DruidDataSource
     # 动态数据源文档 https://www.kancloud.cn/tracy5546/dynamic-datasource/content
     dynamic:
       # 性能分析插件(有性能损耗 不建议生产环境使用)
-      p6spy: false
+      p6spy: true
       # 设置默认的数据源或者数据源组,默认值即为 master
       primary: master
       # 严格模式 匹配不到数据源则报错
@@ -42,20 +42,20 @@ spring:
         # 主库数据源
         master:
           type: ${spring.datasource.type}
-          driverClassName: com.mysql.cj.jdbc.Driver
+          driverClassName: dm.jdbc.driver.DmDriver
           # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
-          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
-          username: root
-          password: root
+          url: jdbc:dm://10.124.9.148:15236/?SCHEMA=SYSDBA&compatibleMode=oracle
+          username: SYSDBA
+          password: Dameng@1234
         # 从库数据源
         slave:
           lazy: true
           type: ${spring.datasource.type}
-          driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
-          username:
-          password:
+          driverClassName: dm.jdbc.driver.DmDriver
+          url: jdbc:dm://10.124.9.148:15236/?SCHEMA=SYSDBA&compatibleMode=oracle
+          username: SYSDBA
+          password: Dameng@1234
 #        oracle:
 #          type: ${spring.datasource.type}
 #          driverClassName: oracle.jdbc.OracleDriver
@@ -89,12 +89,23 @@ spring:
         maxLifetime: 1800000
         # 多久检查一次连接的活性
         keepaliveTime: 30000
+mongo-plus:
+  data:
+    mongodb:
+      host: 10.124.9.148  #ip
+      port: 27017   #端口
+      database: test    #数据库名
+      username: root    #用户名，没有可不填（若账号中出现@,!等等符号，不需要再进行转码！！！）
+      password: Stzda666    #密码，同上（若密码中出现@,!等等符号，不需要再进行转码！！！）
+      authenticationDatabase: admin     #验证数据库
+      connectTimeoutMS: 50000   #在超时之前等待连接打开的最长时间（以毫秒为单位）
+  log: true
 
 --- # redis 单机配置(单机与集群只能开启一个另一个需要注释掉)
 spring.data:
   redis:
     # 地址
-    host: localhost
+    host: 10.124.9.148
     # 端口，默认为6379
     port: 6379
     # 数据库索引
@@ -258,3 +269,7 @@ justauth:
       client-id: 10**********6
       client-secret: 1f7d08**********5b7**********29e
       redirect-uri: ${justauth.address}/social-callback?source=gitlab
+kkfile:
+  onlinePreviewUrl: http://192.168.106.130:8012/onlinePreview?url=
+frontEnd:
+  url: http://127.0.0.1

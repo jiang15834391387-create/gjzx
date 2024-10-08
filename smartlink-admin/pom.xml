@@ -23,12 +23,18 @@
 <!--            <artifactId>mysql-connector-j</artifactId>-->
 <!--        </dependency>-->
 
+<!--        <dependency>-->
+<!--            <groupId>com.dameng</groupId>-->
+<!--            <artifactId>DmJdbcDriver18</artifactId>-->
+<!--            <version>8.1.1.193</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/libs/DmJdbcDriver18.jar</systemPath>-->
+<!--        </dependency>-->
+
         <dependency>
-            <groupId>com.dameng</groupId>
+            <groupId>dm.jdbc</groupId>
             <artifactId>DmJdbcDriver18</artifactId>
-            <version>8.1.1.193</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/DmJdbcDriver18.jar</systemPath>
+            <version>1.0</version>
         </dependency>
 
         <dependency>
