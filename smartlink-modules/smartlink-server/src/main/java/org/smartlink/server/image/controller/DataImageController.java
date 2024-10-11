@@ -1,6 +1,7 @@
 package org.smartlink.server.image.controller;
 
 
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -90,8 +89,9 @@ public class DataImageController extends BaseController {
      * @param businessSerialNo 流水号
      * @return
      */
+    @SaIgnore
     @PostMapping("/uploadImageFile")
-    public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId) throws IOException {
+    public R<Map> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId) throws IOException {
         //上传文件。更换文件系统
         SysOssVo upload = iSysOssService.upload(file);
 
@@ -111,7 +111,11 @@ public class DataImageController extends BaseController {
         Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
         Update update = new Update().push("images", dataImage);
         mongoTemplate.updateFirst(query, update, DataTask.class);
-        return R.ok(dataImage);
+
+        Map map = new HashMap<>();
+        map.put("dataImage", dataImage);
+        map.put("runjianFileId", upload.getFileId());
+        return R.ok(map);
 
 
     }
