@@ -45,17 +45,17 @@ spring:
           driverClassName: dm.jdbc.driver.DmDriver
           # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
-          url: jdbc:dm://10.124.9.148:15236/?SCHEMA=SYSDBA&compatibleMode=oracle
+          url: jdbc:dm://10.5.16.81:30256/?SCHEMA=SYSDBA&compatibleMode=oracle
           username: SYSDBA
-          password: Dameng@1234
+          password: SYSDBA001
         # 从库数据源
         slave:
           lazy: true
           type: ${spring.datasource.type}
           driverClassName: dm.jdbc.driver.DmDriver
-          url: jdbc:dm://10.124.9.148:15236/?SCHEMA=SYSDBA&compatibleMode=oracle
+          url: jdbc:dm://10.5.16.81:30256/?SCHEMA=SYSDBA&compatibleMode=oracle
           username: SYSDBA
-          password: Dameng@1234
+          password: SYSDBA001
 #        oracle:
 #          type: ${spring.datasource.type}
 #          driverClassName: oracle.jdbc.OracleDriver
@@ -92,7 +92,7 @@ spring:
 mongo-plus:
   data:
     mongodb:
-      host: 10.124.9.148  #ip
+      host: 10.5.16.81  #ip
       port: 27017   #端口
       database: test    #数据库名
       username: root    #用户名，没有可不填（若账号中出现@,!等等符号，不需要再进行转码！！！）
@@ -105,7 +105,7 @@ mongo-plus:
 spring.data:
   redis:
     # 地址
-    host: 10.124.9.148
+    host: 10.5.16.81
     # 端口，默认为6379
     port: 6379
     # 数据库索引
