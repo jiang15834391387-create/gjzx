@@ -294,7 +294,6 @@ public class AuthController {
         StpUtil.updateLastActiveToNow();
         String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&fileId="+ fileId+"&token="+ StpUtil.getTokenValue();
         return R.ok("",s);
-
     }
 
 }

@@ -43,11 +43,9 @@ spring:
         master:
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
-          # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
-          # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
-          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
+          url: jdbc:mysql://47.97.23.199:3306/data_image?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
           username: root
-          password: root
+          password: Stzda666@
         # 从库数据源
         slave:
           lazy: true
@@ -56,24 +54,6 @@ spring:
           url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
           username:
           password:
-#        oracle:
-#          type: ${spring.datasource.type}
-#          driverClassName: oracle.jdbc.OracleDriver
-#          url: jdbc:oracle:thin:@//localhost:1521/XE
-#          username: ROOT
-#          password: root
-#        postgres:
-#          type: ${spring.datasource.type}
-#          driverClassName: org.postgresql.Driver
-#          url: jdbc:postgresql://localhost:5432/postgres?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
-#          username: root
-#          password: root
-#        sqlserver:
-#          type: ${spring.datasource.type}
-#          driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-#          url: jdbc:sqlserver://localhost:1433;DatabaseName=tempdb;SelectMethod=cursor;encrypt=false;rewriteBatchedStatements=true
-#          username: SA
-#          password: root
       hikari:
         # 最大连接池数量
         maxPoolSize: 20
@@ -90,13 +70,25 @@ spring:
         # 多久检查一次连接的活性
         keepaliveTime: 30000
 
+# DataSource Config
+mongo-plus:
+  data:
+    mongodb:
+      host: 47.97.23.199   #ip
+      port: 27017   #端口
+      database: test    #数据库名
+      username: root    #用户名，没有可不填（若账号中出现@,!等等符号，不需要再进行转码！！！）
+      password: Stzda666    #密码，同上（若密码中出现@,!等等符号，不需要再进行转码！！！）
+      authenticationDatabase: admin     #验证数据库
+      connectTimeoutMS: 50000   #在超时之前等待连接打开的最长时间（以毫秒为单位）
+  log: true
 --- # redis 单机配置(单机与集群只能开启一个另一个需要注释掉)
 spring.data:
   redis:
     # 地址
-    host: localhost
+    host: 62.234.0.36
     # 端口，默认为6379
-    port: 6379
+    port: 6490
     # 数据库索引
     database: 0
     # 密码(如没有密码请注释掉)
@@ -258,3 +250,7 @@ justauth:
       client-id: 10**********6
       client-secret: 1f7d08**********5b7**********29e
       redirect-uri: ${justauth.address}/social-callback?source=gitlab
+kkfile:
+  onlinePreviewUrl: http://47.97.23.199:8012/onlinePreview?url=
+frontEnd:
+  url: http://47.97.23.199:28080
