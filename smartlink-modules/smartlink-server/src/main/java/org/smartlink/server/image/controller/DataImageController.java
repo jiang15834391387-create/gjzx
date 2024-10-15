@@ -100,6 +100,15 @@ public class DataImageController extends BaseController {
         // 先查询有没有
         DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
         log.info("task:{}", task);
+        List<DataImage> imageList;
+        if (task == null) {
+            throw new ServiceException("单据不存在");
+        }
+        if (task.getImages() != null) {
+            imageList = task.getImages();
+        } else {
+            imageList = new ArrayList<>(2);
+        }
 
         SysOssVo upload = iSysOssService.upload(file);
         DataImage dataImage = new DataImage();
@@ -114,10 +123,9 @@ public class DataImageController extends BaseController {
         Update update = new Update().push("images", dataImage);
         mongoTemplate.updateFirst(query, update, DataTask.class);
 
-        List<DataImage> imageList = new ArrayList<>(1);
         imageList.add(dataImage);
         task.setImages(imageList);
-        log.info("task放入图片后的数据:{}", task);
+
         dataTaskServer.updateById(task);
         return R.ok(dataImage);
 
