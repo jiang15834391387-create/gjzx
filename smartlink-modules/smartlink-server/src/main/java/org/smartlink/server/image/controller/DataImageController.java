@@ -4,6 +4,7 @@ package org.smartlink.server.image.controller;
 import cn.hutool.core.collection.CollUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.StringUtils;
@@ -30,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -93,6 +96,11 @@ public class DataImageController extends BaseController {
      */
     @PostMapping("/uploadImageFile")
     public R<DataImage> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId) {
+        log.info("businessSerialNo:{}", businessSerialNo);
+        // 先查询有没有
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        log.info("task:{}", task);
+
         SysOssVo upload = iSysOssService.upload(file);
         DataImage dataImage = new DataImage();
         dataImage.setFileName(file.getOriginalFilename());
@@ -105,6 +113,12 @@ public class DataImageController extends BaseController {
         Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
         Update update = new Update().push("images", dataImage);
         mongoTemplate.updateFirst(query, update, DataTask.class);
+
+        List<DataImage> imageList = new ArrayList<>(1);
+        imageList.add(dataImage);
+        task.setImages(imageList);
+        log.info("task放入图片后的数据:{}", task);
+        dataTaskServer.updateById(task);
         return R.ok(dataImage);
 
 
