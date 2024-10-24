@@ -1,13 +1,12 @@
 package org.smartlink.web.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.hutool.core.codec.Base64;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthResponse;
@@ -41,7 +40,6 @@ import org.smartlink.web.domain.vo.TenantListVo;
 import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
-import org.smartlink.common.core.utils.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -220,7 +218,7 @@ public class AuthController {
         // 返回对象
         LoginTenantVo vo = new LoginTenantVo();
         vo.setVoList(CollUtil.isNotEmpty(list) ? list : voList);
-        vo.setTenantEnabled(TenantHelper.isEnable());
+        vo.setTenantEnabled(Boolean.valueOf(TenantHelper.isEnable()));
         return R.ok(vo);
     }
 

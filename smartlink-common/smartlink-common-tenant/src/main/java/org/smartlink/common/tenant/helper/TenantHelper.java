@@ -33,14 +33,14 @@ public class TenantHelper {
      * 租户功能是否启用
      */
     public static boolean isEnable() {
-        return Convert.toBool(SpringUtils.getProperty("tenant.enable"), false);
+        return Convert.toBool(SpringUtils.getProperty("tenant.enable"), Boolean.FALSE);
     }
 
     /**
      * 开启忽略租户(开启后需手动调用 {@link #disableIgnore()} 关闭)
      */
     public static void enableIgnore() {
-        InterceptorIgnoreHelper.handle(IgnoreStrategy.builder().tenantLine(true).build());
+        InterceptorIgnoreHelper.handle(IgnoreStrategy.builder().tenantLine(Boolean.TRUE).build());
     }
 
     /**
