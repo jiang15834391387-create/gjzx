@@ -43,7 +43,7 @@ spring:
         master:
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://11.11.24.113:3306/data_image?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
+          url: jdbc:mysql://11.11.24.113:3306/yx?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
           username: root
           password: Stzda@666
         # 从库数据源
@@ -253,4 +253,4 @@ justauth:
 kkfile:
   onlinePreviewUrl: http://47.97.23.199:8012/onlinePreview?url=
 frontEnd:
-  url: http://47.97.23.199:28080
+  url: http://11.11.24.200:32750
