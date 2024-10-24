@@ -183,8 +183,19 @@ public class DataTaskController extends BaseController {
 
     @PostMapping("/relevanceDocument")
     public R<Void> relevanceDocument(@RequestBody TaskAndImages taskAndImages) {
+        final String businessSerialNo = taskAndImages.getBusinessSerialNo();
+        if (StringUtils.isBlank(businessSerialNo)) {
+            throw new ServiceException("业务流水号不能为空!");
+        }
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, taskAndImages).one();
+        if (task == null) {
+            throw new ServiceException("业务单据不存在!");
+        }
+
         List<DataImage> list = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
-        boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, taskAndImages.getBusinessSerialNo()).set(DataTask::getImages, list).update();
+        task.setImages(list);
+//         boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, taskAndImages.getBusinessSerialNo()).set(DataTask::getImages, list).update();
+        final Boolean update = this.dataTaskServer.updateById(task);
         if (update) {
             return R.ok("更新成功！");
         }
