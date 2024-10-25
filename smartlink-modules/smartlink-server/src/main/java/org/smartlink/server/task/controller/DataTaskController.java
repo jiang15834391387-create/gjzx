@@ -187,7 +187,7 @@ public class DataTaskController extends BaseController {
         if (StringUtils.isBlank(businessSerialNo)) {
             throw new ServiceException("业务流水号不能为空!");
         }
-        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, taskAndImages).one();
+        DataTask task = this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
         if (task == null) {
             throw new ServiceException("业务单据不存在!");
         }
@@ -209,7 +209,7 @@ public class DataTaskController extends BaseController {
         if (StringUtils.isBlank(businessSerialNo)) {
             throw new ServiceException("业务流水号不能为空!");
         }
-        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, taskAndImages).one();
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
         if (task == null) {
             throw new ServiceException("业务单据不存在!");
         }
