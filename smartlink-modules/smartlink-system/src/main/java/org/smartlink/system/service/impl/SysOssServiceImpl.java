@@ -200,7 +200,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     }
 
     @Override
-    public void downloadByString(List<String> fileIds, HttpServletResponse response, String uid) throws IOException {
+    public void downloadByString(List<String> fileIds, HttpServletResponse response, String uid) {
         String ossIdsString = fileIds.toString();
         //润建公司批量下载文件，直接调用他们的批量下载方法
         strategyService.download(ossIdsString, response, uid);

@@ -81,7 +81,7 @@ public class MultiFileSysFactory {
             File tempFile;
             try (InputStream in = file.getInputStream()) {
                 // 创建一个临时文件
-                tempFile = File.createTempFile("image", ".jpg");
+                tempFile = File.createTempFile("yxxt", suffix);
                 Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
 
