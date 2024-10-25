@@ -38,7 +38,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -218,34 +217,17 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     public SysOssVo upload(MultipartFile file, String uid) throws IOException {
         String originalfileName = file.getOriginalFilename();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
-        //重写文件服务器工厂
+        // 重写文件服务器工厂
         Map map = multiFileSysFactory.uploadSuffix(file, suffix, uid);
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         // 保存文件信息
         return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"), (String) map.get("id"));
     }
 
-    /**
-     * 上传文件到对象存储服务，并保存文件信息到数据库
-     *
-     * @param file 要上传的文件对象
-     * @return 上传成功后的 SysOssVo 对象，包含文件信息
-     */
-    @Override
-    public SysOssVo upload(File file, String uid) throws IOException {
-        String originalfileName = file.getName();
-        String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
-        //重写文件服务器工厂
-        Map map = multiFileSysFactory.uploadSuffix(file, suffix, uid);
-        String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
-        // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"), (String) map.get("id"));
-    }
 
     @NotNull
     private SysOssVo buildResultEntity(String originalfileName, String suffix, String configKey, UploadResult uploadResult, String fileId) {
         SysOss oss = new SysOss();
-        //改成存貯ossId（上传文件服务器的文件Id）
         oss.setUrl(uploadResult.getUrl());
         oss.setFileSuffix(suffix);
         oss.setFileName(uploadResult.getFilename());

@@ -128,14 +128,14 @@ public class RunJianUtil {
      * x-fio-timestamp 时间戳（单位秒）
      * x-fio-uid ⽤户标识（润建⼯号）
      */
-    public HttpUriRequest setHttpClientHeader(HttpUriRequest httpRequest, String uid) throws IOException {
+    public void setHttpClientHeader(HttpUriRequest httpRequest, String uid) throws IOException {
 
         long currentedTimeMillis = System.currentTimeMillis() / 1000;
-        //获取秒单位
+        // 获取秒单位
         String timestamp = String.valueOf(currentedTimeMillis);
         // 创建一个UUID
         String nonce = UUID.randomUUID().toString().replaceAll("-", "");
-        //获取签名
+        // 获取签名
         String signature = SignatureUtil.signature(appSecret, timestamp, nonce, uid);
 
         httpRequest.setHeader("x-fio-appid", appKey);
@@ -143,7 +143,6 @@ public class RunJianUtil {
         httpRequest.setHeader("x-fio-nonce", nonce);
         httpRequest.setHeader("x-fio-signature", signature);
         httpRequest.setHeader("x-fio-uid", uid);
-        return httpRequest;
     }
 
 }

@@ -23,3 +23,8 @@ CREATE TABLE `data_node_type`  (
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '树节点' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+
+
+
+ALTER TABLE sys_oss MODIFY url VARCHAR(1024);

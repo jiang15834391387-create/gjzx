@@ -251,6 +251,16 @@ justauth:
       client-secret: 1f7d08**********5b7**********29e
       redirect-uri: ${justauth.address}/social-callback?source=gitlab
 kkfile:
-  onlinePreviewUrl: http://47.97.23.199:8012/onlinePreview?url=
+  onlinePreviewUrl: http://47.97.23.19:8012/onlinePreview?url=
 frontEnd:
-  url: http://11.11.24.200:32750
+  url: http://11.11.24.200:31992
+runjian:
+  appKey: yz-yxxt
+  appSecret: da30b1ca5bf14b37abec622291b774c2
+  baseUrl: http://11.11.24.200/30886/openapi
+  accessTokenUrl: /v1/oauth2/accessToken
+  putObjectUrl: /file/v1/putObject
+  getObjectUrl: /file/v1/getObject
+  relObjectIdUrl: /file/v1/relObjectId
+  fileInfoUrl: /file/v1/fileInfo
+  fileViewUrl: /file/v1/fileViewUrl

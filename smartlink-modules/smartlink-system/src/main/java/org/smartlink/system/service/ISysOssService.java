@@ -7,7 +7,6 @@ import org.smartlink.system.domain.bo.SysOssBo;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -51,14 +50,6 @@ public interface ISysOssService {
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
     SysOssVo upload(MultipartFile file, String uid) throws IOException;
-
-    /**
-     * 上传文件到对象存储服务，并保存文件信息到数据库
-     *
-     * @param file 要上传的文件对象
-     * @return 上传成功后的 SysOssVo 对象，包含文件信息
-     */
-    SysOssVo upload(File file,String uid) throws IOException;
 
     /**
      * 文件下载方法，支持一次性下载完整文件

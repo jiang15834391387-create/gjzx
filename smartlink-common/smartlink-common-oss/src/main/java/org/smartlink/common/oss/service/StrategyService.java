@@ -23,7 +23,7 @@ public interface StrategyService {
      * @param file 要上传的文件对象
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
-    Map upload(File file, String uid);
+    Map upload(File file, String fileName,String uid);
 
     /**
      * 文件下载方法，支持一次性下载完整文件
@@ -38,10 +38,5 @@ public interface StrategyService {
      */
     byte[] downloadByte(String fileId,String uid);
 
-    // TODO 文件关联业务主键
-    void relObjectId(String uid) ;
-
-    void fileInfo(String uid) ;
-
-    String fileViewUrl(String uid) ;
+    String fileViewUrl(String fileId,String uid) ;
 }

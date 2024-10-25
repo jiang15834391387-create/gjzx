@@ -9,6 +9,7 @@ import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.ImageTreeBo;
@@ -24,9 +25,6 @@ import org.smartlink.server.task.service.DataTaskServer;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.service.ISysOssService;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -200,28 +199,72 @@ public class DataTaskController extends BaseController {
 
     }
 
+    /**
+     * 关联单据
+     *
+     * @param taskAndImages
+     * @return
+     */
     @PostMapping("/relevanceDocument")
     public R<Void> relevanceDocument(@RequestBody TaskAndImages taskAndImages) {
+
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, taskAndImages.getBusinessSerialNo()).one();
+        if (task == null) {
+            return R.fail("单据不存在");
+        }
+
         List<DataImage> list = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
-        boolean update = dataTaskServer.lambdaUpdate().eq(DataTask::getBusinessSerialNo, taskAndImages.getBusinessSerialNo()).set(DataTask::getImages, list).update();
+
+        if (CollUtil.isEmpty(list)) {
+            task.setImages(new ArrayList<>());
+        } else {
+            task.setImages(list);
+        }
+
+        boolean update = this.dataTaskServer.updateById(task);
+
         if (update) {
             return R.ok("更新成功！");
         }
         return R.ok("操作成功,本次没有更新");
     }
 
-
+    /**
+     * 关联单据，追加
+     *
+     * @param taskAndImages
+     * @return
+     */
     @PostMapping("/additionDocument")
     public R<Void> additionDocument(@RequestBody TaskAndImages taskAndImages) {
-
-        List<DataImage> list = dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
-        for (DataImage dataImage : list) {
-            Query query = new Query(Criteria.where("businessSerialNo").is(taskAndImages.getBusinessSerialNo()));
-            Update update = new Update().push("images", dataImage);
-            mongoTemplate.updateFirst(query, update, DataTask.class);
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, taskAndImages.getBusinessSerialNo()).one();
+        if (task == null) {
+            return R.fail("单据不存在");
+        }
+        List<DataImage> oldImageList = task.getImages();
+        // 为空初始化
+        if (oldImageList == null) {
+            oldImageList = new ArrayList<>(2);
         }
 
-        return R.ok("更新成功！");
+        List<DataImage> imageList = this.dataImageServer.lambdaQuery().in(DataImage::getFileId, taskAndImages.getFileIds()).list();
+        if (CollUtil.isNotEmpty(imageList)) {
+            for (DataImage dataImage : imageList) {
+
+                if (oldImageList.contains(dataImage)) {
+                    log.info("文件已经存在，请勿重复添加！");
+                    continue;
+                }
+                oldImageList.add(dataImage);
+            }
+        }
+        task.setImages(oldImageList);
+        final Boolean aBoolean = this.dataTaskServer.updateById(task);
+
+        if (aBoolean) {
+            return R.ok("更新成功！");
+        }
+        return R.ok("没有改动！");
     }
 
     @GetMapping("/getTaskInfoImages")

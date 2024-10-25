@@ -87,38 +87,32 @@ public class DataImageController extends BaseController {
     }
 
     /**
-     * 单据下上传文件
+     * 上传文件 不与单据挂钩
      *
      * @param file             文件
-     * @param businessSerialNo 流水号
-     * @return
      */
     @SaIgnore
     @PostMapping("/uploadImageFile")
-    public R<Map> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId, String uid) throws IOException {
+    public R<Map> uploadImageFile(@RequestParam("file") MultipartFile file,  String parentId, String uid) throws IOException {
+
         if (StringUtils.isBlank(uid)) {
             throw new ServiceException("uid不能为空");
         }
-        //上传文件。更换文件系统
+        // 上传文件。更换文件系统
         SysOssVo upload = iSysOssService.upload(file, uid);
 
         DataImage dataImage = new DataImage();
         dataImage.setUid(uid);
         dataImage.setFileName(file.getOriginalFilename());
         dataImage.setFileType(upload.getFileSuffix());
-//        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
-        //存储预览地址，使用的是他根据文件id区查询的预览地址
+        // 存储预览地址，使用的是他根据文件id区查询的预览地址
         dataImage.setPreviewUrl(upload.getUrl());
-        //存储预览地址，因为没有返回url地址
+        // 存储预览地址，因为没有返回url地址
         dataImage.setSourceFileUrl(upload.getUrl());
         dataImage.setParentId(parentId);
         dataImage.setOssId(upload.getOssId());
-        Boolean save = dataImageServer.save(dataImage);
-        System.out.println("save = " + save);
 
-        Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
-        Update update = new Update().push("images", dataImage);
-        mongoTemplate.updateFirst(query, update, DataTask.class);
+        this.dataImageServer.save(dataImage);
 
         Map map = new HashMap<>();
         map.put("dataImage", dataImage);
