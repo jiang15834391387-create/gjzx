@@ -23,25 +23,25 @@ public interface StrategyService {
      * @param file 要上传的文件对象
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
-    Map upload(File file);
+    Map upload(File file, String uid);
 
     /**
      * 文件下载方法，支持一次性下载完整文件
      *
      * @param response HttpServletResponse对象，用于设置响应头和向客户端发送文件内容
      */
-    long download(String fileIds,HttpServletResponse response) ;
+    long download(String fileIds,HttpServletResponse response,String uid) ;
 
     /**
      * 返回文件字节流
      * @return
      */
-    byte[] downloadByte(String fileId);
+    byte[] downloadByte(String fileId,String uid);
 
     // TODO 文件关联业务主键
-    void relObjectId() ;
+    void relObjectId(String uid) ;
 
-    void fileInfo() ;
+    void fileInfo(String uid) ;
 
-    String fileViewUrl() ;
+    String fileViewUrl(String uid) ;
 }

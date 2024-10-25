@@ -27,9 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -67,15 +65,15 @@ public class StrategyServiceImplRunJian implements StrategyService {
 
 
     @Override
-    public Map upload(File file) {
+    public Map upload(File file, String uid) {
         String putObject = BaseUrl + putObjectUrl;
         //拼接accesstoken
         String putObjectUrl = runJianUtil.spliceAccessToken(putObject);
 //        CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
-        try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(putObjectUrl);
             //添加基本请求头
-            runJianUtil.setHttpClientHeader(httpPost);
+            runJianUtil.setHttpClientHeader(httpPost, uid);
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
             //添加参数
             Path filePath = file.toPath();
@@ -84,10 +82,10 @@ public class StrategyServiceImplRunJian implements StrategyService {
                 contentType = ContentType.APPLICATION_OCTET_STREAM.getMimeType();
             }
             multipartEntityBuilder.addBinaryBody(
-                    "file",
-                    file,
-                    ContentType.create(contentType),
-                    file.getName()
+                "file",
+                file,
+                ContentType.create(contentType),
+                file.getName()
             );
             HttpEntity httpEntity = multipartEntityBuilder.build();
             httpPost.setEntity(httpEntity);
@@ -115,7 +113,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
     }
 
     @Override
-    public long download(String fileIds,HttpServletResponse response) {
+    public long download(String fileIds,  HttpServletResponse response,String uid) {
         String url = BaseUrl + getPutObjectUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
@@ -130,7 +128,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
             // 创建HttpGet请求
             HttpGet httpGet = new HttpGet(uri);
             // 设置自定义的HTTP头
-            runJianUtil.setHttpClientHeader(httpGet);
+            runJianUtil.setHttpClientHeader(httpGet, uid);
             CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
             // 执行请求
             try (CloseableHttpResponse closeableHttpResponse = httpClient.execute(httpGet)) {
@@ -157,76 +155,9 @@ public class StrategyServiceImplRunJian implements StrategyService {
         }
     }
 
-//    public static void main(String[] args) {
-//        CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
-//        String accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJmaW8iLCJpYXQiOjE3MjczNjEzODUsImp0aSI6ImVYb3RlWGg0ZEE9PSJ9.IZQebOkZZFRlGSSszVFZTQ0fNiShR2799xC-jzESK4k";
-//        String requestUrl = "https://yq.runjian.com:31516/file/v1/getObject" + "?accessToken=" + accessToken;;
-//
-//        // 设置请求URL,拼接token
-//        String fileId = "1839314078039511042";
-//        String compressType = "zip";
-//        try {
-//            // 使用URIBuilder构建带有查询参数的URL
-//            URIBuilder uriBuilder = new URIBuilder(requestUrl);
-//            uriBuilder.addParameter("fileId", fileId);
-//            uriBuilder.addParameter("compressType", compressType);
-//            URI uri = uriBuilder.build();
-//            // 创建HttpGet请求
-//            HttpGet httpGet = new HttpGet(uri);
-//            // 设置自定义的HTTP头
-//            RunJianUtil runJianUtil1 = new RunJianUtil();
-////            runJianUtil1.setHttpClientHeader(httpGet);
-//
-//            long currentedTimeMillis = System.currentTimeMillis() / 1000;
-//            //获取秒单位
-//            String timestamp = String.valueOf(currentedTimeMillis);
-//            // 创建一个UUID
-//            String nonce = UUID.randomUUID().toString().replaceAll("-", "");
-//            //获取签名
-//            String signature = SignatureUtil.signature("30c3e6d495834663ba978636e91c9951", timestamp, nonce, "10011");
-//
-//            httpGet.setHeader("x-fio-appid", "yz-yxxt");
-//            httpGet.setHeader("x-fio-timestamp", timestamp);
-//            httpGet.setHeader("x-fio-nonce", nonce);
-//            httpGet.setHeader("x-fio-signature", signature);
-//            httpGet.setHeader("x-fio-uid", "10011");
-//
-//            CloseableHttpClient httpClient0 = HttpClientCustomUtil.getHttpClient();
-//            // 执行请求
-//            try (CloseableHttpResponse closeableHttpResponse = httpClient0.execute(httpGet)) {
-//                int statusCode = closeableHttpResponse.getStatusLine().getStatusCode();
-//                if (statusCode != HttpServletResponse.SC_OK) {
-//                    throw new OssException("获取文件异常");
-//                }
-//                // 获取响应实体
-//                HttpEntity entity = closeableHttpResponse.getEntity();
-//                System.out.println("entity = " + entity);
-//
-//                if (entity == null) {
-//                    throw new OssException("文件下载失败");
-//                }
-//
-//                byte[] byteArray = EntityUtils.toByteArray(entity);
-//                System.out.println("byteArray:" + byteArray.length);
-//                File file = new File("C:\\Users\\DELL\\Desktop\\test.png");
-//                OutputStream outputStream = new FileOutputStream(file);
-//                outputStream.write(byteArray);
-//                System.out.println("213");
-////                entity.writeTo(outputStream);
-//
-////                OutputStream out = response.getOutputStream();
-////                // 将实体内容写入到servlet响应输出流
-////                entity.writeTo(out);
-////                long contentLength = entity.getContentLength();
-////                return contentLength;
-//            }
-//        } catch (Exception e) {
-//            throw new OssException("文件下载失败，错误信息:[" + e.getMessage() + "]");
-//        }
-//    }
 
     @Override
-    public byte[] downloadByte(String fileId) {
+    public byte[] downloadByte(String fileId, String uid) {
         String url = BaseUrl + getPutObjectUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
@@ -241,7 +172,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
             // 创建HttpGet请求
             HttpGet httpGet = new HttpGet(uri);
             // 设置自定义的HTTP头
-            runJianUtil.setHttpClientHeader(httpGet);
+            runJianUtil.setHttpClientHeader(httpGet, uid);
             CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
             // 执行请求
             try (CloseableHttpResponse closeableHttpResponse = httpClient.execute(httpGet)) {
@@ -261,14 +192,14 @@ public class StrategyServiceImplRunJian implements StrategyService {
     }
 
     @Override
-    public void relObjectId() {
+    public void relObjectId(String uid) {
         String url = BaseUrl + relObjectIdUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
         CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
         try {
             HttpPost httpPost = new HttpPost(requestUrl);
-            runJianUtil.setHttpClientHeader(httpPost);
+            runJianUtil.setHttpClientHeader(httpPost, uid);
             httpPost.setHeader("Content-Type", "application/json");
 
             //构建测试数据
@@ -302,14 +233,14 @@ public class StrategyServiceImplRunJian implements StrategyService {
     }
 
     @Override
-    public void fileInfo() {
+    public void fileInfo(String uid) {
         String url = BaseUrl + fileInfoUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
         CloseableHttpClient httpClient = HttpClientCustomUtil.getHttpClient();
         try {
             HttpPost httpPost = new HttpPost(requestUrl);
-            runJianUtil.setHttpClientHeader(httpPost);
+            runJianUtil.setHttpClientHeader(httpPost, uid);
             httpPost.setHeader("Content-Type", "application/json");
 
             //构建测试数据
@@ -344,7 +275,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
     }
 
     @Override
-    public String fileViewUrl() {
+    public String fileViewUrl(String uid) {
         String url = BaseUrl + fileViewUrl;
         // 设置请求URL,拼接token
         String requestUrl = runJianUtil.spliceAccessToken(url);
@@ -360,7 +291,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
             // 创建HttpGet请求
             HttpGet httpGet = new HttpGet(uri);
             // 设置自定义的HTTP头
-            runJianUtil.setHttpClientHeader(httpGet);
+            runJianUtil.setHttpClientHeader(httpGet, uid);
             // 执行请求
             CloseableHttpResponse response1 = httpClient.execute(httpGet);
             log.info("响应:{}", response1);

@@ -67,9 +67,13 @@ public class DataImageController extends BaseController {
      */
     @PostMapping("/uploadImage")
     public R<DataImage> uploadImage(@RequestBody UploadImageBo uploadImageBo) throws IOException {
+        if (StringUtils.isBlank(uploadImageBo.getUid())) {
+            throw new ServiceException("uid不能为空");
+        }
         byte[] decodedBytes = Base64.getDecoder().decode(uploadImageBo.getFileBase64());
-        SysOssVo upload = iSysOssService.upload(decodedBytes, uploadImageBo.getFileName());
+        SysOssVo upload = iSysOssService.upload(decodedBytes, uploadImageBo.getFileName(), uploadImageBo.getUid());
         DataImage dataImage = new DataImage();
+        dataImage.setUid(uploadImageBo.getUid());
         dataImage.setFileName(uploadImageBo.getFileName());
         dataImage.setFileType(upload.getFileSuffix());
         dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
@@ -91,11 +95,15 @@ public class DataImageController extends BaseController {
      */
     @SaIgnore
     @PostMapping("/uploadImageFile")
-    public R<Map> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId) throws IOException {
+    public R<Map> uploadImageFile(@RequestParam("file") MultipartFile file, String businessSerialNo, String parentId, String uid) throws IOException {
+        if (StringUtils.isBlank(uid)) {
+            throw new ServiceException("uid不能为空");
+        }
         //上传文件。更换文件系统
-        SysOssVo upload = iSysOssService.upload(file);
+        SysOssVo upload = iSysOssService.upload(file, uid);
 
         DataImage dataImage = new DataImage();
+        dataImage.setUid(uid);
         dataImage.setFileName(file.getOriginalFilename());
         dataImage.setFileType(upload.getFileSuffix());
 //        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
@@ -132,7 +140,7 @@ public class DataImageController extends BaseController {
         if (fileInfo == null) {
             throw new ServiceException("文件不存在");
         }
-        this.iSysOssService.download(fileInfo.getOssId(), response);
+        this.iSysOssService.download(fileInfo.getOssId(), response, fileInfo.getUid());
     }
 
     /**
@@ -159,7 +167,7 @@ public class DataImageController extends BaseController {
         int i = 0;
         for (DataImage image : images) {
             i++;
-            byte[] bytes = this.iSysOssService.downloadByte(image.getOssId());
+            byte[] bytes = this.iSysOssService.downloadByte(image.getOssId(), image.getUid());
             zipOut.putNextEntry(new ZipEntry(i + "." + image.getFileName()));
             zipOut.write(bytes);
             zipOut.closeEntry();
@@ -205,7 +213,7 @@ public class DataImageController extends BaseController {
             }
             i++;
             fileName = dataImage.getFileName();
-            byte[] bytes = this.iSysOssService.downloadByte(dataImage.getOssId());
+            byte[] bytes = this.iSysOssService.downloadByte(dataImage.getOssId(), dataImage.getUid());
 
             zipOut.putNextEntry(new ZipEntry(i + "." + dataImage.getFileName()));
             zipOut.write(bytes);

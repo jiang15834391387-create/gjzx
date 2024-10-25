@@ -9,6 +9,8 @@ public class UploadImageBo {
 
     private String fileName;
 
+    private String uid;
+
     /**
      * 父节点
      */

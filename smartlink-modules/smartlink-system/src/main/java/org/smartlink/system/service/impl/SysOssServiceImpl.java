@@ -147,7 +147,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         lqw.eq(StringUtils.isNotBlank(bo.getFileSuffix()), SysOss::getFileSuffix, bo.getFileSuffix());
         lqw.eq(StringUtils.isNotBlank(bo.getUrl()), SysOss::getUrl, bo.getUrl());
         lqw.between(params.get("beginCreateTime") != null && params.get("endCreateTime") != null,
-                SysOss::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
+            SysOss::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
         lqw.eq(ObjectUtil.isNotNull(bo.getCreateBy()), SysOss::getCreateBy, bo.getCreateBy());
         lqw.eq(StringUtils.isNotBlank(bo.getService()), SysOss::getService, bo.getService());
         lqw.orderByAsc(SysOss::getOssId);
@@ -174,7 +174,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
      * @param response HttpServletResponse对象，用于设置响应头和向客户端发送文件内容
      */
     @Override
-    public void download(Long ossId, HttpServletResponse response) throws IOException {
+    public void download(Long ossId, HttpServletResponse response, String uid) throws IOException {
         SysOssVo sysOss = SpringUtils.getAopProxy(this).getById(ossId);
         if (ObjectUtil.isNull(sysOss)) {
             throw new ServiceException("文件数据不存在!");
@@ -185,35 +185,25 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         String serviceName = sysOss.getService();
         String fileName = sysOss.getFileName();
         //这个ossId是保存时在自动生成的，不是wenjian
-        long contentLength = multiFileSysFactory.download(sysOss.getFileId(),serviceName, fileName, response);
-
-//        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
-//        OssClient storage = OssFactory.instance(serviceName);
-//        long contentLength = storage.download(sysOss.getFileName(), response.getOutputStream());
+        long contentLength = multiFileSysFactory.download(sysOss.getFileId(), serviceName, fileName, response, uid);
 
         response.setContentLengthLong(contentLength);
     }
 
     @Override
-    public byte[] downloadByte(Long ossId) throws IOException {
+    public byte[] downloadByte(Long ossId, String uid) {
         SysOssVo sysOss = SpringUtils.getAopProxy(this).getById(ossId);
         if (ObjectUtil.isNull(sysOss)) {
             throw new ServiceException("文件数据不存在!");
         }
-        return multiFileSysFactory.downloadByte(sysOss.getFileId(),sysOss.getService(), sysOss.getFileName());
-
-//        OssClient storage = OssFactory.instance(sysOss.getService());
-//        if (ObjectUtil.isNotNull(storage)) {
-//            return storage.downloadByte(sysOss.getFileName());
-//        }
-//        return new byte[0];
+        return multiFileSysFactory.downloadByte(sysOss.getFileId(), sysOss.getService(), sysOss.getFileName(), uid);
     }
 
     @Override
-    public void downloadByString(List<String> fileIds, HttpServletResponse response) throws IOException {
+    public void downloadByString(List<String> fileIds, HttpServletResponse response, String uid) throws IOException {
         String ossIdsString = fileIds.toString();
         //润建公司批量下载文件，直接调用他们的批量下载方法
-        strategyService.download(ossIdsString, response);
+        strategyService.download(ossIdsString, response, uid);
 
     }
 
@@ -225,21 +215,14 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
      * @throws ServiceException 如果上传过程中发生异常，则抛出 ServiceException 异常
      */
     @Override
-    public SysOssVo upload(MultipartFile file) throws IOException {
+    public SysOssVo upload(MultipartFile file, String uid) throws IOException {
         String originalfileName = file.getOriginalFilename();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
         //重写文件服务器工厂
-        Map map = multiFileSysFactory.uploadSuffix(file, suffix);
+        Map map = multiFileSysFactory.uploadSuffix(file, suffix, uid);
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
-//        OssClient storage = OssFactory.instance();
-//        UploadResult uploadResult;
-//        try {
-//            uploadResult = storage.uploadSuffix(file.getBytes(), suffix);
-//        } catch (IOException e) {
-//            throw new ServiceException(e.getMessage());
-//        }
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"),(String)map.get("id"));
+        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"), (String) map.get("id"));
     }
 
     /**
@@ -249,20 +232,18 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
     @Override
-    public SysOssVo upload(File file) throws IOException {
+    public SysOssVo upload(File file, String uid) throws IOException {
         String originalfileName = file.getName();
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
         //重写文件服务器工厂
-        Map map = multiFileSysFactory.uploadSuffix(file, suffix);
+        Map map = multiFileSysFactory.uploadSuffix(file, suffix, uid);
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
-//        OssClient storage = OssFactory.instance();
-//        UploadResult uploadResult = storage.uploadSuffix(file, suffix);
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"),(String)map.get("id"));
+        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"), (String) map.get("id"));
     }
 
     @NotNull
-    private SysOssVo buildResultEntity(String originalfileName, String suffix, String configKey, UploadResult uploadResult,String fileId) {
+    private SysOssVo buildResultEntity(String originalfileName, String suffix, String configKey, UploadResult uploadResult, String fileId) {
         SysOss oss = new SysOss();
         //改成存貯ossId（上传文件服务器的文件Id）
         oss.setUrl(uploadResult.getUrl());
@@ -296,14 +277,12 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     }
 
     @Override
-    public SysOssVo upload(byte[] fileBytes, String originalfileName) throws IOException {
+    public SysOssVo upload(byte[] fileBytes, String originalfileName, String uid) {
         String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
-        Map map = multiFileSysFactory.uploadSuffix(fileBytes, suffix);
+        Map map = multiFileSysFactory.uploadSuffix(fileBytes, suffix, uid);
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
-//        OssClient storage = OssFactory.instance();
-//        UploadResult uploadResult = storage.uploadSuffix(fileBytes, suffix);
         // 保存文件信息
-        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"),(String)map.get("id"));
+        return buildResultEntity(originalfileName, suffix, configKey, (UploadResult) map.get("uploadResult"), (String) map.get("id"));
     }
 
     /**

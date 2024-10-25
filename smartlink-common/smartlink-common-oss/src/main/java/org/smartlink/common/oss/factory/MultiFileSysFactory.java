@@ -43,7 +43,7 @@ public class MultiFileSysFactory {
      * @param suffix
      * @return
      */
-    public Map uploadSuffix(File file, String suffix) throws IOException {
+    public Map uploadSuffix(File file, String suffix,String uid) throws IOException {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
@@ -51,7 +51,7 @@ public class MultiFileSysFactory {
         }
         // 判断是否润建公司文件服务器
         if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(configKey)) {
-            return getUploadResult(file);
+            return getUploadResult(file,uid);
         } else {
             OssClient storage = OssFactory.instance();
             UploadResult uploadResult = storage.uploadSuffix(file, suffix);
@@ -69,7 +69,7 @@ public class MultiFileSysFactory {
      * @param suffix
      * @return
      */
-    public Map uploadSuffix(MultipartFile file, String suffix) throws IOException {
+    public Map uploadSuffix(MultipartFile file, String suffix,String uid) throws IOException {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
@@ -85,7 +85,7 @@ public class MultiFileSysFactory {
                 Files.copy(in, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
 
-            return getUploadResult(tempFile);
+            return getUploadResult(tempFile,uid);
         } else {
             OssClient storage = OssFactory.instance();
             UploadResult uploadResult;
@@ -108,7 +108,7 @@ public class MultiFileSysFactory {
      * @param suffix
      * @return
      */
-    public Map uploadSuffix(byte[] fileBytes, String suffix) {
+    public Map uploadSuffix(byte[] fileBytes, String suffix,String uid) {
         // 获取redis 默认类型
         String configKey = RedisUtils.getCacheObject(OssConstant.DEFAULT_CONFIG_KEY);
         if (StringUtils.isEmpty(configKey)) {
@@ -122,7 +122,7 @@ public class MultiFileSysFactory {
                 try (OutputStream outputStream = new FileOutputStream(tempFile)) {
                     outputStream.write(fileBytes);
                 }
-                return getUploadResult(tempFile);
+                return getUploadResult(tempFile,uid);
             } catch (Exception e) {
                 log.error("文件上传错误,流式转换异常:{}",e.toString());
                 throw new OssException("文件上传错误,流式转换异常:{}" + e.getMessage());
@@ -138,18 +138,17 @@ public class MultiFileSysFactory {
     }
 
     //文件上传通用
-    private Map getUploadResult(File file) {
+    private Map getUploadResult(File file,String uid) {
         //调用service去构建返回值
-        Map map = strategyService.upload(file);
+        Map map = strategyService.upload(file,uid);
         //构建返回参数
         Map dataMap = (Map) map.get("data");
         //上传完文件后，根据类型编码关联交易类型
         String fileId = (String)dataMap.get("id");
 
-//        strategyService.relObjectId(fileId,);
 
         //通过文件id去查询文件预览路径
-        String fileViewUrl = strategyService.fileViewUrl();
+        String fileViewUrl = strategyService.fileViewUrl(uid);
         UploadResult uploadResult = UploadResult.builder().url("").filename("").build();
         uploadResult.setUrl(fileViewUrl);
         uploadResult.setFilename(dataMap.get("originalFilename").toString());
@@ -158,10 +157,10 @@ public class MultiFileSysFactory {
     }
 
 
-    public Long download(String ossId,String serviceName, String fileName, HttpServletResponse response) throws IOException {
+    public Long download(String ossId,String serviceName, String fileName, HttpServletResponse response, String uid) throws IOException {
         if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
             //是润建服务器狭下载文件
-            long contentLength = strategyService.download(ossId,response);
+            long contentLength = strategyService.download(ossId,response,uid);
             return contentLength;
         } else {
             OssClient storage = OssFactory.instance(serviceName);
@@ -169,10 +168,10 @@ public class MultiFileSysFactory {
             return contentLength;
         }
     }
-    public byte[] downloadByte(String fileId,String serviceName, String fileName){
+    public byte[] downloadByte(String fileId,String serviceName, String fileName,String uid){
         if (OssConstant.RUN_JIAN_CONFIG_KEY.equals(serviceName)) {
             //是润建服务器狭下载文件
-            strategyService.downloadByte(fileId);
+            strategyService.downloadByte(fileId,uid);
             //问题
             return new byte[0];
         } else {

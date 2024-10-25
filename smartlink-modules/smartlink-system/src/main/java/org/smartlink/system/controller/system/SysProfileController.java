@@ -112,13 +112,13 @@ public class SysProfileController extends BaseController {
     @RepeatSubmit
     @Log(title = "用户头像", businessType = BusinessType.UPDATE)
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public R<AvatarVo> avatar(@RequestPart("avatarfile") MultipartFile avatarfile) throws IOException {
+    public R<AvatarVo> avatar(@RequestPart("avatarfile") MultipartFile avatarfile, String uid) throws IOException {
         if (!avatarfile.isEmpty()) {
             String extension = FileUtil.extName(avatarfile.getOriginalFilename());
             if (!StringUtils.equalsAnyIgnoreCase(extension, MimeTypeUtils.IMAGE_EXTENSION)) {
                 return R.fail("文件格式不正确，请上传" + Arrays.toString(MimeTypeUtils.IMAGE_EXTENSION) + "格式");
             }
-            SysOssVo oss = ossService.upload(avatarfile);
+            SysOssVo oss = ossService.upload(avatarfile, uid);
             String avatar = oss.getUrl();
             if (userService.updateUserAvatar(LoginHelper.getUserId(), oss.getOssId())) {
                 AvatarVo avatarVo = new AvatarVo();

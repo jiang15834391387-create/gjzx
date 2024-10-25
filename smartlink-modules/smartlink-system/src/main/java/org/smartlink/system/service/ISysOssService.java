@@ -50,7 +50,7 @@ public interface ISysOssService {
      * @param file 要上传的 MultipartFile 对象
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
-    SysOssVo upload(MultipartFile file) throws IOException;
+    SysOssVo upload(MultipartFile file, String uid) throws IOException;
 
     /**
      * 上传文件到对象存储服务，并保存文件信息到数据库
@@ -58,7 +58,7 @@ public interface ISysOssService {
      * @param file 要上传的文件对象
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
-    SysOssVo upload(File file) throws IOException;
+    SysOssVo upload(File file,String uid) throws IOException;
 
     /**
      * 文件下载方法，支持一次性下载完整文件
@@ -66,7 +66,7 @@ public interface ISysOssService {
      * @param ossId    OSS对象ID
      * @param response HttpServletResponse对象，用于设置响应头和向客户端发送文件内容
      */
-    void download(Long ossId, HttpServletResponse response) throws IOException;
+    void download(Long ossId, HttpServletResponse response,String uid) throws IOException;
 
     /**
      * 文件下载
@@ -74,15 +74,14 @@ public interface ISysOssService {
      * @param ossId OSS对象ID
      * @throws IOException 抛出IO异常
      */
-    byte[] downloadByte(Long ossId) throws IOException;
+    byte[] downloadByte(Long ossId,String uid) throws IOException;
 
     /**
-     *
-     * @param fileIds [id1,id2,id3]
+     * @param fileIds  [id1,id2,id3]
      * @param response
      * @throws IOException
      */
-    void downloadByString(List<String> fileIds, HttpServletResponse response) throws IOException;
+    void downloadByString(List<String> fileIds, HttpServletResponse response,String uid) throws IOException;
 
     /**
      * 删除OSS对象存储
@@ -101,7 +100,7 @@ public interface ISysOssService {
      * @return 上传成功后的 SysOssVo 对象，包含文件信息
      */
 
-    SysOssVo upload(byte[] fileBytes, String originalfileName) throws IOException;
+    SysOssVo upload(byte[] fileBytes, String originalfileName, String uid) throws IOException;
 
     /**
      * 删除OSS对象存储

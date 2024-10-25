@@ -43,8 +43,6 @@ public class RunJianUtil {
     private String BaseUrl;
     @Value("${runjian.accessTokenUrl}")
     private String AccessTokenUrl;
-    @Value("${runjian.uid}")
-    private String uid;
 
     /**
      * 获取润建token值
@@ -113,31 +111,6 @@ public class RunJianUtil {
     }
 
     /**
-     * 设置润建请求头中的统一请求头
-     * x-fio-appid 应⽤id
-     * x-fio-signature 签名信息
-     * x-fio-nonce 应⽤⽣成的⾮重复UUID（⼗分钟内不能重复），⽤于结合时间戳防⽌重放
-     * x-fio-timestamp 时间戳（单位秒）
-     * x-fio-uid ⽤户标识（润建⼯号）
-     */
-    public HttpURLConnection setHttpURLConnectionHeader(HttpURLConnection connection) throws IOException {
-        long currentedTimeMillis = System.currentTimeMillis() / 1000;
-        //获取秒单位
-        String timestamp = String.valueOf(currentedTimeMillis);
-        // 创建一个UUID
-        String nonce = UUID.randomUUID().toString().replaceAll("-", "");
-        //获取签名
-        String signature = SignatureUtil.signature(appSecret, timestamp, nonce, uid);
-
-        connection.setRequestProperty("x-fio-appid", appKey);
-        connection.setRequestProperty("x-fio-timestamp", timestamp);
-        connection.setRequestProperty("x-fio-nonce", nonce);
-        connection.setRequestProperty("x-fio-signature", signature);
-        connection.setRequestProperty("x-fio-uid", uid);
-        return connection;
-    }
-
-    /**
      *拼接token值
      * @param url
      * @return
@@ -155,7 +128,7 @@ public class RunJianUtil {
      * x-fio-timestamp 时间戳（单位秒）
      * x-fio-uid ⽤户标识（润建⼯号）
      */
-    public HttpUriRequest setHttpClientHeader(HttpUriRequest httpRequest) throws IOException {
+    public HttpUriRequest setHttpClientHeader(HttpUriRequest httpRequest, String uid) throws IOException {
 
         long currentedTimeMillis = System.currentTimeMillis() / 1000;
         //获取秒单位

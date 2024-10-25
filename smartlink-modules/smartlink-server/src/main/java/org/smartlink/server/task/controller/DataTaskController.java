@@ -1,6 +1,7 @@
 package org.smartlink.server.task.controller;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
@@ -54,9 +55,9 @@ public class DataTaskController extends BaseController {
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
         return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages)
-                .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
-                .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
-                .page(pageParam);
+            .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
+            .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
+            .page(pageParam);
     }
 
     @GetMapping("/getTaskInfo")
@@ -151,10 +152,14 @@ public class DataTaskController extends BaseController {
         List<DataImage> imageList = one.getImages();
         //获取存储的ossId列表
         List<Long> ossIds = imageList.stream().map(DataImage::getOssId).toList();
+        String uid = "";
+        if (CollUtil.isNotEmpty(imageList)) {
+            uid = imageList.get(0).getUid();
+        }
         //通过ossId，去数据库查询fileId
         List<SysOssVo> sysOssVoList = iSysOssService.listByIds(ossIds);
         List<String> fileIdList = sysOssVoList.stream().map(SysOssVo::getFileId).toList();
-        iSysOssService.downloadByString(fileIdList, response);
+        iSysOssService.downloadByString(fileIdList, response, uid);
 
 
     }
@@ -178,7 +183,7 @@ public class DataTaskController extends BaseController {
             if (dataTask.getImages() != null) {
                 //删除oss文件
                 List<Long> ossIds = dataTask.getImages().stream().map(DataImage::getOssId).toList();
-                if (ossIds.size() > 0) {
+                if (!ossIds.isEmpty()) {
                     iSysOssService.deleteWithValidByIds(ossIds, false);
                 }
                 //删除文件数据

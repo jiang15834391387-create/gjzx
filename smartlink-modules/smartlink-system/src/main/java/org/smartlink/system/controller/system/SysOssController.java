@@ -3,20 +3,20 @@ package org.smartlink.system.controller.system;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.core.util.ObjectUtil;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.validate.QueryGroup;
-import org.smartlink.common.web.core.BaseController;
 import org.smartlink.common.log.annotation.Log;
 import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.web.core.BaseController;
 import org.smartlink.system.domain.bo.SysOssBo;
 import org.smartlink.system.domain.vo.SysOssUploadVo;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.service.ISysOssService;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotEmpty;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -69,11 +69,11 @@ public class SysOssController extends BaseController {
     @SaCheckPermission("system:oss:upload")
     @Log(title = "OSS对象存储", businessType = BusinessType.INSERT)
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public R<SysOssUploadVo> upload(@RequestPart("file") MultipartFile file) throws IOException {
+    public R<SysOssUploadVo> upload(@RequestPart("file") MultipartFile file, String uid) throws IOException {
         if (ObjectUtil.isNull(file)) {
             return R.fail("上传文件不能为空");
         }
-        SysOssVo oss = ossService.upload(file);
+        SysOssVo oss = ossService.upload(file, uid);
         SysOssUploadVo uploadVo = new SysOssUploadVo();
         uploadVo.setUrl(oss.getUrl());
         uploadVo.setFileName(oss.getOriginalName());
@@ -88,8 +88,8 @@ public class SysOssController extends BaseController {
      */
     @SaCheckPermission("system:oss:download")
     @GetMapping("/download/{ossId}")
-    public void download(@PathVariable Long ossId, HttpServletResponse response) throws IOException {
-        ossService.download(ossId, response);
+    public void download(@PathVariable Long ossId, String uid, HttpServletResponse response) throws IOException {
+        ossService.download(ossId, response, uid);
     }
 
     /**

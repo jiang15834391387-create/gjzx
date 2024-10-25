@@ -2,7 +2,6 @@ package org.smartlink.server.image.momain;
 
 import com.anwen.mongo.annotation.ID;
 import com.anwen.mongo.annotation.collection.CollectionName;
-import com.anwen.mongo.model.BaseModelID;
 import lombok.Data;
 
 @Data
@@ -39,6 +38,10 @@ public class DataImage {
      * 对象存储主键
      */
     private Long ossId;
+    /**
+     * 润健UID
+     */
+    private String uid;
     /**
      * 图片顺序
      */
