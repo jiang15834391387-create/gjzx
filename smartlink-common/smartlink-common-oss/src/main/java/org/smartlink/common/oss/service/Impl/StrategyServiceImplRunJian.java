@@ -181,7 +181,8 @@ public class StrategyServiceImplRunJian implements StrategyService {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 // 将实体内容写入到servlet响应输出流
                 entity.writeTo(byteArrayOutputStream);
-                return entity.toString().getBytes();
+               return byteArrayOutputStream.toByteArray();
+//                return entity.toString().getBytes();
             }
         } catch (Exception e) {
             throw new OssException("文件下载失败，错误信息:[" + e.getMessage() + "]");
