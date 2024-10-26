@@ -253,11 +253,11 @@ justauth:
 kkfile:
   onlinePreviewUrl: http://47.97.23.19:8012/onlinePreview?url=
 frontEnd:
-  url: http://11.11.24.200:31992
+  url: https://erp.runjian.com:31992
 runjian:
   appKey: yz-yxxt
   appSecret: da30b1ca5bf14b37abec622291b774c2
-  baseUrl: http://11.11.24.200/30886/openapi
+  baseUrl: http://11.11.24.200:30886/openapi
   accessTokenUrl: /v1/oauth2/accessToken
   putObjectUrl: /file/v1/putObject
   getObjectUrl: /file/v1/getObject

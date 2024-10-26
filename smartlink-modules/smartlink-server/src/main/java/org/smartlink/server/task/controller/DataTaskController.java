@@ -26,6 +26,7 @@ import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.service.ISysOssService;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -129,11 +130,23 @@ public class DataTaskController extends BaseController {
 
     @PostMapping("/addTask")
     public R<Void> addTask(@RequestBody DataTask task) {
-        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, task.getBusinessSerialNo()).one();
+        log.info("新增或修改单据任务,参数:{}", task.toString());
+        DataTask oldTask = this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, task.getBusinessSerialNo()).one();
+
         Boolean save;
-        if (one == null) {
-            save = dataTaskServer.save(task);
+        if (oldTask == null) {
+            log.info("新增单据任务,{}", task.getBusinessSerialNo());
+            save = this.dataTaskServer.save(task);
         } else {
+            log.info("修改单据任务,{}", task.getBusinessSerialNo());
+
+            if (StringUtils.hasText(oldTask.getBillNum())) {
+
+                if (oldTask.getBillNum().equals(task.getBillNum())) {
+                    log.info("新旧单据号相同，无需操作数据库！");
+                    return R.ok();
+                }
+            }
             save = dataTaskServer.updateByColumn(task, DataTask::getBusinessSerialNo);
         }
         if (!save) {
