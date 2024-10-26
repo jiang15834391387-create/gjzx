@@ -1,5 +1,6 @@
 package org.smartlink.common.oss.service.Impl;
 
+import cn.hutool.core.util.IdUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
@@ -29,7 +30,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * ClassName: StrategyServiceImpl
@@ -88,16 +88,15 @@ public class StrategyServiceImplRunJian implements StrategyService {
             );
 
             // 构建数据
-            String objectId = "yxxt" + UUID.randomUUID();
+            String objectId = "yxxt" + IdUtil.simpleUUID();
             String objectType = "yxxt";
 
-//            multipartEntityBuilder.addTextBody("objectId", objectId);
+            multipartEntityBuilder.addTextBody("objectId", objectId);
             multipartEntityBuilder.addTextBody("objectType", objectType);
 
 
             HttpEntity httpEntity = multipartEntityBuilder.build();
             httpPost.setEntity(httpEntity);
-
 
 
             CloseableHttpResponse response = httpClient.execute(httpPost);
