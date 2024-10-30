@@ -3,16 +3,19 @@ package org.smartlink.common.oss.service.Impl;
 import cn.hutool.core.util.IdUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.oss.exception.OssException;
 import org.smartlink.common.oss.service.StrategyService;
 import org.smartlink.common.oss.util.HttpClientCustomUtil;
@@ -70,6 +73,8 @@ public class StrategyServiceImplRunJian implements StrategyService {
             HttpPost httpPost = new HttpPost(putObjectUrl);
             // 添加基本请求头
             runJianUtil.setHttpClientHeader(httpPost, uid);
+            final Header[] allHeaders = httpPost.getAllHeaders();
+            log.info("请求头:{}", JsonUtils.toJsonString(allHeaders));
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
             // 添加参数
             Path filePath = file.toPath();
@@ -79,6 +84,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
                 contentType = ContentType.APPLICATION_OCTET_STREAM.getMimeType();
             }
 
+            multipartEntityBuilder.setMode(HttpMultipartMode.RFC6532);
             multipartEntityBuilder.addBinaryBody(
                 "file",
                 file,
@@ -181,7 +187,7 @@ public class StrategyServiceImplRunJian implements StrategyService {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 // 将实体内容写入到servlet响应输出流
                 entity.writeTo(byteArrayOutputStream);
-               return byteArrayOutputStream.toByteArray();
+                return byteArrayOutputStream.toByteArray();
 //                return entity.toString().getBytes();
             }
         } catch (Exception e) {
