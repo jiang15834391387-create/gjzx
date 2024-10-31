@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.oss.service.StrategyService;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.ImageTreeBo;
 import org.smartlink.server.image.momain.DataImage;
@@ -24,7 +25,6 @@ import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.service.ISysOssService;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -47,7 +47,7 @@ public class DataTaskController extends BaseController {
 
     private final DataImageServer dataImageServer;
 
-    private final MongoTemplate mongoTemplate;
+    private final StrategyService strategyService;
 
     private final DataNodeTypeMapper dataNodeTypeMapper;
 
@@ -72,6 +72,21 @@ public class DataTaskController extends BaseController {
         List<ImageTreeBo> imageTreeList = new ArrayList<>();
         //单据下影像集合
         List<DataImage> images = one.getImages() == null ? new ArrayList<>() : one.getImages();
+
+        for (DataImage image : images) {
+            String runJianId;
+            // 预览地址要去请求润健文件服务器
+            if (StrUtil.isBlank(image.getRunJianId())) {
+                final SysOssVo ossVo = this.iSysOssService.getById(image.getOssId());
+                runJianId = ossVo.getFileId();
+            } else {
+                runJianId = image.getRunJianId();
+            }
+            String fileViewUrl = strategyService.fileViewUrl(runJianId, image.getUid());
+            image.setPreviewUrl(fileViewUrl);
+            image.setSourceFileUrl(fileViewUrl);
+
+        }
         //节点ID
         List<String> typeIds = dataNodeTypes.stream().map(DataNodeType::getId).toList();
         //其他节点ID
@@ -107,13 +122,15 @@ public class DataTaskController extends BaseController {
             }
             imageTreeList.add(nodeTypeImage);
         }
+
         List<Tree<String>> build = TreeUtil.build(imageTreeList, "-1", (image, tree) -> {
             tree.setId(image.getFileId());
             tree.setParentId(image.getParentId());
             tree.setName(image.getFileName());
             tree.setWeight(image.getSort());
-            tree.putExtra("sourceFileUrl", image.getSourceFileUrl());
+
             tree.putExtra("previewUrl", image.getPreviewUrl());
+            tree.putExtra("sourceFileUrl", image.getSourceFileUrl());
             tree.putExtra("fileName", image.getFileName());
             tree.putExtra("ossId", image.getOssId());
             tree.putExtra("total", image.getTotal());

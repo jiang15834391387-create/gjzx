@@ -109,6 +109,8 @@ public class DataImageController extends BaseController {
         dataImage.setPreviewUrl(upload.getUrl());
         // 存储预览地址，因为没有返回url地址
         dataImage.setSourceFileUrl(upload.getUrl());
+        // 存储润健文件ID
+        dataImage.setRunJianId(upload.getFileId());
         dataImage.setParentId(parentId);
         dataImage.setOssId(upload.getOssId());
 

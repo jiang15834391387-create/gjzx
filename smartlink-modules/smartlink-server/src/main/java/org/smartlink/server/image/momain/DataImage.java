@@ -47,6 +47,10 @@ public class DataImage {
      */
     private String sort;
     /**
+     * 润健文件ID
+     */
+    private String runJianId;
+    /**
      * 父节点
      */
     private String parentId;
