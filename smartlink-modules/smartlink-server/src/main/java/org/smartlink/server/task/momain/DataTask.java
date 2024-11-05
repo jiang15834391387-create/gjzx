@@ -29,14 +29,15 @@ public class DataTask extends BaseModelID {
     private String billNum;
 
     /**
+     * 单据类型编号
+     */
+    private String billType;
+
+    /**
      * 单据类型名称
      */
     private String billTypeName;
 
-    /**
-     * 单据类型编号
-     */
-    private String billType;
 
     /**
      * 父单据类型编号
@@ -44,22 +45,17 @@ public class DataTask extends BaseModelID {
     private String pkBillType;
 
     /**
-     * 金额
+     * 用户编码
      */
-    private String cash;
+    private String userCode;
 
     /**
-     * 制单人id
+     * 单据标题
      */
-    private String userId;
+    private String billTitle;
 
     /**
-     * 渠道系统代码
-     */
-    private String systemCode;
-
-    /**
-     * 机构号
+     * 机构编码
      */
     private String orgCode;
 
@@ -68,60 +64,22 @@ public class DataTask extends BaseModelID {
      */
     private String orgName;
 
+
     /**
-     * 制单人名称
+     * 部门编码
      */
-    private String userName;
+    private String deptCode;
+
+    /**
+     * 部门名称
+     */
+    private String deptName;
 
     /**
      * 制单日期
      */
     private String billDate;
 
-    /**
-     * 扫描方式1单扫2批扫
-     */
-    private String scanType;
-
-    /**
-     * 扫描方式中文
-     */
-    private String scanTypeName;
-
-    /**
-     * 粘贴单张数
-     */
-    private String pasteListCount;
-
-    /**
-     * 附件张数
-     */
-    private String accessorCount;
-
-    /**
-     * 所属集团id
-     */
-    private String groupId;
-
-    /**
-     * 制单人编号如
-     */
-    private String userNum;
-
-    /**
-     * 最后操作人
-     */
-    private String lastOperater;
-
-    /**
-     * 最后操作时间
-     */
-    private String lastOperateTime;
-
-    /**
-     * 驳回原因
-     */
-    private String operateSuggest;
 
     /**
      * 单据状态0待登记、1待扫描、2扫描完成、3驳回修改、4驳回重扫、5修改完成、6补扫完成、7未装册、8已装册
@@ -132,7 +90,6 @@ public class DataTask extends BaseModelID {
      * 单据状态中文名
      */
     private String taskStateName;
-
 
     private List<DataImage> images;
 }

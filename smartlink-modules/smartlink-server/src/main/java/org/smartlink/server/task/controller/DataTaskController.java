@@ -54,9 +54,9 @@ public class DataTaskController extends BaseController {
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
         return dataTaskServer.lambdaQuery().projectNone(DataTask::getImages)
-                .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
-                .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
-                .page(pageParam);
+            .like(StrUtil.isNotEmpty(dataTask.getBusinessSerialNo()), DataTask::getBusinessSerialNo, dataTask.getBusinessSerialNo())
+            .like(StrUtil.isNotEmpty(dataTask.getBillNum()), DataTask::getBillNum, dataTask.getBillNum())
+            .page(pageParam);
     }
 
     @GetMapping("/getTaskInfo")
@@ -130,12 +130,11 @@ public class DataTaskController extends BaseController {
     @PostMapping("/addTask")
     public R<Void> addTask(@RequestBody DataTask task) {
         DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, task.getBusinessSerialNo()).one();
-        Boolean save;
         if (one == null) {
-            save = dataTaskServer.save(task);
-        } else {
-            save = dataTaskServer.updateByColumn(task, DataTask::getBusinessSerialNo);
+            dataTaskServer.save(task);
+            return R.ok();
         }
+        dataTaskServer.updateByColumn(task, DataTask::getBusinessSerialNo);
         return R.ok();
     }
 

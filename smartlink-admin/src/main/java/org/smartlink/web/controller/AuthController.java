@@ -1,20 +1,18 @@
 package org.smartlink.web.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.hutool.core.codec.Base64;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
-import org.flowable.engine.TaskService;
 import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginBody;
@@ -22,7 +20,6 @@ import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.RegisterBody;
 import org.smartlink.common.core.domain.model.SocialLoginBody;
 import org.smartlink.common.core.utils.*;
-import org.smartlink.common.core.utils.signature.SignatureUtil;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
@@ -43,17 +40,10 @@ import org.smartlink.web.domain.vo.TenantListVo;
 import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
-import org.smartlink.common.core.utils.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -235,9 +225,12 @@ public class AuthController {
     }
 
     @GetMapping("/getToken")
-    public R<LoginVo> getToken() {
+    public R<LoginVo> getToken(String clientId) {
+        if (StringUtils.isBlank(clientId)){
+            return R.fail("参数不能为空");
+        }
 //        SignatureUtil.signature()
-        SysClientVo client = clientService.queryByClientId("e5cd7e4891bf95d1d19206ce24a7b32e");
+        SysClientVo client = clientService.queryByClientId(clientId);
         SysUserVo user = userService.selectUserById(1l);
         LoginUser loginUser = loginService.buildLoginUser(user);
         loginUser.setClientKey(client.getClientKey());
