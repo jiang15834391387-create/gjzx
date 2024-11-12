@@ -243,6 +243,7 @@ public class DataTaskController extends BaseController {
                 JSONObject item = data.getJSONObject(i);
                 DataImage dataImage = new DataImage();
 
+                dataImage.setFileId(item.getStr("id"));
                 dataImage.setRunJianId(item.getStr("id"));
                 dataImage.setFileName(item.getStr("originalFilename"));
                 dataImage.setParentId("10999");
