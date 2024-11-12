@@ -44,7 +44,7 @@ import java.util.Map;
  * @Version 1.0
  */
 @Slf4j
-@Service()
+@Service
 public class StrategyServiceImplRunJian implements StrategyService {
 
     @Value("${runjian.baseUrl}")
@@ -74,7 +74,9 @@ public class StrategyServiceImplRunJian implements StrategyService {
             // 添加基本请求头
             runJianUtil.setHttpClientHeader(httpPost, uid);
             final Header[] allHeaders = httpPost.getAllHeaders();
+
             log.info("请求头:{}", JsonUtils.toJsonString(allHeaders));
+
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
             // 添加参数
             Path filePath = file.toPath();

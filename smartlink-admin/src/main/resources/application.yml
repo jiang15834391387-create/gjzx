@@ -263,6 +263,8 @@ management:
       show-details: ALWAYS
     logfile:
       external-file: ./logs/sys-console.log
+  server:
+    port: -1
 
 --- # websocket
 websocket:

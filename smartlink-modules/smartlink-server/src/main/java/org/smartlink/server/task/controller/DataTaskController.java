@@ -5,13 +5,26 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.anwen.mongo.model.PageParam;
 import com.anwen.mongo.model.PageResult;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.core.exception.ServiceException;
+import org.smartlink.common.oss.exception.OssException;
 import org.smartlink.common.oss.service.StrategyService;
+import org.smartlink.common.oss.util.RunJianUtil;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.ImageTreeBo;
 import org.smartlink.server.image.momain.DataImage;
@@ -25,14 +38,14 @@ import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.service.ISysOssService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.util.*;
 
 @Slf4j
 @Validated
@@ -51,6 +64,45 @@ public class DataTaskController extends BaseController {
 
     private final DataNodeTypeMapper dataNodeTypeMapper;
 
+    private final RunJianUtil runJianUtil;
+
+    @Value("${runjian.baseUrl}")
+    private String BaseUrl;
+
+    @Value("${runjian.fileInfoUrl}")
+    private String fileInfoUrl;
+
+    /**
+     * 根据文件ID获取到文件预览地址
+     *
+     * @param fileId 文件ID
+     * @return 文件预览地址
+     */
+    @GetMapping("getFileViewUrl")
+    public R<String> getFileViewUrl(@RequestParam(value = "fileId") String fileId,
+                                    @RequestParam(value = "uid", required = false) String uid) {
+        if (!StringUtils.hasText(fileId)) {
+            return R.fail("文件ID为空");
+        }
+        final DataImage dataImage = this.dataImageServer.getById(fileId);
+        if (dataImage != null) {
+            // 不为空说明是影像这边传的文件，走影像本地查询的逻辑
+            String runJianId = fileId;
+            // 预览地址要去请求润健文件服务器
+            if (StrUtil.isBlank(dataImage.getRunJianId())) {
+                final SysOssVo ossVo = this.iSysOssService.getById(dataImage.getOssId());
+                runJianId = ossVo.getFileId();
+            } else {
+                runJianId = dataImage.getRunJianId();
+            }
+
+            String fileViewUrl = strategyService.fileViewUrl(runJianId, dataImage.getUid());
+            return R.ok(fileViewUrl);
+        }
+        log.info("文件ID{}为空，去润健文件服务器查询！", fileId);
+        // 如果文件为空，说明关联关系在润健服务存储，直接调用
+        return R.ok(strategyService.fileViewUrl(fileId, uid));
+    }
 
     @PostMapping("/getTaskList")
     public PageResult<DataTask> getTaskList(@RequestBody DataTask dataTask, @RequestBody PageParam pageParam) {
@@ -61,17 +113,23 @@ public class DataTaskController extends BaseController {
     }
 
     @GetMapping("/getTaskInfo")
-    public R<DataTaskVo> getTaskInfo(String businessSerialNo) {
-        DataTask one = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
-        if (one == null) {
-            return R.fail(businessSerialNo + "单据不存在");
-        }
+    public R<DataTaskVo> getTaskInfo(@RequestParam(value = "businessSerialNo") String businessSerialNo,
+                                     @RequestParam(value = "uid", required = false) String uid) {
+        DataTask dataTask = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+
         //树节点对象
         List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
         //树节点集合
         List<ImageTreeBo> imageTreeList = new ArrayList<>();
+
+
+        if (dataTask == null) {
+            log.info("业务流水号为：{}的单据不存在,去润健文件服务器查询一下！", businessSerialNo);
+
+            dataTask = this.getTaskInfoByRunJian(businessSerialNo, uid);
+        }
         //单据下影像集合
-        List<DataImage> images = one.getImages() == null ? new ArrayList<>() : one.getImages();
+        List<DataImage> images = dataTask.getImages() == null ? new ArrayList<>() : dataTask.getImages();
 
         for (DataImage image : images) {
             String runJianId;
@@ -139,10 +197,65 @@ public class DataTaskController extends BaseController {
         });
 
         DataTaskVo dataTaskVo = new DataTaskVo();
-        BeanUtil.copyProperties(one, dataTaskVo);
+        BeanUtil.copyProperties(dataTask, dataTaskVo);
         dataTaskVo.setImageTree(build);
         return R.ok(dataTaskVo);
 
+    }
+
+    /**
+     * 去润健服务器查询关联业务主键的文件信息
+     *
+     * @param businessSerialNo 文件业务流水号
+     * @param uid              润健工号
+     * @return R
+     */
+    private DataTask getTaskInfoByRunJian(String businessSerialNo, String uid) {
+        // 找润健拉取
+        DataTask task = new DataTask();
+        // 拼接accesstoken
+        String requestUrl = runJianUtil.spliceAccessToken(this.BaseUrl + this.fileInfoUrl);
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost(requestUrl);
+            // 添加基本请求头
+            runJianUtil.setHttpClientHeader(httpPost, uid);
+            // 构建参数
+            Map<String, String> params = new HashMap<>(2);
+            params.put("objectId", businessSerialNo);
+            // 添加参数
+            StringEntity stringEntity = new StringEntity(JSONUtil.toJsonStr(params), ContentType.APPLICATION_JSON);
+            httpPost.setEntity(stringEntity);
+            HttpResponse response = httpClient.execute(httpPost);
+            final String result = EntityUtils.toString(response.getEntity());
+            log.info("请求润健文件服务器获取文件列表返回结果:{}", result);
+            final JSONObject resultObject = JSONUtil.parseObj(result);
+            if (resultObject.getInt("code") != 200) {
+                throw new ServiceException(resultObject.getStr("msg"));
+            }
+            // 设置单据信息
+            task.setBusinessSerialNo(businessSerialNo);
+            task.setBillNum(businessSerialNo);
+            final JSONArray data = resultObject.getJSONArray("data");
+
+            List<DataImage> imageList = new ArrayList<>(2);
+
+            for (int i = 0; i < data.size(); i++) {
+                JSONObject item = data.getJSONObject(i);
+                DataImage dataImage = new DataImage();
+
+                dataImage.setRunJianId(item.getStr("id"));
+                dataImage.setFileName(item.getStr("originalFilename"));
+                dataImage.setParentId("10999");
+
+                imageList.add(dataImage);
+            }
+            task.setImages(imageList);
+        } catch (IOException e) {
+            log.error("请求润健文件服务器异常", e);
+            throw new OssException("文件系统错误:" + e.getMessage());
+        }
+
+        return task;
     }
 
     @PostMapping("/addTask")

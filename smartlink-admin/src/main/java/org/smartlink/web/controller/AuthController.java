@@ -36,10 +36,10 @@ import org.smartlink.system.domain.vo.SysClientVo;
 import org.smartlink.system.domain.vo.SysTenantVo;
 import org.smartlink.system.domain.vo.SysUserVo;
 import org.smartlink.system.service.*;
+import org.smartlink.web.accessToken.AccessTokenVerify;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.smartlink.web.domain.vo.TenantListVo;
-import org.smartlink.web.accessToken.AccessTokenVerify;
 import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
@@ -153,8 +153,8 @@ public class AuthController {
     public R<Void> socialCallback(@RequestBody SocialLoginBody loginBody) {
         // 获取第三方登录信息
         AuthResponse<AuthUser> response = SocialUtils.loginAuth(
-                loginBody.getSource(), loginBody.getSocialCode(),
-                loginBody.getSocialState(), socialProperties);
+            loginBody.getSource(), loginBody.getSocialCode(),
+            loginBody.getSocialState(), socialProperties);
         AuthUser authUserData = response.getData();
         // 判断授权响应是否成功
         if (!response.ok()) {
@@ -219,7 +219,7 @@ public class AuthController {
         }
         // 根据域名进行筛选
         List<TenantListVo> list = StreamUtils.filter(voList, vo ->
-                StringUtils.equals(vo.getDomain(), host));
+            StringUtils.equals(vo.getDomain(), host));
         // 返回对象
         LoginTenantVo vo = new LoginTenantVo();
         vo.setVoList(CollUtil.isNotEmpty(list) ? list : voList);
@@ -228,11 +228,11 @@ public class AuthController {
     }
 
     @GetMapping("/getToken")
-    public R<LoginVo> getToken(@RequestParam("appKey")String appKey,
-                               @RequestParam("timestamp")String timestamp,
-                               @RequestParam("signature")String signature,
-                               @RequestParam("tenantId")String tenantId
-                               ){
+    public R<LoginVo> getToken(@RequestParam("appKey") String appKey,
+                               @RequestParam("timestamp") String timestamp,
+                               @RequestParam("signature") String signature,
+                               @RequestParam("tenantId") String tenantId
+    ) {
         SysClientVo client = clientService.findByClientKey(appKey);
         String generateSignature = StzdSignatureUtil.generateSignature(appKey, timestamp, client.getClientSecret());
         if (!generateSignature.equals(signature)) {
@@ -253,14 +253,14 @@ public class AuthController {
         // 生成token
         LoginHelper.login(loginUser, model);
         LoginVo loginVo = new LoginVo();
-        loginVo.setAccessToken("Bearer "+StpUtil.getTokenValue());
+        loginVo.setAccessToken("Bearer " + StpUtil.getTokenValue());
         loginVo.setExpireIn(StpUtil.getTokenTimeout());
         loginVo.setClientId(client.getClientId());
 
         //将token放入redis
         Long expireIn = loginVo.getExpireIn();
         Duration duration = Duration.ofSeconds(expireIn);
-        RedisUtils.setCacheObject(CacheConstants.YINGXIANG_ACCESSTOKEN,loginVo.getAccessToken(),duration);
+        RedisUtils.setCacheObject(CacheConstants.YINGXIANG_ACCESSTOKEN, loginVo.getAccessToken(), duration);
 
         return R.ok(loginVo);
     }
@@ -270,8 +270,27 @@ public class AuthController {
     public R<String> getPreviewTaskUrl(String businessSerialNo) {
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
-        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
-        return R.ok("",s);
+        String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&token=" + StpUtil.getTokenValue();
+        return R.ok("", s);
+
+    }
+
+    /**
+     * 多单据联查，润健客开，需要传UID
+     *
+     * @param businessSerialNo 单据流水号，多个使用@符号分割
+     * @param uid              润健工号
+     * @return 影像查看预览地址
+     */
+    @AccessTokenVerify
+    @GetMapping("/getPreviewMultipleTaskUrl")
+    public R<String> getPreviewMultipleTaskUrl(@RequestParam("businessSerialNo") String businessSerialNo,
+                                               @RequestParam("uid") String uid) {
+        log.info("单据联查，接收到参数:businessSerialNo:{},uid:{}", businessSerialNo, uid);
+        StpUtil.renewTimeout(604800);
+        StpUtil.updateLastActiveToNow();
+        String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&uid=" + uid + "&token=" + StpUtil.getTokenValue();
+        return R.ok("", s);
 
     }
 
@@ -282,18 +301,18 @@ public class AuthController {
 
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
-        String s = frontEndUrl+ "/documentScan?businessSerialNo=" + businessSerialNo+"&token="+ StpUtil.getTokenValue();
-        return R.ok("",s);
+        String s = frontEndUrl + "/documentScan?businessSerialNo=" + businessSerialNo + "&token=" + StpUtil.getTokenValue();
+        return R.ok("", s);
 
     }
 
 
     @GetMapping("/getLocateImagePosition")
-    public R<String> getLocateImagePosition(String businessSerialNo,String fileId) {
+    public R<String> getLocateImagePosition(String businessSerialNo, String fileId) {
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
-        String s = frontEndUrl+ "/documentInfo?businessSerialNo=" + businessSerialNo+"&fileId="+ fileId+"&token="+ StpUtil.getTokenValue();
-        return R.ok("",s);
+        String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&fileId=" + fileId + "&token=" + StpUtil.getTokenValue();
+        return R.ok("", s);
     }
 
 }
