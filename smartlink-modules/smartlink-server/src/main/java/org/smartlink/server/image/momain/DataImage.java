@@ -48,5 +48,9 @@ public class DataImage {
      */
     private String parentId;
 
+    /**
+     * 创建时间
+     */
+    private String createTime;
 
 }

@@ -2,6 +2,7 @@ package org.smartlink.server.image.controller;
 
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,6 +81,7 @@ public class DataImageController extends BaseController {
         dataImage.setSourceFileUrl(upload.getUrl());
         dataImage.setParentId(uploadImageBo.getParentId());
         dataImage.setOssId(upload.getOssId());
+        dataImage.setCreateTime(DateUtil.now());
         if (dataImageServer.save(dataImage)) {
             return R.ok(dataImage);
         }
@@ -118,6 +120,7 @@ public class DataImageController extends BaseController {
         dataImage.setSourceFileUrl(upload.getUrl());
         dataImage.setParentId(parentId);
         dataImage.setOssId(upload.getOssId());
+        dataImage.setCreateTime(DateUtil.now());
         dataImageServer.save(dataImage);
         Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
         Update update = new Update().push("images", dataImage);
