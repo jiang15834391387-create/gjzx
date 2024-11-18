@@ -124,25 +124,24 @@ public class DataTaskController extends BaseController {
 
 
         if (dataTask == null) {
-            log.info("业务流水号为：{}的单据不存在,去润健文件服务器查询一下！", businessSerialNo);
-
+            log.info("业务流水号为：{}的单据不存在,去润健文件服务器查询一下！UID是：{}", businessSerialNo, uid);
             dataTask = this.getTaskInfoByRunJian(businessSerialNo, uid);
         }
         //单据下影像集合
         List<DataImage> images = dataTask.getImages() == null ? new ArrayList<>() : dataTask.getImages();
 
         for (DataImage image : images) {
-            String runJianId;
-            // 预览地址要去请求润健文件服务器
-            if (StrUtil.isBlank(image.getRunJianId())) {
-                final SysOssVo ossVo = this.iSysOssService.getById(image.getOssId());
-                runJianId = ossVo.getFileId();
-            } else {
-                runJianId = image.getRunJianId();
-            }
-            String fileViewUrl = strategyService.fileViewUrl(runJianId, image.getUid());
-            image.setPreviewUrl(fileViewUrl);
-            image.setSourceFileUrl(fileViewUrl);
+//            String runJianId;
+//            // 预览地址要去请求润健文件服务器
+//            if (StrUtil.isBlank(image.getRunJianId())) {
+//                final SysOssVo ossVo = this.iSysOssService.getById(image.getOssId());
+//                runJianId = ossVo.getFileId();
+//            } else {
+//                runJianId = image.getRunJianId();
+//            }
+            // String fileViewUrl = strategyService.fileViewUrl(runJianId, image.getUid());
+            image.setPreviewUrl("*");
+            image.setSourceFileUrl("*");
 
         }
         //节点ID
@@ -217,20 +216,27 @@ public class DataTaskController extends BaseController {
         String requestUrl = runJianUtil.spliceAccessToken(this.BaseUrl + this.fileInfoUrl);
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(requestUrl);
-            // 添加基本请求头
-            runJianUtil.setHttpClientHeader(httpPost, uid);
+
             // 构建参数
             Map<String, String> params = new HashMap<>(2);
             params.put("objectId", businessSerialNo);
             // 添加参数
             StringEntity stringEntity = new StringEntity(JSONUtil.toJsonStr(params), ContentType.APPLICATION_JSON);
             httpPost.setEntity(stringEntity);
+
+            // 添加基本请求头
+            runJianUtil.setHttpClientHeader(httpPost, uid);
+            log.info("请求参数:{}", JSONUtil.toJsonStr(httpPost.getAllHeaders()));
+
             HttpResponse response = httpClient.execute(httpPost);
+
             final String result = EntityUtils.toString(response.getEntity());
             log.info("请求润健文件服务器获取文件列表返回结果:{}", result);
+
             final JSONObject resultObject = JSONUtil.parseObj(result);
-            if (resultObject.getInt("code") != 200) {
-                throw new ServiceException(resultObject.getStr("msg"));
+
+            if (resultObject.getInt("errcode") != 200) {
+                throw new ServiceException(resultObject.getStr("errmsg"));
             }
             // 设置单据信息
             task.setBusinessSerialNo(businessSerialNo);

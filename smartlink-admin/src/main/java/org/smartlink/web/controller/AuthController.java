@@ -43,7 +43,6 @@ import org.smartlink.web.domain.vo.TenantListVo;
 import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
-import org.smartlink.web.util.StzdSignatureUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -234,10 +233,10 @@ public class AuthController {
                                @RequestParam("tenantId") String tenantId
     ) {
         SysClientVo client = clientService.findByClientKey(appKey);
-        String generateSignature = StzdSignatureUtil.generateSignature(appKey, timestamp, client.getClientSecret());
-        if (!generateSignature.equals(signature)) {
-            R.fail("签名不正确");
-        }
+//        String generateSignature = StzdSignatureUtil.generateSignature(appKey, timestamp, client.getClientSecret());
+//        if (!generateSignature.equals(signature)) {
+//            R.fail("签名不正确");
+//        }
         SysUserVo user = userService.selectUserById(1l);
         LoginUser loginUser = loginService.buildLoginUser(user);
         loginUser.setClientKey(client.getClientKey());

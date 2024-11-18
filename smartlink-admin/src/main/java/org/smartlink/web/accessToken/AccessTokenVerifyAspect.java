@@ -1,5 +1,6 @@
 package org.smartlink.web.accessToken;
 
+import com.esotericsoftware.minlog.Log;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import org.aspectj.lang.annotation.Aspect;
@@ -39,8 +40,8 @@ public class AccessTokenVerifyAspect {
                 throw new CacheException("请求头中无accessToken");
             }
             Object accessToken = RedisUtils.getCacheObject(CacheConstants.YINGXIANG_ACCESSTOKEN);
-
-            if (!Authorization.equals(accessToken)){
+            Log.info("accessToken:" + accessToken);
+            if (!Authorization.equals(accessToken)) {
                 throw new CacheException("请求头中accessToken为空");
             }
         }
