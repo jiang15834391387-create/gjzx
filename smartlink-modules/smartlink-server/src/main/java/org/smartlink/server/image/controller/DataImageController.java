@@ -3,6 +3,9 @@ package org.smartlink.server.image.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +91,61 @@ public class DataImageController extends BaseController {
         return R.fail();
     }
 
+    /**
+     * 上传文件，使用URL
+     *
+     * @param url              url
+     * @param businessSerialNo 流水号
+     * @return
+     */
+    @PostMapping("/uploadImageUrl")
+    public R<DataImage> uploadImageUrl(String url, String fileName, String businessSerialNo, String parentId) {
+
+        log.info("businessSerialNo:{}", businessSerialNo);
+        // 先查询有没有
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        log.info("task:{}", task);
+
+        List<DataImage> imageList;
+        if (task == null) {
+            throw new ServiceException("单据不存在");
+        }
+        if (task.getImages() != null) {
+            imageList = task.getImages();
+        } else {
+            imageList = new ArrayList<>(2);
+        }
+
+        HttpRequest httpRequest = HttpUtil.createGet(url);
+
+        byte[] bytes;
+
+        try (HttpResponse execute = httpRequest.execute()) {
+            bytes = execute.bodyBytes();
+        } catch (Exception e) {
+            throw new ServiceException("请求航信文件失败！");
+        }
+
+        SysOssVo upload = iSysOssService.upload(bytes, fileName);
+        DataImage dataImage = new DataImage();
+        dataImage.setFileName(fileName);
+        dataImage.setFileType(upload.getFileSuffix());
+        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        dataImage.setSourceFileUrl(upload.getUrl());
+        dataImage.setParentId(parentId);
+        dataImage.setOssId(upload.getOssId());
+        dataImage.setCreateTime(DateUtil.now());
+        dataImageServer.save(dataImage);
+        Query query = new Query(Criteria.where("businessSerialNo").is(businessSerialNo));
+        Update update = new Update().push("images", dataImage);
+        mongoTemplate.updateFirst(query, update, DataTask.class);
+
+        imageList.add(dataImage);
+        task.setImages(imageList);
+
+        dataTaskServer.updateById(task);
+        return R.ok(dataImage);
+    }
 
     /**
      * 单据下上传文件
@@ -131,8 +189,6 @@ public class DataImageController extends BaseController {
 
         dataTaskServer.updateById(task);
         return R.ok(dataImage);
-
-
     }
 
     /**
