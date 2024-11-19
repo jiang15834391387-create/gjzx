@@ -99,7 +99,10 @@ public class DataImageController extends BaseController {
      * @return
      */
     @PostMapping("/uploadImageUrl")
-    public R<DataImage> uploadImageUrl(String url, String fileName, String businessSerialNo, String parentId) {
+    public R<DataImage> uploadImageUrl(@RequestParam("url") String url,
+                                       @RequestParam("fileName")String fileName,
+                                       @RequestParam("businessSerialNo")String businessSerialNo,
+                                       @RequestParam("parentId")String parentId) {
 
         log.info("businessSerialNo:{}", businessSerialNo);
         // 先查询有没有
