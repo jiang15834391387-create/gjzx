@@ -266,12 +266,11 @@ public class AuthController {
 
     @AccessTokenVerify
     @GetMapping("/getPreviewTaskUrl")
-    public R<String> getPreviewTaskUrl(String businessSerialNo) {
+    public R<String> getPreviewTaskUrl(@RequestParam("businessSerialNo") String businessSerialNo, @RequestParam(required = false) String uid) {
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
-        String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&token=" + StpUtil.getTokenValue();
+        String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&uid=" + uid + "&token=" + StpUtil.getTokenValue();
         return R.ok("", s);
-
     }
 
     /**

@@ -226,7 +226,8 @@ public class DataTaskController extends BaseController {
 
             // 添加基本请求头
             runJianUtil.setHttpClientHeader(httpPost, uid);
-            log.info("请求参数:{}", JSONUtil.toJsonStr(httpPost.getAllHeaders()));
+            log.info("请求参数,请求头:{}", JSONUtil.toJsonStr(httpPost.getAllHeaders()));
+            log.info("请求参数,请求体:{}", JSONUtil.toJsonStr(httpPost.getEntity()));
 
             HttpResponse response = httpClient.execute(httpPost);
 
