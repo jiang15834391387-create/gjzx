@@ -116,6 +116,10 @@ public class DataTaskController extends BaseController {
             tree.setParentId(image.getParentId());
             tree.setName(image.getFileName());
             tree.setWeight(image.getSort());
+            if (StringUtils.isNotBlank(image.getCreateTime())) {
+                String createTime = image.getCreateTime();
+                image.setCreateTime(createTime.substring(0, createTime.length() - 2));
+            }
             tree.putExtra("createTime", image.getCreateTime());
             tree.putExtra("sourceFileUrl", image.getSourceFileUrl());
             tree.putExtra("previewUrl", image.getPreviewUrl());
