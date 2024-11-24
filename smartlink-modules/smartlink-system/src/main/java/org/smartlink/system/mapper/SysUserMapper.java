@@ -88,4 +88,10 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
     })
     int updateById(@Param(Constants.ENTITY) SysUser user);
 
+    /**
+     * 根据userId获取UserName
+     * @param userId
+     * @return
+     */
+    String selectUserNameByUserId(@Param("userId")String userId);
 }

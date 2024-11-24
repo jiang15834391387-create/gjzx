@@ -2,12 +2,12 @@ package org.smartlink.system.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
+import org.apache.ibatis.annotations.Param;
 import org.smartlink.common.mybatis.annotation.DataColumn;
 import org.smartlink.common.mybatis.annotation.DataPermission;
 import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
 import org.smartlink.system.domain.SysDept;
 import org.smartlink.system.domain.vo.SysDeptVo;
-import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 

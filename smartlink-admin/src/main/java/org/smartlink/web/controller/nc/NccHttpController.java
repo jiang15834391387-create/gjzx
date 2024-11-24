@@ -1,0 +1,101 @@
+package org.smartlink.web.controller.nc;
+
+import io.swagger.annotations.ApiOperation;
+import lombok.AllArgsConstructor;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.smartlink.common.json.utils.JsonUtils;
+import org.smartlink.web.domain.NcResult;
+import org.smartlink.web.service.nc.NcService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * @description: 对NCC系统提供接口
+ * @author: L
+ * @create: 2024-11-20
+ **/
+@RestController
+@RequestMapping("/prod-api/Shy")
+@AllArgsConstructor
+public class NccHttpController {
+
+    private final NcService ncService;
+//    private final ExternalTokenService externalTokenService;
+
+    /**
+     * 返回体Code编码
+     */
+    private static final String RSP_CODE = "RspCode";
+
+    /**
+     * 返回体msg消息
+     */
+    private static final String RSP_MSG = "RspMsg";
+    /**
+     * NCC测试调用测试系统联通性
+     * @return 结果
+     */
+    @ApiOperation("NCC测试调用测试系统联通性")
+    @PostMapping("/testNcc")
+    public String testNcc() throws DocumentException {
+        String result = ncService.testNcc();
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),getXmlNodeData(result,"data"));
+        return JsonUtils.toJsonString(ncResult);
+    }
+
+    /**
+     * 获取xml指定节点的文本
+     * @param xml 返回xml报文
+     * @param node 节点名称
+     * @return 文本值
+     * @throws
+     */
+    private String getXmlNodeData(String xml,String node) throws DocumentException {
+        Document document = DocumentHelper.parseText(xml);
+        Element rootElement = document.getRootElement();
+        return rootElement.elementText(node);
+    }
+
+    /**
+     * NCC制单完成后调用 添加影像任务
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("添加影像任务")
+    @PostMapping("/addScanTask")
+    public String addScanTask(String xml) throws DocumentException {
+        String result = ncService.addScanTask(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
+
+    /**
+     * 单点登录-影响扫描
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("单点登陆")
+    @PostMapping("/singleLogin")
+    public String singleLogin(String xml) throws DocumentException {
+        String result = ncService.singleLogin(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
+
+    /**
+     * NCC调用 获取影像查看页面
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("获取影像查看链接")
+    @PostMapping("/getImageShowUrl")
+    public String getImageShowUrl(String xml) throws DocumentException {
+        String result = ncService.getImageShowUrl(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
+}

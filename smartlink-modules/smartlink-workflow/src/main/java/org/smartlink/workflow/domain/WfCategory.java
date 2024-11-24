@@ -41,7 +41,7 @@ public class WfCategory extends TenantEntity {
     /**
      * 父级id
      */
-    private Long parentId;
+    private String parentId;
 
     /**
      * 排序

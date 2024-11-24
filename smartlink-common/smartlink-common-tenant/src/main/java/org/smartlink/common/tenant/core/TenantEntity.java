@@ -1,8 +1,9 @@
 package org.smartlink.common.tenant.core;
 
-import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.smartlink.common.mybatis.core.domain.BaseEntity;
+
 
 /**
  * 租户基类
@@ -11,11 +12,12 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class TenantEntity extends BaseEntity {
+public class TenantEntity<T> extends BaseEntity {
 
     /**
      * 租户编号
      */
     private String tenantId;
+
 
 }

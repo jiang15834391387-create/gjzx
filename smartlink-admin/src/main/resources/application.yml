@@ -41,6 +41,26 @@ server:
       # 阻塞任务线程池, 当执行类似servlet请求阻塞操作, undertow会从这个线程池中取得线程,它的值设置取决于系统的负载
       worker: 256
 
+# ncc密码配置
+wsdl:
+  baseUrl: http://10.124.9.138:9081
+  bizCenter: 100
+  clientId: tchzt2
+  clientSecret: aad2433934c141b58937
+  nccUserName: admin1
+  nccPassword: qwer123@
+  factoryCode: tchzt2
+  methodName: testNcc
+  dataSource: design
+  wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
+
+# ncc参数配置
+ncc:
+  baseUrl: http://10.124.9.138:9081
+  wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
+  dataSource: design
+  factoryCode: tchzt2
+
 # 日志配置
 logging:
   level:
@@ -110,6 +130,9 @@ sa-token:
 security:
   # 排除路径
   excludes:
+    - /Shy/**
+    - /prod-api/**
+    - /system/**
     # 静态资源
     - /*.html
     - /**/*.html
@@ -151,7 +174,7 @@ mybatis-plus:
   # 对应的 XML 文件位置
   mapperLocations: classpath*:mapper/**/*Mapper.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: org.smartlink.**.domain
+  typeAliasesPackage: org.smartlink.common.mybatis.core.domain
   global-config:
     dbConfig:
       # 主键类型

@@ -29,7 +29,7 @@ public class SysDeptBo extends BaseEntity {
     /**
      * 父部门ID
      */
-    private Long parentId;
+    private String parentId;
 
     /**
      * 部门名称

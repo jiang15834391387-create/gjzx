@@ -40,6 +40,10 @@
         <bouncycastle.version>1.76</bouncycastle.version>
         <mongodbplus.version>2.0.9.3</mongodbplus.version>
         <justauth.version>1.16.6</justauth.version>
+        <swagger-annotations.version>1.5.22</swagger-annotations.version>
+        <knife4j.version>3.0.3</knife4j.version>
+        <thum.version>0.4.8</thum.version>
+        <webservice.version>3.5.3</webservice.version>
         <!-- 离线IP地址定位库 -->
         <ip2region.version>2.7.0</ip2region.version>
         <!-- PDF相关依赖 -->
@@ -116,6 +120,37 @@
                 <version>${hutool.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>swagger-annotations</artifactId>
+                        <groupId>io.swagger</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+
+            <!--图片压缩-->
+            <dependency>
+                <groupId>net.coobird</groupId>
+                <artifactId>thumbnailator</artifactId>
+                <version>${thum.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-spring-boot-starter-jaxws</artifactId>
+                <version>${webservice.version}</version>
             </dependency>
 
             <dependency>

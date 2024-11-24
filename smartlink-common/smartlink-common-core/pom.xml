@@ -16,6 +16,12 @@
     </description>
 
     <dependencies>
+
+<!--        导入smartlink-admin依赖-->
+<!--        <dependency>-->
+<!--            <groupId>org.smartlink</groupId>-->
+<!--            <artifactId>smartlink-admin</artifactId>-->
+<!--        </dependency>-->
         <!-- Spring框架基本的核心工具 -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -97,6 +103,10 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>transmittable-thread-local</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-core</artifactId>
         </dependency>
 
     </dependencies>
