@@ -3,9 +3,9 @@ package org.smartlink.web.ncc.deleteocr.request.taxinvoice;
 import lombok.Data;
 
 /**
- * @author chenJiangHong
+ * @author L
  * @Description 删除增值税发票信息请求类
- * @create: 2022-07-29 16:50
+ * @create:
  */
 @Data
 public class DeleteTaxInvoiceRequest {

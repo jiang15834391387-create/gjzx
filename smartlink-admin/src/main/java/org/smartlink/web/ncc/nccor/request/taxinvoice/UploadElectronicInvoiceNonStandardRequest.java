@@ -5,8 +5,8 @@ import lombok.ToString;
 
 /**
  * @description: NCC2111上传电子发票请求类
- * @author: ChenJiangHong
- * @create: 2022-09-08 09:56
+ * @author: L
+ * @create:
  **/
 @Data
 @ToString(exclude = {"filecontent"})

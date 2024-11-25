@@ -4,8 +4,8 @@ import lombok.Data;
 
 /**
  * @description: NCC2207上传电子发票请求类
- * @author: ChenJiangHong
- * @create: 2022-09-08 09:56
+ * @author: L
+ * @create:
  **/
 @Data
 public class UploadElectronicInvoiceRequest {

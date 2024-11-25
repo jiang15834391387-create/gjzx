@@ -4,8 +4,8 @@ import lombok.Data;
 
 /**
  * @description: 全票种删除电子发票请求类
- * @author: ChenJiangHong
- * @create: 2022-09-20 23:40
+ * @author: L
+ * @create:
  **/
 @Data
 public class DeleteElectronicInvoiceRequest {

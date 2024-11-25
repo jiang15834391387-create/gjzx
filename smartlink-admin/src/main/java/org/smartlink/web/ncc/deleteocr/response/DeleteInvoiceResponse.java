@@ -3,9 +3,9 @@ package org.smartlink.web.ncc.deleteocr.response;
 import lombok.Data;
 
 /**
- * @author chenJiangHong
+ * @author L
  * @Description 删除发票信息响应类
- * @create: 2022-07-29 16:51
+ * @create:
  */
 @Data
 public class DeleteInvoiceResponse {

@@ -7,4 +7,6 @@ import java.util.List;
 public interface IDataCmInfoService {
 
     List<DataCmInfo> selectDataCmInfoListByBusinessSerialNoList(List<String> businessSerialNoList);
+
+    List<DataCmInfo> selectDataCmInfoByBusinessSerialNo(String businessSerialNo);
 }

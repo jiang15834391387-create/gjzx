@@ -3,6 +3,8 @@ package org.smartlink.web.service.nc;
 import org.smartlink.web.domain.DataCurrentTask;
 import org.smartlink.web.domain.invoice.bo.DataCurrentTaskBo;
 
+import java.util.List;
+
 public interface IDataCurrentTaskService {
 
     /**
@@ -18,6 +20,13 @@ public interface IDataCurrentTaskService {
      * @return
      */
     Boolean insertOrUpdateDataCurrentTaskByBusinessSerialNo(DataCurrentTask dataCurrentTask);
+
+    /**
+     * 根据userId获取代办任务列表
+     * @param userId
+     * @return
+     */
+    List<DataCurrentTask> getTaskListByUserId(String userId);
 
     /**
      * 新增任务

@@ -13,14 +13,17 @@ import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.oss.factory.OssFactory;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.web.constant.Constants;
 import org.smartlink.web.constant.ParamConstants;
 import org.smartlink.web.constant.ScanTypeConstants;
 import org.smartlink.web.constant.TaskStateConstants;
 import org.smartlink.web.domain.*;
+import org.smartlink.web.domain.dto.NcDeleteServiceDTO;
 import org.smartlink.web.domain.invoice.bo.DataCurrentTaskBo;
 import org.smartlink.web.enums.NcCodeEnum;
+import org.smartlink.web.factory.NcConfigFactory;
 import org.smartlink.web.ncc.testapi.TestApiService;
 import org.smartlink.web.ncc.testapi.response.TestOpenApiResponse;
 import org.smartlink.web.ncc.testapi.resqust.TestOpenApiRequest;
@@ -61,6 +64,7 @@ public class NcServiceImpl implements NcService {
     private final ExternalTokenService externalTokenService;
     private final IDataCmInfoService dataCmInfoService;
     private final IDataImageFilesInfoService dataImageFilesInfoService;
+    private final IDataOcrService iDataOcrService;
 
     @Autowired
     public TestOpenApiRequestData testOpenApiRequestData;
@@ -203,6 +207,42 @@ public class NcServiceImpl implements NcService {
     }
 
     @Override
+    public String getCurrentTaskCount(String xml) {
+        log.info("NC获取用户代办任务数量接口请求报文：" + xml);
+        String code;
+        String message;
+        Map<String, Object> dataResponse = null;
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("获取用户代办任务数量接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        // xml数据格式校验
+        boolean xmlDataVerify = XmlUtil.xmlDataVerify(rootElement);
+        if (xmlDataVerify) {
+            dataResponse = new HashMap<>();
+            Element billBody = rootElement.element("BillBody");
+            String userId = billBody.elementText("userid");
+            String userNo = billBody.elementText("UserNo");
+            List<DataCurrentTask> dataCurrentTaskList = dataCurrentTaskService.getTaskListByUserId(userId);
+            dataResponse.put("UserId", userId);
+            dataResponse.put("UserNo", userNo);
+            dataResponse.put("CurrentTaskCount", ObjectUtil.isNotEmpty(dataCurrentTaskList) ? dataCurrentTaskList.size() : 0);
+            code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+            message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+        } else {
+            code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
+            message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
+        }
+        String respXML = ResultUtil.getRespXML(code, message, dataResponse);
+        log.info("影像系统接口-获取用户代办任务数量接口成功返回报文：" + respXML);
+        return respXML;
+    }
+
+    @Override
     public String addScanTask(String xml) {
         log.info("NC添加影像任务接口请求报文：" + xml);
         String code;
@@ -269,6 +309,82 @@ public class NcServiceImpl implements NcService {
         log.info("影像系统接口-添加影像任务接口成功返回报文：" + respXML);
         return respXML;
     }
+
+
+    @Override
+    public String deleteScanTask(String xml) {
+        log.info("NC废弃影像任务请求报文：" + xml);
+        String code;
+        String message;
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("废弃影像任务接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        // xml数据格式校验
+        boolean xmlDataVerify = XmlUtil.xmlDataVerify(rootElement);
+        if (xmlDataVerify) {
+            // 与NC业务系统相关逻辑开启，则需要调用删除NC台账接口
+            boolean ncEnabled = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_NC_BUSINESS));
+            boolean bipEnabled = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_BIP_BUSINESS));
+            Element billBody = rootElement.element("BillBody");
+            Element service = billBody.element("service");
+            String businessSerialNo = service.elementText("Busi_Serial_No");
+            DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
+            // 废弃任务需删除：1.任务表数据 2.中间表数据 3.图片表数据 4.发票信息表数据 5.源文件数据
+            if (ObjectUtil.isNotEmpty(dataCurrentTask)) {
+                try {
+                    List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
+                    for (DataCmInfo dataCmInfo : dataCmInfoList) {
+                        List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchId(dataCmInfo.getBatchId());
+                        List<String> fileIdList = dataImageFilesInfoList.stream().map(DataImageFilesInfo::getFileId).collect(Collectors.toList());
+                        if (ncEnabled || bipEnabled) {
+                            NcDeleteServiceDTO ncDeleteServiceDTO = new NcDeleteServiceDTO();
+                            ncDeleteServiceDTO.setFileIdList(fileIdList);
+                            ncDeleteServiceDTO.setBusinessSerialNo(businessSerialNo);
+                            NcConfigFactory.instance().deleteNcInvoiceDataBusinessService(ncDeleteServiceDTO);
+                        }
+                        if(CollectionUtil.isNotEmpty(fileIdList)){
+                            // 删除OCR信息
+                            this.iDataOcrService.deleteMultipleFile(fileIdList);
+                        }
+                        for (DataImageFilesInfo dataImageFilesInfo : dataImageFilesInfoList) {
+                            // 删除影像文件
+                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getIurl())) {
+                                OssFactory.instance().delete(dataImageFilesInfo.getIurl());
+                            }
+                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getLurl())) {
+                                OssFactory.instance().delete(dataImageFilesInfo.getLurl());
+                            }
+                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getPurl())) {
+                                OssFactory.instance().delete(dataImageFilesInfo.getPurl());
+                            }
+                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getSurl())) {
+                                OssFactory.instance().delete(dataImageFilesInfo.getSurl());
+                            }
+                            dataImageFilesInfo.deleteById();
+                        }
+                        dataCmInfo.deleteById();
+                        dataCurrentTask.deleteById();
+                    }
+                } catch (Exception e) {
+                    log.error("废弃影像任务接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+                }
+            }
+            code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+            message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+        } else {
+            code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
+            message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
+        }
+        String respXML = ResultUtil.getRespXML(code, message, null);
+        log.info("影像系统接口-废弃影像任务接口成功返回报文：" + respXML);
+        return respXML;
+    }
+
 
     /**
      * 添加影像任务时处理·友报帐图片

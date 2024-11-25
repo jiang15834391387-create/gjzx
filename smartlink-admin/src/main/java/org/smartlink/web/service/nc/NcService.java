@@ -27,11 +27,24 @@ public interface NcService {
     R<Void> synchronizeBillType();
 
     /**
+     * 获取代办任务数量
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String getCurrentTaskCount(String xml);
+
+    /**
      * 添加影像
      * @return
      */
     String addScanTask(String xml);
 
+    /**
+     * 删除影像任务
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String deleteScanTask(String xml);
     /**
      * 单点登陆
      * @param xml 参数
@@ -45,4 +58,5 @@ public interface NcService {
      * @return 返回结果
      */
     String getImageShowUrl(String xml);
+
 }

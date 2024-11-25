@@ -61,6 +61,20 @@ public class NccHttpController {
     }
 
     /**
+     * NCC系统进入首页调用 获取该用户代办任务数量
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("获取代办任务数量")
+    @PostMapping("/getCurrentTaskCount")
+    public String getCurrentTaskCount(String xml) throws DocumentException {
+        String result = ncService.getCurrentTaskCount(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
+
+
+    /**
      * NCC制单完成后调用 添加影像任务
      * @param xml 入参
      * @return 结果
@@ -69,6 +83,19 @@ public class NccHttpController {
     @PostMapping("/addScanTask")
     public String addScanTask(String xml) throws DocumentException {
         String result = ncService.addScanTask(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
+
+    /**
+     * NCC删除单据调用 删除影像任务
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("删除影像任务")
+    @PostMapping("/deleteScanTask")
+    public String deleteScanTask(String xml) throws DocumentException {
+        String result = ncService.deleteScanTask(xml);
         NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
         return JsonUtils.toJsonString(ncResult);
     }

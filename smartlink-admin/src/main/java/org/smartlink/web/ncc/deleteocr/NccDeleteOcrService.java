@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author chenJiangHong
+ * @author L
  * @Description NCC删除台账接口
- * @create: 2022-07-29 16:45
+ * @create:
  */
 public class NccDeleteOcrService {
 

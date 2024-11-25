@@ -6,8 +6,8 @@ import lombok.ToString;
 
 /**
  * @description: ocr接口请求data对象
- * @author: chenJiangHong
- * @create: 2022-06-13 00:55
+ * @author: L
+ * @create:
  **/
 @Data
 @Builder

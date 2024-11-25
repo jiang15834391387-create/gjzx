@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * @description: 同步NC基础数据
  * @author: L
- * @create: 2022-11-20
+ * @create: 2024-11-20
  **/
 @RestController
 @RequestMapping("/system/base")

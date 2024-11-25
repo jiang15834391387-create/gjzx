@@ -5,8 +5,8 @@ import lombok.Data;
 
 /**
  * @description: 电子发票请求类data
- * @author: ChenJiangHong
- * @create: 2022-09-20 23:47
+ * @author: L
+ * @create:
  **/
 @Data
 @Builder

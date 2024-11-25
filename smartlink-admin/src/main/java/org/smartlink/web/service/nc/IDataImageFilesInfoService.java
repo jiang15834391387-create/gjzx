@@ -12,4 +12,20 @@ public interface IDataImageFilesInfoService {
      * @return
      */
     List<DataImageFilesInfo> selectAllByBatchIdList(List<String> batchIds);
+
+    /**
+     * 根据BatchId查询
+     *
+     * @param batchId
+     * @return
+     */
+    List<DataImageFilesInfo> selectByBatchId(String batchId);
+
+    /**
+     * 根据文件ID查询
+     *
+     * @param fileId 文件ID
+     * @return {@link DataImageFilesInfo}
+     */
+    DataImageFilesInfo selectById(String fileId);
 }

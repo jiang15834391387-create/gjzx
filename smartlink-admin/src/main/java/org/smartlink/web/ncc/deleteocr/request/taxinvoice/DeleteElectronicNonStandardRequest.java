@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 
 /**
  * @description: 非标准删除电子发票台账请求类
- * @author: ChenJiangHong
- * @create: 2023-01-10 18:08
+ * @author: L
+ * @create:
  **/
 @Data
 @AllArgsConstructor

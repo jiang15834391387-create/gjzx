@@ -4,11 +4,14 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import org.smartlink.web.constant.TaskStateConstants;
 import org.smartlink.web.domain.DataCurrentTask;
 import org.smartlink.web.domain.invoice.bo.DataCurrentTaskBo;
 import org.smartlink.web.mapper.DataCurrentTaskMapper;
 import org.smartlink.web.service.nc.IDataCurrentTaskService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 任务Service业务层处理
@@ -37,6 +40,15 @@ public class DataCurrentTaskServiceImpl implements IDataCurrentTaskService {
         }else{
             return this.baseMapper.insert(dataCurrentTask)>0;
         }
+    }
+
+    @Override
+    public List<DataCurrentTask> getTaskListByUserId(String userId) {
+        // 提供给NCC业务使用，查询出该用户的代办任务列表
+        LambdaQueryWrapper<DataCurrentTask> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DataCurrentTask::getUserId,userId);
+        queryWrapper.in(DataCurrentTask::getTaskState, TaskStateConstants.TASK_STATE_SCAN,TaskStateConstants.CHARGE_BACK,TaskStateConstants.TASK_STATE_BH_BS,TaskStateConstants.TASK_STATE_BH_CS);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     /**

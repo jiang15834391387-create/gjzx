@@ -26,4 +26,11 @@ public class DataCmInfoServiceImpl implements IDataCmInfoService {
         queryWrapper.in(DataCmInfo::getBusinessSerialNo,businessSerialNoList);
         return this.baseMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public List<DataCmInfo> selectDataCmInfoByBusinessSerialNo(String businessSerialNo) {
+        LambdaQueryWrapper<DataCmInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DataCmInfo::getBusinessSerialNo,businessSerialNo);
+        return this.baseMapper.selectList(queryWrapper);
+    }
 }

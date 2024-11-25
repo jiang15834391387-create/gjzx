@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * @description: ocr结果返回data
- * @author: chenJiangHong
- * @create: 2022-06-13 07:41
+ * @author: L
+ * @create:
  **/
 @Data
 public class UploadTaxInvoiceResponseData {

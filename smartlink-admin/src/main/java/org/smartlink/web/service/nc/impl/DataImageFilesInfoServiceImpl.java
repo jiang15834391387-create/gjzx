@@ -26,4 +26,16 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         queryWrapper.in(DataImageFilesInfo::getBatchId, batchIdList);
         return this.baseMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public List<DataImageFilesInfo> selectByBatchId(String batchId) {
+        final LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DataImageFilesInfo::getBatchId, batchId);
+        return this.baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public DataImageFilesInfo selectById(String fileId) {
+        return this.baseMapper.selectById(fileId);
+    }
 }

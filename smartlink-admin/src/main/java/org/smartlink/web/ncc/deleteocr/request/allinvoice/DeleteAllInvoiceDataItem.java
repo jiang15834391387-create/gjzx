@@ -5,8 +5,8 @@ import lombok.Data;
 
 /**
  * @description: 删除请求类明细
- * @author: ChenJiangHong
- * @create: 2022-09-01 00:44
+ * @author: L
+ * @create:
  **/
 @Data
 @Builder

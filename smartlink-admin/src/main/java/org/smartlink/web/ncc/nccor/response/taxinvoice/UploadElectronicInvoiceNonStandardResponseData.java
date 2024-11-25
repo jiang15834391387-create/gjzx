@@ -4,8 +4,8 @@ import lombok.Data;
 
 /**
  * @description: 电子发票返回data
- * @author: ChenJiangHong
- * @create: 2022-12-15 17:26
+ * @author: L
+ * @create:
  **/
 @Data
 public class UploadElectronicInvoiceNonStandardResponseData {

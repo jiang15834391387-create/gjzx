@@ -5,8 +5,8 @@ import lombok.Data;
 
 /**
  * @description: NCC获取OCR信息接口请求类
- * @author: chenJiangHong
- * @create: 2022-06-13 00:30
+ * @author: L
+ * @create:
  **/
 @Data
 @Builder

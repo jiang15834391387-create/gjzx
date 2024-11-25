@@ -4,8 +4,8 @@ import lombok.Data;
 
 /**
  * @description: NCC获取增值税发票结果返回类
- * @author: chenJiangHong
- * @create: 2022-06-13 07:39
+ * @author: L
+ * @create:
  **/
 @Data
 public class UploadAllInvoiceResponse {
