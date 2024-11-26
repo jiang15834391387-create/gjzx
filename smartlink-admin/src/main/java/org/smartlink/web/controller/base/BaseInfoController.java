@@ -3,9 +3,13 @@ package org.smartlink.web.controller.base;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.web.annotation.RepeatSubmit;
+import org.smartlink.web.domain.DataCurrentTask;
+import org.smartlink.web.domain.dto.TaskSubmitDTO;
+import org.smartlink.web.domain.dto.UpdateTaskDTO;
+import org.smartlink.web.service.nc.CurrentTaskService;
 import org.smartlink.web.service.nc.NcService;
 import org.springframework.web.bind.annotation.*;
-
 
 /**
  * @description: 同步NC基础数据
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class BaseInfoController {
 
     private final NcService ncService;
+    private final CurrentTaskService currentTaskService;
 
     /**
      * 同步用户信息
@@ -51,6 +56,26 @@ public class BaseInfoController {
     @GetMapping("/synchronizeBillType")
     public R<Void> synchronizeBillType(){
         return ncService.synchronizeBillType();
+    }
+
+    @ApiOperation("提交影像状态")
+    @PostMapping("/taskSubmit")
+    @RepeatSubmit()
+    public R<DataCurrentTask> taskSubmit(@RequestBody TaskSubmitDTO taskSubmitDTO){
+        return currentTaskService.submitTaskState(taskSubmitDTO);
+    }
+
+    @ApiOperation("批量影像任务提交")
+    @PostMapping("/batchTaskSubmit")
+    public R<DataCurrentTask> batchTaskSubmit(@RequestBody TaskSubmitDTO taskSubmitDTO){
+        return currentTaskService.batchSubmitTaskState(taskSubmitDTO);
+    }
+
+    @ApiOperation("驳回影像状态")
+    @PostMapping("/rejectTaskState")
+    @RepeatSubmit()
+    public R<Void> rejectTaskState(@RequestBody UpdateTaskDTO updateTaskDTO){
+        return currentTaskService.rejectTaskState(updateTaskDTO);
     }
 }
 

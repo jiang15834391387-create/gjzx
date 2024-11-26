@@ -68,6 +68,11 @@ public class DataCurrentTaskServiceImpl implements IDataCurrentTaskService {
         return flag;
     }
 
+    @Override
+    public int updateDataCurrentTask(DataCurrentTask dataCurrentTask) {
+        return this.baseMapper.updateById(dataCurrentTask);
+    }
+
     /**
      * 保存前的数据校验
      *

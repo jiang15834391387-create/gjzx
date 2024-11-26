@@ -1,6 +1,9 @@
 package org.smartlink.web.strategy;
 
+import org.smartlink.web.domain.DataCurrentTask;
 import org.smartlink.web.domain.dto.NcDeleteServiceDTO;
+import org.smartlink.web.domain.dto.TaskSubmitDTO;
+import org.smartlink.web.domain.dto.UpdateTaskDTO;
 
 public interface INcStrategy {
     /**
@@ -8,4 +11,17 @@ public interface INcStrategy {
      * @param ncDeleteServiceDTO
      */
     void deleteNcInvoiceDataBusinessService(NcDeleteServiceDTO ncDeleteServiceDTO) throws Exception;
+
+    /**
+     * 业务系统提交影像状态逻辑
+     * @param taskSubmitDTO
+     * @return
+     */
+    DataCurrentTask submitTaskStateToBusinessService(TaskSubmitDTO taskSubmitDTO) throws Exception;
+
+    /**
+     * 业务系统驳回影像状态逻辑
+     * @param updateTaskDTO
+     */
+    DataCurrentTask rejectTaskStateBusinessService(UpdateTaskDTO updateTaskDTO) throws Exception;
 }

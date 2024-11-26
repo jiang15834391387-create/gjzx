@@ -5,6 +5,9 @@ import org.smartlink.web.domain.invoice.bo.DataCurrentTaskBo;
 
 import java.util.List;
 
+/**
+ * 影像任务Service接口
+ */
 public interface IDataCurrentTaskService {
 
     /**
@@ -35,4 +38,11 @@ public interface IDataCurrentTaskService {
      * @return 结果
      */
     Boolean insertByBo(DataCurrentTaskBo bo);
+
+    /**
+     *  更新任务表数据
+     * @param dataCurrentTask
+     * @return int
+     */
+    int updateDataCurrentTask(DataCurrentTask dataCurrentTask);
 }

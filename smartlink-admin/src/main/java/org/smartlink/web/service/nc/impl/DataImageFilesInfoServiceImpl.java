@@ -38,4 +38,8 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
     public DataImageFilesInfo selectById(String fileId) {
         return this.baseMapper.selectById(fileId);
     }
+    @Override
+    public Boolean updateById(DataImageFilesInfo filesInfo) {
+        return this.baseMapper.updateById(filesInfo) > 0;
+    }
 }

@@ -66,4 +66,15 @@ public class SysUserServiceImpl implements ISysUserService {
     public String selectUserNameByUserId(String userId) {
         return this.baseMapper.selectUserNameByUserId(userId);
     }
+
+    /**
+     * 通过用户ID查询用户
+     *
+     * @param userId 用户ID
+     * @return 用户对象信息
+     */
+    @Override
+    public SysUser selectUserById(Long userId) {
+        return baseMapper.selectUserById(userId);
+    }
 }

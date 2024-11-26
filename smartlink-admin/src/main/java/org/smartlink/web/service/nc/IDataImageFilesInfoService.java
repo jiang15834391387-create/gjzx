@@ -4,6 +4,9 @@ import org.smartlink.web.domain.DataImageFilesInfo;
 
 import java.util.List;
 
+/**
+ * 图片文件Service接口
+ */
 public interface IDataImageFilesInfoService {
 
     /**
@@ -28,4 +31,6 @@ public interface IDataImageFilesInfoService {
      * @return {@link DataImageFilesInfo}
      */
     DataImageFilesInfo selectById(String fileId);
+
+    Boolean updateById(DataImageFilesInfo filesInfo);
 }

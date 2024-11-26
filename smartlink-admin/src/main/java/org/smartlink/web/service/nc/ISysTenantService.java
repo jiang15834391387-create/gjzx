@@ -3,6 +3,9 @@ package org.smartlink.web.service.nc;
 
 import org.smartlink.web.domain.SysTenant;
 
+/**
+ * 使用者信息Service接口
+ */
 public interface ISysTenantService {
     /**
      * 查询使用者信息
