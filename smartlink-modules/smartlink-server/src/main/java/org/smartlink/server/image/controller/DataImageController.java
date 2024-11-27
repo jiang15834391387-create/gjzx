@@ -107,7 +107,7 @@ public class DataImageController extends BaseController {
         dataImage.setFileType(upload.getFileSuffix());
         dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
         dataImage.setSourceFileUrl(upload.getUrl());
-        dataImage.setParentId(fileName);
+        dataImage.setParentId(parentId);
         dataImage.setOssId(upload.getOssId());
         dataImage.setCreateTime(DateUtil.now());
 
