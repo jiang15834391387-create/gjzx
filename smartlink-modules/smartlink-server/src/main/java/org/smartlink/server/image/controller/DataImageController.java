@@ -92,6 +92,33 @@ public class DataImageController extends BaseController {
     }
 
     /**
+     * 上传文件，不在单据上，用文件流
+     *
+     * @param file 文件
+     */
+    @PostMapping("/uploadImage2")
+    public R<DataImage> uploadImage2(@RequestParam("file") MultipartFile file, String parentId) throws IOException {
+
+        String fileName = file.getOriginalFilename();
+        log.info("fileName:{}", fileName);
+        SysOssVo upload = iSysOssService.upload(file.getBytes(), fileName);
+        DataImage dataImage = new DataImage();
+        dataImage.setFileName(fileName);
+        dataImage.setFileType(upload.getFileSuffix());
+        dataImage.setPreviewUrl(onlinePreviewUrl + URLEncoder.encode(Base64.getEncoder().encodeToString(upload.getUrl().getBytes())));
+        dataImage.setSourceFileUrl(upload.getUrl());
+        dataImage.setParentId(fileName);
+        dataImage.setOssId(upload.getOssId());
+        dataImage.setCreateTime(DateUtil.now());
+
+        if (dataImageServer.save(dataImage)) {
+            return R.ok(dataImage);
+        }
+        return R.fail();
+    }
+
+
+    /**
      * 上传文件，使用URL
      *
      * @param url              url
@@ -100,9 +127,9 @@ public class DataImageController extends BaseController {
      */
     @PostMapping("/uploadImageUrl")
     public R<DataImage> uploadImageUrl(@RequestParam("url") String url,
-                                       @RequestParam("fileName")String fileName,
-                                       @RequestParam("businessSerialNo")String businessSerialNo,
-                                       @RequestParam("parentId")String parentId) {
+                                       @RequestParam("fileName") String fileName,
+                                       @RequestParam("businessSerialNo") String businessSerialNo,
+                                       @RequestParam("parentId") String parentId) {
 
         log.info("businessSerialNo:{}", businessSerialNo);
         // 先查询有没有
