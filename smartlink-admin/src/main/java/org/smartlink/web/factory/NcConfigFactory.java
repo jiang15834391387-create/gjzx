@@ -16,7 +16,7 @@ import org.smartlink.web.utils.StringUtils;
 /**
  * NC参数实例工厂
  *
- * @author chenJiangHong
+ * @author L
  */
 @Slf4j
 public class NcConfigFactory {

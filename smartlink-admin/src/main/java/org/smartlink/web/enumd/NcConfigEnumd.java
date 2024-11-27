@@ -10,7 +10,7 @@ import org.smartlink.web.strategy.NccServiceStrategy;
 /**
  * 对象存储服务商枚举
  *
- * @author Lion Li
+ * @author L
  */
 @Getter
 @AllArgsConstructor

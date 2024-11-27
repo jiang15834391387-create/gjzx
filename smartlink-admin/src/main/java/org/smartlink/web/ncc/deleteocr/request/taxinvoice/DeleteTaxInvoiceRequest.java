@@ -2,6 +2,8 @@ package org.smartlink.web.ncc.deleteocr.request.taxinvoice;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author L
  * @Description 删除增值税发票信息请求类
@@ -43,6 +45,6 @@ public class DeleteTaxInvoiceRequest {
     /**
      * data
      */
-    private DeleteTaxInvoiceData data;
+    private List<DeleteTaxInvoiceData> data;
 
 }

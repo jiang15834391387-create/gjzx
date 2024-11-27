@@ -1,0 +1,25 @@
+package org.smartlink.web.ocr.service.bean;
+
+
+import org.smartlink.web.domain.modle.BaseEntity;
+
+/**
+ * <p>Title: IdentificationData</p>
+ * <p>提供了一个泛型元组对象</p>
+ * <p>Description: 存储OCR识别信息</p>
+ * @author L
+ **/
+public class IdentificationData<K extends String, T extends BaseEntity> {
+
+
+    public final K k;
+
+    public final T t;
+
+
+    public IdentificationData(K k, T t) {
+        this.k = k;
+
+        this.t = t;
+    }
+}

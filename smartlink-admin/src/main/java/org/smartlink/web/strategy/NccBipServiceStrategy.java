@@ -14,10 +14,7 @@ import org.smartlink.web.constant.TaskStateConstants;
 import org.smartlink.web.domain.DataCmInfo;
 import org.smartlink.web.domain.DataCurrentTask;
 import org.smartlink.web.domain.DataImageFilesInfo;
-import org.smartlink.web.domain.dto.BipDeleteOcrRequest;
-import org.smartlink.web.domain.dto.NcDeleteServiceDTO;
-import org.smartlink.web.domain.dto.TaskSubmitDTO;
-import org.smartlink.web.domain.dto.UpdateTaskDTO;
+import org.smartlink.web.domain.dto.*;
 import org.smartlink.web.domain.dto.biprequest.BipSubBIPOcrRequest;
 import org.smartlink.web.domain.dto.bipresponse.BipResponse;
 import org.smartlink.web.domain.modle.BaseEntity;
@@ -41,7 +38,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+/**
+ * @author L
+ * @title BIP服务
+ * @description BIP服务
+ * @date
+ */
 @Slf4j
 @Component
 public class NccBipServiceStrategy implements INcStrategy{
@@ -319,5 +321,10 @@ public class NccBipServiceStrategy implements INcStrategy{
             throw new Exception("变更影像状态失败，" + bipResponse.getMessage());
         }
         return dataCurrentTask;
+    }
+
+    @Override
+    public DataImageFilesInfo doBusinessService(NcImageServiceDTO ncImageServiceDTO) throws ClassNotFoundException {
+        return null;
     }
 }

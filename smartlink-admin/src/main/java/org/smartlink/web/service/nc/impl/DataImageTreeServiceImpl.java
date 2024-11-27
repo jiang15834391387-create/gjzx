@@ -1,5 +1,6 @@
 package org.smartlink.web.service.nc.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -9,10 +10,7 @@ import org.smartlink.web.mapper.DataImageTreeMapper;
 import org.smartlink.web.service.nc.IDataImageTreeService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 /**
  * 图片树节点Service业务层处理
@@ -53,5 +51,20 @@ public class DataImageTreeServiceImpl implements IDataImageTreeService {
             }
         }
         return result;
+    }
+
+    @Override
+    public boolean saveOrUpdate(DataImageTree dataImageTree) {
+        return baseMapper.insertOrUpdate(dataImageTree);
+    }
+
+    @Override
+    public List<DataImageTree> selectDataImageTreeByFileIdList(List<String> fileIdList) {
+        if (CollUtil.isEmpty(fileIdList)) {
+            return Collections.emptyList();
+        }
+        final LambdaQueryWrapper<DataImageTree> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(DataImageTree::getImageId, fileIdList);
+        return this.baseMapper.selectList(queryWrapper);
     }
 }

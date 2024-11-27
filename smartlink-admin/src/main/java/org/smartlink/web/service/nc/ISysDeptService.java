@@ -23,4 +23,12 @@ public interface ISysDeptService {
      */
     Boolean deleteAllExternalDept();
 
+    /**
+     * 根据部门ID查询信息
+     *
+     * @param deptId 部门ID
+     * @return 部门信息
+     */
+    SysDept selectDeptById(String deptId);
+
 }

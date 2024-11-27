@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.web.annotation.FieldName;
+import org.smartlink.web.domain.modle.BaseEntity;
 
 import java.math.BigDecimal;
 import java.util.Date;

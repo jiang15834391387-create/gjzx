@@ -1,5 +1,7 @@
 package org.smartlink.web.service.nc;
 
+import org.smartlink.web.domain.imagefilesinfo.DataImageTree;
+
 import java.util.List;
 
 public interface IDataImageTreeService {
@@ -10,4 +12,18 @@ public interface IDataImageTreeService {
      * @return
      */
     boolean verifyImageTree(List<String> productName, String batchId);
+
+    /**
+     * 插入或者更新
+     * @param dataImageTree 实体
+     * @return 是否成功
+     */
+    boolean saveOrUpdate(DataImageTree dataImageTree);
+
+    /**
+     * 根据文件id集合查询数据
+     * @param fileIdList
+     * @return
+     */
+    List<DataImageTree> selectDataImageTreeByFileIdList(List<String> fileIdList);
 }

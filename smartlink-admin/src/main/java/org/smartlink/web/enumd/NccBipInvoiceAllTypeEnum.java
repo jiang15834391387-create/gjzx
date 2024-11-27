@@ -5,7 +5,7 @@ import org.smartlink.web.constant.InvoiceConstants;
 
 
 /**
- * @author Zhang Shuai
+ * @author L
  */
 public enum NccBipInvoiceAllTypeEnum {
 

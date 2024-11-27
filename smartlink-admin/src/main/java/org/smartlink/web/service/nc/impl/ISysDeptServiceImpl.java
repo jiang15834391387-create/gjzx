@@ -24,4 +24,15 @@ public class ISysDeptServiceImpl implements ISysDeptService {
         LambdaQueryWrapper<SysDept> queryWrapper = new LambdaQueryWrapper<>();
         return this.baseMapper.delete(queryWrapper)>=0;
     }
+
+    /**
+     * 根据部门ID查询信息
+     *
+     * @param deptId 部门ID
+     * @return 部门信息
+     */
+    @Override
+    public SysDept selectDeptById(String deptId) {
+        return baseMapper.selectById(deptId);
+    }
 }

@@ -2,6 +2,8 @@ package org.smartlink.web.ncc.nccverify.response;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @description: 查验返回发票信息
  * @author: L
@@ -58,6 +60,6 @@ public class VerifyTaxInvoiceResponseDataInvoice {
 
     private String xsfYhzh;
 
-    private VerifyDataItem items;
+    private List<VerifyDataItem> items;
 
 }

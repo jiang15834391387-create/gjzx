@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.web.annotation.FieldName;
+import org.smartlink.web.domain.modle.BaseEntity;
 
 import java.util.Date;
 

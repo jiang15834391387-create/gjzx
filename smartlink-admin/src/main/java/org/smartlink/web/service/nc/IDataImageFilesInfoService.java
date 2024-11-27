@@ -33,4 +33,12 @@ public interface IDataImageFilesInfoService {
     DataImageFilesInfo selectById(String fileId);
 
     Boolean updateById(DataImageFilesInfo filesInfo);
+
+    /**
+     * 根据文件ID查询
+     *
+     * @param fileIds fileIds
+     * @return {@link DataImageFilesInfo}
+     */
+    List<DataImageFilesInfo> selectDataImageFilesInfoListByFileIdList(List<String> fileIds);
 }

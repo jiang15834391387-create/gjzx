@@ -3,8 +3,8 @@ package org.smartlink.web.ncc.deleteocr.request.taxinvoice;
 import lombok.Data;
 
 /**
- * @author chenJiangHong
- * @Description L
+ * @author L
+ * @Description
  * @create:
  */
 @Data
