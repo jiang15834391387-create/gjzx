@@ -126,6 +126,9 @@ security:
     - /actuator/**
     - /**/downloadFile/**
     - /server/image/downloadFile
+    - /server/image/**
+    - /server/task/**
+    - /system/nodeType/list
 
 # 多租户配置
 tenant:
