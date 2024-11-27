@@ -21,5 +21,8 @@ public interface CacheConstants {
      * 字典管理 cache key
      */
     String SYS_DICT_KEY = "sys_dict:";
-
+    /**
+     * 影像token
+     */
+    String YINGXIANG_ACCESSTOKEN = "yingxiang:accesstoken:";
 }

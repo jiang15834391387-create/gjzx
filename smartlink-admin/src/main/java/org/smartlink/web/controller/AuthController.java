@@ -13,6 +13,7 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
+import org.smartlink.common.core.constant.CacheConstants;
 import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginBody;
@@ -22,6 +23,7 @@ import org.smartlink.common.core.domain.model.SocialLoginBody;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
+import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.social.config.properties.SocialLoginConfigProperties;
 import org.smartlink.common.social.config.properties.SocialProperties;
@@ -46,6 +48,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -242,6 +245,12 @@ public class AuthController {
         loginVo.setAccessToken("Bearer "+StpUtil.getTokenValue());
         loginVo.setExpireIn(StpUtil.getTokenTimeout());
         loginVo.setClientId(client.getClientId());
+
+         //将token放入redis
+        Long expireIn = loginVo.getExpireIn();
+        Duration duration = Duration.ofSeconds(expireIn);
+        RedisUtils.setCacheObject(CacheConstants.YINGXIANG_ACCESSTOKEN,loginVo.getAccessToken(),duration);
+
         return R.ok(loginVo);
 
     }
