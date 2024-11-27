@@ -59,4 +59,17 @@ public interface NcService {
      */
     String getImageShowUrl(String xml);
 
+    /**
+     * 更新单据号
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String updateBillNo(String xml);
+
+    /**
+     * 提供给电子档案下载接口
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String downloadImages(String xml);
 }

@@ -3,6 +3,7 @@ package org.smartlink.web.service.nc.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import org.smartlink.web.constant.Constants;
 import org.smartlink.web.domain.DataImageFilesInfo;
 import org.smartlink.web.mapper.DataImageFilesInfoMapper;
 import org.smartlink.web.service.nc.IDataImageFilesInfoService;
@@ -58,6 +59,14 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         }
         final LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(DataImageFilesInfo::getFileId, fileIds);
+        return this.baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public List<DataImageFilesInfo> selectByBatchIdAndCip(String batchId, String cip) {
+        LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DataImageFilesInfo::getBatchId, batchId);
+        queryWrapper.and(u->u.ne(DataImageFilesInfo::getCip, Constants.YBZ).or().isNull(DataImageFilesInfo::getCip));
         return this.baseMapper.selectList(queryWrapper);
     }
 }

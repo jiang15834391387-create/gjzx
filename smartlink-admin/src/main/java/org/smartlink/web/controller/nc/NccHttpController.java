@@ -8,6 +8,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.web.domain.NcResult;
+import org.smartlink.web.enums.NcCodeEnum;
 import org.smartlink.web.service.nc.NcService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -123,6 +124,31 @@ public class NccHttpController {
     public String getImageShowUrl(String xml) throws DocumentException {
         String result = ncService.getImageShowUrl(xml);
         NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
+
+    /**
+     * NCC调用 更新单据号
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("更新单据号")
+    @PostMapping("/updateBillNo")
+    public String updateBillNo(String xml){
+        String result = ncService.updateBillNo(xml);
+        NcResult ncResult = new NcResult(NcCodeEnum.NC_SUCCESS_STATE.getCode(),NcCodeEnum.NC_SUCCESS_STATE.getCodeName(),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
+    /**
+     * 电子档案下载影像
+     * @param xml 入参数
+     * @return 结果
+     */
+    @ApiOperation("电子档案下载影像")
+    @PostMapping("/downloadImage")
+    public String downloadImages(String xml) {
+        String result = ncService.downloadImages(xml);
+        NcResult ncResult = new NcResult(NcCodeEnum.NC_SUCCESS_STATE.getCode(),NcCodeEnum.NC_SUCCESS_STATE.getCodeName(),result);
         return JsonUtils.toJsonString(ncResult);
     }
 }

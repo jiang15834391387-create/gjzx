@@ -41,4 +41,13 @@ public interface IDataImageFilesInfoService {
      * @return {@link DataImageFilesInfo}
      */
     List<DataImageFilesInfo> selectDataImageFilesInfoListByFileIdList(List<String> fileIds);
+
+    /**
+     * 根据BatchId和Cip查询
+     *
+     * @param batchId 此批号
+     * @param cip 来源
+     * @return DataImageFilesInfo
+     */
+    List<DataImageFilesInfo> selectByBatchIdAndCip(String batchId , String cip);
 }

@@ -12,13 +12,11 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.jetbrains.annotations.NotNull;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.oss.factory.OssFactory;
 import org.smartlink.common.redis.utils.RedisUtils;
-import org.smartlink.web.constant.Constants;
-import org.smartlink.web.constant.ParamConstants;
-import org.smartlink.web.constant.ScanTypeConstants;
-import org.smartlink.web.constant.TaskStateConstants;
+import org.smartlink.web.constant.*;
 import org.smartlink.web.domain.*;
 import org.smartlink.web.domain.dto.NcDeleteServiceDTO;
 import org.smartlink.web.domain.invoice.bo.DataCurrentTaskBo;
@@ -39,10 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -65,6 +60,8 @@ public class NcServiceImpl implements NcService {
     private final IDataCmInfoService dataCmInfoService;
     private final IDataImageFilesInfoService dataImageFilesInfoService;
     private final IDataOcrService iDataOcrService;
+
+    private List invoiceList = Arrays.asList(InvoiceConstants.TAX_SPECIAL_INVOICE,InvoiceConstants.TAX_INVOICE,InvoiceConstants.ELECTRONIC_INVOICE,InvoiceConstants.ROLL_TICKET,InvoiceConstants.ELECTRONIC_OFD_INVOICE,InvoiceConstants.ELECTRONIC_INVOICE_ITINERARY,InvoiceConstants.MOTOR_VEHICLE_SALE,InvoiceConstants.USED_CAR_SALES,InvoiceConstants.QUOTA_INVOICE,InvoiceConstants.AIRCRAFT_INVOICE,InvoiceConstants.TAXI_TICKETS,InvoiceConstants.RAILWAY_TICKET,InvoiceConstants.PASSENGER_TICKET,InvoiceConstants.FLIGHT_ITINERARY,InvoiceConstants.STEAMER_TICKET,InvoiceConstants.TOLL_ROADS,InvoiceConstants.RECEIPT,InvoiceConstants.ELECTRONIC_INVOICE_QUKUAILIAN,InvoiceConstants.INVOICE_MUCH_NCC,InvoiceConstants.INVOICE_OTHERS);
 
     @Autowired
     public TestOpenApiRequestData testOpenApiRequestData;
@@ -347,7 +344,7 @@ public class NcServiceImpl implements NcService {
                             ncDeleteServiceDTO.setBusinessSerialNo(businessSerialNo);
                             NcConfigFactory.instance().deleteNcInvoiceDataBusinessService(ncDeleteServiceDTO);
                         }
-                        if(CollectionUtil.isNotEmpty(fileIdList)){
+                        if (CollectionUtil.isNotEmpty(fileIdList)) {
                             // 删除OCR信息
                             this.iDataOcrService.deleteMultipleFile(fileIdList);
                         }
@@ -471,7 +468,7 @@ public class NcServiceImpl implements NcService {
                     currentTask.setBillType(billType);
                     currentTask.setPkBillType(pkBillType);
                     List<DataBillType> dataBillTypes = billTypeService.listDataBillTypeByTypeCode(pkBillType);
-                    String billTypeName = CollectionUtil.isNotEmpty(dataBillTypes) && dataBillTypes.size()>0?dataBillTypes.get(0).getTypeName():"未知业务单据";
+                    String billTypeName = CollectionUtil.isNotEmpty(dataBillTypes) && dataBillTypes.size() > 0 ? dataBillTypes.get(0).getTypeName() : "未知业务单据";
                     currentTask.setBillTypeName(billTypeName);
                     currentTask.setTradeTypeName(billTypeName);
                     currentTask.setUserId(userId);
@@ -489,7 +486,7 @@ public class NcServiceImpl implements NcService {
             urlResponse.put("ip", systemIp);
             urlResponse.put("port", systemPort);
             Map<String, Object> urlMap = new HashMap<>();
-            String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()),userNo);
+            String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()), userNo);
             String url = "";
             //  流水号字段为空为专岗扫描场景，反之为单扫场景
             if (StrUtil.isNotEmpty(businessSerialNo)) {
@@ -515,7 +512,7 @@ public class NcServiceImpl implements NcService {
                 urlMap.put("userId", userId);
                 urlMap.put("linksSource", Constants.LINKS_SOURCE);
             }
-            if(ObjectUtil.isNotEmpty(treeNode)){//自定义节点有值，将&treeNode=放到url中
+            if (ObjectUtil.isNotEmpty(treeNode)) {//自定义节点有值，将&treeNode=放到url中
                 urlMap.put("treeNode", treeNode);
             }
             url = ResultUtil.getUrl(url, urlMap);
@@ -580,13 +577,13 @@ public class NcServiceImpl implements NcService {
             if (ObjectUtil.isNotEmpty(dataCmInfoList)) {
                 batchIdList = dataCmInfoList.stream().map(DataCmInfo::getBatchId).collect(Collectors.toList());
             }
-            if(batchIdList.size()>0){
+            if (batchIdList.size() > 0) {
                 List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectAllByBatchIdList(batchIdList);
                 if (ObjectUtil.isNotEmpty(dataImageFilesInfoList)) {
                     imageCount = dataImageFilesInfoList.size();
                 }
             }
-            String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()),null);
+            String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()), null);
             String url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + token;
             Map<String, Object> urlMap = new HashMap<>();
 
@@ -605,5 +602,137 @@ public class NcServiceImpl implements NcService {
         String respXML = ResultUtil.getRespXML(code, message, dataResponse);
         log.info("影像系统接口-获取查看链接接口成功返回报文：" + respXML);
         return respXML;
+    }
+
+    @Override
+    public String updateBillNo(String xml) {
+        log.info("更新单据号接口请求报文：" + xml);
+        String code;
+        String message;
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("更新单据号接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        // xml数据格式校验
+        boolean xmlDataVerify = XmlUtil.xmlDataVerify(rootElement);
+        if (xmlDataVerify) {
+            Element billBody = rootElement.element("BillBody");
+            // 旧单据号 或 旧流水号
+            String billId = billBody.elementText("billID").trim();
+            // 新单据号
+            String billNo = billBody.elementText("billNo").trim();
+            DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(billId);
+            if (ObjectUtil.isNotEmpty(dataCurrentTask)) {
+                dataCurrentTask.setBillNum(billNo);
+                dataCurrentTask.updateById();
+                code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+                message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+            } else {
+                code = NcCodeEnum.NC_TASK_NO_EXISTS.getCode();
+                message = NcCodeEnum.NC_TASK_NO_EXISTS.getCodeName();
+            }
+
+        } else {
+            code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
+            message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
+        }
+        String respXML = ResultUtil.getRespXML(code, message, null);
+        log.info("影像系统接口-更改单据号接口返回报文：" + respXML);
+        return respXML;
+    }
+
+    @Override
+    public String downloadImages(String xml) {
+        log.info("电子档案下载接口请求报文：" + xml);
+        String resultStr = "";
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("电子档案下载接口异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        Integer nccVersion = Integer.valueOf(NcProperties.getDefaultPropertiesInfo().getString("nccVersion"));
+        String businessSerialNosStr = rootElement.element("BUSI_SERIAL_NOS").getTextTrim();
+        if (StrUtil.isNotEmpty(businessSerialNosStr)) {
+            List<String> stringList = StrUtil.split(businessSerialNosStr, ",");
+            if (CollectionUtil.isNotEmpty(stringList)) {
+                // NCC2411版本开始返回结构有变动
+                if(nccVersion.compareTo(2411)>=0){
+                    for (int i = 0; i < stringList.size(); i++) {
+                        String businessSerialNo = stringList.get(i);
+                        List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
+                        if (CollectionUtil.isNotEmpty(dataCmInfoList)) {
+                            String urlStr = "";
+                            DataCmInfo dataCmInfo = dataCmInfoList.get(0);
+                            List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchIdAndCip(dataCmInfo.getBatchId(),Constants.YBZ);
+                            if (CollectionUtil.isNotEmpty(dataImageFilesInfoList)) {
+                                String items = "<ITEMS>";
+                                for (int j = 0; j < dataImageFilesInfoList.size(); j++) {
+                                    DataImageFilesInfo dataImageFilesInfo = dataImageFilesInfoList.get(j);
+                                    String fileName = dataImageFilesInfo.getFileName();
+                                    String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+                                    String url = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CONFIG_IP) + ":" + RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CONFIG_PORT) + dataImageFilesInfo.getIurl() + "?ext=" + suffix;
+                                    urlStr += "<URL>" +  url+ "</URL>";
+                                    boolean isInvoice = false;
+                                    if(invoiceList.contains(dataImageFilesInfo.getFileType())){
+                                        isInvoice = true;
+                                    }
+                                    String item = "<ITEM><URL>"+url+"</URL><FILE_NAME>"+dataImageFilesInfo.getFileName()+"</FILE_NAME><FILE_TYPE>"+suffix+"</FILE_TYPE><IS_INVOICE>"+isInvoice+"</IS_INVOICE></ITEM>";
+                                    items += item;
+                                }
+                                items += "</ITEMS>";
+                                String businessS = "<BUSI_SERIAL_NO>" + businessSerialNo + "</BUSI_SERIAL_NO>";
+                                resultStr += "<BILL>" + businessS + urlStr + items+"</BILL>";
+                            }else {
+                                resultStr = buildResponse(businessSerialNo, resultStr);
+                            }
+                        } else {
+                            resultStr = buildResponse(businessSerialNo, resultStr);
+                        }
+                    }
+                }else{
+                    for (int i = 0; i < stringList.size(); i++) {
+                        String businessSerialNo = stringList.get(i);
+                        List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
+                        if (CollectionUtil.isNotEmpty(dataCmInfoList)) {
+                            String urlStr = "";
+                            DataCmInfo dataCmInfo = dataCmInfoList.get(0);
+                            List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchIdAndCip(dataCmInfo.getBatchId(),Constants.YBZ);
+                            if (CollectionUtil.isNotEmpty(dataImageFilesInfoList)) {
+                                for (int j = 0; j < dataImageFilesInfoList.size(); j++) {
+                                    DataImageFilesInfo dataImageFilesInfo = dataImageFilesInfoList.get(j);
+                                    String fileName = dataImageFilesInfo.getFileName();
+                                    String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
+                                    urlStr += "<URL>" + RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CONFIG_IP) + ":" + RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CONFIG_PORT) + dataImageFilesInfo.getIurl() + "?ext=" + suffix + "</URL>";
+                                }
+                                String businessS = "<BUSI_SERIAL_NO>" + businessSerialNo + "</BUSI_SERIAL_NO>";
+                                resultStr += "<BILL>" + businessS + urlStr + "</BILL>";
+                            }else {
+                                resultStr = buildResponse(businessSerialNo, resultStr);
+                            }
+                        } else {
+                            resultStr = buildResponse(businessSerialNo, resultStr);
+                        }
+                    }
+                }
+            }
+        }
+        String resultXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+            "<DATA>" + resultStr + "</DATA>";
+        log.info("影像系统接口-电子档案下载接口返回报文：" + resultXml);
+        return resultXml;
+    }
+
+    @NotNull
+    private static String buildResponse(String businessSerialNo, String resultStr) {
+        String businessStr = "<BUSI_SERIAL_NO>" + businessSerialNo + "</BUSI_SERIAL_NO>";
+        resultStr += "<BILL>" + businessStr + "</BILL>";
+        return resultStr;
     }
 }
