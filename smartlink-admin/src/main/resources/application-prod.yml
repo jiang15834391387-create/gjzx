@@ -264,3 +264,7 @@ runjian:
   relObjectIdUrl: /file/v1/relObjectId
   fileInfoUrl: /file/v1/fileInfo
   fileViewUrl: /file/v1/fileViewUrl
+zhiyun:
+  baseUrl: https://sso.runjian.com:31026
+  appKey: ycyth
+  appSecret: 3heTHRci8923pspMPrFqiZ2UMzPOhjHu
