@@ -2,6 +2,7 @@ package org.smartlink.web.service.nc.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
@@ -875,6 +876,74 @@ public class NcServiceImpl implements NcService {
         }
         String respXML = ResultUtil.getRespXML(code, message, dataResponse);
         log.info("影像系统接口-获取凭证影像查看接口成功返回报文：" + respXML);
+        return respXML;
+    }
+
+    @Override
+    public String invoiceScan(String xml) {
+        log.info("NC获取收票节点发票扫描链接请求报文：" + xml);
+        String code;
+        String message;
+        Map<String, Object> dataResponse = null;
+        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
+        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("收票节点发票扫描链接接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        // xml数据格式校验
+        boolean xmlDataVerify = XmlUtil.xmlDataVerify(rootElement);
+        if (xmlDataVerify) {
+            dataResponse = new HashMap<>();
+            Element body = rootElement.element("Body");
+            String orgNoV = body.elementText("OrgNoV");
+            String billType = body.elementText("BillType");
+            String pkBillType = body.elementText("pk_billtype");
+            String ocrType = body.elementText("ocrType");
+            String userNo = body.elementText("UserNo");
+            if (StrUtil.isEmpty(orgNoV)) {
+                orgNoV = IdUtil.fastSimpleUUID();
+            }
+            SysUser sysUser = sysUserService.selectSysUserByUserNo(userNo);
+            // 判断系统内是否同步了基础用户数据
+            if (ObjectUtil.isEmpty(sysUser)) {
+                return ResultUtil.getRespXML(NcCodeEnum.NC_NOT_SYNC_DATA.getCode(), NcCodeEnum.NC_NOT_SYNC_DATA.getCodeName(), null);
+            }
+            String token = externalTokenService.getNccToken(null,null);
+            String url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
+            JSONObject urlResponse = new JSONObject();
+            Map<String, Object> urlMap = new HashMap<>();
+            DataCurrentTask currentTask = new DataCurrentTask();
+            currentTask.setUserId(sysUser.getNcUserId());
+            currentTask.setBusinessSerialNo(orgNoV);
+            currentTask.setBillType(pkBillType);
+            currentTask.setPkBillType(billType);
+            currentTask.setOrgCode(orgNoV);
+            currentTask.setOcrType(ocrType);
+            currentTask.setBillTypeName("收票业务节点");
+            currentTask.setTradeTypeName("收票业务节点");
+            currentTask.setTaskState(TaskStateConstants.TASK_STATE_SCAN);
+            dataCurrentTaskService.insertOrUpdateDataCurrentTaskByBusinessSerialNo(currentTask);
+            urlMap.put("businessSerialNo", currentTask.getBusinessSerialNo());
+            // isTicket 1：收票节点发票上传  2：收票节点文件上传  其他：非收票节点
+            urlMap.put("collectInvoice", "1");
+            url = ResultUtil.getUrl(url, urlMap);
+            urlResponse.put("ip", systemIp);
+            urlResponse.put("port", systemPort);
+            urlResponse.put("url_opensoft", url);
+            dataResponse.put("RspUrl", JSON.toJSONString(urlResponse));
+            code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+            message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+        } else {
+            code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
+            message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
+        }
+        String respXML = ResultUtil.getRespXML(code, message, dataResponse);
+        log.info("影像系统接口-获取收票发票扫描接口成功返回报文：" + respXML);
         return respXML;
     }
 }

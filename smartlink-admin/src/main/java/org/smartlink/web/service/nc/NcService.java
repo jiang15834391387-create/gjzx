@@ -93,4 +93,11 @@ public interface NcService {
      * @return 返回结果
      */
     String getCombineImageShowUrl(String xml);
+
+    /**
+     * 收票发票上传节点获取影像扫描链接
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String invoiceScan(String xml);
 }

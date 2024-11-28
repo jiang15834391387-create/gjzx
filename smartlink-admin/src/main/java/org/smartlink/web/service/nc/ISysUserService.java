@@ -40,4 +40,11 @@ public interface ISysUserService {
      * @return 用户对象信息
      */
     SysUser selectUserById(Long userId);
+
+    /**
+     * 根据NC传递的userNo查询用户信息
+     * @param userNo
+     * @return
+     */
+    SysUser selectSysUserByUserNo(String userNo);
 }
