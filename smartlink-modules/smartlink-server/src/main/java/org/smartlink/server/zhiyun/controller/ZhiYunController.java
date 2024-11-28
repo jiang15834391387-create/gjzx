@@ -7,10 +7,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * 智云单点登录接口
+ * 账号：85026
+ * 秘密：219#yfb@rjgf.com
+ *
+ * 测试账号：102747
+ * 测试密码：219#yfb@rjgf.com
  *
  * @author: 马旭辉
  */
@@ -22,6 +28,17 @@ public class ZhiYunController {
 
     public ZhiYunController(ZhiYunService zhiYunService) {
         this.zhiYunService = zhiYunService;
+    }
+
+    /**
+     * 获取智云URL
+     *
+     * @return 智云URL
+     */
+    @ResponseBody
+    @GetMapping("getZhiYunUrl")
+    public R<String> getZhiYunUrl() {
+        return R.ok(this.zhiYunService.getZhiYunUrl());
     }
 
     /**
@@ -43,6 +60,7 @@ public class ZhiYunController {
      * @param code code
      * @return token
      */
+    @ResponseBody
     @GetMapping("getZhiYunToken")
     public R<String> getZhiYunToken(@RequestParam("code") String code) {
         return null;

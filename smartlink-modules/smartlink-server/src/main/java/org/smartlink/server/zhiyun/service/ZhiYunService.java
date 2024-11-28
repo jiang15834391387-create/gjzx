@@ -9,6 +9,14 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author: 马旭辉
  */
 public interface ZhiYunService {
+
+    /**
+     * 获取智云URL
+     *
+     * @return 智云URL
+     */
+    String getZhiYunUrl();
+
     /**
      * 根据智云code获取用户信息，然后登录影像系统
      *
