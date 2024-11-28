@@ -151,4 +151,17 @@ public class NccHttpController {
         NcResult ncResult = new NcResult(NcCodeEnum.NC_SUCCESS_STATE.getCode(),NcCodeEnum.NC_SUCCESS_STATE.getCodeName(),result);
         return JsonUtils.toJsonString(ncResult);
     }
+
+    /**
+     * NCC驳回单据调用 驳回影像状态
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("驳回单据时调用驳回影像状态")
+    @PostMapping("/rejectImageOnBillReject")
+    public String rejectImageOnBillReject(String xml) throws DocumentException {
+        String result = ncService.rejectImageOnBillReject(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
 }

@@ -72,4 +72,11 @@ public interface NcService {
      * @return 返回结果
      */
     String downloadImages(String xml);
+
+    /**
+     * 驳回影像状态
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String rejectImageOnBillReject(String xml);
 }

@@ -735,4 +735,42 @@ public class NcServiceImpl implements NcService {
         resultStr += "<BILL>" + businessStr + "</BILL>";
         return resultStr;
     }
+
+    @Override
+    public String rejectImageOnBillReject(String xml) {
+        log.info("NC单据驳回影像状态请求报文：" + xml);
+        String code;
+        String message;
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("单据驳回影像状态接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        // xml数据格式校验
+        boolean xmlDataVerify = XmlUtil.xmlDataVerify(rootElement);
+        if (xmlDataVerify) {
+            Element billBody = rootElement.element("BillBody");
+            Element bill = billBody.element("Bill");
+            String businessSerialNo = bill.elementText("Busi_Serial_No");
+            DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
+            if (ObjectUtil.isEmpty(dataCurrentTask)) {
+                // 如果数据在影像系统不存在 提示业务系统单据不存在
+                return ResultUtil.getRespXML(NcCodeEnum.NC_TASK_NO_EXISTS.getCode(), NcCodeEnum.NC_TASK_NO_EXISTS.getCodeName(), null);
+            } else {
+                dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_BH_BS);
+                dataCurrentTaskService.updateDataCurrentTask(dataCurrentTask);
+                code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+                message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+            }
+        } else {
+            code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
+            message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
+        }
+        String respXML = ResultUtil.getRespXML(code, message, null);
+        log.info("影像系统接口-驳回影像状态接口成功返回报文：" + respXML);
+        return respXML;
+    }
 }
