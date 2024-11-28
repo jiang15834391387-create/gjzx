@@ -203,4 +203,17 @@ public class NccHttpController {
         NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
         return JsonUtils.toJsonString(ncResult);
     }
+
+    /**
+     * 更改影像状态
+     * @param xml 入参数
+     * @return 结果
+     */
+    @ApiOperation("更改影像状态")
+    @PostMapping("/updateimagestate")
+    public String updateImageState(String xml) throws DocumentException {
+        String result = ncService.updateImageState(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
 }

@@ -100,4 +100,11 @@ public interface NcService {
      * @return 返回结果
      */
     String invoiceScan(String xml);
+
+    /**
+     * 更改影像状态
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String updateImageState(String xml);
 }

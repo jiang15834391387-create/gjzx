@@ -946,4 +946,38 @@ public class NcServiceImpl implements NcService {
         log.info("影像系统接口-获取收票发票扫描接口成功返回报文：" + respXML);
         return respXML;
     }
+
+    @Override
+    public String updateImageState(String xml) {
+        log.info("更改影像状态接口请求报文：" + xml);
+        Document document;
+        String code;
+        String message;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("更改影像状态接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        // xml数据格式校验
+        boolean xmlDataVerify = XmlUtil.xmlDataVerify(rootElement);
+        if (xmlDataVerify) {
+            Element billBody = rootElement.element("BillBody");
+            Element service = billBody.element("service");
+            String businessSerialNo = service.elementText("Busi_Serial_No");
+            String imageState = service.elementText("imagastate");
+            DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
+            dataCurrentTask.setTaskState(imageState);
+            dataCurrentTaskService.insertOrUpdateDataCurrentTaskByBusinessSerialNo(dataCurrentTask);
+            code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+            message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+        } else {
+            code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
+            message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
+        }
+        String resXml = ResultUtil.getRespXML(code, message, null);
+        log.info("更改影像状态接口返回报文：" + resXml);
+        return resXml;
+    }
 }
