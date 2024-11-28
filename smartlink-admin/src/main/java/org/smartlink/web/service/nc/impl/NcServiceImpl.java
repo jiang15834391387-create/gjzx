@@ -773,4 +773,57 @@ public class NcServiceImpl implements NcService {
         log.info("影像系统接口-驳回影像状态接口成功返回报文：" + respXML);
         return respXML;
     }
+
+    @Override
+    public String fileScan(String xml) {
+        log.info("NC获取收票节点文件上传链接请求报文：" + xml);
+        String code;
+        String message;
+        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
+        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
+        Map<String, Object> dataResponse = null;
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("收票节点文件上传链接接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXML(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null);
+        }
+        Element rootElement = document.getRootElement();
+        // xml数据格式校验
+        boolean xmlDataVerify = XmlUtil.xmlDataVerify(rootElement);
+        if (xmlDataVerify) {
+            dataResponse = new HashMap<>();
+            Element billBody = rootElement.element("Body");
+            String businessSerialNo = billBody.elementText("New_Busi_Serial_No");
+            String ocrType = billBody.elementText("ocrType");
+            String token = externalTokenService.getNccToken(null,null);
+            String url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
+            JSONObject urlResponse = new JSONObject();
+            Map<String, Object> urlMap = new HashMap<>();
+            DataCurrentTask currentTask = new DataCurrentTask();
+            currentTask.setBusinessSerialNo(businessSerialNo);
+            currentTask.setOcrType(ocrType);
+            currentTask.setTaskState(TaskStateConstants.TASK_STATE_SCAN);
+            currentTask.setBillTypeName("收票业务节点");
+            currentTask.setTradeTypeName("收票业务节点");
+            dataCurrentTaskService.insertOrUpdateDataCurrentTaskByBusinessSerialNo(currentTask);
+            urlMap.put("businessSerialNo", currentTask.getBusinessSerialNo());
+            // isTicket 1：收票节点发票上传  2：收票节点文件上传  其他：非收票节点
+            urlMap.put("collectInvoice", "2");
+            url = ResultUtil.getUrl(url, urlMap);
+            urlResponse.put("ip", systemIp);
+            urlResponse.put("port", systemIp);
+            urlResponse.put("url_opensoft", url);
+            dataResponse.put("RspUrl", JSON.toJSONString(urlResponse));
+            code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+            message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+        } else {
+            code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
+            message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
+        }
+        String respXML = ResultUtil.getRespXML(code, message, dataResponse);
+        log.info("影像系统接口-获取收票附件上传接口成功返回报文：" + respXML);
+        return respXML;
+    }
 }

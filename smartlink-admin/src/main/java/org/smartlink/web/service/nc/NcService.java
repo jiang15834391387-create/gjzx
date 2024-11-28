@@ -79,4 +79,11 @@ public interface NcService {
      * @return 返回结果
      */
     String rejectImageOnBillReject(String xml);
+
+    /**
+     * 收票文件上传节点获取影像扫描链接
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String fileScan(String xml);
 }

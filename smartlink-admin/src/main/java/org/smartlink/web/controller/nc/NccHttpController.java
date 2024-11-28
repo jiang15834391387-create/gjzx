@@ -164,4 +164,17 @@ public class NccHttpController {
         NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
         return JsonUtils.toJsonString(ncResult);
     }
+
+    /**
+     * 收票节点获取影像扫描链接 只能传普通文件上传
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("收票节点文件上传")
+    @PostMapping("/filescan")
+    public String fileScan(String xml) throws DocumentException {
+        String result = ncService.fileScan(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
 }
