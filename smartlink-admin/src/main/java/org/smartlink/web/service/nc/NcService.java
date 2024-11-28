@@ -86,4 +86,11 @@ public interface NcService {
      * @return 返回结果
      */
     String fileScan(String xml);
+
+    /**
+     * 凭证节点获取影像查看链接
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String getCombineImageShowUrl(String xml);
 }

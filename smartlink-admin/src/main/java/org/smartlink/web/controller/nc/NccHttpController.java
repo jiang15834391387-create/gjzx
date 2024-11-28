@@ -177,4 +177,17 @@ public class NccHttpController {
         NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
         return JsonUtils.toJsonString(ncResult);
     }
+
+    /**
+     * 凭证节点获取影像查看链接
+     * @param xml 入参
+     * @return 结果
+     */
+    @ApiOperation("凭证节点获取影像查看链接")
+    @PostMapping("/getCombineImageShowUrl")
+    public String getCombineImageShowUrl(String xml) throws DocumentException {
+        String result = ncService.getCombineImageShowUrl(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
 }
