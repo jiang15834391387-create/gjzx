@@ -21,7 +21,9 @@ import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.web.constant.*;
 import org.smartlink.web.domain.*;
 import org.smartlink.web.domain.dto.NcDeleteServiceDTO;
+import org.smartlink.web.domain.dto.NcUpdateTaskStateDTO;
 import org.smartlink.web.domain.invoice.bo.DataCurrentTaskBo;
+import org.smartlink.web.enums.NCCTaskStateEnum;
 import org.smartlink.web.enums.NcCodeEnum;
 import org.smartlink.web.factory.NcConfigFactory;
 import org.smartlink.web.ncc.testapi.TestApiService;
@@ -1040,5 +1042,121 @@ public class NcServiceImpl implements NcService {
         String resXml = ResultUtil.getRespXmlForMobile(NcCodeEnum.NC_SUCCESS_STATE.getCode(), NcCodeEnum.NC_SUCCESS_STATE.getCodeName(), dataResponse, map, batchId);
         log.info("移动审批获取图片列表接口返回报文：" + resXml);
         return resXml;
+    }
+
+    @Override
+    public DataCurrentTask submitTaskStateForNc(DataCurrentTask dataCurrentTask, String userId,String supplementaryScan) throws Exception {
+        String businessSerialNo = dataCurrentTask.getBusinessSerialNo();
+        String state = NCCTaskStateEnum.TASK_STATE_COMPLETE.getState();
+        List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
+        List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchId(dataCmInfoList.get(0).getBatchId());
+        List<DataImageFilesInfo> filterDataImageFilesInfoList = dataImageFilesInfoList.stream().filter((obj) -> !StrUtil.equals(obj.getFileStatus(), FileStatusConstants.INVOICE_CHECK_SUCCESS) && !StrUtil.equals(obj.getFileStatus(), FileStatusConstants.SAVED_SUCCESSFULLY) && !StrUtil.equals(obj.getFileStatus(), FileStatusConstants.INVOICE_UPDATE)).collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(filterDataImageFilesInfoList) && filterDataImageFilesInfoList.size() > 0) {
+            throw new Exception("提交影像状态失败，该单据下包含异常状态发票");
+        }
+        List<SysUser> sysUserList = sysUserService.selectListByNcUserId(userId);
+        if (CollectionUtil.isEmpty(sysUserList)) {
+            throw new Exception("提交影像状态失败，影像系统不存在该用户：" + userId);
+        }
+        NcUpdateTaskStateDTO updateTaskRequestParam;
+        // 如果是事后补扫场景 走相应的补扫同步状态接口
+        if(StrUtil.equals("Y",supplementaryScan)){
+            updateTaskRequestParam = this.getUpdateTaskRequestParam(businessSerialNo, sysUserList.get(0), "", new ArrayList<>());
+            updateTaskRequestParam.setDataCurrentTask(dataCurrentTask);
+            try {
+                callNcService.updateNcImageStateForReScan(updateTaskRequestParam);
+            } catch (Exception e) {
+                log.error("事后补扫同步状态失败：" + ExceptionUtil.getExceptionMessage(e));
+                throw new Exception("事后补扫同步状态失败：" + e.getLocalizedMessage());
+            }
+        }else{
+            // 若当前影像已经为驳回状态，则设置传给NC的state为补扫完成：5
+            if (StrUtil.equals(dataCurrentTask.getTaskState(), TaskStateConstants.TASK_STATE_BH_BS)) {
+                // 补扫提交
+                state = NCCTaskStateEnum.TASK_STATE_BS_COMPLETE.getState();
+                dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_BS_WC);
+            }else if(StrUtil.equals(dataCurrentTask.getTaskState(),TaskStateConstants.TASK_STATE_BH_CS)){
+                // 重扫提交
+                state = NCCTaskStateEnum.TASK_STATE_BS_COMPLETE.getState();
+                dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_CS_WC);
+            }else {
+                // 默认扫描成功状态
+                dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_COMPLETE);
+            }
+            dataCurrentTaskService.updateDataCurrentTask(dataCurrentTask);
+            updateTaskRequestParam = this.getUpdateTaskRequestParam(businessSerialNo, sysUserList.get(0), state, dataImageFilesInfoList);
+            updateTaskRequestParam.setDataCurrentTask(dataCurrentTask);
+            try {
+                callNcService.updateNcImageState(updateTaskRequestParam);
+            } catch (Exception e) {
+                log.error("提交影像状态失败：" + ExceptionUtil.getExceptionMessage(e));
+                throw new Exception("提交影像状态失败：" + e.getLocalizedMessage());
+            }
+        }
+        return dataCurrentTask;
+    }
+
+    /**
+     * 获取NC更新影像状态接口所需参数
+     *
+     * @param businessSerialNo 流水号
+     * @param sysUser          用户
+     * @param state            影像状态
+     * @return 结果
+     */
+    private NcUpdateTaskStateDTO getUpdateTaskRequestParam(String businessSerialNo, SysUser sysUser, String state, List<DataImageFilesInfo> dataImageFilesInfoList) {
+        String webUrl = NcProperties.getDefaultPropertiesInfo().getString("baseUrl") + NcProperties.getDefaultPropertiesInfo().getString("wsUrl");
+        NcUpdateTaskStateDTO ncUpdateTaskStateDTO = new NcUpdateTaskStateDTO();
+        // 需影像状态变更时，需通知给NC影像数量
+        int imageCount = 0;
+        int invoiceCount = 0;
+        if (ObjectUtil.isNotEmpty(dataImageFilesInfoList)) {
+            imageCount = dataImageFilesInfoList.size();
+        }
+        for (DataImageFilesInfo dataImageFilesInfo : dataImageFilesInfoList) {
+            if (NcConstant.ALL_INVOICE_LIST.contains(dataImageFilesInfo.getFileType())) {
+                invoiceCount += 1;
+            }
+        }
+        ncUpdateTaskStateDTO.setImageCount(imageCount);
+        ncUpdateTaskStateDTO.setInvoiceCount(invoiceCount);
+        ncUpdateTaskStateDTO.setSysUser(sysUser);
+        ncUpdateTaskStateDTO.setState(state);
+        ncUpdateTaskStateDTO.setFactoryCode(NcProperties.getDefaultPropertiesInfo().getString("factoryCode"));
+        ncUpdateTaskStateDTO.setDataSource(NcProperties.getDefaultPropertiesInfo().getString("dataSource"));
+        ncUpdateTaskStateDTO.setWebUrl(webUrl);
+        return ncUpdateTaskStateDTO;
+    }
+    @Override
+    public DataCurrentTask rejectTaskStateForNc(DataCurrentTask dataCurrentTask, String userId, String taskState) throws Exception {
+        String businessSerialNo = dataCurrentTask.getBusinessSerialNo();
+        List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
+        List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchId(dataCmInfoList.get(0).getBatchId());
+        List<SysUser> sysUserList = sysUserService.selectListByNcUserId(userId);
+        if (ObjectUtil.isEmpty(dataCurrentTask)) {
+            throw new Exception("驳回影像状态失败，对应影像任务不存在，流水号：" + businessSerialNo);
+        }
+        if (ObjectUtil.isEmpty(sysUserList)) {
+            throw new Exception("驳回影像状态失败，影像系统不存在该用户：" + userId);
+        }
+        if (taskState.equalsIgnoreCase(TaskStateConstants.TASK_STATE_BH_CS)){
+            //驳回重扫
+            dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_BH_CS);
+        }
+        if (taskState.equalsIgnoreCase(TaskStateConstants.TASK_STATE_BH_BS)){
+            //驳回补扫
+            dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_BH_BS);
+        }
+        taskState= NCCTaskStateEnum.TASK_STATE_BS.getState();
+        dataCurrentTaskService.updateDataCurrentTask(dataCurrentTask);
+        NcUpdateTaskStateDTO updateTaskRequestParam = this.getUpdateTaskRequestParam(businessSerialNo, sysUserList.get(0), taskState, dataImageFilesInfoList);
+        updateTaskRequestParam.setDataCurrentTask(dataCurrentTask);
+        try {
+            callNcService.updateNcImageState(updateTaskRequestParam);
+        } catch (Exception e) {
+            log.error("驳回影像状态失败：" + ExceptionUtil.getExceptionMessage(e));
+            throw new Exception("驳回影像状态失败：" + e.getLocalizedMessage());
+        }
+        return dataCurrentTask;
     }
 }

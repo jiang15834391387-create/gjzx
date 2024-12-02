@@ -282,4 +282,30 @@ public class DataOcrServiceImpl implements IDataOcrService {
         }
         return baseEntity;
     }
+    @Override
+    public R<Void> ocrUpdateByBaseEntity(String fileType, BaseEntity t) throws ClassNotFoundException {
+        Map<String, Object> map = BeanUtil.beanToMap(t);
+        map.put("type", fileType);
+        if (ObjectUtil.isEmpty(map.get("type"))) {
+            return R.fail("发票类型为空");
+        }
+        //插入或更新
+        if (StrUtil.isEmpty(InvoiceConstants.INVOICE_ClASS_TYPE.get(fileType))) {
+            return R.ok();
+        }
+        BaseEntity baseEntity = (BaseEntity) BeanUtil.toBean(map, Class.forName(InvoiceConstants.INVOICE_ClASS_TYPE.get(fileType)));
+        baseEntity.updateById();
+        List<BaseEntity> list;
+        if (baseEntity instanceof DataFlightItinerary) {
+            list = (List<BaseEntity>) map.get("dataFlights");
+        } else {
+            list = (List<BaseEntity>) map.get("details");
+        }
+        if (list != null) {
+            for (BaseEntity entity : list) {
+                entity.insertOrUpdate();
+            }
+        }
+        return R.ok();
+    }
 }

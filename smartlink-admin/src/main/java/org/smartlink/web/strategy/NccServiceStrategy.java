@@ -80,6 +80,7 @@ public class NccServiceStrategy extends AbstractNCStrategy{
     private ISysDeptService sysDeptService;
     private IDataOcrService dataOcrService;
     private NccTaxVerifyDisposeInvoiceService nccVerifyDisposeInvoiceService;
+    private NcService ncService;
     @Override
     public void deleteNcInvoiceDataBusinessService(NcDeleteServiceDTO ncDeleteServiceDTO) throws Exception {
         DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(ncDeleteServiceDTO.getBusinessSerialNo());
@@ -295,12 +296,12 @@ public class NccServiceStrategy extends AbstractNCStrategy{
     }
     @Override
     public DataCurrentTask submitTaskStateToBusinessService(TaskSubmitDTO taskSubmitDTO) throws Exception {
-        return null;
+        return ncService.submitTaskStateForNc(taskSubmitDTO.getDataCurrentTask(),taskSubmitDTO.getUserId(),taskSubmitDTO.getSupplementaryScan());
     }
 
     @Override
     public DataCurrentTask rejectTaskStateBusinessService(UpdateTaskDTO updateTaskDTO) throws Exception {
-        return null;
+        return ncService.rejectTaskStateForNc(updateTaskDTO.getDataCurrentTask(),updateTaskDTO.getUserId(),updateTaskDTO.getUpdateState());
     }
 
     @Override

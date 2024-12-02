@@ -5,6 +5,7 @@ import org.smartlink.web.domain.DataBillType;
 import org.smartlink.web.domain.DataCurrentTask;
 import org.smartlink.web.domain.SysDept;
 import org.smartlink.web.domain.SysUser;
+import org.smartlink.web.domain.dto.NcUpdateTaskStateDTO;
 
 import java.util.List;
 
@@ -34,4 +35,19 @@ public interface CallNcService {
      * 拉取影像任务
      */
     DataCurrentTask synchronizeTaskFromNc(String factoryCode, String dataSource, String groupId, String barCode, String userId, String webUrl) throws Exception;
+
+    /**
+     * NCC下事后补扫场景提交后调用
+     * @param ncUpdateTaskStateDTO
+     * @return
+     */
+    String updateNcImageStateForReScan(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception;
+
+    /**
+     * 更改影像状态
+     * @param ncUpdateTaskStateDTO 对象
+     * @return 结果
+     * @throws Exception 异常
+     */
+    String updateNcImageState(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception;
 }

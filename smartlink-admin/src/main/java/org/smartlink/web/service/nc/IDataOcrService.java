@@ -79,4 +79,5 @@ public interface IDataOcrService {
      */
     BaseEntity ocrQueryByFileId(String fileId) throws ClassNotFoundException, IllegalAccessException, InstantiationException;
 
+    R<Void> ocrUpdateByBaseEntity(String fileType, BaseEntity t) throws ClassNotFoundException;
 }

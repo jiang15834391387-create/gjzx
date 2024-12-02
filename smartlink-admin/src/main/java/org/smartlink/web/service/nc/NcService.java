@@ -1,6 +1,7 @@
 package org.smartlink.web.service.nc;
 
 import org.smartlink.common.core.domain.R;
+import org.smartlink.web.domain.DataCurrentTask;
 
 public interface NcService {
     /**
@@ -114,4 +115,8 @@ public interface NcService {
      * @return 返回结果
      */
     String mobileImageQuery(String xml);
+
+    DataCurrentTask submitTaskStateForNc(DataCurrentTask dataCurrentTask, String userId, String supplementaryScan) throws Exception;
+
+    DataCurrentTask rejectTaskStateForNc(DataCurrentTask dataCurrentTask,String userId,String taskState) throws Exception;
 }

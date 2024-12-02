@@ -17,6 +17,7 @@ import org.smartlink.web.domain.DataBillType;
 import org.smartlink.web.domain.DataCurrentTask;
 import org.smartlink.web.domain.SysDept;
 import org.smartlink.web.domain.SysUser;
+import org.smartlink.web.domain.dto.NcUpdateTaskStateDTO;
 import org.smartlink.web.service.nc.CallNcService;
 import org.smartlink.web.utils.WebClientUtil;
 import org.smartlink.web.utils.WebServiceUtil;
@@ -309,6 +310,105 @@ public class CallNcServiceImpl implements CallNcService {
         xml.append("<opuseraccount></opuseraccount>");
         xml.append("</billinfo></params>");
         String xmlString = xml.toString();
+        return this.handleParameters(xmlString);
+    }
+
+    @Override
+    public String updateNcImageStateForReScan(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception {
+        String requestParam = this.getAfterImageRescanRequestParam(AFTER_IMAGE_RESCAN, ncUpdateTaskStateDTO.getFactoryCode(), ncUpdateTaskStateDTO.getDataSource(), ncUpdateTaskStateDTO.getDataCurrentTask(), ncUpdateTaskStateDTO.getSysUser());
+        log.info("事后补扫场景下调用NC业务系统同步状态请求报文：" + requestParam);
+        Element ncWsResult = this.getNcWsResult(ncUpdateTaskStateDTO.getWebUrl(), requestParam);
+        final String ncResult = ncWsResult.elementText(NC_WS_RESULT);
+        if (!NC_WS_SUCCESS_RESULT.equals(ncResult)) {
+            log.error("事后补扫场景下调用NC业务系统同步状态失败:" + ncResult);
+        }
+        return ncResult;
+    }
+
+    @Override
+    public String updateNcImageState(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception {
+        String requestParam = this.getUpdateTaskStateRequestParam(UPDATE_IMAGE_STATE_NAMESPACE, ncUpdateTaskStateDTO.getFactoryCode(), ncUpdateTaskStateDTO.getDataSource(), ncUpdateTaskStateDTO.getDataCurrentTask(), ncUpdateTaskStateDTO.getSysUser(), ncUpdateTaskStateDTO.getState(), ncUpdateTaskStateDTO.getImageCount(), ncUpdateTaskStateDTO.getInvoiceCount());
+        log.info("调用NC业务系统更改影像状态请求报文：" + requestParam);
+        Element ncWsResult = this.getNcWsResult(ncUpdateTaskStateDTO.getWebUrl(), requestParam);
+        final String ncResult = ncWsResult.elementText(NC_WS_RESULT);
+        if (!NC_WS_SUCCESS_RESULT.equals(ncResult)) {
+            log.error("请求NC接口更改影像状态失败:" + ncResult);
+        }
+        return ncResult;
+    }
+
+    /**
+     * 组装更改影像状态所需参数
+     *
+     * @param serverName      服务名称
+     * @param factoryCode     厂商编码
+     * @param dataSource      数据源
+     * @param dataCurrentTask 任务对象
+     * @param user            用户对象
+     * @param state           影像状态
+     * @param imageCount      文件中数量
+     * @param invoiceCount    发票数量
+     * @return 返回
+     */
+    private String getUpdateTaskStateRequestParam(String serverName, String factoryCode, String dataSource, DataCurrentTask dataCurrentTask, SysUser user, String state, int imageCount, int invoiceCount) {
+        StringBuilder reqxml = new StringBuilder();
+        reqxml.append("<params>");
+        reqxml.append("<factorycode>").append(factoryCode).append("</factorycode>");
+        reqxml.append("<servername>").append(serverName).append("</servername>");
+        reqxml.append("<datasource>").append(dataSource).append("</datasource>");
+        reqxml.append("<billinfo>");
+        reqxml.append("<datasource>").append(dataSource).append("</datasource>");
+        reqxml.append("<billcode>").append(dataCurrentTask.getBusinessSerialNo()).append("</billcode>");
+        reqxml.append("<state>").append(state).append("</state>");
+        reqxml.append("<billtype>").append(dataCurrentTask.getPkBillType()).append("</billtype>");
+        reqxml.append("<pk_billtype>").append(dataCurrentTask.getBillType()).append("</pk_billtype>");
+        reqxml.append("<imagenum>").append(imageCount).append("</imagenum>");
+        reqxml.append("<invoicenum>").append(invoiceCount).append("</invoicenum>");
+        reqxml.append("<OrgNo>").append(dataCurrentTask.getOrgCode()).append("</OrgNo>");
+        reqxml.append("<groupid>").append(dataCurrentTask.getGroupId()).append("</groupid>");
+        reqxml.append("<opuserdatetime>").append(DateUtil.formatDateTime(new Date())).append("</opuserdatetime>");
+        reqxml.append("<opusername></opusername>");
+        reqxml.append("<opuserpk>").append(user.getNcUserId()).append("</opuserpk>");
+        reqxml.append("<opuseraccount>").append(user.getUserName()).append("</opuseraccount>");
+        reqxml.append("<scantype>").append(dataCurrentTask.getScanType()).append("</scantype>");
+        reqxml.append("</billinfo>");
+        reqxml.append("</params>");
+        String xmlString = reqxml.toString();
+        return this.handleParameters(xmlString);
+    }
+    /**
+     * 组装事后补扫同步状态所需参数
+     *
+     * @param serverName      服务名称
+     * @param factoryCode     厂商编码
+     * @param dataSource      数据源
+     * @param dataCurrentTask 任务对象
+     * @param user            用户对象
+     * @return 返回
+     */
+    private String getAfterImageRescanRequestParam(String serverName, String factoryCode, String dataSource, DataCurrentTask dataCurrentTask, SysUser user) {
+        StringBuilder reqxml = new StringBuilder();
+        reqxml.append("<params>");
+        reqxml.append("<factorycode>").append(factoryCode).append("</factorycode>");
+        reqxml.append("<servername>").append(serverName).append("</servername>");
+        reqxml.append("<datasource>").append(dataSource).append("</datasource>");
+        reqxml.append("<billinfo>");
+        reqxml.append("<datasource>").append(dataSource).append("</datasource>");
+        reqxml.append("<billid>").append(dataCurrentTask.getBusinessSerialNo()).append("</billid>");
+        reqxml.append("<billno>").append(dataCurrentTask.getBillNum()).append("</billno>");
+        reqxml.append("<billtypecode>").append(dataCurrentTask.getBillType()).append("</billtypecode>");
+        reqxml.append("<transtypecode>").append(dataCurrentTask.getPkBillType()).append("</transtypecode>");
+        reqxml.append("<pk_org>").append(dataCurrentTask.getOrgCode()).append("</pk_org>");
+        reqxml.append("<billdate>").append(DateUtil.format(dataCurrentTask.getBillDate(), "yyyy-MM-dd")).append("</billdate>");
+        reqxml.append("<time>").append(DateUtil.formatDateTime(new Date())).append("</time>");
+        reqxml.append("<amount>").append(dataCurrentTask.getCash()).append("</amount>");
+        reqxml.append("<billmaker>").append(dataCurrentTask.getUserId()).append("</billmaker>");
+        reqxml.append("<userid>").append(user.getNcUserId()).append("</userid>");
+        reqxml.append("<opuseraccount>").append(user.getUserName()).append("</opuseraccount>");
+        reqxml.append("<scantype>").append(dataCurrentTask.getScanType()).append("</scantype>");
+        reqxml.append("</billinfo>");
+        reqxml.append("</params>");
+        String xmlString = reqxml.toString();
         return this.handleParameters(xmlString);
     }
 }
