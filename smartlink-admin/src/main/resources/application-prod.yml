@@ -270,3 +270,4 @@ zhiyun:
   appSecret: 3heTHRci8923pspMPrFqiZ2UMzPOhjHu
   getTokenUrl: /business/oath/access_token
   getUserInfo: /business/oauth/token/user_info
+clientId: e5cd7e4891bf95d1d19206ce24a7b32e
