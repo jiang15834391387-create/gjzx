@@ -26,4 +26,16 @@ public interface IDataImageTreeService {
      * @return
      */
     List<DataImageTree> selectDataImageTreeByFileIdList(List<String> fileIdList);
+
+    /**
+     * 根据fileId查询树表
+     * @param fileId
+     */
+    DataImageTree selectImageTreeByFileId(String fileId);
+
+    /**
+     * 根据fileId删除树表
+     * @param fileId
+     */
+    Boolean deleteImageTreeByFileId(String fileId);
 }

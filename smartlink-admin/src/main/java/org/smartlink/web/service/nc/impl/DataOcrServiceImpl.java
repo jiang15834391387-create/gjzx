@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Service
-public class IDataOcrServiceImpl implements IDataOcrService {
+public class DataOcrServiceImpl implements IDataOcrService {
 
     private final DataImageFilesInfoMapper dataImageFilesInfoMapper;
     private final DataImageTreeMapper dataImageTreeMapper;

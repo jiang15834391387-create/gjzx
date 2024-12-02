@@ -1,5 +1,7 @@
 package org.smartlink.web.service.nc;
 
+import org.smartlink.web.domain.invoice.DataOcrInfo;
+
 public interface IDataOcrInfoService {
 
     /**
@@ -8,4 +10,8 @@ public interface IDataOcrInfoService {
      * @return
      */
     Boolean deleteByFileId(String fileId);
+
+    DataOcrInfo getByFileId(String FileId);
+
+    Boolean insert(DataOcrInfo ocrInfo);
 }

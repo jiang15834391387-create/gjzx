@@ -50,4 +50,27 @@ public interface IDataImageFilesInfoService {
      * @return DataImageFilesInfo
      */
     List<DataImageFilesInfo> selectByBatchIdAndCip(String batchId , String cip);
+
+    /**
+     * 根据barCode模糊查询图片列表
+     * @param barCode barCode
+     * @return
+     */
+    List<DataImageFilesInfo> fuzzySelectAllByBarCode(String barCode);
+
+    /**
+     * 新增文件
+     *
+     * @param filesInfo @{@link DataImageFilesInfo}
+     * @return Boolean
+     */
+    Boolean insert(DataImageFilesInfo filesInfo);
+
+    /**
+     * 根据ID删除
+     *
+     * @param fileId 文件ID
+     * @return @{@link Boolean}
+     */
+    Boolean deleteById(String fileId);
 }

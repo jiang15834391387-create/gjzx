@@ -32,7 +32,7 @@ public class DataBillType extends BaseEntity {
     /**
      * 父级单据类型id
      */
-    private String parentTpyeId;
+    private String parentTypeId;
     /**
      * 父级系统
      */

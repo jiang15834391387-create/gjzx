@@ -69,4 +69,21 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         queryWrapper.and(u->u.ne(DataImageFilesInfo::getCip, Constants.YBZ).or().isNull(DataImageFilesInfo::getCip));
         return this.baseMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public List<DataImageFilesInfo> fuzzySelectAllByBarCode(String barCode) {
+        LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(DataImageFilesInfo::getBarCode, barCode);
+        return this.baseMapper.fuzzySelectAllByBarCode(queryWrapper);
+    }
+
+    @Override
+    public Boolean insert(DataImageFilesInfo filesInfo) {
+        return this.baseMapper.insert(filesInfo) > 0;
+    }
+
+    @Override
+    public Boolean deleteById(String fileId) {
+        return this.baseMapper.deleteById(fileId) > 0;
+    }
 }

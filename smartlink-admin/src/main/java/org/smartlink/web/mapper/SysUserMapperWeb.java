@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
 import org.smartlink.web.annotation.DataColumn;
 import org.smartlink.web.annotation.DataPermission;
@@ -91,5 +92,10 @@ public interface SysUserMapperWeb extends BaseMapperPlus<SysUser, SysUser> {
      * @return
      */
     String selectUserNameByUserId(@Param("userId")String userId);
+
+    @Select("SELECT user_id, dept_id, user_name, nick_name, user_type, email, phonenumber, sex, avatar, password, status, del_flag, login_ip, login_date, remark, nc_user_id, group_id, nc_user_relevance_identity, nc_user_relevance_code, tenant_id, create_by, create_time, update_by, update_time " +
+        "FROM sys_user " +
+        "WHERE del_flag = '0' AND (nc_user_id = #{ncUserId} AND create_by = #{createBy})")
+    List<SysUser> selectListByNcUserId(@Param("ncUserId") String ncUserId, @Param("createBy") String createBy);
 
 }

@@ -20,7 +20,7 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 @Service
-public class IDataOcrDetailsServiceImpl implements IDataOcrDetailsService {
+public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
 
     private final DataOcrDetailsMapper baseMapper;
 

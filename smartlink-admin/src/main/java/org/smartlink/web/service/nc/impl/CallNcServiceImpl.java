@@ -18,7 +18,6 @@ import org.smartlink.web.domain.DataCurrentTask;
 import org.smartlink.web.domain.SysDept;
 import org.smartlink.web.domain.SysUser;
 import org.smartlink.web.service.nc.CallNcService;
-import org.smartlink.web.utils.Java2XmlUtil;
 import org.smartlink.web.utils.WebClientUtil;
 import org.smartlink.web.utils.WebServiceUtil;
 import org.smartlink.web.utils.XMLProcess;
@@ -161,7 +160,7 @@ public class CallNcServiceImpl implements CallNcService {
             result = WebClientUtil.sendHttpWebService(webUrl, this.getSoapRequestParamForHttp(requestParam));
             result = XMLProcess.getXMLResult(result, "return", false);
         }
-        result = Java2XmlUtil.javaBeanToXml(result);
+//        result = Java2XmlUtil.javaBeanToXml(result);
         final Document document = DocumentHelper.parseText(result);
         return document.getRootElement();
     }
@@ -236,7 +235,7 @@ public class CallNcServiceImpl implements CallNcService {
             bill.setId(IdUtil.simpleUUID());
             bill.setTypeCode(obj.elementTextTrim("billtypecode"));
             bill.setTypeName(obj.elementText("billtypename"));
-            bill.setParentTpyeId(obj.elementText("parentbilltype"));
+            bill.setParentTypeId(obj.elementText("parentbilltype"));
             bill.setSystemCode(obj.elementText("systemcode"));
             bill.setParentSystem(obj.elementText("parentsystem"));
             bill.setOcrEnable("0");

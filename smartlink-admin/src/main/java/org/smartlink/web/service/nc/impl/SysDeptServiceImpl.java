@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @RequiredArgsConstructor
-@Service
-public class ISysDeptServiceImpl implements ISysDeptService {
+@Service("sysDeptServiceWeb")
+public class SysDeptServiceImpl implements ISysDeptService {
     private final SysDeptMapper1 baseMapper;
 
     @Override

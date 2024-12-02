@@ -124,6 +124,7 @@ public class BaseEntity extends Model<BaseEntity> implements Serializable {
      * 乐观锁版本控制
      */
     @Version
+    @TableField(exist = false)
     private Integer version;
 
     /**

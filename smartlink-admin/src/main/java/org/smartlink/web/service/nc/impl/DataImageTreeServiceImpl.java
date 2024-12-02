@@ -67,4 +67,18 @@ public class DataImageTreeServiceImpl implements IDataImageTreeService {
         queryWrapper.in(DataImageTree::getImageId, fileIdList);
         return this.baseMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public DataImageTree selectImageTreeByFileId(String fileId) {
+        final LambdaQueryWrapper<DataImageTree> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DataImageTree::getImageId, fileId);
+        return this.baseMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public Boolean deleteImageTreeByFileId(String fileId) {
+        final LambdaQueryWrapper<DataImageTree> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DataImageTree::getImageId, fileId);
+        return this.baseMapper.delete(queryWrapper) > 0;
+    }
 }
