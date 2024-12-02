@@ -1,6 +1,7 @@
 package org.smartlink.server.zhiyun.service.impl;
 
 import cn.hutool.core.net.URLEncodeUtil;
+import cn.hutool.http.HttpUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.server.zhiyun.service.ZhiYunService;
@@ -22,6 +23,12 @@ public class ZhiYunServiceImpl implements ZhiYunService {
     @Value("${zhiyun.baseUrl}")
     private String zhiYunUrl;
 
+    @Value("${zhiyun.getTokenUrl}")
+    private String getToken;
+
+    @Value("${zhiyun.getUserInfo}")
+    private String getUserInfo;
+
     @Value("${zhiyun.appKey}")
     private String appKey;
 
@@ -34,10 +41,10 @@ public class ZhiYunServiceImpl implements ZhiYunService {
     @Override
     public String getZhiYunUrl() {
         /// 线上换成配置的URL
-        String yxUrl = "http://127.0.0.1:8088/server/zhiyun/login";
+        //String yxUrl = "http://127.0.0.1:8088/server/zhiyun/login";
+        String yxUrl = "http://47.97.23.199:28080/documentInfo";
 
         String eUrl = URLEncodeUtil.encodeAll(yxUrl);
-        log.info("编码后的URL：{}", eUrl);
 
         String redirectUrl = this.zhiYunUrl + "/login?clinet_id=" + this.appKey + "&redirect_url=" + eUrl;
 
@@ -58,10 +65,14 @@ public class ZhiYunServiceImpl implements ZhiYunService {
         return new RedirectView(newUrl);
     }
 
+
     @Override
     public String getZhiYunToken(String code) {
+        log.info("智云code为：{}", code);
+        HttpUtil.createGet(this.zhiYunUrl + this.appKey);
         return "";
     }
+
 
     @Override
     public String getZhiYunUserInfo(String token) {

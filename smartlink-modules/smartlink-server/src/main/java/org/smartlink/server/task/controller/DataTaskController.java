@@ -274,7 +274,7 @@ public class DataTaskController extends BaseController {
         Boolean save;
         if (oldTask == null) {
             log.info("新增单据任务,{}", task.getBusinessSerialNo());
-            task.setTaskState("");
+            task.setTaskState("扫描完成");
             save = this.dataTaskServer.save(task);
         } else {
             log.info("修改单据任务,{}", task.getBusinessSerialNo());
@@ -442,4 +442,7 @@ public class DataTaskController extends BaseController {
         }
         return R.ok();
     }
+
+
+
 }

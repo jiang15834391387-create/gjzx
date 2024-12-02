@@ -268,3 +268,5 @@ zhiyun:
   baseUrl: https://sso.runjian.com:31026
   appKey: ycyth
   appSecret: 3heTHRci8923pspMPrFqiZ2UMzPOhjHu
+  getTokenUrl: /business/oath/access_token
+  getUserInfo: /business/oauth/token/user_info

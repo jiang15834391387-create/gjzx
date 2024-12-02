@@ -3,11 +3,7 @@ package org.smartlink.server.zhiyun.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.server.zhiyun.service.ZhiYunService;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 
 /**
@@ -21,7 +17,7 @@ import org.springframework.web.servlet.view.RedirectView;
  * @author: 马旭辉
  */
 @RequestMapping("/server/zhiyun/")
-@Controller
+@RestController
 public class ZhiYunController {
     private final ZhiYunService zhiYunService;
 
@@ -30,16 +26,6 @@ public class ZhiYunController {
         this.zhiYunService = zhiYunService;
     }
 
-    /**
-     * 获取智云URL
-     *
-     * @return 智云URL
-     */
-    @ResponseBody
-    @GetMapping("getZhiYunUrl")
-    public R<String> getZhiYunUrl() {
-        return R.ok(this.zhiYunService.getZhiYunUrl());
-    }
 
     /**
      * 根据智云code获取用户信息，然后登录影像系统
@@ -60,9 +46,8 @@ public class ZhiYunController {
      * @param code code
      * @return token
      */
-    @ResponseBody
     @GetMapping("getZhiYunToken")
     public R<String> getZhiYunToken(@RequestParam("code") String code) {
-        return null;
+        return R.ok(this.zhiYunService.getZhiYunToken(code));
     }
 }
