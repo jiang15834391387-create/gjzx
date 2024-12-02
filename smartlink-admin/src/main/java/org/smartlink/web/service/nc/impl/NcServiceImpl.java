@@ -2,6 +2,7 @@ package org.smartlink.web.service.nc.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
@@ -978,6 +979,66 @@ public class NcServiceImpl implements NcService {
         }
         String resXml = ResultUtil.getRespXML(code, message, null);
         log.info("更改影像状态接口返回报文：" + resXml);
+        return resXml;
+    }
+
+    @Override
+    public String mobileImageQuery(String xml) {
+        log.info("移动审批获取图片列表接口请求报文：" + xml);
+        Document document;
+        try {
+            document = DocumentHelper.parseText(xml);
+        } catch (DocumentException e) {
+            log.error("移动审批获取图片列表接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
+            return ResultUtil.getRespXmlForMobile(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(),null,null,null);
+        }
+        Element rootElement = document.getRootElement();
+        // 组装返回xml数据
+        Map<String, Object> dataResponse = new HashMap<>();
+        String businessSerialNo = rootElement.elementText("BUSI_SERIAL_NO");
+        List<Element> srcBusinessSerialNoList = rootElement.elements("SRC_BUSI_SERIAL_NO");
+        // 流水号下图片的集合
+        List<DataImageFilesInfo> dataImageFilesInfoList = new ArrayList<>();
+        String batchId = "";
+        dataResponse.put("TRADETYPE", rootElement.elementText("TRADETYPE"));
+        dataResponse.put("SYSTEM_CODE", rootElement.elementText("SYSTEM_CODE"));
+        dataResponse.put("BRANCH_NO", rootElement.elementText("BRANCH_NO"));
+        dataResponse.put("USER_NO", rootElement.elementText("USER_NO"));
+        dataResponse.put("OPERATE_TIME", DateUtil.now());
+        List<DataCmInfo> cmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
+        if (CollectionUtil.isNotEmpty(cmInfoList)) {
+            batchId = cmInfoList.get(0).getBatchId();
+            dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchId(batchId);
+        }
+        // 将单据联查相关的流水号下的图片也塞进集合中
+        if (CollectionUtil.isNotEmpty(srcBusinessSerialNoList)) {
+            List<String> businessSerialNoList = srcBusinessSerialNoList.stream().map(Element::getText).collect(Collectors.toList());
+            List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoListByBusinessSerialNoList(businessSerialNoList);
+            if (ObjectUtil.isNotEmpty(dataCmInfoList)) {
+                List<String> batchIdList = dataCmInfoList.stream().map(DataCmInfo::getBatchId).collect(Collectors.toList());
+                List<DataImageFilesInfo> srcDataImageFilesInfoList = dataImageFilesInfoService.selectAllByBatchIdList(batchIdList);
+                dataImageFilesInfoList.addAll(srcDataImageFilesInfoList);
+            }
+        }
+        // 对图片集合进行分类处理并塞进对应map中
+        Map<String, List<DataImageFilesInfo>> map = new HashMap<>();
+        for (DataImageFilesInfo imageFilesInfo : dataImageFilesInfoList) {
+            String documentName = imageFilesInfo.getDocumentName();
+            if (StrUtil.isEmpty(documentName)) {
+                documentName = "移动审批";
+            }
+            if (!map.containsKey(documentName)) {
+                List<DataImageFilesInfo> dataImageFilesInfos = new ArrayList<>();
+                dataImageFilesInfos.add(imageFilesInfo);
+                map.put(documentName, dataImageFilesInfos);
+            } else {
+                List<DataImageFilesInfo> dataImageFilesInfos = map.get(documentName);
+                dataImageFilesInfos.add(imageFilesInfo);
+                map.put(documentName, dataImageFilesInfos);
+            }
+        }
+        String resXml = ResultUtil.getRespXmlForMobile(NcCodeEnum.NC_SUCCESS_STATE.getCode(), NcCodeEnum.NC_SUCCESS_STATE.getCodeName(), dataResponse, map, batchId);
+        log.info("移动审批获取图片列表接口返回报文：" + resXml);
         return resXml;
     }
 }

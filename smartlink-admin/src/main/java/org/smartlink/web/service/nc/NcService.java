@@ -107,4 +107,11 @@ public interface NcService {
      * @return 返回结果
      */
     String updateImageState(String xml);
+
+    /**
+     * 移动审批查看影像
+     * @param xml 参数
+     * @return 返回结果
+     */
+    String mobileImageQuery(String xml);
 }

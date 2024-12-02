@@ -216,4 +216,17 @@ public class NccHttpController {
         NcResult ncResult = new NcResult(getXmlNodeData(result,RSP_CODE),getXmlNodeData(result,RSP_MSG),result);
         return JsonUtils.toJsonString(ncResult);
     }
+
+    /**
+     * 移动审批查看影像   eq:友空间以及轻推使用
+     * @param xml 入参数
+     * @return 结果
+     */
+    @ApiOperation("移动审批查看影像")
+    @PostMapping("/CMForMobile_OnePicQuery")
+    public String mobileImageQuery(String xml) throws DocumentException {
+        String result = ncService.mobileImageQuery(xml);
+        NcResult ncResult = new NcResult(getXmlNodeData(result,"RSPCODE"),getXmlNodeData(result,"RSPMSG"),result);
+        return JsonUtils.toJsonString(ncResult);
+    }
 }
