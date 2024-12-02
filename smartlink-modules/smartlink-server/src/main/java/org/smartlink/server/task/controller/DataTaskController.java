@@ -344,8 +344,19 @@ public class DataTaskController extends BaseController {
         if (dataTask == null) {
             return R.fail(businessSerialNo + "单据不存在");
         }
+        //树节点对象
+        List<DataNodeType> dataNodeTypes = dataNodeTypeMapper.selectList();
+        Map<String, String> typeMap = new HashMap<>(2);
+        for (DataNodeType dataNodeType : dataNodeTypes) {
+            typeMap.put(dataNodeType.getId(), dataNodeType.getNodeName());
+        }
+
         //单据下影像集合
         List<DataImage> images = dataTask.getImages() == null ? new ArrayList<>() : dataTask.getImages();
+        for (DataImage image : images) {
+            final String typeName = typeMap.get(image.getParentId());
+            image.setParentId(Objects.requireNonNullElse(typeName, "其他"));
+        }
         return R.ok(images);
 
     }
