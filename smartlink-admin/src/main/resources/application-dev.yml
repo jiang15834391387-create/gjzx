@@ -286,8 +286,9 @@ runjian:
   fileInfoUrl: /file/v1/fileInfo
   fileViewUrl: /file/v1/fileViewUrl
 zhiyun:
-  baseUrl: http://yq.runjian.com:30067
+  baseUrl: http://yq.runjian.com:30065
   appKey: ycyth
   appSecret: fR6yJ7sF5nH5tZ8fN2tZ4lC7dJ4uS9cU
-  getTokenUrl: /business/oath/access_token
+  getTokenUrl: /business/oauth/access_token
   getUserInfo: /business/oauth/token/user_info
+clientId: e5cd7e4891bf95d1d19206ce24a7b32e

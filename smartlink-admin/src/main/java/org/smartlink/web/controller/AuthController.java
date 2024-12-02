@@ -6,6 +6,11 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,7 @@ import org.smartlink.common.core.domain.model.LoginBody;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.RegisterBody;
 import org.smartlink.common.core.domain.model.SocialLoginBody;
+import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
@@ -82,6 +88,72 @@ public class AuthController {
     @Value("${frontEnd.url}")
     private String frontEndUrl;
 
+    @Value("${zhiyun.baseUrl}")
+    private String zhiYunUrl;
+
+    @Value("${zhiyun.getTokenUrl}")
+    private String getToken;
+
+    @Value("${zhiyun.getUserInfo}")
+    private String getUserInfo;
+
+    @Value("${zhiyun.appKey}")
+    private String appKey;
+
+    @Value("${zhiyun.appSecret}")
+    private String appSecret;
+
+    @Value("${clientId}")
+    private String clientId;
+
+    /**
+     * 获取智云的Token
+     *
+     * @param code code
+     * @return token
+     */
+    @GetMapping("getZhiYunToken")
+    public R<JSONObject> getZhiYunToken(@RequestParam("code") String code) {
+        log.info("智云code为：{}", code);
+        String url = this.zhiYunUrl + this.getToken + "?appKey=" + this.appKey + "&appSecret=" + this.appSecret + "&code=" + code;
+        log.info("请求完整URL:{}", url);
+        final HttpRequest httpRequest = HttpUtil.createGet(url);
+        try (HttpResponse execute = httpRequest.execute()) {
+            final String body = execute.body();
+            log.info("智云原始返回结果为：{}", body);
+            final JSONObject result = JSONUtil.parseObj(body);
+            // 登录一下，然后set进去返回一个token
+            result.set("token", this.getYxToken("admin"));
+            // 返回
+            return R.ok(result);
+        } catch (Exception e) {
+            throw new ServiceException("获取智云token失败");
+        }
+    }
+
+
+    private String getYxToken(String userName) {
+        SysClientVo client = clientService.findByClientKey(this.clientId);
+        SysUserVo user = userService.selectUserByUserName(userName);
+        LoginUser loginUser = loginService.buildLoginUser(user);
+        loginUser.setClientKey(client.getClientKey());
+        loginUser.setDeviceType(client.getDeviceType());
+
+        SaLoginModel model = new SaLoginModel();
+        model.setDevice(client.getDeviceType());
+        // 自定义分配 不同用户体系 不同 token 授权时间 不设置默认走全局 yml 配置
+        // 例如: 后台用户30分钟过期 app用户1天过期
+        model.setTimeout(client.getTimeout());
+        model.setActiveTimeout(client.getActiveTimeout());
+        model.setExtra(LoginHelper.CLIENT_KEY, client.getClientId());
+        // 生成token
+        LoginHelper.login(loginUser, model);
+        LoginVo loginVo = new LoginVo();
+        loginVo.setAccessToken("Bearer " + StpUtil.getTokenValue());
+        loginVo.setExpireIn(StpUtil.getTokenTimeout());
+        loginVo.setClientId(client.getClientId());
+        return "Bearer " + StpUtil.getTokenValue();
+    }
 
     /**
      * 登录方法
@@ -230,13 +302,10 @@ public class AuthController {
     public R<LoginVo> getToken(@RequestParam("appKey") String appKey,
                                @RequestParam("timestamp") String timestamp,
                                @RequestParam("signature") String signature,
-                               @RequestParam("tenantId") String tenantId
-    ) {
+                               @RequestParam("tenantId") String tenantId) {
+
+
         SysClientVo client = clientService.findByClientKey(appKey);
-//        String generateSignature = StzdSignatureUtil.generateSignature(appKey, timestamp, client.getClientSecret());
-//        if (!generateSignature.equals(signature)) {
-//            R.fail("签名不正确");
-//        }
         SysUserVo user = userService.selectUserById(1l);
         LoginUser loginUser = loginService.buildLoginUser(user);
         loginUser.setClientKey(client.getClientKey());
