@@ -6,10 +6,10 @@ import lombok.Data;
 
 
 /**
- * @author shidunkai
+ * @author L
  * @title 友报账上传图片
  * @description 上传图片
- * @date 2022-06
+ * @date
  */
 @Data
 public class YbzUploadImageRequest {

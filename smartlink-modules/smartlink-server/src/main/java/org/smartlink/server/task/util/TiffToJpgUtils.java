@@ -9,10 +9,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * @author shidunkai
+ * @author
  * @title tif转JPG
  * @description tif转JPG
- * @date 2022-04
+ * @date
  */
 public class TiffToJpgUtils {
     /**

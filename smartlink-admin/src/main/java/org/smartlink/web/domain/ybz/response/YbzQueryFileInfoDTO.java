@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * 友报账查询文件信息DTO
  *
- * @author maxuhui
+ * @author L
  */
 @Data
 public class YbzQueryFileInfoDTO implements Serializable {

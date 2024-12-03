@@ -6,7 +6,7 @@ import lombok.Data;
 
 
 /**
- * @author shidunkai
+ * @author L
  * @title 删除图片入参
  * @description 删除图片入参
  * @date 2022-06

@@ -9,8 +9,8 @@ import java.util.List;
  * <p>
  * <p>Description:查看影像列表接口返回Items</p>
  *
- * @author zhangzhifa
- * @date 2018-04-26 18:37
+ * @author L
+ * @date
  **/
 @Data
 public class YbzQueryItemsDTO {

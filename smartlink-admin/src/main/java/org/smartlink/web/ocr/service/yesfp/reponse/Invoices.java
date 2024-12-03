@@ -11,9 +11,9 @@ import org.smartlink.web.domain.invoice.dto.InvoiceCheckParamDTO;
  * <p>
  * <p>Description: TODO </p>
  *
- * @author fuhiroshi
+ * @author L
  * @version 1.0.0
- * @date 2023-03-21 13:46
+ * @date
  **/
 @Getter
 @Setter

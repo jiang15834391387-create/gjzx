@@ -10,10 +10,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 /**
- * @author shidunkai
+ * @author L
  * @title ofd处理工具
  * @description ofd工具处理
- * @date 2022-04
+ * @date
  */
 public class OfdUtils {
     /**
