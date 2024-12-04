@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class jobUser {
+public class jobSynchronize {
 
     @Autowired
     private NcService ncService;
@@ -23,6 +23,19 @@ public class jobUser {
             return ncService.synchronizeUser();
         } catch (Exception e) {
            throw new Exception("同步用户失败！");
+        }
+    }
+
+    /**
+     * 定时同步组织机构
+     */
+    @Scheduled(cron ="0 0 0 * * ?")
+    @ApiOperation("定时同步组织机构")
+    public R<Void> SynchronizeDepart() throws Exception {
+        try {
+            return ncService.synchronizeDepart();
+        } catch (Exception e) {
+            throw new Exception("同步组织机构失败！");
         }
     }
 //    @Scheduled(cron ="0/5 * * * * ?")

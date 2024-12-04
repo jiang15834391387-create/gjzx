@@ -39,8 +39,8 @@
     </resultMap>
 
     <select id="selectByBatchId" resultMap="DataImageFilesInfoResult">
-        select file_id,file_name,file_type,bar_code,batch_id,iurl from data_image_files_info
-                                                                           ${ew.getCustomSqlSegment}
+        select file_id, file_name, file_type, bar_code, batch_id, iurl
+        from data_image_files_info ${ew.getCustomSqlSegment}
     </select>
 
     <select id="fuzzySelectAllByBarCode" resultMap="DataImageFilesInfoResult">

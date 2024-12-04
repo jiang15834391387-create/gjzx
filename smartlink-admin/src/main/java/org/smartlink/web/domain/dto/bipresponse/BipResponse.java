@@ -5,10 +5,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author zouchaung
+ * @author L
  * @title bip统一返回
  * @description bip统一返回
- * @date 2022-08
+ * @date
  */
 @NoArgsConstructor
 @Data

@@ -19,6 +19,7 @@ import org.smartlink.web.domain.SysDept;
 import org.smartlink.web.domain.SysUser;
 import org.smartlink.web.domain.dto.NcUpdateTaskStateDTO;
 import org.smartlink.web.service.nc.CallNcService;
+import org.smartlink.web.utils.Java2XmlUtil;
 import org.smartlink.web.utils.WebClientUtil;
 import org.smartlink.web.utils.WebServiceUtil;
 import org.smartlink.web.utils.XMLProcess;
@@ -161,7 +162,7 @@ public class CallNcServiceImpl implements CallNcService {
             result = WebClientUtil.sendHttpWebService(webUrl, this.getSoapRequestParamForHttp(requestParam));
             result = XMLProcess.getXMLResult(result, "return", false);
         }
-//        result = Java2XmlUtil.javaBeanToXml(result);
+        result = Java2XmlUtil.javaBeanToXml(result);
         final Document document = DocumentHelper.parseText(result);
         return document.getRootElement();
     }
