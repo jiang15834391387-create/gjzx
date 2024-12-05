@@ -133,7 +133,9 @@ public class AuthController {
 
 
     private String getYxToken(String userName) {
-        SysClientVo client = clientService.findByClientKey(this.clientId);
+        log.info("clientId:{}", this.clientId);
+        SysClientVo client = clientService.queryByClientId(this.clientId);
+
         SysUserVo user = userService.selectUserByUserName(userName);
         LoginUser loginUser = loginService.buildLoginUser(user);
         loginUser.setClientKey(client.getClientKey());
