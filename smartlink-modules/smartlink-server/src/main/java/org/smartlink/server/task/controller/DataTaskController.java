@@ -33,6 +33,7 @@ import org.smartlink.server.nodeType.domain.DataNodeType;
 import org.smartlink.server.nodeType.mapper.DataNodeTypeMapper;
 import org.smartlink.server.task.domain.bo.DocumentType;
 import org.smartlink.server.task.domain.bo.TaskAndImages;
+import org.smartlink.server.task.domain.dto.UpdateTaskStateDTO;
 import org.smartlink.server.task.domain.vo.DataTaskVo;
 import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
@@ -71,6 +72,30 @@ public class DataTaskController extends BaseController {
 
     @Value("${runjian.fileInfoUrl}")
     private String fileInfoUrl;
+
+    private final String SUCCESS = "001";
+    private final String FAIL = "000";
+
+    @PostMapping("updateTaskState")
+    public R<String> updateTaskState(@RequestBody UpdateTaskStateDTO dto) {
+        if (!StringUtils.hasText(dto.getBusinessSerialNo())) {
+            throw new ServiceException("业务流水号为空");
+        }
+        final DataTask task = this.dataTaskServer.getById(dto.getBusinessSerialNo());
+        if (task == null) {
+            throw new ServiceException("业务流水号不存在");
+        }
+        if (dto.getState().equals(SUCCESS)) {
+            task.setTaskState(SUCCESS);
+            task.setTaskStateName("归档成功");
+        } else {
+            task.setTaskState(FAIL);
+            task.setTaskStateName("归档失败");
+        }
+        // TODO 这里要添加调用业财的归档接口
+        this.dataTaskServer.updateById(task);
+        return R.ok();
+    }
 
     /**
      * 根据文件ID获取到文件预览地址
@@ -442,7 +467,6 @@ public class DataTaskController extends BaseController {
         }
         return R.ok();
     }
-
 
 
 }
