@@ -12,7 +12,7 @@ public class UpdateTaskStateDTO implements Serializable {
      */
     private String businessSerialNo;
     /**
-     * 单据状态 000归档失败，001归档成功
+     * 单据状态 000未归档，001归档成功
      */
     private String state;
     /**

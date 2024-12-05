@@ -78,19 +78,26 @@ public class DataTaskController extends BaseController {
 
     @PostMapping("updateTaskState")
     public R<String> updateTaskState(@RequestBody UpdateTaskStateDTO dto) {
+
         if (!StringUtils.hasText(dto.getBusinessSerialNo())) {
             throw new ServiceException("业务流水号为空");
         }
+
         final DataTask task = this.dataTaskServer.getById(dto.getBusinessSerialNo());
+
         if (task == null) {
             throw new ServiceException("业务流水号不存在");
         }
         if (dto.getState().equals(SUCCESS)) {
+
             task.setTaskState(SUCCESS);
             task.setTaskStateName("归档成功");
+
         } else {
+
             task.setTaskState(FAIL);
-            task.setTaskStateName("归档失败");
+            task.setTaskStateName("未归档");
+
         }
         // TODO 这里要添加调用业财的归档接口
         this.dataTaskServer.updateById(task);
@@ -299,7 +306,6 @@ public class DataTaskController extends BaseController {
         Boolean save;
         if (oldTask == null) {
             log.info("新增单据任务,{}", task.getBusinessSerialNo());
-            task.setTaskState("扫描完成");
             save = this.dataTaskServer.save(task);
         } else {
             log.info("修改单据任务,{}", task.getBusinessSerialNo());
