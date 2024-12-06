@@ -154,7 +154,7 @@ public class AuthController {
         loginVo.setAccessToken("Bearer " + StpUtil.getTokenValue());
         loginVo.setExpireIn(StpUtil.getTokenTimeout());
         loginVo.setClientId(client.getClientId());
-        return "Bearer " + StpUtil.getTokenValue();
+        return StpUtil.getTokenValue();
     }
 
     /**

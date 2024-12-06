@@ -83,7 +83,7 @@ public class DataTaskController extends BaseController {
             throw new ServiceException("业务流水号为空");
         }
 
-        final DataTask task = this.dataTaskServer.getById(dto.getBusinessSerialNo());
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, dto.getBusinessSerialNo()).one();
 
         if (task == null) {
             throw new ServiceException("业务流水号不存在");
