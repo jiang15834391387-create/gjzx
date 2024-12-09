@@ -31,10 +31,49 @@ public class BaseController {
     }
 
     /**
+     * 响应返回结果
+     *
+     * @param rows 影响行数
+     * @param message 响应信息
+     * @return 操作结果
+     */
+    protected R<Void> toAjax(int rows,String message) {
+        return rows > 0 ? R.ok(message) : R.fail(message);
+    }
+
+    /**
      * 页面跳转
      */
     public String redirect(String url) {
         return StringUtils.format("redirect:{}", url);
     }
 
+//    /**
+//     * 获取用户缓存信息
+//     */
+//    public LoginUser getLoginUser() {
+//        return LoginHelper.getLoginUser();
+//    }
+//
+//    /**
+//     * 获取登录用户id
+//     */
+//    public Long getUserId() {
+//        return LoginHelper.getUserId();
+//    }
+//
+//    /**
+//     * 获取登录部门id
+//     * @return
+//     */
+//    public String getDeptId() {
+//        return LoginHelper.getDeptId();
+//    }
+//
+//    /**
+//     * 获取登录用户名
+//     */
+//    public String getUsername() {
+//        return LoginHelper.getUsername();
+//    }
 }

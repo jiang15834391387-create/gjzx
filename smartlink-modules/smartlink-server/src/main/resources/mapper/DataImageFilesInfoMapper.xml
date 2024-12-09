@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.smartlink.server.nc.mapper.DataImageFilesInfoMapper">
+
+    <resultMap type="org.smartlink.server.nc.domain.DataImageFilesInfo" id="DataImageFilesInfoResult">
+        <result property="fileId" column="file_id"/>
+        <result property="barCode" column="bar_code"/>
+        <result property="batchId" column="batch_id"/>
+        <result property="ncImageId" column="nc_image_id"/>
+        <result property="cip" column="cip"/>
+        <result property="fileMd5" column="file_md5"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileFlowStatus" column="file_flow_status"/>
+        <result property="fileType" column="file_type"/>
+        <result property="folderId" column="folder_id"/>
+        <result property="imageSecret" column="image_secret"/>
+        <result property="surl" column="surl"/>
+        <result property="iurl" column="iurl"/>
+        <result property="purl" column="purl"/>
+        <result property="lurl" column="lurl"/>
+        <result property="message" column="message"/>
+        <result property="rotateAngle" column="rotate_angle"/>
+        <result property="newBarCode" column="new_bar_code"/>
+        <result property="operateState" column="operate_state"/>
+        <result property="documentName" column="document_name"/>
+        <result property="parentFileId" column="parent_file_id"/>
+        <result property="sortValue" column="sort_value"/>
+        <result property="fileStatus" column="file_status"/>
+        <result property="deleteFlag" column="delete_flag"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectByBatchId" resultMap="DataImageFilesInfoResult">
+        select file_id, file_name, file_type, bar_code, batch_id, iurl
+        from data_image_files_info ${ew.getCustomSqlSegment}
+    </select>
+
+    <select id="fuzzySelectAllByBarCode" resultMap="DataImageFilesInfoResult">
+        select file_id,bar_code,batch_id,file_name,file_size,surl,iurl from data_image_files_info ${ew.getCustomSqlSegment}
+    </select>
+
+</mapper>

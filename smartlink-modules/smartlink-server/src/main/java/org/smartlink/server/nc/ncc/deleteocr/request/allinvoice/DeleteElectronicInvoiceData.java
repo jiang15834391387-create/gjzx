@@ -1,0 +1,16 @@
+package org.smartlink.server.nc.ncc.deleteocr.request.allinvoice;
+
+import lombok.Builder;
+import lombok.Data;
+
+/**
+ * @description: 电子发票请求类data
+ * @author: L
+ * @create:
+ **/
+@Data
+@Builder
+public class DeleteElectronicInvoiceData {
+    private String fphm;
+    private String fpdm;
+}

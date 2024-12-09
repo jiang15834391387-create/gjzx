@@ -49,17 +49,16 @@ wsdl:
   clientSecret: aad2433934c141b58937
   nccUserName: admin1
   nccPassword: qwer123@
-  factoryCode: tchzt2
+#  factoryCode: tchzt2
+  factoryCode: shy
   methodName: testNcc
-  dataSource: design
+  dataSource: YONBIP
   wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
 
 # ncc参数配置
 ncc:
   baseUrl: http://10.124.9.138:9081
   wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
-  dataSource: design
-  factoryCode: tchzt2
 
 # 日志配置
 logging:

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -139,6 +140,19 @@ public class RedisUtils {
         batch.execute();
     }
 
+    /**
+     * 缓存基本的对象，Integer、String、实体类等
+     *
+     * @param key      缓存的键值
+     * @param value    缓存的值
+     * @param timeout  时间
+     * @param timeUnit 时间颗粒度
+     */
+    public static <T> void setCacheObject(final String key, final T value, final long timeout, final TimeUnit timeUnit) {
+        RBucket<T> result = CLIENT.getBucket(key);
+        result.set(value);
+        result.expire(timeout, timeUnit);
+    }
     /**
      * 如果不存在则设置 并返回 true 如果存在则返回 false
      *
