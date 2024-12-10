@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.lang.tree.TreeUtil;
+import cn.hutool.core.net.URLEncodeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -76,6 +77,10 @@ public class DataTaskController extends BaseController {
     private final String SUCCESS = "001";
     private final String FAIL = "000";
 
+    public static void main(String[] args) {
+        String eUrl = URLEncodeUtil.encodeAll("http://47.97.23.199:28080/keepFile");
+        System.out.println(eUrl);
+    }
     @PostMapping("updateTaskState")
     public R<String> updateTaskState(@RequestBody UpdateTaskStateDTO dto) {
 
