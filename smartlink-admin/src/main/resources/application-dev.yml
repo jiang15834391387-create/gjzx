@@ -276,9 +276,12 @@ kkfile:
 frontEnd:
   url: http://47.97.23.199:28080
 runjian:
-  appKey: yz-yxxt
-  appSecret: 30c3e6d495834663ba978636e91c9951
-  baseUrl: https://yq.runjian.com:31516
+  #appKey: yz-yxxt
+  #appSecret: 30c3e6d495834663ba978636e91c9951
+  #baseUrl: https://yq.runjian.com:31516
+  appKey: yc-yxxt
+  appSecret: d065e3a63e094ebcacab70a77a1270f8
+  baseUrl: https://beta.runjian.com:31516
   accessTokenUrl: /v1/oauth2/accessToken
   putObjectUrl: /file/v1/putObject
   getObjectUrl: /file/v1/getObject

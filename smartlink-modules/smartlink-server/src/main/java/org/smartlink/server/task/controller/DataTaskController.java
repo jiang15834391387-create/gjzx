@@ -26,6 +26,7 @@ import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.oss.exception.OssException;
 import org.smartlink.common.oss.service.StrategyService;
 import org.smartlink.common.oss.util.RunJianUtil;
+import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.server.image.domain.bo.ImageTreeBo;
 import org.smartlink.server.image.momain.DataImage;
@@ -47,6 +48,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -81,6 +83,7 @@ public class DataTaskController extends BaseController {
         String eUrl = URLEncodeUtil.encodeAll("http://47.97.23.199:28080/keepFile");
         System.out.println(eUrl);
     }
+
     @PostMapping("updateTaskState")
     public R<String> updateTaskState(@RequestBody UpdateTaskStateDTO dto) {
 
@@ -168,15 +171,6 @@ public class DataTaskController extends BaseController {
         List<DataImage> images = dataTask.getImages() == null ? new ArrayList<>() : dataTask.getImages();
 
         for (DataImage image : images) {
-//            String runJianId;
-//            // 预览地址要去请求润健文件服务器
-//            if (StrUtil.isBlank(image.getRunJianId())) {
-//                final SysOssVo ossVo = this.iSysOssService.getById(image.getOssId());
-//                runJianId = ossVo.getFileId();
-//            } else {
-//                runJianId = image.getRunJianId();
-//            }
-            // String fileViewUrl = strategyService.fileViewUrl(runJianId, image.getUid());
             image.setPreviewUrl("*");
             image.setSourceFileUrl("*");
 
@@ -291,7 +285,8 @@ public class DataTaskController extends BaseController {
                 dataImage.setRunJianId(item.getStr("id"));
                 dataImage.setFileName(item.getStr("originalFilename"));
                 dataImage.setParentId("10999");
-
+                // 润健ID和文件名存缓存里
+                RedisUtils.setCacheObject(dataImage.getFileId(), dataImage.getFileName(), Duration.ofMillis(100 * 60 * 1000));
                 imageList.add(dataImage);
             }
             task.setImages(imageList);

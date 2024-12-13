@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.smartlink.common.core.constant.CacheNames;
 import org.smartlink.common.core.domain.dto.OssDTO;
@@ -49,6 +50,7 @@ import java.util.Map;
  *
  * @author Lion Li
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class SysOssServiceImpl implements ISysOssService, OssService {
@@ -185,6 +187,17 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         String fileName = sysOss.getFileName();
         //这个ossId是保存时在自动生成的，不是wenjian
         long contentLength = multiFileSysFactory.download(sysOss.getFileId(), serviceName, fileName, response, uid);
+
+        response.setContentLengthLong(contentLength);
+    }
+
+    @Override
+    public void download(String fileId, HttpServletResponse response, String uid) throws IOException {
+        String fileName = RedisUtils.getCacheObject(fileId);
+        FileUtils.setAttachmentResponseHeader(response, fileName);
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
+        //这个ossId是保存时在自动生成的，不是wenjian
+        long contentLength = multiFileSysFactory.download(fileId, "runjian", fileName, response, uid);
 
         response.setContentLengthLong(contentLength);
     }

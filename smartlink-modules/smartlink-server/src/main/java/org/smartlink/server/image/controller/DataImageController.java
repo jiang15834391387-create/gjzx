@@ -5,6 +5,7 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.StringUtils;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -89,11 +91,11 @@ public class DataImageController extends BaseController {
     /**
      * 上传文件 不与单据挂钩
      *
-     * @param file             文件
+     * @param file 文件
      */
     @SaIgnore
     @PostMapping("/uploadImageFile")
-    public R<Map> uploadImageFile(@RequestParam("file") MultipartFile file,  String parentId, String uid) throws IOException {
+    public R<Map> uploadImageFile(@RequestParam("file") MultipartFile file, String parentId, String uid) throws IOException {
 
         if (StringUtils.isBlank(uid)) {
             throw new ServiceException("uid不能为空");
@@ -131,12 +133,15 @@ public class DataImageController extends BaseController {
      * @param response 响应流
      */
     @GetMapping("/downloadFile")
-    public void downloadFile(HttpServletResponse response, @RequestParam("fileId") String fileId) throws IOException {
+    public void downloadFile(HttpServletResponse response, @RequestParam("fileId") String fileId,
+                             @RequestParam(value = "uid",required = false) String uid) throws IOException {
         final DataImage fileInfo = this.dataImageServer.getById(fileId);
         if (fileInfo == null) {
-            throw new ServiceException("文件不存在");
+            log.info("文件不存在.，去润建文件服务器下载：{},UID:{}", fileId, uid);
+            this.iSysOssService.download(fileId, response, uid);
+        } else {
+            this.iSysOssService.download(fileInfo.getOssId(), response, fileInfo.getUid());
         }
-        this.iSysOssService.download(fileInfo.getOssId(), response, fileInfo.getUid());
     }
 
     /**

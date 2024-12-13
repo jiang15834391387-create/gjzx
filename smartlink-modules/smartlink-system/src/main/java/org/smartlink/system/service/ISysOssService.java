@@ -60,6 +60,11 @@ public interface ISysOssService {
     void download(Long ossId, HttpServletResponse response,String uid) throws IOException;
 
     /**
+     * 文件下载，文件不是从影像上传的，没有oss信息
+     */
+    void download(String fileId, HttpServletResponse response,String uid) throws IOException;
+
+    /**
      * 文件下载
      *
      * @param ossId OSS对象ID
