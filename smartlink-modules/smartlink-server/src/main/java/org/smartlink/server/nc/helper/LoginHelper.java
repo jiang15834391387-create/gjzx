@@ -1,5 +1,6 @@
 package org.smartlink.server.nc.helper;
 
+import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.exceptions.UtilException;
 import cn.hutool.core.util.ObjectUtil;
@@ -10,6 +11,9 @@ import org.smartlink.common.core.enums.UserType;
 import org.smartlink.server.nc.constant.UserConstants;
 import org.smartlink.server.nc.domain.modle.LoginUser;
 import org.smartlink.server.nc.utils.StringUtils;
+
+import static org.smartlink.common.satoken.utils.LoginHelper.DEPT_NAME_KEY;
+import static org.smartlink.common.satoken.utils.LoginHelper.TENANT_KEY;
 
 
 /**
@@ -29,6 +33,10 @@ public class LoginHelper {
 
     public static final String JOIN_CODE = ":";
     public static final String LOGIN_USER_KEY = "loginUser";
+    public static final String USER_KEY = "userId";
+    public static final String USER_NAME_KEY = "userName";
+    public static final String DEPT_KEY = "deptId";
+    public static final String CLIENT_KEY = "clientid";
 
     private static final ThreadLocal<LoginUser> LOGIN_CACHE = new ThreadLocal<>();
 
@@ -41,6 +49,26 @@ public class LoginHelper {
         LOGIN_CACHE.set(loginUser);
         StpUtil.login(loginUser.getLoginId());
         setLoginUser(loginUser);
+    }
+
+    /**
+     * 登录系统 基于 设备类型
+     * 针对相同用户体系不同设备
+     *
+     * @param loginUser 登录用户信息
+     * @param model     配置参数
+     */
+    public static void login(LoginUser loginUser, SaLoginModel model) {
+        model = ObjectUtil.defaultIfNull(model, new SaLoginModel());
+        StpUtil.login(loginUser.getLoginId(),
+            model.setExtra(TENANT_KEY, loginUser.getTenantId())
+                .setExtra(USER_KEY, loginUser.getUserId())
+                .setExtra(USER_NAME_KEY, loginUser.getUsername())
+                .setExtra(DEPT_KEY, loginUser.getDeptId())
+                .setExtra(DEPT_NAME_KEY, loginUser.getDeptName())
+//                .setExtra(DEPT_CATEGORY_KEY, loginUser.getDeptCategory())
+        );
+        StpUtil.getTokenSession().set(LOGIN_USER_KEY, loginUser);
     }
 
     /**

@@ -61,7 +61,7 @@ public class SysDeptController extends BaseController {
      */
     @SaCheckPermission("system:dept:query")
     @GetMapping(value = "/{deptId}")
-    public R<SysDeptVo> getInfo(@PathVariable Long deptId) {
+    public R<SysDeptVo> getInfo(@PathVariable String deptId) {
         deptService.checkDeptDataScope(deptId);
         return R.ok(deptService.selectDeptById(deptId));
     }
@@ -88,7 +88,7 @@ public class SysDeptController extends BaseController {
     @Log(title = "部门管理", businessType = BusinessType.UPDATE)
     @PutMapping
     public R<Void> edit(@Validated @RequestBody SysDeptBo dept) {
-        Long deptId = dept.getDeptId();
+        String deptId = dept.getDeptId();
         deptService.checkDeptDataScope(deptId);
         if (!deptService.checkDeptNameUnique(dept)) {
             return R.fail("修改部门'" + dept.getDeptName() + "'失败，部门名称已存在");
@@ -114,7 +114,7 @@ public class SysDeptController extends BaseController {
     @SaCheckPermission("system:dept:remove")
     @Log(title = "部门管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{deptId}")
-    public R<Void> remove(@PathVariable Long deptId) {
+    public R<Void> remove(@PathVariable String deptId) {
         if (deptService.hasChildByDeptId(deptId)) {
             return R.warn("存在下级部门,不允许删除");
         }

@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
+
 import org.smartlink.server.nc.annotation.DataColumn;
 import org.smartlink.server.nc.annotation.DataPermission;
 import org.smartlink.server.nc.domain.SysUser;
@@ -18,7 +18,7 @@ import java.util.List;
  * @author L
  */
 
-public interface SysUserMapperWeb extends BaseMapperPlus<SysUser, SysUser> {
+public interface SysUserMapperWeb extends BaseMapperPlusWeb<SysUserMapperWeb,SysUser, SysUser> {
 
     @DataPermission({
         @DataColumn(key = "deptName", value = "d.dept_id"),

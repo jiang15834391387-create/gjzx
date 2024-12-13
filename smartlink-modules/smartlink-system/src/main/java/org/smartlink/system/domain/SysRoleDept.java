@@ -24,6 +24,6 @@ public class SysRoleDept {
     /**
      * 部门ID
      */
-    private Long deptId;
+    private String deptId;
 
 }

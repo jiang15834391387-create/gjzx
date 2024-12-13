@@ -78,10 +78,11 @@ public class SysUserServiceImpl implements ISysUserService {
         return baseMapper.selectUserById(userId);
     }
 
+
     @Override
     public SysUser selectSysUserByUserNo(String userNo) {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(SysUser::getUserName,userNo);
-        return this.baseMapper.selectOne(queryWrapper);
+        return this.baseMapper.selectOne(queryWrapper,true);
     }
 }

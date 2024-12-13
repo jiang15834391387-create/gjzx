@@ -28,10 +28,7 @@ import org.smartlink.common.tenant.helper.TenantHelper;
 import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.domain.bo.SysSocialBo;
 import org.smartlink.system.domain.vo.*;
-import org.smartlink.system.domain.vo.*;
 import org.smartlink.system.mapper.SysUserMapper;
-import org.smartlink.system.service.*;
-import org.smartlink.common.core.utils.*;
 import org.smartlink.system.service.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -152,7 +149,6 @@ public class SysLoginService {
         LoginUser loginUser = new LoginUser();
         loginUser.setTenantId(user.getTenantId());
         loginUser.setUserId(user.getUserId());
-        loginUser.setDeptId(user.getDeptId());
         loginUser.setUsername(user.getUserName());
         loginUser.setNickname(user.getNickName());
         loginUser.setUserType(user.getUserType());

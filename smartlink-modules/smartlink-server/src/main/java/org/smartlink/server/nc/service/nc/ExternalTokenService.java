@@ -1,5 +1,8 @@
 package org.smartlink.server.nc.service.nc;
 
+import org.smartlink.common.core.domain.R;
+import org.smartlink.server.nc.domain.token.LoginVo;
+
 public interface ExternalTokenService {
 
     /**
@@ -15,4 +18,6 @@ public interface ExternalTokenService {
      * @return TokenValue
      */
     String getNccToken(String userId,String userNo);
+
+    R<LoginVo> getToken();
 }

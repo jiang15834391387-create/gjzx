@@ -78,7 +78,7 @@ public class SysPostServiceImpl implements ISysPostService {
         } else if (ObjectUtil.isNotNull(bo.getBelongDeptId())) {
             //部门树搜索
             wrapper.and(x -> {
-                List<Long> deptIds = deptMapper.selectList(new LambdaQueryWrapper<SysDept>()
+                List<String> deptIds = deptMapper.selectList(new LambdaQueryWrapper<SysDept>()
                         .select(SysDept::getDeptId)
                         .apply(DataBaseHelper.findInSet(bo.getBelongDeptId(), "ancestors")))
                     .stream()

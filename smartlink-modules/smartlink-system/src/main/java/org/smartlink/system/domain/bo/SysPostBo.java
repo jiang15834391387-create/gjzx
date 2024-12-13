@@ -34,7 +34,7 @@ public class SysPostBo extends BaseEntity {
     /**
      * 归属部门id（部门树）
      */
-    private Long belongDeptId;
+    private String belongDeptId;
 
     /**
      * 岗位编码

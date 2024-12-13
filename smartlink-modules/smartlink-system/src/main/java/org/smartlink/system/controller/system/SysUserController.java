@@ -28,9 +28,7 @@ import org.smartlink.system.domain.bo.SysPostBo;
 import org.smartlink.system.domain.bo.SysRoleBo;
 import org.smartlink.system.domain.bo.SysUserBo;
 import org.smartlink.system.domain.vo.*;
-import org.smartlink.system.domain.vo.*;
 import org.smartlink.system.listener.SysUserImportListener;
-import org.smartlink.system.service.*;
 import org.smartlink.system.service.*;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -140,7 +138,7 @@ public class SysUserController extends BaseController {
             SysUserVo sysUser = userService.selectUserById(userId);
             userInfoVo.setUser(sysUser);
             userInfoVo.setRoleIds(roleService.selectRoleListByUserId(userId));
-            Long deptId = sysUser.getDeptId();
+            Long deptId = Long.parseLong(sysUser.getDeptId());
             if (ObjectUtil.isNotNull(deptId)) {
                 SysPostBo postBo = new SysPostBo();
                 postBo.setDeptId(deptId);
@@ -286,7 +284,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckPermission("system:user:list")
     @GetMapping("/deptTree")
-    public R<List<Tree<Long>>> deptTree(SysDeptBo dept) {
+    public R<List<Tree<String>>> deptTree(SysDeptBo dept) {
         return R.ok(deptService.selectDeptTreeList(dept));
     }
 

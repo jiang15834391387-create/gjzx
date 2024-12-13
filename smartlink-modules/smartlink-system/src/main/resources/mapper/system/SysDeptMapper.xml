@@ -18,11 +18,11 @@
         from sys_dept ${ew.getCustomSqlSegment}
     </select>
 
-    <select id="countDeptById" resultType="Long">
+    <select id="countDeptById" resultType="String">
         select count(*) from sys_dept where del_flag = '0' and dept_id = #{deptId}
     </select>
 
-    <select id="selectDeptListByRoleId" resultType="Long">
+    <select id="selectDeptListByRoleId" resultType="String">
         select d.dept_id
         from sys_dept d
             left join sys_role_dept rd on d.dept_id = rd.dept_id

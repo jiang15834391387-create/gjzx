@@ -1,17 +1,18 @@
 package org.smartlink.system.domain.vo;
 
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.linpeilie.annotations.AutoMapper;
+import lombok.Data;
 import org.smartlink.common.sensitive.annotation.Sensitive;
 import org.smartlink.common.sensitive.core.SensitiveStrategy;
+import org.smartlink.common.tenant.core.TenantEntity;
 import org.smartlink.common.translation.annotation.Translation;
 import org.smartlink.common.translation.constant.TransConstant;
 import org.smartlink.system.domain.SysUser;
-import io.github.linpeilie.annotations.AutoMapper;
-import lombok.Data;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -23,7 +24,7 @@ import java.util.List;
  */
 @Data
 @AutoMapper(target = SysUser.class)
-public class SysUserVo implements Serializable {
+public class SysUserVo extends TenantEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -41,7 +42,7 @@ public class SysUserVo implements Serializable {
     /**
      * 部门ID
      */
-    private Long deptId;
+    private String deptId;
 
     /**
      * 用户账号
@@ -138,5 +139,16 @@ public class SysUserVo implements Serializable {
      * 数据权限 当前角色ID
      */
     private Long roleId;
+
+
+
+
+
+    /**
+     * 删除标志（0代表存在 2代表删除）
+     */
+    @TableLogic
+    private String delFlag;
+
 
 }

@@ -8,13 +8,17 @@ package org.smartlink.server.nc.utils;
 public class UrlAddressTypeConstant {
 
     /**
-     * 扫描页面地址
+     * 扫描页面
      */
-    public static final String SCAN_URL_ADDRESS = "/scanPage";
+    public static final String PAGE_URL_ADDRESS = "/scanPage";
+    /**
+     * 单点登录
+     */
+    public static final String SCAN_URL_ADDRESS = "/documentScan";
     /**
      * 查看页面地址
      */
-    public static final String SHOW_URL_ADDRESS = "/showImages";
+    public static final String SHOW_URL_ADDRESS = "/documentInfo";
     /**
      * 代办任务页面地址
      */

@@ -3,10 +3,13 @@ package org.smartlink.server.nc.domain;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.annotation.*;
 import io.swagger.annotations.ApiModelProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.smartlink.common.core.constant.UserConstants;
+import org.smartlink.common.core.xss.Xss;
 import org.smartlink.system.domain.SysDept;
 import org.smartlink.system.domain.SysRole;
 import org.smartlink.system.domain.modle.BaseEntity;
@@ -42,6 +45,10 @@ public class SysUser extends BaseEntity {
     /**
      * 用户账号
      */
+    @ApiModelProperty(value = "用户账号")
+    @Xss(message = "用户账号不能包含脚本字符")
+    @NotBlank(message = "用户账号不能为空")
+    @Size(min = 0, max = 30, message = "用户账号长度不能超过30个字符")
     private String userName;
 
     /**

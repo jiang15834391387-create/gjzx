@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <logger name="com.baomidou.mybatisplus.core.mapper" level="DEBUG"/>
     <property name="log.path" value="./logs"/>
     <property name="console.log.pattern"
               value="%red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta(%logger{36}%n) - %msg%n"/>

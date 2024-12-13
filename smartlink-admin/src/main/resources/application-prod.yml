@@ -106,6 +106,44 @@ spring.data:
     # 是否开启ssl
     ssl.enabled: false
 
+# ncc密码配置
+wsdl:
+  baseUrl: http://10.124.9.138:9081
+  bizCenter: 100
+  clientId: tchzt2
+  clientSecret: aad2433934c141b58937
+  nccUserName: admin1
+  nccPassword: qwer123@
+  #  factoryCode: tchzt2
+  factoryCode: shy
+  methodName: testNcc
+  dataSource: YONBIP
+  wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
+
+# ncc参数配置
+ncc:
+  baseUrl: http://10.124.9.138:9081
+  wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
+
+# 影像系统IP地址
+sys_visit_ip: http://10.124.9.147
+sys_visit_port: 8088
+
+
+
+
+
+spring:
+  data:
+    mongodb:
+      port: 10900
+      host: 8.130.64.138
+      # 注意: 每个库对应的用户不同 root用户默认对应admin库
+      database: yingxiang
+      # 如果设置了用户名密码 需要填
+      username: yingxiang
+      # 如果设置了用户名密码 需要填
+      password: i&8@!Q7t*z
 # DataSource Config
 mongo-plus:
   data:

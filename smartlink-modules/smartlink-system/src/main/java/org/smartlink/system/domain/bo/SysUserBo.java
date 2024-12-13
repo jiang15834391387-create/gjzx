@@ -32,7 +32,7 @@ public class SysUserBo extends BaseEntity {
     /**
      * 部门ID
      */
-    private Long deptId;
+    private String deptId;
 
     /**
      * 用户账号

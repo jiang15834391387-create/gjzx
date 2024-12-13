@@ -31,7 +31,7 @@ public class SysDataScopeServiceImpl implements ISysDataScopeService {
     private final SysDeptMapper deptMapper;
 
     @Override
-    public String getRoleCustom(Long roleId) {
+    public String getRoleCustom(String roleId) {
         List<SysRoleDept> list = roleDeptMapper.selectList(
             new LambdaQueryWrapper<SysRoleDept>()
                 .select(SysRoleDept::getDeptId)
@@ -43,11 +43,11 @@ public class SysDataScopeServiceImpl implements ISysDataScopeService {
     }
 
     @Override
-    public String getDeptAndChild(Long deptId) {
+    public String getDeptAndChild(String deptId) {
         List<SysDept> deptList = deptMapper.selectList(new LambdaQueryWrapper<SysDept>()
             .select(SysDept::getDeptId)
             .apply(DataBaseHelper.findInSet(deptId, "ancestors")));
-        List<Long> ids = StreamUtils.toList(deptList, SysDept::getDeptId);
+        List<String> ids = StreamUtils.toList(deptList, SysDept::getDeptId);
         ids.add(deptId);
         if (CollUtil.isNotEmpty(ids)) {
             return StreamUtils.join(ids, Convert::toStr);

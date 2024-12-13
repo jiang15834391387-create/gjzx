@@ -75,7 +75,7 @@ public interface Constants {
     /**
      * 顶级部门id
      */
-    Long TOP_PARENT_ID = 0L;
+    String TOP_PARENT_ID = "0";
 
 }
 

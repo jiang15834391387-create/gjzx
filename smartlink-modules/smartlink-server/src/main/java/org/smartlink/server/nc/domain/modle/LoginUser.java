@@ -32,6 +32,13 @@ public class LoginUser implements Serializable {
      */
     private String deptId;
 
+
+    private Long depId;
+
+    /**
+     * 部门类别编码
+     */
+    private String deptCategory;
     /**
      * 部门名
      */
@@ -62,6 +69,10 @@ public class LoginUser implements Serializable {
      */
     private String ipaddr;
 
+    /**
+     * 用户昵称
+     */
+    private String nickname;
     /**
      * 登录地点
      */
@@ -123,4 +134,14 @@ public class LoginUser implements Serializable {
     public String getLoginId() {
         return userType + LoginHelper.JOIN_CODE + userId;
     }
+
+    /**
+     * 客户端
+     */
+    private String clientKey;
+
+    /**
+     * 设备类型
+     */
+    private String deviceType;
 }

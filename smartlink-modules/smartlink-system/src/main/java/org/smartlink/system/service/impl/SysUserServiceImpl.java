@@ -36,7 +36,6 @@ import org.smartlink.system.domain.vo.SysRoleVo;
 import org.smartlink.system.domain.vo.SysUserExportVo;
 import org.smartlink.system.domain.vo.SysUserVo;
 import org.smartlink.system.mapper.*;
-import org.smartlink.system.mapper.*;
 import org.smartlink.system.service.ISysUserService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -95,7 +94,7 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
                 List<SysDept> deptList = deptMapper.selectList(new LambdaQueryWrapper<SysDept>()
                     .select(SysDept::getDeptId)
                     .apply(DataBaseHelper.findInSet(user.getDeptId(), "ancestors")));
-                List<Long> ids = StreamUtils.toList(deptList, SysDept::getDeptId);
+                List<String> ids = StreamUtils.toList(deptList, SysDept::getDeptId);
                 ids.add(user.getDeptId());
                 w.in("u.dept_id", ids);
             }).orderByAsc("u.user_id");

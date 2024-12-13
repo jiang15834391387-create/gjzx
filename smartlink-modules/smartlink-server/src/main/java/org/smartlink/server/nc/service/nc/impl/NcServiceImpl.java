@@ -23,6 +23,7 @@ import org.smartlink.server.nc.domain.*;
 import org.smartlink.server.nc.domain.dto.NcDeleteServiceDTO;
 import org.smartlink.server.nc.domain.dto.NcUpdateTaskStateDTO;
 import org.smartlink.server.nc.domain.invoice.bo.DataCurrentTaskBo;
+import org.smartlink.server.nc.domain.token.LoginVo;
 import org.smartlink.server.nc.enums.NCCTaskStateEnum;
 import org.smartlink.server.nc.enums.NcCodeEnum;
 import org.smartlink.server.nc.factory.NcConfigFactory;
@@ -38,6 +39,7 @@ import org.smartlink.server.nc.token.request.NccTokenRequest;
 import org.smartlink.server.nc.token.response.Token;
 import org.smartlink.server.nc.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -64,6 +66,11 @@ public class NcServiceImpl implements NcService {
     private final IDataCmInfoService dataCmInfoService;
     private final IDataImageFilesInfoService dataImageFilesInfoService;
     private final IDataOcrService iDataOcrService;
+
+    @Value("${sys_visit_ip}")
+    private String sysVisitIp;
+    @Value("${sys_visit_port}")
+    private String sysVisitPort;
 
     private List invoiceList = Arrays.asList(InvoiceConstants.TAX_SPECIAL_INVOICE,InvoiceConstants.TAX_INVOICE,InvoiceConstants.ELECTRONIC_INVOICE,InvoiceConstants.ROLL_TICKET,InvoiceConstants.ELECTRONIC_OFD_INVOICE,InvoiceConstants.ELECTRONIC_INVOICE_ITINERARY,InvoiceConstants.MOTOR_VEHICLE_SALE,InvoiceConstants.USED_CAR_SALES,InvoiceConstants.QUOTA_INVOICE,InvoiceConstants.AIRCRAFT_INVOICE,InvoiceConstants.TAXI_TICKETS,InvoiceConstants.RAILWAY_TICKET,InvoiceConstants.PASSENGER_TICKET,InvoiceConstants.FLIGHT_ITINERARY,InvoiceConstants.STEAMER_TICKET,InvoiceConstants.TOLL_ROADS,InvoiceConstants.RECEIPT,InvoiceConstants.ELECTRONIC_INVOICE_QUKUAILIAN,InvoiceConstants.INVOICE_MUCH_NCC,InvoiceConstants.INVOICE_OTHERS);
 
@@ -419,8 +426,8 @@ public class NcServiceImpl implements NcService {
         log.info("NC用户单点登陆接口请求报文：" + xml);
         String code;
         String message;
-        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
-        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
+//        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
+//        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
         Map<String, Object> dataResponse = null;
         Document document;
         try {
@@ -487,14 +494,14 @@ public class NcServiceImpl implements NcService {
                 }
             }
             JSONObject urlResponse = new JSONObject();
-            urlResponse.put("ip", systemIp);
-            urlResponse.put("port", systemPort);
+            urlResponse.put("ip", "http://10.124.9.147");
+            urlResponse.put("port", "8086");
             Map<String, Object> urlMap = new HashMap<>();
             String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()), userNo);
             String url = "";
             //  流水号字段为空为专岗扫描场景，反之为单扫场景
             if (StrUtil.isNotEmpty(businessSerialNo)) {
-                url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
+                url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
                 DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
                 // 如果影像任务不存在，则向业务系统主动拉取影像任务
                 if (ObjectUtil.isEmpty(dataCurrentTask)) {
@@ -512,7 +519,7 @@ public class NcServiceImpl implements NcService {
                 urlMap.put("billNum", dataCurrentTask.getBillNum());
                 urlMap.put("supplementaryScan", isSupplementaryScanning);
             } else {
-                url = systemIp + ":" + systemPort + UrlAddressTypeConstant.TASK_URL_ADDRESS + "?token=" + token;
+                url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
                 urlMap.put("userId", userId);
                 urlMap.put("linksSource", Constants.LINKS_SOURCE);
             }
@@ -538,8 +545,8 @@ public class NcServiceImpl implements NcService {
         log.info("NC获取影像查看链接请求报文：" + xml);
         String code;
         String message;
-        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
-        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
+//        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
+//        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
         Map<String, Object> dataResponse = null;
         Document document;
         try {
@@ -561,14 +568,14 @@ public class NcServiceImpl implements NcService {
             String userId = billBody.elementText("userid").replace(">", "");
             String userNo = billBody.elementText("UserNo");
             // 判断是否同步了用户
-            List<SysUser> sysUserList = sysUserService.selectListByNcUserId(userId);
-            if (CollectionUtil.isEmpty(sysUserList) || sysUserList.size() < 1) {
-                code = NcCodeEnum.NC_NOT_SYNC_DATA.getCode();
-                message = NcCodeEnum.NC_NOT_SYNC_DATA.getCodeName();
-                String respXML = ResultUtil.getRespXML(code, message, dataResponse);
-                log.info("影像系统接口-获取查看链接接口返回成功报文：" + respXML);
-                return respXML;
-            }
+//            List<SysUser> sysUserList = sysUserService.selectListByNcUserId(userId);
+//            if (CollectionUtil.isEmpty(sysUserList) || sysUserList.size() < 1) {
+//                code = NcCodeEnum.NC_NOT_SYNC_DATA.getCode();
+//                message = NcCodeEnum.NC_NOT_SYNC_DATA.getCodeName();
+//                String respXML = ResultUtil.getRespXML(code, message, dataResponse);
+//                log.info("影像系统接口-获取查看链接接口返回成功报文：" + respXML);
+//                return respXML;
+//            }
             List<Element> srcBusinessSerialNoList = billBody.elements("Src_Busi_Serial_No");
             List<String> businessSerialNoList = new ArrayList<>();
             List<String> batchIdList = new ArrayList<>();
@@ -587,18 +594,50 @@ public class NcServiceImpl implements NcService {
                     imageCount = dataImageFilesInfoList.size();
                 }
             }
-            String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()), null);
-            String url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + token;
-            Map<String, Object> urlMap = new HashMap<>();
 
-            urlMap.put("isEdit", isEdit);
-            urlMap.put("userId", userId);
-            urlMap.put("businessSerialNo", StrUtil.join(Constants.CONNECT_SYMBOL, businessSerialNoList));
-            url = ResultUtil.getUrl(url, urlMap);
-            dataResponse.put("ImagCount", imageCount);
-            dataResponse.put("RspUrl", url);
-            code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
-            message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+            R<LoginVo> token = externalTokenService.getToken();
+            String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + token.getData().getAccessToken();
+//            String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + StpUtil.getTokenValueByLoginId(loginUser.getLoginId());
+
+//            try {
+                // 定义URL
+//                String baseUrl = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS;
+//                // 定义参数Map
+//                Map<String, String> params = new HashMap<>();
+////                params.put("businessSerialNo", businessSerialNo);
+//                params.put("token", token);
+//
+//                // 拼接参数
+//                StringBuilder urlBuilder = new StringBuilder(baseUrl);
+//                urlBuilder.append("?");
+//
+//                for (Map.Entry<String, String> entry : params.entrySet()) {
+//                    urlBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8))
+//                        .append("=")
+//                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+//                        .append("&");
+//                }
+//
+//                // 移除最后一个多余的&
+//                if (urlBuilder.charAt(urlBuilder.length() - 1) == '&') {
+//                    urlBuilder.deleteCharAt(urlBuilder.length() - 1);
+//                }
+//                // 输出最终的URL
+//                String url = urlBuilder.toString();
+
+                Map<String, Object> urlMap = new HashMap<>();
+                urlMap.put("isEdit", isEdit);
+                urlMap.put("userId", userId);
+                urlMap.put("businessSerialNo", StrUtil.join(Constants.CONNECT_SYMBOL, businessSerialNoList));
+                url = ResultUtil.getUrl(url, urlMap);
+                dataResponse.put("ImagCount", imageCount);
+                dataResponse.put("RspUrl", url);
+                code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+                message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//            }
+//            String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?businessSerialNo=" + businessSerialNo + "token=" + token;
         } else {
             code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
             message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
@@ -888,9 +927,9 @@ public class NcServiceImpl implements NcService {
         String code;
         String message;
         Map<String, Object> dataResponse = null;
-        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
-        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
-        Document document;
+//        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
+//        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
+            Document document;
         try {
             document = DocumentHelper.parseText(xml);
         } catch (DocumentException e) {
@@ -908,6 +947,7 @@ public class NcServiceImpl implements NcService {
             String pkBillType = body.elementText("pk_billtype");
             String ocrType = body.elementText("ocrType");
             String userNo = body.elementText("UserNo");
+//            String businessSerialNo = body.elementText("Business_Serial_No");
             if (StrUtil.isEmpty(orgNoV)) {
                 orgNoV = IdUtil.fastSimpleUUID();
             }
@@ -917,7 +957,7 @@ public class NcServiceImpl implements NcService {
                 return ResultUtil.getRespXML(NcCodeEnum.NC_NOT_SYNC_DATA.getCode(), NcCodeEnum.NC_NOT_SYNC_DATA.getCodeName(), null);
             }
             String token = externalTokenService.getNccToken(null,null);
-            String url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
+            String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
             JSONObject urlResponse = new JSONObject();
             Map<String, Object> urlMap = new HashMap<>();
             DataCurrentTask currentTask = new DataCurrentTask();
@@ -935,8 +975,8 @@ public class NcServiceImpl implements NcService {
             // isTicket 1：收票节点发票上传  2：收票节点文件上传  其他：非收票节点
             urlMap.put("collectInvoice", "1");
             url = ResultUtil.getUrl(url, urlMap);
-            urlResponse.put("ip", systemIp);
-            urlResponse.put("port", systemPort);
+            urlResponse.put("ip", "http://10.124.9.147");
+            urlResponse.put("port", "8086");
             urlResponse.put("url_opensoft", url);
             dataResponse.put("RspUrl", JSON.toJSONString(urlResponse));
             code = NcCodeEnum.NC_SUCCESS_STATE.getCode();

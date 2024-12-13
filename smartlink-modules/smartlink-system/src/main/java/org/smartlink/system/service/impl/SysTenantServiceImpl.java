@@ -136,7 +136,7 @@ public class SysTenantServiceImpl implements ISysTenantService {
         dept.setParentId(Constants.TOP_PARENT_ID);
         dept.setAncestors(Constants.TOP_PARENT_ID.toString());
         deptMapper.insert(dept);
-        Long deptId = dept.getDeptId();
+        String deptId = dept.getDeptId();
 
         // 角色和部门关联表
         SysRoleDept roleDept = new SysRoleDept();

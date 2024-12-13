@@ -30,7 +30,7 @@ public class SysUser extends TenantEntity {
     /**
      * 部门ID
      */
-    private Long deptId;
+    private String deptId;
 
     /**
      * 用户账号

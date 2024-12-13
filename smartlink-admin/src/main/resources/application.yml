@@ -3,7 +3,7 @@ smartlink:
   # 名称
   name: smartlink
   # 版本
-  version: ${revision}
+  version: 2.0
   # 版权年份
   copyrightYear: 2024
 
@@ -60,10 +60,18 @@ ncc:
   baseUrl: http://10.124.9.138:9081
   wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
 
+# 影像系统IP地址
+sys_visit_ip: http://10.124.9.147
+sys_visit_port: 8088
+
+# jwt
+token:
+  key: yingxiang
+
 # 日志配置
 logging:
   level:
-    org.smartlink: @logging.level@
+    org.smartlink: info
     org.springframework: warn
     org.mybatis.spring.mapper: error
   config: classpath:logback-plus.xml
@@ -79,7 +87,7 @@ user:
 # Spring配置
 spring:
   application:
-    name: ${smartlink.name}
+    name: yingxiang
   threads:
     # 开启虚拟线程 仅jdk21可用
     virtual:
@@ -89,7 +97,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: @profiles.active@
+    active: prod
   # 文件上传
   servlet:
     multipart:
@@ -129,6 +137,8 @@ sa-token:
 security:
   # 排除路径
   excludes:
+#    - /server/**
+    - /ai/**
     - /Shy/**
     - /prod-api/**
     - /system/**
@@ -168,6 +178,8 @@ tenant:
 # MyBatisPlus配置
 # https://baomidou.com/config/
 mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   # 多包名使用 例如 org.smartlink.**.mapper,org.xxx.**.mapper
   mapperPackage: org.smartlink.**.mapper
   # 对应的 XML 文件位置
