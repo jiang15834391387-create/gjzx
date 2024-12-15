@@ -94,7 +94,7 @@ public class DataCurrentTask extends BaseEntity {
      */
     private String systemCode;
     /**
-     * 单据状态
+     * 单据状态 1-扫描完成 0-待扫描
      */
     private String taskState;
     /**

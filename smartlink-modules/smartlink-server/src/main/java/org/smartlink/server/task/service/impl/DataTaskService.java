@@ -9,8 +9,5 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class DataTaskService extends ServiceImpl<DataTask> implements DataTaskServer {
-
-
-
-
 }
+

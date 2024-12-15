@@ -1,7 +1,6 @@
 package org.smartlink.server.nc.service.nc.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.convert.Convert;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -16,17 +15,13 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.jetbrains.annotations.NotNull;
 import org.smartlink.common.core.domain.R;
-import org.smartlink.common.oss.factory.OssFactory;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.server.nc.constant.*;
 import org.smartlink.server.nc.domain.*;
-import org.smartlink.server.nc.domain.dto.NcDeleteServiceDTO;
 import org.smartlink.server.nc.domain.dto.NcUpdateTaskStateDTO;
-import org.smartlink.server.nc.domain.invoice.bo.DataCurrentTaskBo;
 import org.smartlink.server.nc.domain.token.LoginVo;
 import org.smartlink.server.nc.enums.NCCTaskStateEnum;
 import org.smartlink.server.nc.enums.NcCodeEnum;
-import org.smartlink.server.nc.factory.NcConfigFactory;
 import org.smartlink.server.nc.ncc.testapi.TestApiService;
 import org.smartlink.server.nc.ncc.testapi.response.TestOpenApiResponse;
 import org.smartlink.server.nc.ncc.testapi.resqust.TestOpenApiRequest;
@@ -37,9 +32,13 @@ import org.smartlink.server.nc.service.nc.*;
 import org.smartlink.server.nc.token.NccToken;
 import org.smartlink.server.nc.token.request.NccTokenRequest;
 import org.smartlink.server.nc.token.response.Token;
-import org.smartlink.server.nc.utils.*;
+import org.smartlink.server.nc.utils.ExceptionUtil;
+import org.smartlink.server.nc.utils.ResultUtil;
+import org.smartlink.server.nc.utils.UrlAddressTypeConstant;
+import org.smartlink.server.nc.utils.XmlUtil;
+import org.smartlink.server.task.momain.DataTask;
+import org.smartlink.server.task.service.DataTaskServer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,13 +65,9 @@ public class NcServiceImpl implements NcService {
     private final IDataCmInfoService dataCmInfoService;
     private final IDataImageFilesInfoService dataImageFilesInfoService;
     private final IDataOcrService iDataOcrService;
+    private final DataTaskServer dataTaskServer;
 
-    @Value("${sys_visit_ip}")
-    private String sysVisitIp;
-    @Value("${sys_visit_port}")
-    private String sysVisitPort;
-
-    private List invoiceList = Arrays.asList(InvoiceConstants.TAX_SPECIAL_INVOICE,InvoiceConstants.TAX_INVOICE,InvoiceConstants.ELECTRONIC_INVOICE,InvoiceConstants.ROLL_TICKET,InvoiceConstants.ELECTRONIC_OFD_INVOICE,InvoiceConstants.ELECTRONIC_INVOICE_ITINERARY,InvoiceConstants.MOTOR_VEHICLE_SALE,InvoiceConstants.USED_CAR_SALES,InvoiceConstants.QUOTA_INVOICE,InvoiceConstants.AIRCRAFT_INVOICE,InvoiceConstants.TAXI_TICKETS,InvoiceConstants.RAILWAY_TICKET,InvoiceConstants.PASSENGER_TICKET,InvoiceConstants.FLIGHT_ITINERARY,InvoiceConstants.STEAMER_TICKET,InvoiceConstants.TOLL_ROADS,InvoiceConstants.RECEIPT,InvoiceConstants.ELECTRONIC_INVOICE_QUKUAILIAN,InvoiceConstants.INVOICE_MUCH_NCC,InvoiceConstants.INVOICE_OTHERS);
+    private List invoiceList = Arrays.asList(InvoiceConstants.TAX_SPECIAL_INVOICE, InvoiceConstants.TAX_INVOICE, InvoiceConstants.ELECTRONIC_INVOICE, InvoiceConstants.ROLL_TICKET, InvoiceConstants.ELECTRONIC_OFD_INVOICE, InvoiceConstants.ELECTRONIC_INVOICE_ITINERARY, InvoiceConstants.MOTOR_VEHICLE_SALE, InvoiceConstants.USED_CAR_SALES, InvoiceConstants.QUOTA_INVOICE, InvoiceConstants.AIRCRAFT_INVOICE, InvoiceConstants.TAXI_TICKETS, InvoiceConstants.RAILWAY_TICKET, InvoiceConstants.PASSENGER_TICKET, InvoiceConstants.FLIGHT_ITINERARY, InvoiceConstants.STEAMER_TICKET, InvoiceConstants.TOLL_ROADS, InvoiceConstants.RECEIPT, InvoiceConstants.ELECTRONIC_INVOICE_QUKUAILIAN, InvoiceConstants.INVOICE_MUCH_NCC, InvoiceConstants.INVOICE_OTHERS);
 
     @Autowired
     public TestOpenApiRequestData testOpenApiRequestData;
@@ -279,30 +274,32 @@ public class NcServiceImpl implements NcService {
             if (StrUtil.isEmpty(scanType)) {
                 scanType = ScanTypeConstants.BATCH_SCAN;
             }
-            DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
+
+            DataTask task = this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
             List<DataBillType> dataBillTypeList = billTypeService.listDataBillTypeByTypeCode(billType);
-            boolean taskIsExists = ObjectUtil.isNotEmpty(dataCurrentTask);
-            dataCurrentTask = !taskIsExists ? new DataCurrentTask() : dataCurrentTask;
-            String taskState = taskIsExists ? dataCurrentTask.getTaskState() : TaskStateConstants.TASK_STATE_SCAN;
-            dataCurrentTask.setScanTypeName(StrUtil.equals(scanType, ScanTypeConstants.SINGLE_SCAN) ? "单笔扫描" : "批量扫描");
-            dataCurrentTask.setScanType(scanType);
-            dataCurrentTask.setBusinessSerialNo(businessSerialNo);
-            dataCurrentTask.setBillNum(billCode);
-            dataCurrentTask.setBillType(pkBillType);
-            dataCurrentTask.setPkBillType(billType);
+            boolean taskIsExists = ObjectUtil.isNotEmpty(task);
+            task = !taskIsExists ? new DataTask() : task;
+            String taskState = taskIsExists ? task.getTaskState() : TaskStateConstants.TASK_STATE_SCAN;
+            task.setScanTypeName(StrUtil.equals(scanType, ScanTypeConstants.SINGLE_SCAN) ? "单笔扫描" : "批量扫描");
+            task.setScanType(scanType);
+            task.setBusinessSerialNo(businessSerialNo);
+            task.setBillNum(billCode);
+            task.setBillType(pkBillType);
+            task.setPkBillType(billType);
             String tradeTypeName = CollectionUtil.isNotEmpty(dataBillTypeList) && dataBillTypeList.size() > 0 ? dataBillTypeList.get(0).getTypeName() : "未知业务单据";
-            dataCurrentTask.setBillTypeName(tradeTypeName);
-            dataCurrentTask.setTradeTypeName(tradeTypeName);
-            dataCurrentTask.setBillDate(Convert.toDate(bill.elementText("BillDate")));
-            dataCurrentTask.setCash(bill.elementText("Cash"));
-            dataCurrentTask.setUserId(bill.elementText("userid"));
-            dataCurrentTask.setGroupId(bill.elementText("DetailInfo"));
-            dataCurrentTask.setOrgCode(bill.elementText("OrgNo"));
-            dataCurrentTask.setOrgName(bill.elementText("OrgName"));
-            dataCurrentTask.setOcrType(bill.elementText("ocrType") != null ? bill.elementText("ocrType") : "0");
-            dataCurrentTask.setTaskState(taskState);
-            dataCurrentTask.setSystemCode(clientCode);
-            dataCurrentTaskService.insertOrUpdateDataCurrentTaskByBusinessSerialNo(dataCurrentTask);
+            task.setBillTypeName(tradeTypeName);
+            task.setTradeTypeName(tradeTypeName);
+            task.setBillDate(bill.elementText("BillDate"));
+            task.setCash(bill.elementText("Cash"));
+            task.setUserId(bill.elementText("userid"));
+            task.setGroupId(bill.elementText("DetailInfo"));
+            task.setOrgCode(bill.elementText("OrgNo"));
+            task.setOrgName(bill.elementText("OrgName"));
+            task.setOcrType(bill.elementText("ocrType") != null ? bill.elementText("ocrType") : "0");
+            task.setTaskState(taskState);
+            task.setSystemCode(clientCode);
+//            dataCurrentTaskService.insertOrUpdateDataCurrentTaskByBusinessSerialNo(task);
+            this.dataTaskServer.saveOrUpdate(task);
             // 如果appImages有数据，则为友报帐调用接口
             if (ObjectUtil.isNotEmpty(appImages)) {
                 this.disposeImages(appImages, businessSerialNo, billType);
@@ -341,43 +338,11 @@ public class NcServiceImpl implements NcService {
             Element billBody = rootElement.element("BillBody");
             Element service = billBody.element("service");
             String businessSerialNo = service.elementText("Busi_Serial_No");
-            DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
-            // 废弃任务需删除：1.任务表数据 2.中间表数据 3.图片表数据 4.发票信息表数据 5.源文件数据
-            if (ObjectUtil.isNotEmpty(dataCurrentTask)) {
+            DataTask task = this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+      // 废弃任务需删除：1.任务表数据 2.中间表数据 3.图片表数据 4.发票信息表数据 5.源文件数据
+            if (ObjectUtil.isNotEmpty(task)) {
                 try {
-                    List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
-                    for (DataCmInfo dataCmInfo : dataCmInfoList) {
-                        List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchId(dataCmInfo.getBatchId());
-                        List<String> fileIdList = dataImageFilesInfoList.stream().map(DataImageFilesInfo::getFileId).collect(Collectors.toList());
-                        if (ncEnabled || bipEnabled) {
-                            NcDeleteServiceDTO ncDeleteServiceDTO = new NcDeleteServiceDTO();
-                            ncDeleteServiceDTO.setFileIdList(fileIdList);
-                            ncDeleteServiceDTO.setBusinessSerialNo(businessSerialNo);
-                            NcConfigFactory.instance().deleteNcInvoiceDataBusinessService(ncDeleteServiceDTO);
-                        }
-                        if (CollectionUtil.isNotEmpty(fileIdList)) {
-                            // 删除OCR信息
-                            this.iDataOcrService.deleteMultipleFile(fileIdList);
-                        }
-                        for (DataImageFilesInfo dataImageFilesInfo : dataImageFilesInfoList) {
-                            // 删除影像文件
-                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getIurl())) {
-                                OssFactory.instance().delete(dataImageFilesInfo.getIurl());
-                            }
-                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getLurl())) {
-                                OssFactory.instance().delete(dataImageFilesInfo.getLurl());
-                            }
-                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getPurl())) {
-                                OssFactory.instance().delete(dataImageFilesInfo.getPurl());
-                            }
-                            if (StrUtil.isNotEmpty(dataImageFilesInfo.getSurl())) {
-                                OssFactory.instance().delete(dataImageFilesInfo.getSurl());
-                            }
-                            dataImageFilesInfo.deleteById();
-                        }
-                        dataCmInfo.deleteById();
-                        dataCurrentTask.deleteById();
-                    }
+                     this.dataTaskServer.removeById(task.getId());
                 } catch (Exception e) {
                     log.error("废弃影像任务接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
                 }
@@ -468,29 +433,29 @@ public class NcServiceImpl implements NcService {
             // 判断是不是补扫状态，若是 则需手动添加影像任务至数据库
             if (StrUtil.equals(scanType, ScanTypeConstants.RE_PATCH_SCAN)) {
                 log.info(scanType + ":单点登录接口补扫状态下逻辑处理");
-                DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
+                DataTask dataTask = this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+
                 // 如果单据任务不存在 则手动添加至数据库中
-                if (ObjectUtil.isEmpty(dataCurrentTask)) {
-                    DataCurrentTask currentTask = new DataCurrentTask();
-                    currentTask.setScanType(scanType);
-                    currentTask.setBusinessSerialNo(businessSerialNo);
-                    currentTask.setBillNum(billNum);
-                    currentTask.setCash(cash);
-                    currentTask.setBillType(billType);
-                    currentTask.setPkBillType(pkBillType);
+                if (ObjectUtil.isEmpty(dataTask)) {
+                    DataTask task = new DataTask();
+                    task.setScanType(scanType);
+                    task.setBusinessSerialNo(businessSerialNo);
+                    task.setBillNum(billNum);
+                    task.setCash(cash);
+                    task.setBillType(billType);
+                    task.setPkBillType(pkBillType);
                     List<DataBillType> dataBillTypes = billTypeService.listDataBillTypeByTypeCode(pkBillType);
                     String billTypeName = CollectionUtil.isNotEmpty(dataBillTypes) && dataBillTypes.size() > 0 ? dataBillTypes.get(0).getTypeName() : "未知业务单据";
-                    currentTask.setBillTypeName(billTypeName);
-                    currentTask.setTradeTypeName(billTypeName);
-                    currentTask.setUserId(userId);
-                    currentTask.setGroupId(billBody.elementText("DetailInfo"));
-                    currentTask.setOrgCode(billBody.elementText("OrgNoV"));
-                    currentTask.setOrgName(billBody.elementText("OrgName"));
-                    currentTask.setOcrType("1");
-                    currentTask.setTaskState(TaskStateConstants.TASK_STATE_SCAN);
-                    currentTask.setSystemCode("NCC");
-                    DataCurrentTaskBo dataCurrentTaskBo = BeanCopyUtils.copy(currentTask, DataCurrentTaskBo.class);
-                    dataCurrentTaskService.insertByBo(dataCurrentTaskBo);
+                    task.setBillTypeName(billTypeName);
+                    task.setTradeTypeName(billTypeName);
+                    task.setUserId(userId);
+                    task.setGroupId(billBody.elementText("DetailInfo"));
+                    task.setOrgCode(billBody.elementText("OrgNoV"));
+                    task.setOrgName(billBody.elementText("OrgName"));
+                    task.setOcrType("1");
+                    task.setTaskState(TaskStateConstants.TASK_STATE_SCAN);
+                    task.setSystemCode("NCC");
+                  this.dataTaskServer.save(task);
                 }
             }
             JSONObject urlResponse = new JSONObject();
@@ -502,12 +467,13 @@ public class NcServiceImpl implements NcService {
             //  流水号字段为空为专岗扫描场景，反之为单扫场景
             if (StrUtil.isNotEmpty(businessSerialNo)) {
                 url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
-                DataCurrentTask dataCurrentTask = dataCurrentTaskService.selectDataCurrentTaskByBusinessSerialNo(businessSerialNo);
+                DataTask task=this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
                 // 如果影像任务不存在，则向业务系统主动拉取影像任务
-                if (ObjectUtil.isEmpty(dataCurrentTask)) {
+                if (ObjectUtil.isEmpty(task)) {
                     String webUrl = NcProperties.getDefaultPropertiesInfo().getString("baseUrl") + NcProperties.getDefaultPropertiesInfo().getString("wsUrl");
                     try {
-                        dataCurrentTask = callNcService.synchronizeTaskFromNc(NcProperties.getDefaultPropertiesInfo().getString("factoryCode"), NcProperties.getDefaultPropertiesInfo().getString("dataSource"), groupId, barCode, userId, webUrl);
+                        log.info("拉影像任务：待实现");
+                      //  task = callNcService.synchronizeTaskFromNc(NcProperties.getDefaultPropertiesInfo().getString("factoryCode"), NcProperties.getDefaultPropertiesInfo().getString("dataSource"), groupId, barCode, userId, webUrl);
                     } catch (Exception e) {
                         log.error("singleLogin接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
                         return ResultUtil.getRespXML(NcCodeEnum.NC_FAIL_STATE.getCode(), e.getLocalizedMessage(), null);
@@ -516,7 +482,7 @@ public class NcServiceImpl implements NcService {
                 urlMap.put("businessSerialNo", businessSerialNo);
                 urlMap.put("userId", userId);
                 urlMap.put("userNo", userNo);
-                urlMap.put("billNum", dataCurrentTask.getBillNum());
+                urlMap.put("billNum", task.getBillNum());
                 urlMap.put("supplementaryScan", isSupplementaryScanning);
             } else {
                 url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
@@ -600,7 +566,7 @@ public class NcServiceImpl implements NcService {
 //            String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + StpUtil.getTokenValueByLoginId(loginUser.getLoginId());
 
 //            try {
-                // 定义URL
+            // 定义URL
 //                String baseUrl = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS;
 //                // 定义参数Map
 //                Map<String, String> params = new HashMap<>();
@@ -625,15 +591,15 @@ public class NcServiceImpl implements NcService {
 //                // 输出最终的URL
 //                String url = urlBuilder.toString();
 
-                Map<String, Object> urlMap = new HashMap<>();
-                urlMap.put("isEdit", isEdit);
-                urlMap.put("userId", userId);
-                urlMap.put("businessSerialNo", StrUtil.join(Constants.CONNECT_SYMBOL, businessSerialNoList));
-                url = ResultUtil.getUrl(url, urlMap);
-                dataResponse.put("ImagCount", imageCount);
-                dataResponse.put("RspUrl", url);
-                code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
-                message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
+            Map<String, Object> urlMap = new HashMap<>();
+            urlMap.put("isEdit", isEdit);
+            urlMap.put("userId", userId);
+            urlMap.put("businessSerialNo", StrUtil.join(Constants.CONNECT_SYMBOL, businessSerialNoList));
+            url = ResultUtil.getUrl(url, urlMap);
+            dataResponse.put("ImagCount", imageCount);
+            dataResponse.put("RspUrl", url);
+            code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
+            message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
 //            } catch (Exception e) {
 //                throw new RuntimeException(e);
 //            }
@@ -706,14 +672,14 @@ public class NcServiceImpl implements NcService {
             List<String> stringList = StrUtil.split(businessSerialNosStr, ",");
             if (CollectionUtil.isNotEmpty(stringList)) {
                 // NCC2411版本开始返回结构有变动
-                if(nccVersion.compareTo(2411)>=0){
+                if (nccVersion.compareTo(2411) >= 0) {
                     for (int i = 0; i < stringList.size(); i++) {
                         String businessSerialNo = stringList.get(i);
                         List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
                         if (CollectionUtil.isNotEmpty(dataCmInfoList)) {
                             String urlStr = "";
                             DataCmInfo dataCmInfo = dataCmInfoList.get(0);
-                            List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchIdAndCip(dataCmInfo.getBatchId(),Constants.YBZ);
+                            List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchIdAndCip(dataCmInfo.getBatchId(), Constants.YBZ);
                             if (CollectionUtil.isNotEmpty(dataImageFilesInfoList)) {
                                 String items = "<ITEMS>";
                                 for (int j = 0; j < dataImageFilesInfoList.size(); j++) {
@@ -721,32 +687,32 @@ public class NcServiceImpl implements NcService {
                                     String fileName = dataImageFilesInfo.getFileName();
                                     String suffix = fileName.substring(fileName.lastIndexOf(".") + 1);
                                     String url = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CONFIG_IP) + ":" + RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CONFIG_PORT) + dataImageFilesInfo.getIurl() + "?ext=" + suffix;
-                                    urlStr += "<URL>" +  url+ "</URL>";
+                                    urlStr += "<URL>" + url + "</URL>";
                                     boolean isInvoice = false;
-                                    if(invoiceList.contains(dataImageFilesInfo.getFileType())){
+                                    if (invoiceList.contains(dataImageFilesInfo.getFileType())) {
                                         isInvoice = true;
                                     }
-                                    String item = "<ITEM><URL>"+url+"</URL><FILE_NAME>"+dataImageFilesInfo.getFileName()+"</FILE_NAME><FILE_TYPE>"+suffix+"</FILE_TYPE><IS_INVOICE>"+isInvoice+"</IS_INVOICE></ITEM>";
+                                    String item = "<ITEM><URL>" + url + "</URL><FILE_NAME>" + dataImageFilesInfo.getFileName() + "</FILE_NAME><FILE_TYPE>" + suffix + "</FILE_TYPE><IS_INVOICE>" + isInvoice + "</IS_INVOICE></ITEM>";
                                     items += item;
                                 }
                                 items += "</ITEMS>";
                                 String businessS = "<BUSI_SERIAL_NO>" + businessSerialNo + "</BUSI_SERIAL_NO>";
-                                resultStr += "<BILL>" + businessS + urlStr + items+"</BILL>";
-                            }else {
+                                resultStr += "<BILL>" + businessS + urlStr + items + "</BILL>";
+                            } else {
                                 resultStr = buildResponse(businessSerialNo, resultStr);
                             }
                         } else {
                             resultStr = buildResponse(businessSerialNo, resultStr);
                         }
                     }
-                }else{
+                } else {
                     for (int i = 0; i < stringList.size(); i++) {
                         String businessSerialNo = stringList.get(i);
                         List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
                         if (CollectionUtil.isNotEmpty(dataCmInfoList)) {
                             String urlStr = "";
                             DataCmInfo dataCmInfo = dataCmInfoList.get(0);
-                            List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchIdAndCip(dataCmInfo.getBatchId(),Constants.YBZ);
+                            List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectByBatchIdAndCip(dataCmInfo.getBatchId(), Constants.YBZ);
                             if (CollectionUtil.isNotEmpty(dataImageFilesInfoList)) {
                                 for (int j = 0; j < dataImageFilesInfoList.size(); j++) {
                                     DataImageFilesInfo dataImageFilesInfo = dataImageFilesInfoList.get(j);
@@ -756,7 +722,7 @@ public class NcServiceImpl implements NcService {
                                 }
                                 String businessS = "<BUSI_SERIAL_NO>" + businessSerialNo + "</BUSI_SERIAL_NO>";
                                 resultStr += "<BILL>" + businessS + urlStr + "</BILL>";
-                            }else {
+                            } else {
                                 resultStr = buildResponse(businessSerialNo, resultStr);
                             }
                         } else {
@@ -840,7 +806,7 @@ public class NcServiceImpl implements NcService {
             Element billBody = rootElement.element("Body");
             String businessSerialNo = billBody.elementText("New_Busi_Serial_No");
             String ocrType = billBody.elementText("ocrType");
-            String token = externalTokenService.getNccToken(null,null);
+            String token = externalTokenService.getNccToken(null, null);
             String url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
             JSONObject urlResponse = new JSONObject();
             Map<String, Object> urlMap = new HashMap<>();
@@ -903,7 +869,7 @@ public class NcServiceImpl implements NcService {
                 }
             }
             String businessSerialNo = StrUtil.join(Constants.CONNECT_SYMBOL, businessSerialNoList);
-            String token = externalTokenService.getNccToken(null,null);
+            String token = externalTokenService.getNccToken(null, null);
             String url = systemIp + ":" + systemPort + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + token;
             Map<String, Object> urlMap = new HashMap<>();
             urlMap.put("businessSerialNo", businessSerialNo);
@@ -929,7 +895,7 @@ public class NcServiceImpl implements NcService {
         Map<String, Object> dataResponse = null;
 //        String systemIp = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_IP);
 //        String systemPort = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_VISIT_PORT);
-            Document document;
+        Document document;
         try {
             document = DocumentHelper.parseText(xml);
         } catch (DocumentException e) {
@@ -956,7 +922,7 @@ public class NcServiceImpl implements NcService {
             if (ObjectUtil.isEmpty(sysUser)) {
                 return ResultUtil.getRespXML(NcCodeEnum.NC_NOT_SYNC_DATA.getCode(), NcCodeEnum.NC_NOT_SYNC_DATA.getCodeName(), null);
             }
-            String token = externalTokenService.getNccToken(null,null);
+            String token = externalTokenService.getNccToken(null, null);
             String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
             JSONObject urlResponse = new JSONObject();
             Map<String, Object> urlMap = new HashMap<>();
@@ -1032,7 +998,7 @@ public class NcServiceImpl implements NcService {
             document = DocumentHelper.parseText(xml);
         } catch (DocumentException e) {
             log.error("移动审批获取图片列表接口出现异常：" + ExceptionUtil.getExceptionMessage(e));
-            return ResultUtil.getRespXmlForMobile(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(),null,null,null);
+            return ResultUtil.getRespXmlForMobile(NcCodeEnum.NC_XML_ERROR.getCode(), NcCodeEnum.NC_XML_ERROR.getCodeName(), null, null, null);
         }
         Element rootElement = document.getRootElement();
         // 组装返回xml数据
@@ -1085,7 +1051,7 @@ public class NcServiceImpl implements NcService {
     }
 
     @Override
-    public DataCurrentTask submitTaskStateForNc(DataCurrentTask dataCurrentTask, String userId,String supplementaryScan) throws Exception {
+    public DataCurrentTask submitTaskStateForNc(DataCurrentTask dataCurrentTask, String userId, String supplementaryScan) throws Exception {
         String businessSerialNo = dataCurrentTask.getBusinessSerialNo();
         String state = NCCTaskStateEnum.TASK_STATE_COMPLETE.getState();
         List<DataCmInfo> dataCmInfoList = dataCmInfoService.selectDataCmInfoByBusinessSerialNo(businessSerialNo);
@@ -1100,7 +1066,7 @@ public class NcServiceImpl implements NcService {
         }
         NcUpdateTaskStateDTO updateTaskRequestParam;
         // 如果是事后补扫场景 走相应的补扫同步状态接口
-        if(StrUtil.equals("Y",supplementaryScan)){
+        if (StrUtil.equals("Y", supplementaryScan)) {
             updateTaskRequestParam = this.getUpdateTaskRequestParam(businessSerialNo, sysUserList.get(0), "", new ArrayList<>());
             updateTaskRequestParam.setDataCurrentTask(dataCurrentTask);
             try {
@@ -1109,17 +1075,17 @@ public class NcServiceImpl implements NcService {
                 log.error("事后补扫同步状态失败：" + ExceptionUtil.getExceptionMessage(e));
                 throw new Exception("事后补扫同步状态失败：" + e.getLocalizedMessage());
             }
-        }else{
+        } else {
             // 若当前影像已经为驳回状态，则设置传给NC的state为补扫完成：5
             if (StrUtil.equals(dataCurrentTask.getTaskState(), TaskStateConstants.TASK_STATE_BH_BS)) {
                 // 补扫提交
                 state = NCCTaskStateEnum.TASK_STATE_BS_COMPLETE.getState();
                 dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_BS_WC);
-            }else if(StrUtil.equals(dataCurrentTask.getTaskState(),TaskStateConstants.TASK_STATE_BH_CS)){
+            } else if (StrUtil.equals(dataCurrentTask.getTaskState(), TaskStateConstants.TASK_STATE_BH_CS)) {
                 // 重扫提交
                 state = NCCTaskStateEnum.TASK_STATE_BS_COMPLETE.getState();
                 dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_CS_WC);
-            }else {
+            } else {
                 // 默认扫描成功状态
                 dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_COMPLETE);
             }
@@ -1167,6 +1133,7 @@ public class NcServiceImpl implements NcService {
         ncUpdateTaskStateDTO.setWebUrl(webUrl);
         return ncUpdateTaskStateDTO;
     }
+
     @Override
     public DataCurrentTask rejectTaskStateForNc(DataCurrentTask dataCurrentTask, String userId, String taskState) throws Exception {
         String businessSerialNo = dataCurrentTask.getBusinessSerialNo();
@@ -1179,15 +1146,15 @@ public class NcServiceImpl implements NcService {
         if (ObjectUtil.isEmpty(sysUserList)) {
             throw new Exception("驳回影像状态失败，影像系统不存在该用户：" + userId);
         }
-        if (taskState.equalsIgnoreCase(TaskStateConstants.TASK_STATE_BH_CS)){
+        if (taskState.equalsIgnoreCase(TaskStateConstants.TASK_STATE_BH_CS)) {
             //驳回重扫
             dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_BH_CS);
         }
-        if (taskState.equalsIgnoreCase(TaskStateConstants.TASK_STATE_BH_BS)){
+        if (taskState.equalsIgnoreCase(TaskStateConstants.TASK_STATE_BH_BS)) {
             //驳回补扫
             dataCurrentTask.setTaskState(TaskStateConstants.TASK_STATE_BH_BS);
         }
-        taskState= NCCTaskStateEnum.TASK_STATE_BS.getState();
+        taskState = NCCTaskStateEnum.TASK_STATE_BS.getState();
         dataCurrentTaskService.updateDataCurrentTask(dataCurrentTask);
         NcUpdateTaskStateDTO updateTaskRequestParam = this.getUpdateTaskRequestParam(businessSerialNo, sysUserList.get(0), taskState, dataImageFilesInfoList);
         updateTaskRequestParam.setDataCurrentTask(dataCurrentTask);
@@ -1198,5 +1165,54 @@ public class NcServiceImpl implements NcService {
             throw new Exception("驳回影像状态失败：" + e.getLocalizedMessage());
         }
         return dataCurrentTask;
+    }
+
+    @Override
+    public R<DataTask> imageSubmission(String businessSerialNo) throws Exception {
+
+        DataTask dataTask = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+        if (dataTask == null) {
+            throw new Exception("影像提交失败，对应影像任务不存在，流水号：" + businessSerialNo);
+        }
+        dataTask.setTaskState(TaskStateConstants.TASK_STATE_COMPLETE);
+        dataTaskServer.updateById(dataTask);
+        NcUpdateTaskStateDTO updateTaskRequestParam;
+        updateTaskRequestParam = this.getUpdateBipTaskRequestParam(businessSerialNo,NCCTaskStateEnum.TASK_STATE_COMPLETE.getState());
+        updateTaskRequestParam.setDataTask(dataTask);
+        try {
+            callNcService.updateBipImageState(updateTaskRequestParam);
+            log.info("影像状态提交成功+6666666666666666666666666666666666666666");
+        } catch (Exception e) {
+            log.error("提交影像状态失败：" + ExceptionUtil.getExceptionMessage(e));
+            throw new Exception("提交影像状态失败：" + e.getLocalizedMessage());
+        }
+        return R.ok(dataTask);
+    }
+    private NcUpdateTaskStateDTO getUpdateBipTaskRequestParam(String businessSerialNo, String state) {
+        String webUrl = nccTokenRequest.getBaseUrl() + nccTokenRequest.getWsUrl();
+        DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
+
+//        int imageCount = 0;
+//        int invoiceCount = 0;
+        NcUpdateTaskStateDTO ncUpdateTaskStateDTO = new NcUpdateTaskStateDTO();
+//        ncUpdateTaskStateDTO.setImageCount(imageCount);
+//        ncUpdateTaskStateDTO.setInvoiceCount(invoiceCount);
+        ncUpdateTaskStateDTO.setFactoryCode("shy");
+        ncUpdateTaskStateDTO.setDataSource("YONBIP");
+        ncUpdateTaskStateDTO.setBillCode(task.getBusinessSerialNo());
+        ncUpdateTaskStateDTO.setState(state);
+        ncUpdateTaskStateDTO.setBillType(task.getBillType());
+        ncUpdateTaskStateDTO.setPk_billtype(task.getPkBillType());
+        ncUpdateTaskStateDTO.setImagenum(task.getImages()==null?"0":task.getImages().size()+"");
+        ncUpdateTaskStateDTO.setOrgNo(task.getOrgCode());
+        ncUpdateTaskStateDTO.setGroupid(task.getGroupId());
+        ncUpdateTaskStateDTO.setOpuserdatetime(DateUtil.today());
+        ncUpdateTaskStateDTO.setOpuserpk(task.getUserId());
+        ncUpdateTaskStateDTO.setOpusername(task.getUserName());
+        ncUpdateTaskStateDTO.setOpuseraccount(task.getUserNum());
+        ncUpdateTaskStateDTO.setScanType("1");
+        ncUpdateTaskStateDTO.setWebUrl(webUrl);
+        ncUpdateTaskStateDTO.setBusinessSerialNo(businessSerialNo);
+        return ncUpdateTaskStateDTO;
     }
 }

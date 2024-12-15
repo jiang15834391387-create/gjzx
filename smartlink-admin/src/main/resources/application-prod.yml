@@ -311,6 +311,6 @@ justauth:
       redirect-uri: ${justauth.address}/social-callback?source=gitlab
 
 kkfile:
-  onlinePreviewUrl: http://192.168.106.130:8012/onlinePreview?url=
+  onlinePreviewUrl: http://10.124.9.147:8012/onlinePreview?url=
 frontEnd:
   url: http://127.0.0.1

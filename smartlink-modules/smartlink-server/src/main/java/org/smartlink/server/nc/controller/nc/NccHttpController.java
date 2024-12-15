@@ -6,13 +6,15 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.server.nc.domain.NcResult;
 import org.smartlink.server.nc.enums.NcCodeEnum;
 import org.smartlink.server.nc.service.nc.NcService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.smartlink.server.task.momain.DataTask;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @description: 对NCC系统提供接口
@@ -24,8 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class NccHttpController {
 
+    private static final Logger log = LoggerFactory.getLogger(NccHttpController.class);
     private final NcService ncService;
-//    private final ExternalTokenService externalTokenService;
 
     /**
      * 返回体Code编码
@@ -228,5 +230,17 @@ public class NccHttpController {
         String result = ncService.mobileImageQuery(xml);
         NcResult ncResult = new NcResult(getXmlNodeData(result,"RSPCODE"),getXmlNodeData(result,"RSPMSG"),result);
         return JsonUtils.toJsonString(ncResult);
+    }
+
+    /**
+     * 影像提交
+     * @param
+     * @return 结果
+     */
+    @ApiOperation("影像提交")
+    @GetMapping("/imageSubmission")
+    public R<DataTask> imageSubmission( String businessSerialNo) throws Exception {
+        log.info("imageSubmission businessSerialNo:{}",businessSerialNo);
+        return ncService.imageSubmission(businessSerialNo);
     }
 }

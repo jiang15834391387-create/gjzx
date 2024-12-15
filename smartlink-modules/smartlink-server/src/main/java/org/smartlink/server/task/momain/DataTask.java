@@ -42,6 +42,10 @@ public class DataTask extends BaseModelID {
      * 父单据类型编号
      */
     private String pkBillType;
+    /**
+     * 父单据类型编号
+     */
+    private String tradeTypeName;
 
     /**
      * 金额
@@ -67,6 +71,11 @@ public class DataTask extends BaseModelID {
      * 机构名称
      */
     private String orgName;
+
+    /**
+     * 机构名称
+     */
+    private String ocrType;
 
     /**
      * 制单人名称

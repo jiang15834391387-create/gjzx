@@ -50,4 +50,13 @@ public interface CallNcService {
      * @throws Exception 异常
      */
     String updateNcImageState(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception;
+
+    /**
+     * 更改影像状态
+     * @param ncUpdateTaskStateDTO 对象
+     * @return 结果
+     * @throws Exception 异常
+     */
+    String updateBipImageState(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception;
+
 }

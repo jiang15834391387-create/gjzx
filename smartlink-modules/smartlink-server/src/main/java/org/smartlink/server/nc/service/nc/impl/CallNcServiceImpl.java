@@ -337,6 +337,61 @@ public class CallNcServiceImpl implements CallNcService {
         return ncResult;
     }
 
+    @Override
+    public String updateBipImageState(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception {
+        String requestParam = this.getBipUpdateTaskStateRequestParam(UPDATE_IMAGE_STATE_NAMESPACE, ncUpdateTaskStateDTO.getFactoryCode(), ncUpdateTaskStateDTO.getDataSource(),ncUpdateTaskStateDTO.getBillCode(),ncUpdateTaskStateDTO.getState(), ncUpdateTaskStateDTO.getBillType(),ncUpdateTaskStateDTO.getPk_billtype(),ncUpdateTaskStateDTO.getImagenum(),ncUpdateTaskStateDTO.getOrgNo(),ncUpdateTaskStateDTO.getGroupid(),ncUpdateTaskStateDTO.getOpuserdatetime(),ncUpdateTaskStateDTO.getOpusername(),ncUpdateTaskStateDTO.getOpuserpk(),ncUpdateTaskStateDTO.getOpuseraccount(),ncUpdateTaskStateDTO.getScanType());
+        log.info("调用NC业务系统更改影像状态请求报文：" + requestParam);
+        Element ncWsResult = this.getNcWsResult(ncUpdateTaskStateDTO.getWebUrl(), requestParam);
+        final String ncResult = ncWsResult.elementText(NC_WS_RESULT);
+        log.info("调用NC业务系统更改影像状态返回结果：" + ncResult);
+        if (!NC_WS_SUCCESS_RESULT.equals(ncResult)) {
+            log.error("请求NC接口更改影像状态失败:" + ncResult);
+        }
+        return ncResult;
+    }
+    /**
+     * 组装更改影像状态所需参数
+     *
+     * @param serverName      服务名称
+     * @param factoryCode     厂商编码
+     * @param dataSource      数据源
+     * @param
+     * @param
+     * @param state           影像状态
+     * @param
+     * @param
+     * @return 返回
+     */
+    private String getBipUpdateTaskStateRequestParam(String serverName, String factoryCode, String dataSource, String billCode,String state,String billType,String pk_billType,String imagenum,String orgNo,String groupId,String opUserDatetime,String opUsername,String opUserPk,String opUserAccount,String scanType) {
+        StringBuilder reqxml = new StringBuilder();
+        reqxml.append("<params>");
+        reqxml.append("<factorycode>").append(factoryCode).append("</factorycode>");
+        reqxml.append("<servername>").append(serverName).append("</servername>");
+        reqxml.append("<datasource>").append(dataSource).append("</datasource>");
+        reqxml.append("<billinfo>");
+        reqxml.append("<datasource>").append(dataSource).append("</datasource>");
+        reqxml.append("<billcode>").append(billCode).append("</billcode>");
+        reqxml.append("<state>").append(state).append("</state>");
+        reqxml.append("<billtype>").append(pk_billType).append("</billtype>");
+        reqxml.append("<pk_billtype>").append(billType).append("</pk_billtype>");
+        reqxml.append("<imagenum>").append(imagenum).append("</imagenum>");
+        reqxml.append("<OrgNo>").append(orgNo).append("</OrgNo>");
+        reqxml.append("<groupid>").append(groupId).append("</groupid>");
+        reqxml.append("<opuserdatetime>").append(opUserDatetime).append("</opuserdatetime>");
+        reqxml.append("<scanType>").append(scanType).append("</scanType>");
+//        reqxml.append("<invoicenum>").append(invoiceCount).append("</invoicenum>");
+        reqxml.append("<opusername>").append(opUsername).append("</opusername>");
+        reqxml.append("<opuserpk>").append(opUserPk).append("</opuserpk>");
+        reqxml.append("<opuseraccount>").append(opUserAccount).append("</opuseraccount>");
+        reqxml.append("<scantype>").append(scanType).append("</scantype>");
+        reqxml.append("</billinfo>");
+        reqxml.append("</params>");
+        String xmlString = reqxml.toString();
+        return this.handleParameters(xmlString);
+    }
+
+
+
     /**
      * 组装更改影像状态所需参数
      *

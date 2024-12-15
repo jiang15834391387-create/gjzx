@@ -2,6 +2,7 @@ package org.smartlink.server.nc.service.nc;
 
 import org.smartlink.common.core.domain.R;
 import org.smartlink.server.nc.domain.DataCurrentTask;
+import org.smartlink.server.task.momain.DataTask;
 
 
 public interface NcService {
@@ -120,4 +121,6 @@ public interface NcService {
     DataCurrentTask submitTaskStateForNc(DataCurrentTask dataCurrentTask, String userId, String supplementaryScan) throws Exception;
 
     DataCurrentTask rejectTaskStateForNc(DataCurrentTask dataCurrentTask,String userId,String taskState) throws Exception;
+
+    R<DataTask> imageSubmission(String businessSerialNo) throws Exception;
 }

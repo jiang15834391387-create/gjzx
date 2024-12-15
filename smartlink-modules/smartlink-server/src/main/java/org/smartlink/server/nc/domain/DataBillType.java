@@ -88,5 +88,4 @@ public class DataBillType extends BaseEntity {
             return false;
         }
     }
-
 }

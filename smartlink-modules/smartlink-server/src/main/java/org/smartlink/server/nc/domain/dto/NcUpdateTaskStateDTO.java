@@ -4,6 +4,7 @@ package org.smartlink.server.nc.domain.dto;
 import lombok.Data;
 import org.smartlink.server.nc.domain.DataCurrentTask;
 import org.smartlink.server.nc.domain.SysUser;
+import org.smartlink.server.task.momain.DataTask;
 
 
 /**
@@ -18,6 +19,8 @@ public class NcUpdateTaskStateDTO {
      * 任务对象
      */
     private DataCurrentTask dataCurrentTask;
+
+    private DataTask dataTask;
 
     /**
      * 影像数量
@@ -44,6 +47,8 @@ public class NcUpdateTaskStateDTO {
      */
     private String state;
 
+    private String scanType;
+
     /**
      * dataSource
      */
@@ -53,6 +58,19 @@ public class NcUpdateTaskStateDTO {
      * factoryCode
      */
     private String factoryCode;
+
+
+    String businessSerialNo;
+    String billCode;
+    String billType;
+    String pk_billtype;
+    String imagenum;
+    String OrgNo;
+    String groupid;
+    String opuserdatetime;
+    String opusername;
+    String opuserpk;
+    String opuseraccount;
 
 
 }
