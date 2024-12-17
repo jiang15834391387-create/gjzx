@@ -193,7 +193,8 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
 
     @Override
     public void download(String fileId, HttpServletResponse response, String uid) throws IOException {
-        String fileName = RedisUtils.getCacheObject(fileId);
+        String fileName = RedisUtils.getCacheObject(OssConstant.RUN_JIAN_TOKEN_KEY+fileId);
+        log.info("文件下载获取文件名：{},UID:{}", fileName, uid);
         FileUtils.setAttachmentResponseHeader(response, fileName);
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
         //这个ossId是保存时在自动生成的，不是wenjian

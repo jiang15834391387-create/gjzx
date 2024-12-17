@@ -23,6 +23,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
+import org.smartlink.common.oss.constant.OssConstant;
 import org.smartlink.common.oss.exception.OssException;
 import org.smartlink.common.oss.service.StrategyService;
 import org.smartlink.common.oss.util.RunJianUtil;
@@ -286,7 +287,8 @@ public class DataTaskController extends BaseController {
                 dataImage.setFileName(item.getStr("originalFilename"));
                 dataImage.setParentId("10999");
                 // 润健ID和文件名存缓存里
-                RedisUtils.setCacheObject(dataImage.getFileId(), dataImage.getFileName(), Duration.ofMillis(100 * 60 * 1000));
+                RedisUtils.setCacheObject(OssConstant.RUN_JIAN_TOKEN_KEY+dataImage.getFileId(), dataImage.getFileName(), Duration.ofMillis(10 * 60 * 1000));
+                log.info("文件名缓存,key:{},value:{}", OssConstant.RUN_JIAN_TOKEN_KEY+dataImage.getFileId(), dataImage.getFileName());
                 imageList.add(dataImage);
             }
             task.setImages(imageList);
