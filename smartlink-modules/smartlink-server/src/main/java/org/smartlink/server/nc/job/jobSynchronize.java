@@ -38,6 +38,19 @@ public class jobSynchronize {
             throw new Exception("同步组织机构失败！");
         }
     }
+
+    /**
+     * 定时同步单据类型
+     */
+    @Scheduled(cron ="0 0 0 * * ?")
+    @ApiOperation("定时同步单据类型")
+    public R<Void> synchronizeBillType() throws Exception {
+        try {
+            return ncService.synchronizeBillType();
+        } catch (Exception e) {
+            throw new Exception("同步单据类型失败！");
+        }
+    }
 //    @Scheduled(cron ="0/5 * * * * ?")
 //    @ApiOperation("定时同步用户")
 //    public R<Void> adc() throws Exception {

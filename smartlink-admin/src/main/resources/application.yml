@@ -60,14 +60,6 @@ ncc:
   baseUrl: http://10.124.9.138:9081
   wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
 
-# 影像系统IP地址
-sys_visit_ip: http://10.124.9.147
-sys_visit_port: 8088
-
-# jwt
-token:
-  key: yingxiang
-
 # 日志配置
 logging:
   level:
@@ -137,7 +129,6 @@ sa-token:
 security:
   # 排除路径
   excludes:
-#    - /server/**
     - /ai/**
     - /Shy/**
     - /prod-api/**

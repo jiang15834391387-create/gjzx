@@ -52,7 +52,7 @@ public interface CallNcService {
     String updateNcImageState(NcUpdateTaskStateDTO ncUpdateTaskStateDTO) throws Exception;
 
     /**
-     * 更改影像状态
+     * 更改影像状态Bip
      * @param ncUpdateTaskStateDTO 对象
      * @return 结果
      * @throws Exception 异常

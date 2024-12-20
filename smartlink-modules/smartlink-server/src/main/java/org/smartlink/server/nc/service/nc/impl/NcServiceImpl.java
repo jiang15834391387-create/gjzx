@@ -32,10 +32,7 @@ import org.smartlink.server.nc.service.nc.*;
 import org.smartlink.server.nc.token.NccToken;
 import org.smartlink.server.nc.token.request.NccTokenRequest;
 import org.smartlink.server.nc.token.response.Token;
-import org.smartlink.server.nc.utils.ExceptionUtil;
-import org.smartlink.server.nc.utils.ResultUtil;
-import org.smartlink.server.nc.utils.UrlAddressTypeConstant;
-import org.smartlink.server.nc.utils.XmlUtil;
+import org.smartlink.server.nc.utils.*;
 import org.smartlink.server.task.momain.DataTask;
 import org.smartlink.server.task.service.DataTaskServer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -462,11 +459,12 @@ public class NcServiceImpl implements NcService {
             urlResponse.put("ip", "http://10.124.9.147");
             urlResponse.put("port", "8086");
             Map<String, Object> urlMap = new HashMap<>();
-            String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()), userNo);
+//            String token = externalTokenService.getNccToken(String.valueOf(sysUserList.get(0).getUserId()), userNo);
+            R<LoginVo> token = externalTokenService.getToken();
             String url = "";
             //  流水号字段为空为专岗扫描场景，反之为单扫场景
             if (StrUtil.isNotEmpty(businessSerialNo)) {
-                url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
+                url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token.getData().getAccessToken();
                 DataTask task=this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
                 // 如果影像任务不存在，则向业务系统主动拉取影像任务
                 if (ObjectUtil.isEmpty(task)) {
@@ -485,7 +483,7 @@ public class NcServiceImpl implements NcService {
                 urlMap.put("billNum", task.getBillNum());
                 urlMap.put("supplementaryScan", isSupplementaryScanning);
             } else {
-                url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token;
+                url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SCAN_URL_ADDRESS + "?token=" + token.getData().getAccessToken();
                 urlMap.put("userId", userId);
                 urlMap.put("linksSource", Constants.LINKS_SOURCE);
             }
@@ -533,15 +531,6 @@ public class NcServiceImpl implements NcService {
             String userName = billBody.elementText("UserName");
             String userId = billBody.elementText("userid").replace(">", "");
             String userNo = billBody.elementText("UserNo");
-            // 判断是否同步了用户
-//            List<SysUser> sysUserList = sysUserService.selectListByNcUserId(userId);
-//            if (CollectionUtil.isEmpty(sysUserList) || sysUserList.size() < 1) {
-//                code = NcCodeEnum.NC_NOT_SYNC_DATA.getCode();
-//                message = NcCodeEnum.NC_NOT_SYNC_DATA.getCodeName();
-//                String respXML = ResultUtil.getRespXML(code, message, dataResponse);
-//                log.info("影像系统接口-获取查看链接接口返回成功报文：" + respXML);
-//                return respXML;
-//            }
             List<Element> srcBusinessSerialNoList = billBody.elements("Src_Busi_Serial_No");
             List<String> businessSerialNoList = new ArrayList<>();
             List<String> batchIdList = new ArrayList<>();
@@ -560,36 +549,9 @@ public class NcServiceImpl implements NcService {
                     imageCount = dataImageFilesInfoList.size();
                 }
             }
-
             R<LoginVo> token = externalTokenService.getToken();
             String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + token.getData().getAccessToken();
 //            String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?token=" + StpUtil.getTokenValueByLoginId(loginUser.getLoginId());
-
-//            try {
-            // 定义URL
-//                String baseUrl = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS;
-//                // 定义参数Map
-//                Map<String, String> params = new HashMap<>();
-////                params.put("businessSerialNo", businessSerialNo);
-//                params.put("token", token);
-//
-//                // 拼接参数
-//                StringBuilder urlBuilder = new StringBuilder(baseUrl);
-//                urlBuilder.append("?");
-//
-//                for (Map.Entry<String, String> entry : params.entrySet()) {
-//                    urlBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8))
-//                        .append("=")
-//                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
-//                        .append("&");
-//                }
-//
-//                // 移除最后一个多余的&
-//                if (urlBuilder.charAt(urlBuilder.length() - 1) == '&') {
-//                    urlBuilder.deleteCharAt(urlBuilder.length() - 1);
-//                }
-//                // 输出最终的URL
-//                String url = urlBuilder.toString();
 
             Map<String, Object> urlMap = new HashMap<>();
             urlMap.put("isEdit", isEdit);
@@ -600,10 +562,6 @@ public class NcServiceImpl implements NcService {
             dataResponse.put("RspUrl", url);
             code = NcCodeEnum.NC_SUCCESS_STATE.getCode();
             message = NcCodeEnum.NC_SUCCESS_STATE.getCodeName();
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//            }
-//            String url = "http://10.124.9.147:8086" + UrlAddressTypeConstant.SHOW_URL_ADDRESS + "?businessSerialNo=" + businessSerialNo + "token=" + token;
         } else {
             code = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCode();
             message = NcCodeEnum.NC_HEAD_CHECK_FAIL_STATE.getCodeName();
@@ -1169,7 +1127,6 @@ public class NcServiceImpl implements NcService {
 
     @Override
     public R<DataTask> imageSubmission(String businessSerialNo) throws Exception {
-
         DataTask dataTask = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
         if (dataTask == null) {
             throw new Exception("影像提交失败，对应影像任务不存在，流水号：" + businessSerialNo);
@@ -1192,11 +1149,7 @@ public class NcServiceImpl implements NcService {
         String webUrl = nccTokenRequest.getBaseUrl() + nccTokenRequest.getWsUrl();
         DataTask task = dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo).one();
 
-//        int imageCount = 0;
-//        int invoiceCount = 0;
         NcUpdateTaskStateDTO ncUpdateTaskStateDTO = new NcUpdateTaskStateDTO();
-//        ncUpdateTaskStateDTO.setImageCount(imageCount);
-//        ncUpdateTaskStateDTO.setInvoiceCount(invoiceCount);
         ncUpdateTaskStateDTO.setFactoryCode("shy");
         ncUpdateTaskStateDTO.setDataSource("YONBIP");
         ncUpdateTaskStateDTO.setBillCode(task.getBusinessSerialNo());
