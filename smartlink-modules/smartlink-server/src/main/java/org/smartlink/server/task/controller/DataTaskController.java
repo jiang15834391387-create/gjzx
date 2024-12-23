@@ -166,7 +166,14 @@ public class DataTaskController extends BaseController {
 
         if (dataTask == null) {
             log.info("业务流水号为：{}的单据不存在,去润健文件服务器查询一下！UID是：{}", businessSerialNo, uid);
-            dataTask = this.getTaskInfoByRunJian(businessSerialNo, uid);
+            if (businessSerialNo.startsWith("temp")) {
+                log.info("临时业务单据，去Redis查询文件id");
+                final String fileIds = RedisUtils.getCacheObject(OssConstant.RUN_JIAN_TOKEN_KEY + businessSerialNo);
+                log.info("从缓存查到的文件ID为：{}", fileIds);
+                dataTask = this.getTempTaskInfoByRunJian(businessSerialNo, fileIds, uid);
+            } else {
+                dataTask = this.getTaskInfoByRunJian(businessSerialNo, uid);
+            }
         }
         //单据下影像集合
         List<DataImage> images = dataTask.getImages() == null ? new ArrayList<>() : dataTask.getImages();
@@ -235,6 +242,71 @@ public class DataTaskController extends BaseController {
     }
 
     /**
+     * 去润健服务器查询关联业务主键的文件信息(一组文件ID)
+     *
+     * @param businessSerialNo 文件业务流水号
+     * @param uid              润健工号
+     * @return R
+     */
+    private DataTask getTempTaskInfoByRunJian(String businessSerialNo, String fileIds, String uid) {
+        // 找润健拉取
+        DataTask task = new DataTask();
+        // 拼接accesstoken
+        String requestUrl = runJianUtil.spliceAccessToken(this.BaseUrl + this.fileInfoUrl);
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost(requestUrl);
+
+            // 构建参数
+            Map<String, String> params = new HashMap<>(2);
+            params.put("fileId", fileIds);
+            // 添加参数
+            StringEntity stringEntity = new StringEntity(JSONUtil.toJsonStr(params), ContentType.APPLICATION_JSON);
+            httpPost.setEntity(stringEntity);
+
+            // 添加基本请求头
+            runJianUtil.setHttpClientHeader(httpPost, uid);
+            log.info("请求参数,请求体:{}", JSONUtil.toJsonStr(httpPost.getEntity()));
+
+            HttpResponse response = httpClient.execute(httpPost);
+
+            final String result = EntityUtils.toString(response.getEntity());
+            log.info("一组请求润健文件服务器获取文件列表返回结果:{}", result);
+
+            final JSONObject resultObject = JSONUtil.parseObj(result);
+
+            if (resultObject.getInt("errcode") != 200) {
+                throw new ServiceException(resultObject.getStr("errmsg"));
+            }
+            // 设置单据信息
+            task.setBusinessSerialNo(businessSerialNo);
+            task.setBillNum(businessSerialNo);
+            final JSONArray data = resultObject.getJSONArray("data");
+
+            List<DataImage> imageList = new ArrayList<>(2);
+
+            for (int i = 0; i < data.size(); i++) {
+                JSONObject item = data.getJSONObject(i);
+                DataImage dataImage = new DataImage();
+
+                dataImage.setFileId(item.getStr("id"));
+                dataImage.setRunJianId(item.getStr("id"));
+                dataImage.setFileName(item.getStr("originalFilename"));
+                dataImage.setParentId("10999");
+                // 润健ID和文件名存缓存里
+                RedisUtils.setCacheObject(OssConstant.RUN_JIAN_TOKEN_KEY + dataImage.getFileId(), dataImage.getFileName(), Duration.ofMillis(10 * 60 * 1000));
+                log.info("文件名缓存,key:{},value:{}", OssConstant.RUN_JIAN_TOKEN_KEY + dataImage.getFileId(), dataImage.getFileName());
+                imageList.add(dataImage);
+            }
+            task.setImages(imageList);
+        } catch (IOException e) {
+            log.error("请求润健文件服务器异常", e);
+            throw new OssException("文件系统错误:" + e.getMessage());
+        }
+
+        return task;
+    }
+
+    /**
      * 去润健服务器查询关联业务主键的文件信息
      *
      * @param businessSerialNo 文件业务流水号
@@ -258,7 +330,6 @@ public class DataTaskController extends BaseController {
 
             // 添加基本请求头
             runJianUtil.setHttpClientHeader(httpPost, uid);
-            log.info("请求参数,请求头:{}", JSONUtil.toJsonStr(httpPost.getAllHeaders()));
             log.info("请求参数,请求体:{}", JSONUtil.toJsonStr(httpPost.getEntity()));
 
             HttpResponse response = httpClient.execute(httpPost);
@@ -287,8 +358,8 @@ public class DataTaskController extends BaseController {
                 dataImage.setFileName(item.getStr("originalFilename"));
                 dataImage.setParentId("10999");
                 // 润健ID和文件名存缓存里
-                RedisUtils.setCacheObject(OssConstant.RUN_JIAN_TOKEN_KEY+dataImage.getFileId(), dataImage.getFileName(), Duration.ofMillis(10 * 60 * 1000));
-                log.info("文件名缓存,key:{},value:{}", OssConstant.RUN_JIAN_TOKEN_KEY+dataImage.getFileId(), dataImage.getFileName());
+                RedisUtils.setCacheObject(OssConstant.RUN_JIAN_TOKEN_KEY + dataImage.getFileId(), dataImage.getFileName(), Duration.ofMillis(10 * 60 * 1000));
+                log.info("文件名缓存,key:{},value:{}", OssConstant.RUN_JIAN_TOKEN_KEY + dataImage.getFileId(), dataImage.getFileName());
                 imageList.add(dataImage);
             }
             task.setImages(imageList);

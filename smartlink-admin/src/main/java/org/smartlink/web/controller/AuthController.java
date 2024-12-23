@@ -5,6 +5,7 @@ import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
@@ -29,6 +30,7 @@ import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
+import org.smartlink.common.oss.constant.OssConstant;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.social.config.properties.SocialLoginConfigProperties;
@@ -335,9 +337,24 @@ public class AuthController {
         return R.ok(loginVo);
     }
 
+    private String createTempTask(String fileIds) {
+        final String replace = fileIds.replace("@", ",");
+        String taskId = "temp" + IdUtil.simpleUUID();
+        log.info("创建临时任务：{},文件id值：{}", taskId, replace);
+        RedisUtils.setCacheObject(OssConstant.RUN_JIAN_TOKEN_KEY + taskId, replace, Duration.ofMillis(2 * 60 * 1000));
+        return taskId;
+    }
+
     @AccessTokenVerify
     @GetMapping("/getPreviewTaskUrl")
-    public R<String> getPreviewTaskUrl(@RequestParam("businessSerialNo") String businessSerialNo, @RequestParam(required = false) String uid) {
+    public R<String> getPreviewTaskUrl(@RequestParam("businessSerialNo") String businessSerialNo,
+                                       @RequestParam(required = false) String uid,
+                                       @RequestParam(required = false) String fileIds) {
+        if (StringUtils.isNotEmpty(fileIds)) {
+            log.info("影像查看，接收到一组文件ID:{}", fileIds);
+            String tempTask = this.createTempTask(fileIds);
+            businessSerialNo = businessSerialNo + "@" + tempTask;
+        }
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
         String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&uid=" + uid + "&token=" + StpUtil.getTokenValue();
@@ -354,8 +371,14 @@ public class AuthController {
     @AccessTokenVerify
     @GetMapping("/getPreviewMultipleTaskUrl")
     public R<String> getPreviewMultipleTaskUrl(@RequestParam("businessSerialNo") String businessSerialNo,
-                                               @RequestParam("uid") String uid) {
+                                               @RequestParam("uid") String uid,
+                                               @RequestParam("fileIds") String fileIds) {
         log.info("单据联查，接收到参数:businessSerialNo:{},uid:{}", businessSerialNo, uid);
+        if (StringUtils.isNotEmpty(fileIds)) {
+            log.info("单据影像查看，接收到一组文件ID:{}", fileIds);
+            String tempTask = this.createTempTask(fileIds);
+            businessSerialNo = businessSerialNo + "@" + tempTask;
+        }
         StpUtil.renewTimeout(604800);
         StpUtil.updateLastActiveToNow();
         String s = frontEndUrl + "/documentInfo?businessSerialNo=" + businessSerialNo + "&uid=" + uid + "&token=" + StpUtil.getTokenValue();
