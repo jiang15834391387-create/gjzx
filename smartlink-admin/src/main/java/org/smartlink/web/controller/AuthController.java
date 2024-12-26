@@ -372,7 +372,7 @@ public class AuthController {
     @GetMapping("/getPreviewMultipleTaskUrl")
     public R<String> getPreviewMultipleTaskUrl(@RequestParam("businessSerialNo") String businessSerialNo,
                                                @RequestParam("uid") String uid,
-                                               @RequestParam("fileIds") String fileIds) {
+                                               @RequestParam(value = "fileIds",required = false) String fileIds) {
         log.info("单据联查，接收到参数:businessSerialNo:{},uid:{}", businessSerialNo, uid);
         if (StringUtils.isNotEmpty(fileIds)) {
             log.info("单据影像查看，接收到一组文件ID:{}", fileIds);
