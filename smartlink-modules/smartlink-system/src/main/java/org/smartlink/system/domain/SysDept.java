@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.smartlink.common.tenant.core.TenantEntity;
+import org.smartlink.common.mybatis.modle.BaseEntity;
 
 import java.io.Serial;
 
@@ -18,7 +18,7 @@ import java.io.Serial;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_dept")
-public class SysDept extends TenantEntity {
+public class SysDept extends BaseEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -33,6 +33,11 @@ public class SysDept extends TenantEntity {
      * 父部门ID
      */
     private String parentId;
+
+    /**
+     * 租户编号
+     */
+    private String tenantId;
 
     /**
      * 部门名称
@@ -52,7 +57,7 @@ public class SysDept extends TenantEntity {
     /**
      * 负责人
      */
-    private Long leader;
+    private String leader;
 
     /**
      * 联系电话

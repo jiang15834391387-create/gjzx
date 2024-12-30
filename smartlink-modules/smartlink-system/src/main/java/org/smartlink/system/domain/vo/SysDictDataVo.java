@@ -2,6 +2,7 @@ package org.smartlink.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.excel.annotation.ExcelDictFormat;
 import org.smartlink.common.excel.convert.ExcelDictConvert;
 import org.smartlink.system.domain.SysDictData;
@@ -83,6 +84,7 @@ public class SysDictDataVo implements Serializable {
      * 创建时间
      */
     @ExcelProperty(value = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
 }

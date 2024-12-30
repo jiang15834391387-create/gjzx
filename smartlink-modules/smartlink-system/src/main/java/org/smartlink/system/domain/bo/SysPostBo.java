@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.smartlink.common.mybatis.core.domain.BaseEntity;
+import org.smartlink.common.mybatis.modle.BaseEntity;
 import org.smartlink.system.domain.SysPost;
 
 /**
@@ -29,7 +29,7 @@ public class SysPostBo extends BaseEntity {
      * 部门id（单部门）
      */
     @NotNull(message = "部门id不能为空")
-    private Long deptId;
+    private String deptId;
 
     /**
      * 归属部门id（部门树）

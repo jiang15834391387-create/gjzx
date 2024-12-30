@@ -43,6 +43,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -308,6 +309,7 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
     public int insertUser(SysUserBo user) {
         SysUser sysUser = MapstructUtils.convert(user, SysUser.class);
         // 新增用户信息
+        sysUser.setCreateTime(new Date());
         int rows = baseMapper.insert(sysUser);
         user.setUserId(sysUser.getUserId());
         // 新增用户岗位关联
@@ -555,7 +557,7 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
      * @return 用户信息集合信息
      */
     @Override
-    public List<SysUserVo> selectUserListByDept(Long deptId) {
+    public List<SysUserVo> selectUserListByDept(String deptId) {
         LambdaQueryWrapper<SysUser> lqw = Wrappers.lambdaQuery();
         lqw.eq(SysUser::getDeptId, deptId);
         lqw.orderByAsc(SysUser::getUserId);

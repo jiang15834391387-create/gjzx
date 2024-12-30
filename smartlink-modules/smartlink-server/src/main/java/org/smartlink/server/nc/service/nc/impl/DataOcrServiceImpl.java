@@ -1,25 +1,27 @@
 package org.smartlink.server.nc.service.nc.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.mybatis.core.page.PageQuery;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.server.nc.constant.Constants;
 import org.smartlink.server.nc.constant.InvoiceConstants;
 import org.smartlink.server.nc.domain.DataImageFilesInfo;
 import org.smartlink.server.nc.domain.imagefilesinfo.DataImageTree;
 import org.smartlink.server.nc.domain.invoice.*;
 import org.smartlink.server.nc.domain.modle.BaseEntity;
 import org.smartlink.server.nc.mapper.*;
+import org.smartlink.server.nc.service.nc.IDataImageFilesInfoService;
 import org.smartlink.server.nc.service.nc.IDataOcrService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author L
@@ -33,6 +35,49 @@ public class DataOcrServiceImpl implements IDataOcrService {
     private final DataDidiItineraryDetailsMapper dataDidiItineraryDetailsMapper;
     private final DataFlightsMapper dataFlightsMapper;
     private final DataOcrDetailsMapper dataOcrDetailsMapper;
+    private final IDataImageFilesInfoService dataImageFilesInfoService;
+
+    /**
+     * 全票种查询
+     *
+     * @param map       查询参数 type 发票类型
+     * @param pageQuery 分页参数
+     * @return 发票分页内容
+     */
+    @Override
+    public TableDataInfo ocrQuery(Map<String, Object> map, PageQuery pageQuery) throws Exception {
+        String type = map.get("type").toString();
+        map.remove(type);
+        map.entrySet().removeIf(m -> StrUtil.isEmpty(m.getValue().toString()));
+        BaseEntity baseEntity = (BaseEntity) BeanUtil.toBean(map, Class.forName(InvoiceConstants.INVOICE_ClASS_TYPE.get(type)));
+        QueryWrapper<BaseEntity> baseEntityLqw = new QueryWrapper<>(baseEntity);
+        List<String> fileIds = null;
+        if (type.equals(InvoiceConstants.TAX_SPECIAL_INVOICE)
+            || type.equals(InvoiceConstants.TAX_INVOICE)
+            || type.equals(InvoiceConstants.ELECTRONIC_INVOICE)
+            || type.equals(InvoiceConstants.ROLL_TICKET)
+            || type.equals(InvoiceConstants.ELECTRONIC_OFD_INVOICE)
+            || type.equals(InvoiceConstants.ELECTRONIC_INVOICE_ITINERARY)) {
+            fileIds = isTypeForInvoce(type);
+            baseEntityLqw.in(CollectionUtil.isNotEmpty(fileIds), "file_id", fileIds);
+        }
+        if (baseEntity instanceof DataOcrInfo && CollectionUtil.isEmpty(fileIds)) {
+            return null;
+        }
+        return TableDataInfo.build(baseEntity.selectPage(pageQuery.build(), baseEntityLqw));
+    }
+
+    //根据fileId查询是否是这个类型
+    private List<String> isTypeForInvoce(String type) {
+        List<DataImageFilesInfo> dataImageFilesInfoList = dataImageFilesInfoService.selectAllByType(type);
+        // 这个类型的ocrId
+        List<String> fileIdList = new ArrayList<>();
+        for (DataImageFilesInfo img : dataImageFilesInfoList) {
+            fileIdList.add(img.getFileId());
+        }
+        return fileIdList;
+    }
+
     @Override
     public R<String> deleteMultipleFile(List<String> fileIds) throws Exception {
         for (String fileId : fileIds) {
@@ -222,6 +267,11 @@ public class DataOcrServiceImpl implements IDataOcrService {
     }
 
     @Override
+    public R<Void> ocrConvertToPicture(String fileId) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
+        return null;
+    }
+
+    @Override
     public List<BaseEntity> queryInvoiceInfoByTypeAndFileId(String invoiceType, String fileId) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         if (!StrUtil.equals(invoiceType, InvoiceConstants.IMAGE_OTHERS)) {
             BaseEntity baseEntity = (BaseEntity) Class.forName(InvoiceConstants.INVOICE_ClASS_TYPE.get(invoiceType)).newInstance();
@@ -307,5 +357,55 @@ public class DataOcrServiceImpl implements IDataOcrService {
             }
         }
         return R.ok();
+    }
+    @Override
+    public List<BaseEntity> multipleOcrQueryByFileId(String fileId) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        DataImageFilesInfo dataImageFilesInfo = dataImageFilesInfoMapper.selectById(fileId);
+        List<BaseEntity> baseEntityList = new ArrayList<>();
+        if (ObjectUtil.isEmpty(dataImageFilesInfo)) {
+            return null;
+        }
+        String type = dataImageFilesInfo.getFileType();
+        if (type.equals(InvoiceConstants.INVOICE_MUCH_NCC)) {
+            type = dataImageFilesInfo.getIncludeTypeArr();
+        }
+        String[] split = type.split(Constants.CONNECT_COMMA_SYMBOL);
+        for (String s : split) {
+            if (StrUtil.isEmpty(InvoiceConstants.INVOICE_ClASS_TYPE.get(s))) {
+                continue;
+            }
+            BaseEntity baseEntity = (BaseEntity) Class.forName(InvoiceConstants.INVOICE_ClASS_TYPE.get(s)).newInstance();
+            QueryWrapper<BaseEntity> baseEntityLaqw = new QueryWrapper<>();
+            baseEntityLaqw.eq("file_id", fileId);
+            List<BaseEntity> baseEntities = baseEntity.selectList(baseEntityLaqw);
+            for (BaseEntity entity : baseEntities) {
+                entity.setOcrFileType(s);
+                if (entity instanceof DataOcrInfo) {
+                    DataOcrInfo dataOcrInfo = (DataOcrInfo) entity;
+                    Map<String, Object> map = new HashMap();
+                    map.put("file_id", dataOcrInfo.getFileId());
+                    List<DataOcrDetails> list = dataOcrDetailsMapper.selectByMap(map);
+                    dataOcrInfo.setDetails(list);
+                    baseEntityList.add(dataOcrInfo);
+                } else if (entity instanceof DataFlightItinerary) {
+                    DataFlightItinerary dataFlightItinerary = (DataFlightItinerary) entity;
+                    Map<String, Object> map = new HashMap();
+                    map.put("file_id", dataFlightItinerary.getFileId());
+                    List<DataFlights> list = dataFlightsMapper.selectByMap(map);
+                    dataFlightItinerary.setDataFlights(list);
+                    baseEntityList.add(dataFlightItinerary);
+                } else if (entity instanceof DataDidiItinerary) {
+                    DataDidiItinerary dataDidiItinerary = (DataDidiItinerary) entity;
+                    Map<String, Object> map = new HashMap();
+                    map.put("file_id", dataDidiItinerary.getFileId());
+                    List<DataDidiItineraryDetails> list = dataDidiItineraryDetailsMapper.selectByMap(map);
+                    dataDidiItinerary.setDetails(list);
+                    baseEntityList.add(dataDidiItinerary);
+                } else {
+                    baseEntityList.add(entity);
+                }
+            }
+        }
+        return baseEntityList;
     }
 }

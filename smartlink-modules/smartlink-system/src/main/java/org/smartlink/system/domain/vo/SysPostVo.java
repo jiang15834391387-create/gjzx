@@ -37,7 +37,7 @@ public class SysPostVo implements Serializable {
      * 部门id
      */
     @ExcelProperty(value = "部门id")
-    private Long deptId;
+    private String deptId;
 
     /**
      * 岗位编码

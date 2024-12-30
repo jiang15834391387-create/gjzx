@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
+import org.smartlink.common.mybatis.modle.BaseEntity;
 import org.smartlink.common.sensitive.annotation.Sensitive;
 import org.smartlink.common.sensitive.core.SensitiveStrategy;
-import org.smartlink.common.tenant.core.TenantEntity;
 import org.smartlink.common.translation.annotation.Translation;
 import org.smartlink.common.translation.constant.TransConstant;
 import org.smartlink.system.domain.SysUser;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Data
 @AutoMapper(target = SysUser.class)
-public class SysUserVo extends TenantEntity {
+public class SysUserVo extends BaseEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;

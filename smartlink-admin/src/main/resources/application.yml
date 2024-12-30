@@ -22,7 +22,7 @@ captcha:
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 8088
+  port: 8887
   servlet:
     # 应用的访问路径
     context-path: /
@@ -110,9 +110,11 @@ spring:
       indent_output: false
       # 忽略无法转换的对象
       fail_on_empty_beans: false
+      write-dates-as-timestamps: false
     deserialization:
       # 允许对象忽略json中不存在的属性
       fail_on_unknown_properties: false
+      accept-empty-string-as-null-object: true
 
 # Sa-Token配置
 sa-token:

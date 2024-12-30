@@ -138,7 +138,7 @@ public class SysUserController extends BaseController {
             SysUserVo sysUser = userService.selectUserById(userId);
             userInfoVo.setUser(sysUser);
             userInfoVo.setRoleIds(roleService.selectRoleListByUserId(userId));
-            Long deptId = Long.parseLong(sysUser.getDeptId());
+            String deptId = sysUser.getDeptId();
             if (ObjectUtil.isNotNull(deptId)) {
                 SysPostBo postBo = new SysPostBo();
                 postBo.setDeptId(deptId);
@@ -293,7 +293,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckPermission("system:user:list")
     @GetMapping("/list/dept/{deptId}")
-    public R<List<SysUserVo>> listByDept(@PathVariable @NotNull Long deptId) {
+    public R<List<SysUserVo>> listByDept(@PathVariable @NotNull String deptId) {
         return R.ok(userService.selectUserListByDept(deptId));
     }
 

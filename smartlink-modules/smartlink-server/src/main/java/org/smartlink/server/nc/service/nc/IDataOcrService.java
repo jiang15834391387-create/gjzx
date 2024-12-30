@@ -1,6 +1,8 @@
 package org.smartlink.server.nc.service.nc;
 
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.mybatis.core.page.PageQuery;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.server.nc.domain.DataImageFilesInfo;
 import org.smartlink.server.nc.domain.modle.BaseEntity;
 
@@ -8,6 +10,15 @@ import java.util.List;
 import java.util.Map;
 
 public interface IDataOcrService {
+
+    /**
+     * 全票种查询
+     *
+     * @param map       查询参数 type 发票类型
+     * @param pageQuery 分页参数
+     * @return 发票分页内容
+     */
+    TableDataInfo ocrQuery(Map<String, Object> map, PageQuery pageQuery) throws Exception;
 
     /**
      * 删除多个
@@ -61,6 +72,14 @@ public interface IDataOcrService {
     R<Void> ocrInsertOrUpdate(Map<String, Object> map) throws Exception;
 
     /**
+     * 发票转图
+     *
+     * @param fileId 文件ID
+     * @return 成功或者失败
+     */
+    R<Void> ocrConvertToPicture(String fileId) throws ClassNotFoundException, InstantiationException, IllegalAccessException;
+
+    /**
      * 根据fileId和type查询发票表信息
      * @param invoiceType
      * @param fileId
@@ -80,4 +99,6 @@ public interface IDataOcrService {
     BaseEntity ocrQueryByFileId(String fileId) throws ClassNotFoundException, IllegalAccessException, InstantiationException;
 
     R<Void> ocrUpdateByBaseEntity(String fileType, BaseEntity t) throws ClassNotFoundException;
+
+    List<BaseEntity> multipleOcrQueryByFileId(String fileId) throws ClassNotFoundException, IllegalAccessException, InstantiationException;
 }

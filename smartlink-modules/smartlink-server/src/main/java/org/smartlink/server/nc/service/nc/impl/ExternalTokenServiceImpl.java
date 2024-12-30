@@ -30,7 +30,6 @@ import org.smartlink.system.service.ISysClientService;
 import org.smartlink.system.service.ISysMenuService;
 import org.smartlink.system.service.ISysRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -52,8 +51,6 @@ public class ExternalTokenServiceImpl implements ExternalTokenService {
     private final ISysUserService userService;
     @Autowired
     private ISysUserService iSysUserService;
-    @Value("${token.key}")
-    private String tokenKey;
 
     @Override
     public R<LoginVo> getToken() {

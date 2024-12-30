@@ -2,9 +2,9 @@ package org.smartlink.system.domain;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.smartlink.common.tenant.core.TenantEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.smartlink.system.domain.modle.BaseEntity;
 
 /**
  * 岗位表 sys_post
@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_post")
-public class SysPost extends TenantEntity {
+public class SysPost extends BaseEntity {
 
     /**
      * 岗位序号
@@ -26,7 +26,12 @@ public class SysPost extends TenantEntity {
     /**
      * 部门id
      */
-    private Long deptId;
+    private String deptId;
+
+    /**
+     * 租户编号
+     */
+    private String tenantId;
 
     /**
      * 岗位编码

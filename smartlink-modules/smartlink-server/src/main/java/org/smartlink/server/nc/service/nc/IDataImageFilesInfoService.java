@@ -26,6 +26,12 @@ public interface IDataImageFilesInfoService {
     List<DataImageFilesInfo> selectByBatchId(String batchId);
 
     /**
+     * 根据type查询list
+     *
+     */
+    List<DataImageFilesInfo> selectAllByType(String type);
+
+    /**
      * 根据文件ID查询
      *
      * @param fileId 文件ID

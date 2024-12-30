@@ -26,6 +26,7 @@ import org.smartlink.system.service.ISysPostService;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -214,6 +215,7 @@ public class SysPostServiceImpl implements ISysPostService {
     @Override
     public int insertPost(SysPostBo bo) {
         SysPost post = MapstructUtils.convert(bo, SysPost.class);
+        post.setCreateTime(new Date());
         return baseMapper.insert(post);
     }
 

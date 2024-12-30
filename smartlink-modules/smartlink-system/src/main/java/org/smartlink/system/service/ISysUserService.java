@@ -218,5 +218,5 @@ public interface ISysUserService {
      * @param deptId 部门id
      * @return 结果
      */
-    List<SysUserVo> selectUserListByDept(Long deptId);
+    List<SysUserVo> selectUserListByDept(String deptId);
 }

@@ -60,12 +60,12 @@ import java.util.List;
 public class ScanImageController extends BaseController {
 
     private final ScanImageService scanImageService;
-    private final IDataCurrentTaskService iDataCurrentTaskService;
+    private final IDataCurrentTaskService dataCurrentTaskService;
     private final CurrentTaskService currentTaskService;
     private final IDataCmInfoService cmInfoService;
 
     private final IDataImageFilesInfoService imageFilesInfoService;
-    private final IDataImageTreeService iDataImageTreeService;
+    private final IDataImageTreeService dataImageTreeService;
     private final HardWareMessageService hardWareMessageService;
 
     /**
@@ -91,7 +91,7 @@ public class ScanImageController extends BaseController {
         if (StrUtil.isEmpty(dto.getSupplementaryScan())) {
             dto.setSupplementaryScan("N");
         }
-        DataCurrentTaskVo task = iDataCurrentTaskService.queryById(dto.getBusinessSerialNo());
+        DataCurrentTaskVo task = dataCurrentTaskService.queryById(dto.getBusinessSerialNo());
         DataCmInfoBo cmInfoBo = new DataCmInfoBo();
         cmInfoBo.setBusinessSerialNo(dto.getBusinessSerialNo());
         List<DataCmInfoVo> cmInfoVos = cmInfoService.queryList(cmInfoBo);
@@ -133,7 +133,7 @@ public class ScanImageController extends BaseController {
             dataImageFilesInfo.setFileStatus(FileStatusConstants.IMAGE_SAVE_FAILED);
             dataImageFilesInfo.setMessage("上传异常:" + e.getLocalizedMessage());
             dataImageFilesInfo.insertOrUpdate();
-            DataImageTree dataImageTree = iDataImageTreeService.selectImageTreeByFileId(dataImageFilesInfo.getFileId());
+            DataImageTree dataImageTree = dataImageTreeService.selectImageTreeByFileId(dataImageFilesInfo.getFileId());
             if(ObjectUtil.isEmpty(dataImageTree)){
                 dataImageTree=new DataImageTree();
             }
@@ -163,7 +163,7 @@ public class ScanImageController extends BaseController {
                 dataImageTree.setParentId(InvoiceConstants.AFTER_FILE);
                 dataImageTree.setIsMove("1");
             }
-            iDataImageTreeService.saveOrUpdate(dataImageTree);
+            dataImageTreeService.saveOrUpdate(dataImageTree);
             return R.fail(e.getLocalizedMessage());
         }finally {
             scanImageService.pushFileDataToBusinessSystem(dataImageFilesInfo, dto.getBusinessSerialNo());

@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -264,6 +265,7 @@ public class SysDeptServiceImpl implements ISysDeptService, DeptService {
         }
         SysDept dept = MapstructUtils.convert(bo, SysDept.class);
         dept.setAncestors(info.getAncestors() + StringUtils.SEPARATOR + dept.getParentId());
+        dept.setCreateTime(new Date());
         return baseMapper.insert(dept);
     }
 

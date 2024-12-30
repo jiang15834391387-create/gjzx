@@ -1,11 +1,11 @@
 package org.smartlink.system.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
-import org.smartlink.common.core.constant.UserConstants;
-import org.smartlink.common.tenant.core.TenantEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.smartlink.common.core.constant.UserConstants;
+import org.smartlink.common.mybatis.modle.BaseEntity;
 
 import java.util.Date;
 
@@ -19,7 +19,7 @@ import java.util.Date;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_user")
-public class SysUser extends TenantEntity {
+public class SysUser extends BaseEntity {
 
     /**
      * 用户ID
@@ -31,6 +31,10 @@ public class SysUser extends TenantEntity {
      * 部门ID
      */
     private String deptId;
+    /**
+     * 租户编号
+     */
+    private String tenantId;
 
     /**
      * 用户账号
