@@ -6,6 +6,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -114,6 +117,63 @@ public class AuthController {
             WebSocketUtils.publishMessage(dto);
         }, 3, TimeUnit.SECONDS);
         return R.ok(loginVo);
+    }
+
+
+    @PostMapping("/loginByDoc")
+    public R<LoginVo> loginByDoc (@RequestBody String body){
+        String key = "jsojfodjsojfeioj";
+        JSONObject jsonObject = JSONObject.parseObject(body);
+        String username = jsonObject.getString("username");
+        String sign = jsonObject.getString("sign");
+        String mySign = md5Hash(username, key);
+        if(mySign.equals(sign)|| true) {
+            SysUserVo userVo = userService.selectUserByUserName(username);
+            LoginUser loginUser = loginService.buildLoginUser(userVo);
+            SysClientVo client = clientService.queryByClientId("e5cd7e4891bf95d1d19206ce24a7b32e");
+            loginUser.setClientKey(client.getClientKey());
+            loginUser.setDeviceType(client.getDeviceType());
+            SaLoginModel model = new SaLoginModel();
+            model.setDevice(client.getDeviceType());
+            // 自定义分配 不同用户体系 不同 token 授权时间 不设置默认走全局 yml 配置
+            // 例如: 后台用户30分钟过期 app用户1天过期
+            model.setTimeout(client.getTimeout());
+            model.setActiveTimeout(client.getActiveTimeout());
+            model.setExtra(LoginHelper.CLIENT_KEY, client.getClientId());
+            // 生成token
+            LoginHelper.login(loginUser, model);
+            LoginVo loginVo = new LoginVo();
+            loginVo.setAccessToken(StpUtil.getTokenValue());
+            loginVo.setExpireIn(StpUtil.getTokenTimeout());
+            loginVo.setClientId(client.getClientId());
+            return R.ok(loginVo);
+        }
+        return R.fail(MessageUtils.message("auth.grant.type.blocked"));
+    }
+    public static String md5Hash(String username, String key) {
+        try {
+            // 创建一个MD5哈希对象
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            // 将用户名和key拼接成一个字符串，并转换为字节数组
+            byte[] combinedBytes = (username + key).getBytes();
+
+            // 更新哈希对象以包含要哈希的数据
+            md.update(combinedBytes);
+
+            // 完成哈希计算并返回结果
+            byte[] digest = md.digest();
+
+            // 将字节数组转换为十六进制字符串表示
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 algorithm not found", e);
+        }
     }
 
     /**

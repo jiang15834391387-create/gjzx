@@ -45,7 +45,7 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
-          url: jdbc:mysql://8.130.64.138:3306/gansu_image?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
+          url: jdbc:mysql://8.130.64.138:3306/demo_image?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
           username: root
           password: pF0|mU6;qX
         # 从库数据源
@@ -119,12 +119,10 @@ wsdl:
   methodName: testNcc
   dataSource: YONBIP
   wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
-
 # ncc参数配置
 ncc:
   baseUrl: http://10.124.9.138:9081
   wsUrl: /uapws/service/nc.imag.itf.ws.IImageInterfaceService
-
 # 影像系统IP地址
 sys_visit_ip: http://10.124.9.147
 sys_visit_port: 8088
@@ -134,21 +132,21 @@ spring:
       port: 10900
       host: 8.130.64.138
       # 注意: 每个库对应的用户不同 root用户默认对应admin库
-      database: yingxiang
+      database: yingxiang_demo
       # 如果设置了用户名密码 需要填
       username: yingxiang
       # 如果设置了用户名密码 需要填
-      password: i&8@!Q7t*z
+      password: pL5)mC7+aL
 # DataSource Config
 mongo-plus:
   data:
     mongodb:
       host: 8.130.64.138   #ip
       port: 10900   #端口
-      database: yingxiang    #数据库名
+      database: yingxiang_demo    #数据库名
       username: yingxiang    #用户名，没有可不填（若账号中出现@,!等等符号，不需要再进行转码！！！）
-      password: i&8@!Q7t*z    #密码，同上（若密码中出现@,!等等符号，不需要再进行转码！！！）
-      authenticationDatabase: admin     #验证数据库
+      password: pL5)mC7+aL    #密码，同上（若密码中出现@,!等等符号，不需要再进行转码！！！）
+      authenticationDatabase: yingxiang_demo     #验证数据库
       connectTimeoutMS: 50000   #在超时之前等待连接打开的最长时间（以毫秒为单位）
   log: true
 
@@ -306,6 +304,6 @@ justauth:
       redirect-uri: ${justauth.address}/social-callback?source=gitlab
 
 kkfile:
-  onlinePreviewUrl: http://10.124.9.147:8012/onlinePreview?url=
+  onlinePreviewUrl: http://8.130.64.138:8012/onlinePreview?url=
 frontEnd:
   url: http://127.0.0.1
