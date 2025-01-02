@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
+import com.anwen.mongo.conditions.query.LambdaQueryChainWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -349,15 +350,22 @@ public class DataImageController extends BaseController {
      * @return 成功失败
      */
     @GetMapping("/deleteImage")
-    public R<Void> deleteImage(String fileId) {
+    public R<Void> deleteImage(String fileId, @RequestParam(value = "businessSerialNo", required = false) String businessSerialNo) {
+        if (StringUtils.isNotEmpty(businessSerialNo)){
+            // 找到这个单据
+            LambdaQueryChainWrapper<DataTask> queryChainWrapper = this.dataTaskServer.lambdaQuery().eq(DataTask::getBusinessSerialNo, businessSerialNo);
+            DataTask task = queryChainWrapper.one();
+            if (task != null){
+                List<DataImage> images = task.getImages();
+                images.removeIf(image -> image.getFileId().equals(fileId));
+                dataTaskServer.updateById(task);
+            }
+        }
         DataImage one = dataImageServer.lambdaQuery().eq(DataImage::getFileId, fileId).one();
         if (one != null) {
             iSysOssService.deleteWithValidById(one.getOssId(), false);
         }
         dataImageServer.lambdaUpdate().eq(DataImage::getFileId, fileId).remove();
-        Query query = new Query(Criteria.where("images").elemMatch(Criteria.where("fileId").is(fileId)));
-        Update update = new Update().pull("images", Query.query(Criteria.where("fileId").is(fileId)));
-        mongoTemplate.updateMulti(query, update, "dataTask");
         return R.ok();
     }
 
