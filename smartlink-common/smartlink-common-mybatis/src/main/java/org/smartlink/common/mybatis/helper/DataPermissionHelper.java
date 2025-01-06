@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.plugins.IgnoreStrategy;
 import com.baomidou.mybatisplus.core.plugins.InterceptorIgnoreHelper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.dromara.common.core.utils.reflect.ReflectUtils;
+import org.smartlink.common.core.utils.reflect.ReflectUtils;
 
 import java.util.HashMap;
 import java.util.Map;

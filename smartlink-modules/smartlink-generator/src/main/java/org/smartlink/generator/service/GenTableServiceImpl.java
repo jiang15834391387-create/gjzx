@@ -22,6 +22,7 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.smartlink.common.core.constant.Constants;
 import org.smartlink.common.core.exception.ServiceException;
+import org.smartlink.common.core.utils.SpringUtils;
 import org.smartlink.common.core.utils.StreamUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.core.utils.file.FileUtils;

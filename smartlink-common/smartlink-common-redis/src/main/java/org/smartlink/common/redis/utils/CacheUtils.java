@@ -1,6 +1,6 @@
-package org.dromara.common.redis.utils;
+package org.smartlink.common.redis.utils;
 
-import org.dromara.common.core.utils.SpringUtils;
+import org.smartlink.common.core.utils.SpringUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.redisson.api.RMap;

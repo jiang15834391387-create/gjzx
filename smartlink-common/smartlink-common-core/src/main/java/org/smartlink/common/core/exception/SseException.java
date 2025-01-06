@@ -1,4 +1,4 @@
-package org.dromara.common.core.exception;
+package org.smartlink.common.core.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -12,6 +12,7 @@ import org.smartlink.common.web.core.BaseController;
 import org.smartlink.system.domain.bo.SysDeptBo;
 import org.smartlink.system.domain.vo.SysDeptVo;
 import org.smartlink.system.service.ISysDeptService;
+import org.smartlink.system.service.ISysPostService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 

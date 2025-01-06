@@ -1,7 +1,7 @@
 package org.smartlink.common.mail.config;
 
+import cn.hutool.extra.mail.MailAccount;
 import org.smartlink.common.mail.config.properties.MailProperties;
-import org.smartlink.common.mail.utils.MailAccount;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

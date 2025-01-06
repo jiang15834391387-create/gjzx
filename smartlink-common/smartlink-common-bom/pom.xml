@@ -174,8 +174,8 @@
 
             <!-- SSE模块 -->
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-sse</artifactId>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-common-sse</artifactId>
                 <version>${revision}</version>
             </dependency>
 

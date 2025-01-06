@@ -1,4 +1,4 @@
-package org.dromara.system.service.impl;
+package org.smartlink.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -26,10 +26,7 @@ import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.mybatis.helper.DataBaseHelper;
 import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.system.domain.SysDept;
-import org.smartlink.system.domain.SysUser;
-import org.smartlink.system.domain.SysUserPost;
-import org.smartlink.system.domain.SysUserRole;
+import org.smartlink.system.domain.*;
 import org.smartlink.system.domain.bo.SysUserBo;
 import org.smartlink.system.domain.vo.SysPostVo;
 import org.smartlink.system.domain.vo.SysRoleVo;

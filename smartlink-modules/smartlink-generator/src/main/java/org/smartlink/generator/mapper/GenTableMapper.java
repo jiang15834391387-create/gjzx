@@ -1,4 +1,4 @@
-package org.dromara.generator.mapper;
+package org.smartlink.generator.mapper;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.annotation.InterceptorIgnore;

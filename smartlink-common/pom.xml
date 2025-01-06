@@ -33,6 +33,7 @@
         <module>smartlink-common-encrypt</module>
         <module>smartlink-common-tenant</module>
         <module>smartlink-common-websocket</module>
+        <module>smartlink-common-sse</module>
     </modules>
 
     <artifactId>smartlink-common</artifactId>

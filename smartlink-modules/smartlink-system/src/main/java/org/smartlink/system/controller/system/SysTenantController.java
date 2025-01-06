@@ -24,6 +24,7 @@ import org.smartlink.common.web.core.BaseController;
 import org.smartlink.system.domain.bo.SysTenantBo;
 import org.smartlink.system.domain.vo.SysTenantVo;
 import org.smartlink.system.service.ISysTenantService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
