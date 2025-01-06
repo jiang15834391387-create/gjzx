@@ -22,6 +22,7 @@ import org.smartlink.workflow.service.IActTaskService;
 import org.smartlink.workflow.service.IWfTaskBackNodeService;
 import org.smartlink.workflow.utils.QueryUtils;
 import org.flowable.engine.TaskService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,10 +40,9 @@ import java.util.Map;
 @RequestMapping("/workflow/task")
 public class ActTaskController extends BaseController {
 
+    @Autowired(required = false)
+    private TaskService taskService;
     private final IActTaskService actTaskService;
-
-    private final TaskService taskService;
-
     private final IWfTaskBackNodeService wfTaskBackNodeService;
 
 

@@ -103,11 +103,11 @@ public class AuthController {
 
         Long userId = LoginHelper.getUserId();
         scheduledExecutorService.schedule(() -> {
-            WebSocketMessageDto dto = new WebSocketMessageDto();
+            SseMessageDto dto = new SseMessageDto();
             dto.setMessage("欢迎登录smartlink后台管理系统");
-            dto.setSessionKeys(List.of(userId));
-            WebSocketUtils.publishMessage(dto);
-        }, 3, TimeUnit.SECONDS);
+            dto.setUserIds(List.of(userId));
+            SseMessageUtils.publishMessage(dto);
+        }, 5, TimeUnit.SECONDS);
         return R.ok(loginVo);
     }
 

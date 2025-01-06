@@ -62,7 +62,7 @@ public class SysNoticeController extends BaseController {
             return R.fail();
         }
         String type = dictService.getDictLabel("sys_notice_type", notice.getNoticeType());
-        WebSocketUtils.publishAll("[" + type + "] " + notice.getNoticeTitle());
+        SseMessageUtils.publishAll("[" + type + "] " + notice.getNoticeTitle());
         return R.ok();
     }
 

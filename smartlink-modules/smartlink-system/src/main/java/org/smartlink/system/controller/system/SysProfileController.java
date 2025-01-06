@@ -72,7 +72,8 @@ public class SysProfileController extends BaseController {
         if (StringUtils.isNotEmpty(user.getEmail()) && !userService.checkEmailUnique(user)) {
             return R.fail("修改用户'" + username + "'失败，邮箱账号已存在");
         }
-        if (userService.updateUserProfile(user) > 0) {
+        int rows = DataPermissionHelper.ignore(() -> userService.updateUserProfile(user));
+        if (rows > 0) {
             return R.ok();
         }
         return R.fail("修改个人信息异常，请联系管理员");

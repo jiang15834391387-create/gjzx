@@ -79,7 +79,7 @@ public class SysLogininforController extends BaseController {
     @Log(title = "账户解锁", businessType = BusinessType.OTHER)
     @GetMapping("/unlock/{userName}")
     public R<Void> unlock(@PathVariable("userName") String userName) {
-        String loginName = GlobalConstants.PWD_ERR_CNT_KEY + userName;
+        String loginName = CacheConstants.PWD_ERR_CNT_KEY + userName;
         if (RedisUtils.hasKey(loginName)) {
             RedisUtils.deleteObject(loginName);
         }

@@ -1,4 +1,4 @@
-package org.smartlink.generator.mapper;
+package org.dromara.generator.mapper;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
@@ -16,22 +16,6 @@ import java.util.List;
  */
 @InterceptorIgnore(dataPermission = "true", tenantLine = "true")
 public interface GenTableMapper extends BaseMapperPlus<GenTable, GenTable> {
-
-    /**
-     * 查询据库列表
-     *
-     * @param genTable 查询条件
-     * @return 数据库表集合
-     */
-    Page<GenTable> selectPageDbTableList(@Param("page") Page<GenTable> page, @Param("genTable") GenTable genTable);
-
-    /**
-     * 查询据库列表
-     *
-     * @param tableNames 表名称组
-     * @return 数据库表集合
-     */
-    List<GenTable> selectDbTableListByNames(String[] tableNames);
 
     /**
      * 查询所有表信息
@@ -56,6 +40,14 @@ public interface GenTableMapper extends BaseMapperPlus<GenTable, GenTable> {
      */
     GenTable selectGenTableByName(String tableName);
 
+    /**
+     * 查询指定数据源下的所有表名列表
+     *
+     * @param dataName 数据源名称，用于选择不同的数据源
+     * @return 当前数据库中的表名列表
+     *
+     * @DS("") 使用默认数据源执行查询操作
+     */
     @DS("")
     List<String> selectTableNameList(String dataName);
 }

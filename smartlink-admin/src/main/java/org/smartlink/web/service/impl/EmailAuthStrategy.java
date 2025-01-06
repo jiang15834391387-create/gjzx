@@ -1,4 +1,4 @@
-package org.smartlink.web.service.impl;
+package org.dromara.web.service.impl;
 
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
@@ -50,13 +50,12 @@ public class EmailAuthStrategy implements IAuthStrategy {
         String tenantId = loginBody.getTenantId();
         String email = loginBody.getEmail();
         String emailCode = loginBody.getEmailCode();
-
-        // 通过邮箱查找用户
-        SysUserVo user = loadUserByEmail(tenantId, email);
-
-        loginService.checkLogin(LoginType.EMAIL, tenantId, user.getUserName(), () -> !validateEmailCode(tenantId, email, emailCode));
-        // 此处可根据登录用户的数据不同 自行创建 loginUser 属性不够用继承扩展就行了
-        LoginUser loginUser = loginService.buildLoginUser(user);
+        LoginUser loginUser = TenantHelper.dynamic(tenantId, () -> {
+            SysUserVo user = loadUserByEmail(email);
+            loginService.checkLogin(LoginType.EMAIL, tenantId, user.getUserName(), () -> !validateEmailCode(tenantId, email, emailCode));
+            // 此处可根据登录用户的数据不同 自行创建 loginUser 属性不够用继承扩展就行了
+            return loginService.buildLoginUser(user);
+        });
         loginUser.setClientKey(client.getClientKey());
         loginUser.setDeviceType(client.getDeviceType());
         SaLoginModel model = new SaLoginModel();
@@ -88,18 +87,16 @@ public class EmailAuthStrategy implements IAuthStrategy {
         return code.equals(emailCode);
     }
 
-    private SysUserVo loadUserByEmail(String tenantId, String email) {
-        return TenantHelper.dynamic(tenantId, () -> {
-            SysUserVo user = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, email));
-            if (ObjectUtil.isNull(user)) {
-                log.info("登录用户：{} 不存在.", email);
-                throw new UserException("user.not.exists", email);
-            } else if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
-                log.info("登录用户：{} 已被停用.", email);
-                throw new UserException("user.blocked", email);
-            }
-            return user;
-        });
+    private SysUserVo loadUserByEmail(String email) {
+        SysUserVo user = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getEmail, email));
+        if (ObjectUtil.isNull(user)) {
+            log.info("登录用户：{} 不存在.", email);
+            throw new UserException("user.not.exists", email);
+        } else if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
+            log.info("登录用户：{} 已被停用.", email);
+            throw new UserException("user.blocked", email);
+        }
+        return user;
     }
 
 }
