@@ -19,7 +19,7 @@ snail-job:
   # SnailJob 接入验证令牌 详见 script/sql/snail_job.sql `sj_group_config` 表
   token: "SJ_cKqBTPzCsWA3VyuCfFoccmuIEGXjr5KT"
   server:
-    host: 127.0.0.1
+    host: 127.0.0.11231232131lllll
     port: 17888
   # 详见 script/sql/snail_job.sql `sj_namespace` 表
   namespace: ${spring.profiles.active}
