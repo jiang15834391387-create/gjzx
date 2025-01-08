@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataElectronicTransportationGoods;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -46,7 +44,7 @@ public class DataElectronicTransportationGoodsVo implements Serializable {
      * 申请日期
      */
     @ExcelProperty(value = "申请日期")
-    private Date date;
+    private String date;
 
     /**
      * 托运人证照号码
@@ -76,7 +74,7 @@ public class DataElectronicTransportationGoodsVo implements Serializable {
      * 费用合计小写
      */
     @ExcelProperty(value = "费用合计小写")
-    private Long totalPrice;
+    private String totalPrice;
 
     /**
      * 费用合计大写
@@ -97,16 +95,10 @@ public class DataElectronicTransportationGoodsVo implements Serializable {
     private String transporterIdNumber;
 
     /**
-     * 坐标
+     * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
-    @ExcelProperty(value = "坐标")
+    @ExcelProperty(value = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]")
     private String region;
-
-    /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -119,18 +111,6 @@ public class DataElectronicTransportationGoodsVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

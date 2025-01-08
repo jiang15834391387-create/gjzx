@@ -23,7 +23,7 @@ import org.smartlink.business.service.IDataOcrInfoService;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
 /**
- * ocr信息
+ * 增值税发票
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -37,7 +37,7 @@ public class DataOcrInfoController extends BaseController {
     private final IDataOcrInfoService dataOcrInfoService;
 
     /**
-     * 查询ocr信息列表
+     * 查询增值税发票列表
      */
     @SaCheckPermission("business:ocrInfo:list")
     @GetMapping("/list")
@@ -46,18 +46,18 @@ public class DataOcrInfoController extends BaseController {
     }
 
     /**
-     * 导出ocr信息列表
+     * 导出增值税发票列表
      */
     @SaCheckPermission("business:ocrInfo:export")
-    @Log(title = "ocr信息", businessType = BusinessType.EXPORT)
+    @Log(title = "增值税发票", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DataOcrInfoBo bo, HttpServletResponse response) {
         List<DataOcrInfoVo> list = dataOcrInfoService.queryList(bo);
-        ExcelUtil.exportExcel(list, "ocr信息", DataOcrInfoVo.class, response);
+        ExcelUtil.exportExcel(list, "增值税发票", DataOcrInfoVo.class, response);
     }
 
     /**
-     * 获取ocr信息详细信息
+     * 获取增值税发票详细信息
      *
      * @param id 主键
      */
@@ -69,10 +69,10 @@ public class DataOcrInfoController extends BaseController {
     }
 
     /**
-     * 新增ocr信息
+     * 新增增值税发票
      */
     @SaCheckPermission("business:ocrInfo:add")
-    @Log(title = "ocr信息", businessType = BusinessType.INSERT)
+    @Log(title = "增值税发票", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody DataOcrInfoBo bo) {
@@ -80,10 +80,10 @@ public class DataOcrInfoController extends BaseController {
     }
 
     /**
-     * 修改ocr信息
+     * 修改增值税发票
      */
     @SaCheckPermission("business:ocrInfo:edit")
-    @Log(title = "ocr信息", businessType = BusinessType.UPDATE)
+    @Log(title = "增值税发票", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DataOcrInfoBo bo) {
@@ -91,12 +91,12 @@ public class DataOcrInfoController extends BaseController {
     }
 
     /**
-     * 删除ocr信息
+     * 删除增值税发票
      *
      * @param ids 主键串
      */
     @SaCheckPermission("business:ocrInfo:remove")
-    @Log(title = "ocr信息", businessType = BusinessType.DELETE)
+    @Log(title = "增值税发票", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable String[] ids) {

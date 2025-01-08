@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataRailwayTicket;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -46,7 +44,7 @@ public class DataRailwayTicketVo implements Serializable {
      * 日期
      */
     @ExcelProperty(value = "日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 图片表id
@@ -124,7 +122,7 @@ public class DataRailwayTicketVo implements Serializable {
      * 合计
      */
     @ExcelProperty(value = "合计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票专用章存在性判断
@@ -143,12 +141,6 @@ public class DataRailwayTicketVo implements Serializable {
      */
     @ExcelProperty(value = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]")
     private String region;
-
-    /**
-     * 睿真token
-     */
-    @ExcelProperty(value = "睿真token")
-    private String saveToken;
 
     /**
      * 商务类型  退 售 改签 退差
@@ -222,14 +214,14 @@ public class DataRailwayTicketVo implements Serializable {
      */
     @ExcelProperty(value = "退票金额", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "仅=在电子凭证时返回")
-    private Long amountRefunded;
+    private String amountRefunded;
 
     /**
      * 原火车票价款（仅在电子凭证时返回）
      */
     @ExcelProperty(value = "原火车票价款", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "仅=在电子凭证时返回")
-    private Long fareOfOriginalRailwayTicket;
+    private String fareOfOriginalRailwayTicket;
 
     /**
      * 原火车票起点站（仅在电子凭证时返回）
@@ -276,24 +268,6 @@ public class DataRailwayTicketVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

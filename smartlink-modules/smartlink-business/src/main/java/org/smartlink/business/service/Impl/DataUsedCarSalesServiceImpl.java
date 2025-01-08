@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataUsedCarSalesBo;
 import org.smartlink.business.domain.vo.DataUsedCarSalesVo;
 import org.smartlink.business.domain.DataUsedCarSales;
 import org.smartlink.business.mapper.DataUsedCarSalesMapper;
 import org.smartlink.business.service.IDataUsedCarSalesService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +90,7 @@ public class DataUsedCarSalesServiceImpl implements IDataUsedCarSalesService {
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceCode()), DataUsedCarSales::getInvoiceCode, bo.getInvoiceCode());
         lqw.like(StringUtils.isNotBlank(bo.getCompanyName()), DataUsedCarSales::getCompanyName, bo.getCompanyName());
         lqw.eq(StringUtils.isNotBlank(bo.getCompanyTaxId()), DataUsedCarSales::getCompanyTaxId, bo.getCompanyTaxId());
-        lqw.eq(bo.getInvoiceDate() != null, DataUsedCarSales::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataUsedCarSales::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getLemonMarketBankAndCcount()), DataUsedCarSales::getLemonMarketBankAndCcount, bo.getLemonMarketBankAndCcount());
         lqw.eq(StringUtils.isNotBlank(bo.getLemonMarketPhone()), DataUsedCarSales::getLemonMarketPhone, bo.getLemonMarketPhone());
         lqw.eq(StringUtils.isNotBlank(bo.getLemonMarketAddress()), DataUsedCarSales::getLemonMarketAddress, bo.getLemonMarketAddress());
@@ -103,7 +103,7 @@ public class DataUsedCarSalesServiceImpl implements IDataUsedCarSalesService {
         lqw.eq(StringUtils.isNotBlank(bo.getSellerId()), DataUsedCarSales::getSellerId, bo.getSellerId());
         lqw.eq(StringUtils.isNotBlank(bo.getSellerPhone()), DataUsedCarSales::getSellerPhone, bo.getSellerPhone());
         lqw.eq(StringUtils.isNotBlank(bo.getSellerAddress()), DataUsedCarSales::getSellerAddress, bo.getSellerAddress());
-        lqw.eq(bo.getInvoiceTotal() != null, DataUsedCarSales::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataUsedCarSales::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getPageNumber()), DataUsedCarSales::getPageNumber, bo.getPageNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceSheet()), DataUsedCarSales::getInvoiceSheet, bo.getInvoiceSheet());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataUsedCarSales::getInvoiceStamp, bo.getInvoiceStamp());
@@ -114,17 +114,13 @@ public class DataUsedCarSalesServiceImpl implements IDataUsedCarSalesService {
         lqw.like(StringUtils.isNotBlank(bo.getVehicleManageName()), DataUsedCarSales::getVehicleManageName, bo.getVehicleManageName());
         lqw.eq(StringUtils.isNotBlank(bo.getVehicleType()), DataUsedCarSales::getVehicleType, bo.getVehicleType());
         lqw.eq(StringUtils.isNotBlank(bo.getMachineId()), DataUsedCarSales::getMachineId, bo.getMachineId());
-        lqw.eq(bo.getMachineNumber() != null, DataUsedCarSales::getMachineNumber, bo.getMachineNumber());
+        lqw.eq(StringUtils.isNotBlank(bo.getMachineNumber()), DataUsedCarSales::getMachineNumber, bo.getMachineNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getElectronicNumber()), DataUsedCarSales::getElectronicNumber, bo.getElectronicNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getElectronicMark()), DataUsedCarSales::getElectronicMark, bo.getElectronicMark());
         lqw.eq(StringUtils.isNotBlank(bo.getIssuer()), DataUsedCarSales::getIssuer, bo.getIssuer());
         lqw.eq(StringUtils.isNotBlank(bo.getDestinationDepartmentOfMotorVehicles()), DataUsedCarSales::getDestinationDepartmentOfMotorVehicles, bo.getDestinationDepartmentOfMotorVehicles());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataUsedCarSales::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataUsedCarSales::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataUsedCarSales::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataUsedCarSales::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataUsedCarSales::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataUsedCarSales::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

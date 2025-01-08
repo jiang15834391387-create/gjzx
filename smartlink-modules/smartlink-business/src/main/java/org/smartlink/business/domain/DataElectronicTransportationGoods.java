@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -37,7 +35,7 @@ public class DataElectronicTransportationGoods extends TenantEntity {
     /**
      * 申请日期
      */
-    private Date date;
+    private String date;
 
     /**
      * 托运人证照号码
@@ -62,7 +60,7 @@ public class DataElectronicTransportationGoods extends TenantEntity {
     /**
      * 费用合计小写
      */
-    private Long totalPrice;
+    private String totalPrice;
 
     /**
      * 费用合计大写
@@ -80,14 +78,9 @@ public class DataElectronicTransportationGoods extends TenantEntity {
     private String transporterIdNumber;
 
     /**
-     * 坐标
+     * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
-
-    /**
-     * token
-     */
-    private String saveToken;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -104,16 +97,6 @@ public class DataElectronicTransportationGoods extends TenantEntity {
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

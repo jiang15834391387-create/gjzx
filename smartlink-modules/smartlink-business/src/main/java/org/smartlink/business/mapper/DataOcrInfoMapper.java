@@ -5,7 +5,7 @@ import org.smartlink.business.domain.vo.DataOcrInfoVo;
 import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
 
 /**
- * ocr信息Mapper接口
+ * 增值税发票Mapper接口
  *
  * @author Lion Li
  * @date 2025-01-08

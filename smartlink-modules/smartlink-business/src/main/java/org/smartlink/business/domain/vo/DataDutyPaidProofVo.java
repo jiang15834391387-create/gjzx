@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataDutyPaidProof;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -70,7 +68,7 @@ public class DataDutyPaidProofVo implements Serializable {
      * 日期
      */
     @ExcelProperty(value = "日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 发票号码
@@ -82,7 +80,7 @@ public class DataDutyPaidProofVo implements Serializable {
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 大写金额
@@ -118,7 +116,7 @@ public class DataDutyPaidProofVo implements Serializable {
      * 税款限缴期限
      */
     @ExcelProperty(value = "税款限缴期限")
-    private Date taxPaymentLimitedTime;
+    private String taxPaymentLimitedTime;
 
     /**
      * 收款国库
@@ -133,12 +131,6 @@ public class DataDutyPaidProofVo implements Serializable {
     private String region;
 
     /**
-     * 税务云token
-     */
-    @ExcelProperty(value = "税务云token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -149,18 +141,6 @@ public class DataDutyPaidProofVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

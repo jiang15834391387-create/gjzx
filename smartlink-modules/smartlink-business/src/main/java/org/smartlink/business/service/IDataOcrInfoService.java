@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * ocr信息Service接口
+ * 增值税发票Service接口
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -17,48 +17,48 @@ import java.util.List;
 public interface IDataOcrInfoService {
 
     /**
-     * 查询ocr信息
+     * 查询增值税发票
      *
      * @param id 主键
-     * @return ocr信息
+     * @return 增值税发票
      */
     DataOcrInfoVo queryById(String id);
 
     /**
-     * 分页查询ocr信息列表
+     * 分页查询增值税发票列表
      *
      * @param bo        查询条件
      * @param pageQuery 分页参数
-     * @return ocr信息分页列表
+     * @return 增值税发票分页列表
      */
     TableDataInfo<DataOcrInfoVo> queryPageList(DataOcrInfoBo bo, PageQuery pageQuery);
 
     /**
-     * 查询符合条件的ocr信息列表
+     * 查询符合条件的增值税发票列表
      *
      * @param bo 查询条件
-     * @return ocr信息列表
+     * @return 增值税发票列表
      */
     List<DataOcrInfoVo> queryList(DataOcrInfoBo bo);
 
     /**
-     * 新增ocr信息
+     * 新增增值税发票
      *
-     * @param bo ocr信息
+     * @param bo 增值税发票
      * @return 是否新增成功
      */
     Boolean insertByBo(DataOcrInfoBo bo);
 
     /**
-     * 修改ocr信息
+     * 修改增值税发票
      *
-     * @param bo ocr信息
+     * @param bo 增值税发票
      * @return 是否修改成功
      */
     Boolean updateByBo(DataOcrInfoBo bo);
 
     /**
-     * 校验并批量删除ocr信息信息
+     * 校验并批量删除增值税发票信息
      *
      * @param ids     待删除的主键集合
      * @param isValid 是否进行有效性校验

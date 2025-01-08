@@ -105,13 +105,7 @@ public class DataDidiItineraryDetailsVo implements Serializable {
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
-
-    /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
+    private String invoiceTotal;
 
     /**
      * 是否删除标识 0-不删除  1-删除

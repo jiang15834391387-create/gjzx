@@ -23,7 +23,7 @@ public class DataQuotaInvoiceBo extends BaseEntity {
     /**
      * 主键
      */
-    @NotBlank(message = "主键不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "主键不能为空", groups = { EditGroup.class })
     private String id;
 
     /**
@@ -65,8 +65,8 @@ public class DataQuotaInvoiceBo extends BaseEntity {
     /**
      * 总计
      */
-    @NotNull(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
+    @NotBlank(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 是否有公司印章(0: 没有; 1: 有)
@@ -93,12 +93,6 @@ public class DataQuotaInvoiceBo extends BaseEntity {
     private String region;
 
     /**
-     * 睿真token
-     */
-    @NotBlank(message = "睿真token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -109,24 +103,6 @@ public class DataQuotaInvoiceBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

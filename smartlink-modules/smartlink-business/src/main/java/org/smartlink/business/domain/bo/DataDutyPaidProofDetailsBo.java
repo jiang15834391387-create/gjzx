@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -29,16 +27,16 @@ public class DataDutyPaidProofDetailsBo extends BaseEntity {
     private String id;
 
     /**
-     * 已缴金额
+     * 图片表主键
      */
-    @NotNull(message = "已缴金额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long amountPaid;
+    @NotBlank(message = "图片表主键不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String fileId;
 
     /**
      * 入库日期
      */
-    @NotNull(message = "入库日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date entryDate;
+    @NotBlank(message = "入库日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String entryDate;
 
     /**
      * 征收机关
@@ -107,16 +105,16 @@ public class DataDutyPaidProofDetailsBo extends BaseEntity {
     private String total;
 
     /**
-     * 图片表主键
+     * 已缴金额
      */
-    @NotBlank(message = "图片表主键不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String fileId;
+    @NotBlank(message = "已缴金额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String amountPaid;
 
     /**
      * 实缴金额
      */
-    @NotNull(message = "实缴金额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long actualPaidAmount;
+    @NotBlank(message = "实缴金额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String actualPaidAmount;
 
     /**
      * 是否删除标识 0-不删除  1-删除

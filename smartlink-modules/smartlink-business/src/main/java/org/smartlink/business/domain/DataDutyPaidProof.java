@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -57,7 +55,7 @@ public class DataDutyPaidProof extends TenantEntity {
     /**
      * 日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 发票号码
@@ -67,7 +65,7 @@ public class DataDutyPaidProof extends TenantEntity {
     /**
      * 总计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 大写金额
@@ -97,7 +95,7 @@ public class DataDutyPaidProof extends TenantEntity {
     /**
      * 税款限缴期限
      */
-    private Date taxPaymentLimitedTime;
+    private String taxPaymentLimitedTime;
 
     /**
      * 收款国库
@@ -108,11 +106,6 @@ public class DataDutyPaidProof extends TenantEntity {
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
-
-    /**
-     * 税务云token
-     */
-    private String saveToken;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -129,16 +122,6 @@ public class DataDutyPaidProof extends TenantEntity {
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

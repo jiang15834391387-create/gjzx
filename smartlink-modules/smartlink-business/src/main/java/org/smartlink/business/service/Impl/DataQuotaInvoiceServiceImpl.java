@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataQuotaInvoiceBo;
 import org.smartlink.business.domain.vo.DataQuotaInvoiceVo;
 import org.smartlink.business.domain.DataQuotaInvoice;
 import org.smartlink.business.mapper.DataQuotaInvoiceMapper;
 import org.smartlink.business.service.IDataQuotaInvoiceService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -77,16 +77,12 @@ public class DataQuotaInvoiceServiceImpl implements IDataQuotaInvoiceService {
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataQuotaInvoice::getFileId, bo.getFileId());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataQuotaInvoice::getInvoiceNumber, bo.getInvoiceNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getProvince()), DataQuotaInvoice::getProvince, bo.getProvince());
-        lqw.eq(bo.getInvoiceTotal() != null, DataQuotaInvoice::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataQuotaInvoice::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getCompanySeal()), DataQuotaInvoice::getCompanySeal, bo.getCompanySeal());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataQuotaInvoice::getInvoiceStamp, bo.getInvoiceStamp());
         lqw.eq(StringUtils.isNotBlank(bo.getMoneyUppercase()), DataQuotaInvoice::getMoneyUppercase, bo.getMoneyUppercase());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataQuotaInvoice::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataQuotaInvoice::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataQuotaInvoice::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataQuotaInvoice::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataQuotaInvoice::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataQuotaInvoice::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

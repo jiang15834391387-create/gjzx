@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -25,7 +23,7 @@ public class DataPassengerCarBo extends BaseEntity {
     /**
      * 主键
      */
-    @NotBlank(message = "主键不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "主键不能为空", groups = { EditGroup.class })
     private String id;
 
     /**
@@ -49,8 +47,8 @@ public class DataPassengerCarBo extends BaseEntity {
     /**
      * 日期
      */
-    @NotNull(message = "日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 出发车站
@@ -79,8 +77,8 @@ public class DataPassengerCarBo extends BaseEntity {
     /**
      * 总计
      */
-    @NotNull(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
+    @NotBlank(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 姓名
@@ -113,12 +111,6 @@ public class DataPassengerCarBo extends BaseEntity {
     private String busNumber;
 
     /**
-     * 睿真token
-     */
-    @NotBlank(message = "睿真token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否查验标识，（0查验失败，1查验成功）
      */
     @NotBlank(message = "是否查验标识，（0查验失败，1查验成功）不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -135,24 +127,6 @@ public class DataPassengerCarBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -92,7 +90,7 @@ public class DataMotorVehicleSale extends TenantEntity {
     /**
      * 开票日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 开票人
@@ -107,7 +105,7 @@ public class DataMotorVehicleSale extends TenantEntity {
     /**
      * 限乘人数
      */
-    private Long limitedPeopleCount;
+    private String limitedPeopleCount;
 
     /**
      * 机打代码
@@ -127,7 +125,7 @@ public class DataMotorVehicleSale extends TenantEntity {
     /**
      * 税前金额
      */
-    private Long preTaxAmount;
+    private String preTaxAmount;
 
     /**
      * 产地
@@ -177,7 +175,7 @@ public class DataMotorVehicleSale extends TenantEntity {
     /**
      * 税额
      */
-    private Long tax;
+    private String tax;
 
     /**
      * 主管税务机关
@@ -217,7 +215,7 @@ public class DataMotorVehicleSale extends TenantEntity {
     /**
      * 总计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票专用章存在性判断
@@ -260,11 +258,6 @@ public class DataMotorVehicleSale extends TenantEntity {
     private String region;
 
     /**
-     * 税务云token
-     */
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     private String deleteFlag;
@@ -275,25 +268,10 @@ public class DataMotorVehicleSale extends TenantEntity {
     private String remark;
 
     /**
-     * 置信度
-     */
-    private String confidence;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

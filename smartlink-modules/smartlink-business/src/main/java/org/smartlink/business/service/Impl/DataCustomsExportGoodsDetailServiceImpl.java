@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataCustomsExportGoodsDetailBo;
 import org.smartlink.business.domain.vo.DataCustomsExportGoodsDetailVo;
 import org.smartlink.business.domain.DataCustomsExportGoodsDetail;
 import org.smartlink.business.mapper.DataCustomsExportGoodsDetailMapper;
 import org.smartlink.business.service.IDataCustomsExportGoodsDetailService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -83,13 +83,10 @@ public class DataCustomsExportGoodsDetailServiceImpl implements IDataCustomsExpo
         lqw.eq(StringUtils.isNotBlank(bo.getQuantityOf2Uom()), DataCustomsExportGoodsDetail::getQuantityOf2Uom, bo.getQuantityOf2Uom());
         lqw.eq(StringUtils.isNotBlank(bo.getQuantityOfUom()), DataCustomsExportGoodsDetail::getQuantityOfUom, bo.getQuantityOfUom());
         lqw.eq(StringUtils.isNotBlank(bo.getSpecification()), DataCustomsExportGoodsDetail::getSpecification, bo.getSpecification());
-        lqw.eq(bo.getTotalPrice() != null, DataCustomsExportGoodsDetail::getTotalPrice, bo.getTotalPrice());
+        lqw.eq(StringUtils.isNotBlank(bo.getTotalPrice()), DataCustomsExportGoodsDetail::getTotalPrice, bo.getTotalPrice());
         lqw.eq(StringUtils.isNotBlank(bo.getTransactionUomAndQuantity()), DataCustomsExportGoodsDetail::getTransactionUomAndQuantity, bo.getTransactionUomAndQuantity());
-        lqw.eq(bo.getUnitPrice() != null, DataCustomsExportGoodsDetail::getUnitPrice, bo.getUnitPrice());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataCustomsExportGoodsDetail::getSaveToken, bo.getSaveToken());
+        lqw.eq(StringUtils.isNotBlank(bo.getUnitPrice()), DataCustomsExportGoodsDetail::getUnitPrice, bo.getUnitPrice());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataCustomsExportGoodsDetail::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataCustomsExportGoodsDetail::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataCustomsExportGoodsDetail::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

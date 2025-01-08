@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataMotorVehicleSale;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -113,7 +111,7 @@ public class DataMotorVehicleSaleVo implements Serializable {
      * 开票日期
      */
     @ExcelProperty(value = "开票日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 开票人
@@ -131,7 +129,7 @@ public class DataMotorVehicleSaleVo implements Serializable {
      * 限乘人数
      */
     @ExcelProperty(value = "限乘人数")
-    private Long limitedPeopleCount;
+    private String limitedPeopleCount;
 
     /**
      * 机打代码
@@ -155,7 +153,7 @@ public class DataMotorVehicleSaleVo implements Serializable {
      * 税前金额
      */
     @ExcelProperty(value = "税前金额")
-    private Long preTaxAmount;
+    private String preTaxAmount;
 
     /**
      * 产地
@@ -215,7 +213,7 @@ public class DataMotorVehicleSaleVo implements Serializable {
      * 税额
      */
     @ExcelProperty(value = "税额")
-    private Long tax;
+    private String tax;
 
     /**
      * 主管税务机关
@@ -263,7 +261,7 @@ public class DataMotorVehicleSaleVo implements Serializable {
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票专用章存在性判断
@@ -315,12 +313,6 @@ public class DataMotorVehicleSaleVo implements Serializable {
     private String region;
 
     /**
-     * 税务云token
-     */
-    @ExcelProperty(value = "税务云token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -331,24 +323,6 @@ public class DataMotorVehicleSaleVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

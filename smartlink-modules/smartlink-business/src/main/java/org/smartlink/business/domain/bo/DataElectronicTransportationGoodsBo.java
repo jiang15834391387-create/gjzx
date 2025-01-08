@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -37,8 +35,8 @@ public class DataElectronicTransportationGoodsBo extends BaseEntity {
     /**
      * 申请日期
      */
-    @NotNull(message = "申请日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date date;
+    @NotBlank(message = "申请日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String date;
 
     /**
      * 托运人证照号码
@@ -67,8 +65,8 @@ public class DataElectronicTransportationGoodsBo extends BaseEntity {
     /**
      * 费用合计小写
      */
-    @NotNull(message = "费用合计小写不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long totalPrice;
+    @NotBlank(message = "费用合计小写不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String totalPrice;
 
     /**
      * 费用合计大写
@@ -89,16 +87,10 @@ public class DataElectronicTransportationGoodsBo extends BaseEntity {
     private String transporterIdNumber;
 
     /**
-     * 坐标
+     * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
-    @NotBlank(message = "坐标不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]不能为空", groups = { AddGroup.class, EditGroup.class })
     private String region;
-
-    /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -111,18 +103,6 @@ public class DataElectronicTransportationGoodsBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

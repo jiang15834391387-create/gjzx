@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -37,7 +35,7 @@ public class DataFlightsItineraryDetail extends TenantEntity {
     /**
      * 乘机日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 图片表主键
@@ -62,12 +60,12 @@ public class DataFlightsItineraryDetail extends TenantEntity {
     /**
      * 客票生效日期
      */
-    private Date effectiveDate;
+    private String effectiveDate;
 
     /**
      * 有效截至日期
      */
-    private Date expiryDate;
+    private String expiryDate;
 
     /**
      * 主表id
@@ -115,11 +113,6 @@ public class DataFlightsItineraryDetail extends TenantEntity {
     private String flightSegment;
 
     /**
-     * token
-     */
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     private String deleteFlag;
@@ -128,11 +121,6 @@ public class DataFlightsItineraryDetail extends TenantEntity {
      * 备注
      */
     private String remark;
-
-    /**
-     * 置信度
-     */
-    private String confidence;
 
     /**
      * 版本号

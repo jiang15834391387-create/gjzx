@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataPassengerCar;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -58,7 +56,7 @@ public class DataPassengerCarVo implements Serializable {
      * 日期
      */
     @ExcelProperty(value = "日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 出发车站
@@ -88,7 +86,7 @@ public class DataPassengerCarVo implements Serializable {
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 姓名
@@ -122,12 +120,6 @@ public class DataPassengerCarVo implements Serializable {
     private String busNumber;
 
     /**
-     * 睿真token
-     */
-    @ExcelProperty(value = "睿真token")
-    private String saveToken;
-
-    /**
      * 是否查验标识，（0查验失败，1查验成功）
      */
     @ExcelProperty(value = "是否查验标识，", converter = ExcelDictConvert.class)
@@ -145,24 +137,6 @@ public class DataPassengerCarVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

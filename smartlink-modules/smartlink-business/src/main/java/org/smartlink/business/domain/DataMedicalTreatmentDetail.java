@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -45,9 +43,9 @@ public class DataMedicalTreatmentDetail extends TenantEntity {
     private String invoiceCode;
 
     /**
-     * 开票日期
+     * 开票日期 
      */
-    private Date date;
+    private String date;
 
     /**
      * 交款人
@@ -57,12 +55,12 @@ public class DataMedicalTreatmentDetail extends TenantEntity {
     /**
      * 小计
      */
-    private Long subtotal;
+    private String subtotal;
 
     /**
      * 总计
      */
-    private Long total;
+    private String total;
 
     /**
      * 收款单位
@@ -82,7 +80,7 @@ public class DataMedicalTreatmentDetail extends TenantEntity {
     /**
      * 金额
      */
-    private Long amount;
+    private String amount;
 
     /**
      * 备注
@@ -93,11 +91,6 @@ public class DataMedicalTreatmentDetail extends TenantEntity {
      * 坐标
      */
     private String region;
-
-    /**
-     * token
-     */
-    private String saveToken;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -114,16 +107,6 @@ public class DataMedicalTreatmentDetail extends TenantEntity {
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

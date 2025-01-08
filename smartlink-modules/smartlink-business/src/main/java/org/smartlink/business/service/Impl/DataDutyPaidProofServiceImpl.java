@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataDutyPaidProofBo;
 import org.smartlink.business.domain.vo.DataDutyPaidProofVo;
 import org.smartlink.business.domain.DataDutyPaidProof;
 import org.smartlink.business.mapper.DataDutyPaidProofMapper;
 import org.smartlink.business.service.IDataDutyPaidProofService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -76,21 +76,18 @@ public class DataDutyPaidProofServiceImpl implements IDataDutyPaidProofService {
         lqw.eq(StringUtils.isNotBlank(bo.getSerialNumber()), DataDutyPaidProof::getSerialNumber, bo.getSerialNumber());
         lqw.like(StringUtils.isNotBlank(bo.getBuyerName()), DataDutyPaidProof::getBuyerName, bo.getBuyerName());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerTaxId()), DataDutyPaidProof::getBuyerTaxId, bo.getBuyerTaxId());
-        lqw.eq(bo.getInvoiceDate() != null, DataDutyPaidProof::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataDutyPaidProof::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataDutyPaidProof::getInvoiceNumber, bo.getInvoiceNumber());
-        lqw.eq(bo.getInvoiceTotal() != null, DataDutyPaidProof::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataDutyPaidProof::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getTotalUppercase()), DataDutyPaidProof::getTotalUppercase, bo.getTotalUppercase());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxAuthority()), DataDutyPaidProof::getTaxAuthority, bo.getTaxAuthority());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxAgencyCode()), DataDutyPaidProof::getTaxAgencyCode, bo.getTaxAgencyCode());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerDepositBank()), DataDutyPaidProof::getBuyerDepositBank, bo.getBuyerDepositBank());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerAccount()), DataDutyPaidProof::getBuyerAccount, bo.getBuyerAccount());
-        lqw.eq(bo.getTaxPaymentLimitedTime() != null, DataDutyPaidProof::getTaxPaymentLimitedTime, bo.getTaxPaymentLimitedTime());
+        lqw.eq(StringUtils.isNotBlank(bo.getTaxPaymentLimitedTime()), DataDutyPaidProof::getTaxPaymentLimitedTime, bo.getTaxPaymentLimitedTime());
         lqw.eq(StringUtils.isNotBlank(bo.getReceivingTreasury()), DataDutyPaidProof::getReceivingTreasury, bo.getReceivingTreasury());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataDutyPaidProof::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataDutyPaidProof::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataDutyPaidProof::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataDutyPaidProof::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataDutyPaidProof::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

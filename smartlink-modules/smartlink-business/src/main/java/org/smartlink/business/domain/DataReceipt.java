@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -26,6 +24,7 @@ public class DataReceipt extends TenantEntity {
     /**
      * 主键
      */
+    @TableId(value = "id")
     private String id;
 
     /**
@@ -36,7 +35,7 @@ public class DataReceipt extends TenantEntity {
     /**
      * 日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 时间
@@ -61,12 +60,12 @@ public class DataReceipt extends TenantEntity {
     /**
      * 小计
      */
-    private Long subTotal;
+    private String subTotal;
 
     /**
      * 税费
      */
-    private Long tax;
+    private String tax;
 
     /**
      * 发票号码
@@ -81,7 +80,7 @@ public class DataReceipt extends TenantEntity {
     /**
      * 总计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 消费类型
@@ -97,11 +96,6 @@ public class DataReceipt extends TenantEntity {
      * 发票专用章存在性判断
      */
     private String invoiceStamp;
-
-    /**
-     * token
-     */
-    private String saveToken;
 
     /**
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
@@ -123,16 +117,6 @@ public class DataReceipt extends TenantEntity {
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

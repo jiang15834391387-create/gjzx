@@ -8,19 +8,19 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataOcrDetailsBo;
 import org.smartlink.business.domain.vo.DataOcrDetailsVo;
 import org.smartlink.business.domain.DataOcrDetails;
 import org.smartlink.business.mapper.DataOcrDetailsMapper;
 import org.smartlink.business.service.IDataOcrDetailsService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 
 /**
- * ocr明细Service业务层处理
+ * 增值税发票明细Service业务层处理
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -32,10 +32,10 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     private final DataOcrDetailsMapper baseMapper;
 
     /**
-     * 查询ocr明细
+     * 查询增值税发票明细
      *
      * @param id 主键
-     * @return ocr明细
+     * @return 增值税发票明细
      */
     @Override
     public DataOcrDetailsVo queryById(String id){
@@ -43,11 +43,11 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     }
 
     /**
-     * 分页查询ocr明细列表
+     * 分页查询增值税发票明细列表
      *
      * @param bo        查询条件
      * @param pageQuery 分页参数
-     * @return ocr明细分页列表
+     * @return 增值税发票明细分页列表
      */
     @Override
     public TableDataInfo<DataOcrDetailsVo> queryPageList(DataOcrDetailsBo bo, PageQuery pageQuery) {
@@ -57,10 +57,10 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     }
 
     /**
-     * 查询符合条件的ocr明细列表
+     * 查询符合条件的增值税发票明细列表
      *
      * @param bo 查询条件
-     * @return ocr明细列表
+     * @return 增值税发票明细列表
      */
     @Override
     public List<DataOcrDetailsVo> queryList(DataOcrDetailsBo bo) {
@@ -73,22 +73,22 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
         LambdaQueryWrapper<DataOcrDetails> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getOcrId()), DataOcrDetails::getOcrId, bo.getOcrId());
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataOcrDetails::getFileId, bo.getFileId());
-        lqw.eq(bo.getDetailAmount() != null, DataOcrDetails::getDetailAmount, bo.getDetailAmount());
-        lqw.eq(bo.getDetailsCount() != null, DataOcrDetails::getDetailsCount, bo.getDetailsCount());
+        lqw.eq(StringUtils.isNotBlank(bo.getDetailAmount()), DataOcrDetails::getDetailAmount, bo.getDetailAmount());
+        lqw.eq(StringUtils.isNotBlank(bo.getDetailsCount()), DataOcrDetails::getDetailsCount, bo.getDetailsCount());
         lqw.eq(StringUtils.isNotBlank(bo.getDetailNo()), DataOcrDetails::getDetailNo, bo.getDetailNo());
         lqw.like(StringUtils.isNotBlank(bo.getName()), DataOcrDetails::getName, bo.getName());
         lqw.eq(StringUtils.isNotBlank(bo.getCommodityCode()), DataOcrDetails::getCommodityCode, bo.getCommodityCode());
         lqw.like(StringUtils.isNotBlank(bo.getCommodityName()), DataOcrDetails::getCommodityName, bo.getCommodityName());
-        lqw.eq(bo.getPrice() != null, DataOcrDetails::getPrice, bo.getPrice());
+        lqw.eq(StringUtils.isNotBlank(bo.getPrice()), DataOcrDetails::getPrice, bo.getPrice());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxRate()), DataOcrDetails::getTaxRate, bo.getTaxRate());
         lqw.eq(StringUtils.isNotBlank(bo.getStandard()), DataOcrDetails::getStandard, bo.getStandard());
-        lqw.eq(bo.getTax() != null, DataOcrDetails::getTax, bo.getTax());
+        lqw.eq(StringUtils.isNotBlank(bo.getTax()), DataOcrDetails::getTax, bo.getTax());
         lqw.eq(StringUtils.isNotBlank(bo.getUnit()), DataOcrDetails::getUnit, bo.getUnit());
-        lqw.eq(bo.getCurrentDateEnd() != null, DataOcrDetails::getCurrentDateEnd, bo.getCurrentDateEnd());
-        lqw.eq(bo.getCurrentDateStart() != null, DataOcrDetails::getCurrentDateStart, bo.getCurrentDateStart());
+        lqw.eq(StringUtils.isNotBlank(bo.getCurrentDateEnd()), DataOcrDetails::getCurrentDateEnd, bo.getCurrentDateEnd());
+        lqw.eq(StringUtils.isNotBlank(bo.getCurrentDateStart()), DataOcrDetails::getCurrentDateStart, bo.getCurrentDateStart());
         lqw.eq(StringUtils.isNotBlank(bo.getLicensePlateNum()), DataOcrDetails::getLicensePlateNum, bo.getLicensePlateNum());
         lqw.eq(StringUtils.isNotBlank(bo.getVehicleType()), DataOcrDetails::getVehicleType, bo.getVehicleType());
-        lqw.eq(bo.getUsageTime() != null, DataOcrDetails::getUsageTime, bo.getUsageTime());
+        lqw.eq(StringUtils.isNotBlank(bo.getUsageTime()), DataOcrDetails::getUsageTime, bo.getUsageTime());
         lqw.eq(StringUtils.isNotBlank(bo.getSpecialMark()), DataOcrDetails::getSpecialMark, bo.getSpecialMark());
         lqw.eq(StringUtils.isNotBlank(bo.getPlaceOfBuildingService()), DataOcrDetails::getPlaceOfBuildingService, bo.getPlaceOfBuildingService());
         lqw.like(StringUtils.isNotBlank(bo.getBuildingName()), DataOcrDetails::getBuildingName, bo.getBuildingName());
@@ -100,17 +100,16 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
         lqw.eq(StringUtils.isNotBlank(bo.getTo()), DataOcrDetails::getTo, bo.getTo());
         lqw.like(StringUtils.isNotBlank(bo.getGoodsName()), DataOcrDetails::getGoodsName, bo.getGoodsName());
         lqw.eq(StringUtils.isNotBlank(bo.getPassenger()), DataOcrDetails::getPassenger, bo.getPassenger());
-        lqw.eq(bo.getTravelDate() != null, DataOcrDetails::getTravelDate, bo.getTravelDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getTravelDate()), DataOcrDetails::getTravelDate, bo.getTravelDate());
         lqw.eq(StringUtils.isNotBlank(bo.getSeat()), DataOcrDetails::getSeat, bo.getSeat());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataOcrDetails::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataOcrDetails::getConfidence, bo.getConfidence());
         return lqw;
     }
 
     /**
-     * 新增ocr明细
+     * 新增增值税发票明细
      *
-     * @param bo ocr明细
+     * @param bo 增值税发票明细
      * @return 是否新增成功
      */
     @Override
@@ -125,9 +124,9 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     }
 
     /**
-     * 修改ocr明细
+     * 修改增值税发票明细
      *
-     * @param bo ocr明细
+     * @param bo 增值税发票明细
      * @return 是否修改成功
      */
     @Override
@@ -145,7 +144,7 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     }
 
     /**
-     * 校验并批量删除ocr明细信息
+     * 校验并批量删除增值税发票明细信息
      *
      * @param ids     待删除的主键集合
      * @param isValid 是否进行有效性校验

@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataReceiptBo;
 import org.smartlink.business.domain.vo.DataReceiptVo;
 import org.smartlink.business.domain.DataReceipt;
 import org.smartlink.business.mapper.DataReceiptMapper;
 import org.smartlink.business.service.IDataReceiptService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -72,24 +72,21 @@ public class DataReceiptServiceImpl implements IDataReceiptService {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataReceipt> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getCurrencyCode()), DataReceipt::getCurrencyCode, bo.getCurrencyCode());
-        lqw.eq(bo.getInvoiceDate() != null, DataReceipt::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataReceipt::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getTime()), DataReceipt::getTime, bo.getTime());
         lqw.eq(StringUtils.isNotBlank(bo.getDiscount()), DataReceipt::getDiscount, bo.getDiscount());
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataReceipt::getFileId, bo.getFileId());
         lqw.like(StringUtils.isNotBlank(bo.getStoreName()), DataReceipt::getStoreName, bo.getStoreName());
-        lqw.eq(bo.getSubTotal() != null, DataReceipt::getSubTotal, bo.getSubTotal());
-        lqw.eq(bo.getTax() != null, DataReceipt::getTax, bo.getTax());
+        lqw.eq(StringUtils.isNotBlank(bo.getSubTotal()), DataReceipt::getSubTotal, bo.getSubTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getTax()), DataReceipt::getTax, bo.getTax());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataReceipt::getInvoiceNumber, bo.getInvoiceNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getTips()), DataReceipt::getTips, bo.getTips());
-        lqw.eq(bo.getInvoiceTotal() != null, DataReceipt::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataReceipt::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getType()), DataReceipt::getType, bo.getType());
         lqw.eq(StringUtils.isNotBlank(bo.getInternationalMark()), DataReceipt::getInternationalMark, bo.getInternationalMark());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataReceipt::getInvoiceStamp, bo.getInvoiceStamp());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataReceipt::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataReceipt::getRegion, bo.getRegion());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataReceipt::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataReceipt::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataReceipt::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

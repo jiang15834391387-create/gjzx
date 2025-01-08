@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataElectronicTransportationGoodsBo;
 import org.smartlink.business.domain.vo.DataElectronicTransportationGoodsVo;
 import org.smartlink.business.domain.DataElectronicTransportationGoods;
 import org.smartlink.business.mapper.DataElectronicTransportationGoodsMapper;
 import org.smartlink.business.service.IDataElectronicTransportationGoodsService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -72,20 +72,17 @@ public class DataElectronicTransportationGoodsServiceImpl implements IDataElectr
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataElectronicTransportationGoods> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataElectronicTransportationGoods::getFileId, bo.getFileId());
-        lqw.eq(bo.getDate() != null, DataElectronicTransportationGoods::getDate, bo.getDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getDate()), DataElectronicTransportationGoods::getDate, bo.getDate());
         lqw.eq(StringUtils.isNotBlank(bo.getBusinessLicenseNumber()), DataElectronicTransportationGoods::getBusinessLicenseNumber, bo.getBusinessLicenseNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getElectronicReceiptNumber()), DataElectronicTransportationGoods::getElectronicReceiptNumber, bo.getElectronicReceiptNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getProducer()), DataElectronicTransportationGoods::getProducer, bo.getProducer());
         lqw.eq(StringUtils.isNotBlank(bo.getShipper()), DataElectronicTransportationGoods::getShipper, bo.getShipper());
-        lqw.eq(bo.getTotalPrice() != null, DataElectronicTransportationGoods::getTotalPrice, bo.getTotalPrice());
+        lqw.eq(StringUtils.isNotBlank(bo.getTotalPrice()), DataElectronicTransportationGoods::getTotalPrice, bo.getTotalPrice());
         lqw.eq(StringUtils.isNotBlank(bo.getTotalCn()), DataElectronicTransportationGoods::getTotalCn, bo.getTotalCn());
         lqw.eq(StringUtils.isNotBlank(bo.getTransporter()), DataElectronicTransportationGoods::getTransporter, bo.getTransporter());
         lqw.eq(StringUtils.isNotBlank(bo.getTransporterIdNumber()), DataElectronicTransportationGoods::getTransporterIdNumber, bo.getTransporterIdNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataElectronicTransportationGoods::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataElectronicTransportationGoods::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataElectronicTransportationGoods::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataElectronicTransportationGoods::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataElectronicTransportationGoods::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

@@ -43,7 +43,7 @@ public class DataImageFilesInfo extends TenantEntity {
     private String invoice;
 
     /**
-     * 友报账编号
+     * 条形码
      */
     private String barCode;
 
@@ -123,11 +123,6 @@ public class DataImageFilesInfo extends TenantEntity {
     private String message;
 
     /**
-     * 操作状态
-     */
-    private String operateState;
-
-    /**
      * 文档名
      */
     private String documentName;
@@ -143,9 +138,14 @@ public class DataImageFilesInfo extends TenantEntity {
     private String fileStatus;
 
     /**
+     * 排序字段
+     */
+    private String sortValue;
+
+    /**
      * 旋转角度
      */
-    private Long rotateAngle;
+    private String rotateAngle;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -168,25 +168,10 @@ public class DataImageFilesInfo extends TenantEntity {
     private String remark;
 
     /**
-     * 排序字段
-     */
-    private Long sortValue;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 小程序上传发票用户ID
-     */
-    private String userId;
-
-    /**
-     * 微信小程序发票是否使用(0=未使用,1=已使用)
-     */
-    private String isUse;
 
 
 }

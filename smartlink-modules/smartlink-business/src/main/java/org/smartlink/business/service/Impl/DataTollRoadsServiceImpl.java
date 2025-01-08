@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataTollRoadsBo;
 import org.smartlink.business.domain.vo.DataTollRoadsVo;
 import org.smartlink.business.domain.DataTollRoads;
 import org.smartlink.business.mapper.DataTollRoadsMapper;
 import org.smartlink.business.service.IDataTollRoadsService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -73,21 +73,17 @@ public class DataTollRoadsServiceImpl implements IDataTollRoadsService {
         LambdaQueryWrapper<DataTollRoads> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getTitle()), DataTollRoads::getTitle, bo.getTitle());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceCode()), DataTollRoads::getInvoiceCode, bo.getInvoiceCode());
-        lqw.eq(bo.getInvoiceDate() != null, DataTollRoads::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataTollRoads::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getEntrance()), DataTollRoads::getEntrance, bo.getEntrance());
         lqw.eq(StringUtils.isNotBlank(bo.getExit()), DataTollRoads::getExit, bo.getExit());
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataTollRoads::getFileId, bo.getFileId());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataTollRoads::getInvoiceNumber, bo.getInvoiceNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTime()), DataTollRoads::getInvoiceTime, bo.getInvoiceTime());
-        lqw.eq(bo.getInvoiceTotal() != null, DataTollRoads::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataTollRoads::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataTollRoads::getInvoiceStamp, bo.getInvoiceStamp());
         lqw.eq(StringUtils.isNotBlank(bo.getHighwayFlag()), DataTollRoads::getHighwayFlag, bo.getHighwayFlag());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataTollRoads::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataTollRoads::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataTollRoads::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataTollRoads::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataTollRoads::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataTollRoads::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

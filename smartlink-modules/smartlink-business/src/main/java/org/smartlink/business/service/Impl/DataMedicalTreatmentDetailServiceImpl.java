@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataMedicalTreatmentDetailBo;
 import org.smartlink.business.domain.vo.DataMedicalTreatmentDetailVo;
 import org.smartlink.business.domain.DataMedicalTreatmentDetail;
 import org.smartlink.business.mapper.DataMedicalTreatmentDetailMapper;
 import org.smartlink.business.service.IDataMedicalTreatmentDetailService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -74,20 +74,17 @@ public class DataMedicalTreatmentDetailServiceImpl implements IDataMedicalTreatm
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataMedicalTreatmentDetail::getFileId, bo.getFileId());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataMedicalTreatmentDetail::getInvoiceNumber, bo.getInvoiceNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceCode()), DataMedicalTreatmentDetail::getInvoiceCode, bo.getInvoiceCode());
-        lqw.eq(bo.getDate() != null, DataMedicalTreatmentDetail::getDate, bo.getDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getDate()), DataMedicalTreatmentDetail::getDate, bo.getDate());
         lqw.eq(StringUtils.isNotBlank(bo.getPayer()), DataMedicalTreatmentDetail::getPayer, bo.getPayer());
-        lqw.eq(bo.getSubtotal() != null, DataMedicalTreatmentDetail::getSubtotal, bo.getSubtotal());
-        lqw.eq(bo.getTotal() != null, DataMedicalTreatmentDetail::getTotal, bo.getTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getSubtotal()), DataMedicalTreatmentDetail::getSubtotal, bo.getSubtotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getTotal()), DataMedicalTreatmentDetail::getTotal, bo.getTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getPayee()), DataMedicalTreatmentDetail::getPayee, bo.getPayee());
         lqw.like(StringUtils.isNotBlank(bo.getProjectName()), DataMedicalTreatmentDetail::getProjectName, bo.getProjectName());
         lqw.eq(StringUtils.isNotBlank(bo.getQuantity()), DataMedicalTreatmentDetail::getQuantity, bo.getQuantity());
-        lqw.eq(bo.getAmount() != null, DataMedicalTreatmentDetail::getAmount, bo.getAmount());
+        lqw.eq(StringUtils.isNotBlank(bo.getAmount()), DataMedicalTreatmentDetail::getAmount, bo.getAmount());
         lqw.eq(StringUtils.isNotBlank(bo.getComment()), DataMedicalTreatmentDetail::getComment, bo.getComment());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataMedicalTreatmentDetail::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataMedicalTreatmentDetail::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataMedicalTreatmentDetail::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataMedicalTreatmentDetail::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataMedicalTreatmentDetail::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

@@ -95,7 +95,7 @@ public class DataCustomsImportGoodsDetail extends TenantEntity {
     /**
      * 总价
      */
-    private Long totalPrice;
+    private String totalPrice;
 
     /**
      * 成交计量数量单位
@@ -105,12 +105,7 @@ public class DataCustomsImportGoodsDetail extends TenantEntity {
     /**
      * 单价
      */
-    private Long unitPrice;
-
-    /**
-     * token
-     */
-    private String saveToken;
+    private String unitPrice;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -127,16 +122,6 @@ public class DataCustomsImportGoodsDetail extends TenantEntity {
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

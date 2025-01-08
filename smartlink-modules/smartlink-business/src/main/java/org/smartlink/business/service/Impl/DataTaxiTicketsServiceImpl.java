@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataTaxiTicketsBo;
 import org.smartlink.business.domain.vo.DataTaxiTicketsVo;
 import org.smartlink.business.domain.DataTaxiTickets;
 import org.smartlink.business.mapper.DataTaxiTicketsMapper;
 import org.smartlink.business.service.IDataTaxiTicketsService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -71,11 +71,11 @@ public class DataTaxiTicketsServiceImpl implements IDataTaxiTicketsService {
     private LambdaQueryWrapper<DataTaxiTickets> buildQueryWrapper(DataTaxiTicketsBo bo) {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataTaxiTickets> lqw = Wrappers.lambdaQuery();
+        lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataTaxiTickets::getFileId, bo.getFileId());
         lqw.eq(StringUtils.isNotBlank(bo.getTitle()), DataTaxiTickets::getTitle, bo.getTitle());
         lqw.eq(StringUtils.isNotBlank(bo.getCity()), DataTaxiTickets::getCity, bo.getCity());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceCode()), DataTaxiTickets::getInvoiceCode, bo.getInvoiceCode());
-        lqw.eq(bo.getInvoiceDate() != null, DataTaxiTickets::getInvoiceDate, bo.getInvoiceDate());
-        lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataTaxiTickets::getFileId, bo.getFileId());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataTaxiTickets::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getLicensePlate()), DataTaxiTickets::getLicensePlate, bo.getLicensePlate());
         lqw.eq(StringUtils.isNotBlank(bo.getMileage()), DataTaxiTickets::getMileage, bo.getMileage());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataTaxiTickets::getInvoiceNumber, bo.getInvoiceNumber());
@@ -83,15 +83,11 @@ public class DataTaxiTicketsServiceImpl implements IDataTaxiTicketsService {
         lqw.eq(StringUtils.isNotBlank(bo.getProvince()), DataTaxiTickets::getProvince, bo.getProvince());
         lqw.eq(StringUtils.isNotBlank(bo.getTimeGetOff()), DataTaxiTickets::getTimeGetOff, bo.getTimeGetOff());
         lqw.eq(StringUtils.isNotBlank(bo.getTimeGetOn()), DataTaxiTickets::getTimeGetOn, bo.getTimeGetOn());
-        lqw.eq(bo.getInvoiceTotal() != null, DataTaxiTickets::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataTaxiTickets::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataTaxiTickets::getInvoiceStamp, bo.getInvoiceStamp());
-        lqw.eq(bo.getFuelSurcharge() != null, DataTaxiTickets::getFuelSurcharge, bo.getFuelSurcharge());
+        lqw.eq(StringUtils.isNotBlank(bo.getFuelSurcharge()), DataTaxiTickets::getFuelSurcharge, bo.getFuelSurcharge());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataTaxiTickets::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataTaxiTickets::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataTaxiTickets::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataTaxiTickets::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataTaxiTickets::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataTaxiTickets::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

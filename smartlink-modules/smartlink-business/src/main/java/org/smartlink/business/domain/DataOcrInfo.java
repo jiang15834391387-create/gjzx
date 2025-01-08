@@ -4,13 +4,11 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
 /**
- * ocr信息对象 data_ocr_info
+ * 增值税发票对象 data_ocr_info
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -26,6 +24,7 @@ public class DataOcrInfo extends TenantEntity {
     /**
      * 主键
      */
+    @TableId(value = "id")
     private String id;
 
     /**
@@ -69,11 +68,6 @@ public class DataOcrInfo extends TenantEntity {
     private String cancellationMark;
 
     /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
      * 复合人
      */
     private String checker;
@@ -106,7 +100,7 @@ public class DataOcrInfo extends TenantEntity {
     /**
      * 发票日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 发票号码
@@ -131,12 +125,12 @@ public class DataOcrInfo extends TenantEntity {
     /**
      * 小写金额，（价税合计）
      */
-    private Long totalLowercase;
+    private String totalLowercase;
 
     /**
      * 税前金额
      */
-    private Long pretaxAmount;
+    private String pretaxAmount;
 
     /**
      * 是否有公司印章(0: 没有; 1: 有)
@@ -164,6 +158,11 @@ public class DataOcrInfo extends TenantEntity {
     private String machineCode;
 
     /**
+     * 种类
+     */
+    private String category;
+
+    /**
      * 密码区
      */
     private String password1;
@@ -176,7 +175,7 @@ public class DataOcrInfo extends TenantEntity {
     /**
      * 车船税
      */
-    private Long travelTax;
+    private String travelTax;
 
     /**
      * 收款人
@@ -206,12 +205,12 @@ public class DataOcrInfo extends TenantEntity {
     /**
      * 合计金额（税前）
      */
-    private Long sumAmount;
+    private String sumAmount;
 
     /**
      * 总税额
      */
-    private Long sumTax;
+    private String sumTax;
 
     /**
      * 大写金额，（加税合计）
@@ -252,11 +251,6 @@ public class DataOcrInfo extends TenantEntity {
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
-
-    /**
-     * 睿真token
-     */
-    private String saveToken;
 
     /**
      * 红冲/非红冲
@@ -334,20 +328,10 @@ public class DataOcrInfo extends TenantEntity {
     private String remark;
 
     /**
-     * 置信度
-     */
-    private String confidence;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataReceipt;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -46,7 +44,7 @@ public class DataReceiptVo implements Serializable {
      * 日期
      */
     @ExcelProperty(value = "日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 时间
@@ -76,13 +74,13 @@ public class DataReceiptVo implements Serializable {
      * 小计
      */
     @ExcelProperty(value = "小计")
-    private Long subTotal;
+    private String subTotal;
 
     /**
      * 税费
      */
     @ExcelProperty(value = "税费")
-    private Long tax;
+    private String tax;
 
     /**
      * 发票号码
@@ -100,7 +98,7 @@ public class DataReceiptVo implements Serializable {
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 消费类型
@@ -121,12 +119,6 @@ public class DataReceiptVo implements Serializable {
     private String invoiceStamp;
 
     /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
-
-    /**
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     @ExcelProperty(value = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]")
@@ -143,18 +135,6 @@ public class DataReceiptVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataRailwayTicketBo;
 import org.smartlink.business.domain.vo.DataRailwayTicketVo;
 import org.smartlink.business.domain.DataRailwayTicket;
 import org.smartlink.business.mapper.DataRailwayTicketMapper;
 import org.smartlink.business.service.IDataRailwayTicketService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class DataRailwayTicketServiceImpl implements IDataRailwayTicketService {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataRailwayTicket> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getTitle()), DataRailwayTicket::getTitle, bo.getTitle());
-        lqw.eq(bo.getInvoiceDate() != null, DataRailwayTicket::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataRailwayTicket::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataRailwayTicket::getFileId, bo.getFileId());
         lqw.like(StringUtils.isNotBlank(bo.getName()), DataRailwayTicket::getName, bo.getName());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataRailwayTicket::getInvoiceNumber, bo.getInvoiceNumber());
@@ -85,11 +85,10 @@ public class DataRailwayTicketServiceImpl implements IDataRailwayTicketService {
         lqw.eq(StringUtils.isNotBlank(bo.getStationGetOff()), DataRailwayTicket::getStationGetOff, bo.getStationGetOff());
         lqw.eq(StringUtils.isNotBlank(bo.getStationGetOn()), DataRailwayTicket::getStationGetOn, bo.getStationGetOn());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTime()), DataRailwayTicket::getInvoiceTime, bo.getInvoiceTime());
-        lqw.eq(bo.getInvoiceTotal() != null, DataRailwayTicket::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataRailwayTicket::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataRailwayTicket::getInvoiceStamp, bo.getInvoiceStamp());
         lqw.eq(StringUtils.isNotBlank(bo.getTrainNumber()), DataRailwayTicket::getTrainNumber, bo.getTrainNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataRailwayTicket::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataRailwayTicket::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getTypeOfBusiness()), DataRailwayTicket::getTypeOfBusiness, bo.getTypeOfBusiness());
         lqw.eq(StringUtils.isNotBlank(bo.getRefundContent()), DataRailwayTicket::getRefundContent, bo.getRefundContent());
         lqw.eq(StringUtils.isNotBlank(bo.getTicketContent()), DataRailwayTicket::getTicketContent, bo.getTicketContent());
@@ -100,17 +99,14 @@ public class DataRailwayTicketServiceImpl implements IDataRailwayTicketService {
         lqw.eq(StringUtils.isNotBlank(bo.getTypeOfVoucher()), DataRailwayTicket::getTypeOfVoucher, bo.getTypeOfVoucher());
         lqw.eq(StringUtils.isNotBlank(bo.getTypeOfRailwayTicket()), DataRailwayTicket::getTypeOfRailwayTicket, bo.getTypeOfRailwayTicket());
         lqw.eq(StringUtils.isNotBlank(bo.getDiscountMark()), DataRailwayTicket::getDiscountMark, bo.getDiscountMark());
-        lqw.eq(bo.getAmountRefunded() != null, DataRailwayTicket::getAmountRefunded, bo.getAmountRefunded());
-        lqw.eq(bo.getFareOfOriginalRailwayTicket() != null, DataRailwayTicket::getFareOfOriginalRailwayTicket, bo.getFareOfOriginalRailwayTicket());
+        lqw.eq(StringUtils.isNotBlank(bo.getAmountRefunded()), DataRailwayTicket::getAmountRefunded, bo.getAmountRefunded());
+        lqw.eq(StringUtils.isNotBlank(bo.getFareOfOriginalRailwayTicket()), DataRailwayTicket::getFareOfOriginalRailwayTicket, bo.getFareOfOriginalRailwayTicket());
         lqw.eq(StringUtils.isNotBlank(bo.getDepartureStationOfOriginalRailwayTicket()), DataRailwayTicket::getDepartureStationOfOriginalRailwayTicket, bo.getDepartureStationOfOriginalRailwayTicket());
         lqw.eq(StringUtils.isNotBlank(bo.getDestinationStationOfOriginalRailwayTicket()), DataRailwayTicket::getDestinationStationOfOriginalRailwayTicket, bo.getDestinationStationOfOriginalRailwayTicket());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerAddrTel()), DataRailwayTicket::getBuyerAddrTel, bo.getBuyerAddrTel());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerBankAccount()), DataRailwayTicket::getBuyerBankAccount, bo.getBuyerBankAccount());
         lqw.eq(StringUtils.isNotBlank(bo.getElectronicMark()), DataRailwayTicket::getElectronicMark, bo.getElectronicMark());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataRailwayTicket::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataRailwayTicket::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataRailwayTicket::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataRailwayTicket::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

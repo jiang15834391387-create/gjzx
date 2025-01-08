@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataMedicalTreatmentDetail;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -55,10 +53,10 @@ public class DataMedicalTreatmentDetailVo implements Serializable {
     private String invoiceCode;
 
     /**
-     * 开票日期
+     * 开票日期 
      */
     @ExcelProperty(value = "开票日期 ")
-    private Date date;
+    private String date;
 
     /**
      * 交款人
@@ -70,13 +68,13 @@ public class DataMedicalTreatmentDetailVo implements Serializable {
      * 小计
      */
     @ExcelProperty(value = "小计")
-    private Long subtotal;
+    private String subtotal;
 
     /**
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long total;
+    private String total;
 
     /**
      * 收款单位
@@ -100,7 +98,7 @@ public class DataMedicalTreatmentDetailVo implements Serializable {
      * 金额
      */
     @ExcelProperty(value = "金额")
-    private Long amount;
+    private String amount;
 
     /**
      * 备注
@@ -115,12 +113,6 @@ public class DataMedicalTreatmentDetailVo implements Serializable {
     private String region;
 
     /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -131,18 +123,6 @@ public class DataMedicalTreatmentDetailVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

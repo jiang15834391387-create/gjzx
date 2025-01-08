@@ -45,9 +45,9 @@ public class DataImageFilesInfoBo extends BaseEntity {
     private String invoice;
 
     /**
-     * 友报账编号
+     * 条形码
      */
-    @NotBlank(message = "友报账编号不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "条形码不能为空", groups = { AddGroup.class, EditGroup.class })
     private String barCode;
 
     /**
@@ -141,12 +141,6 @@ public class DataImageFilesInfoBo extends BaseEntity {
     private String message;
 
     /**
-     * 操作状态
-     */
-    @NotBlank(message = "操作状态不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String operateState;
-
-    /**
      * 文档名
      */
     @NotBlank(message = "文档名不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -165,10 +159,16 @@ public class DataImageFilesInfoBo extends BaseEntity {
     private String fileStatus;
 
     /**
+     * 排序字段
+     */
+    @NotBlank(message = "排序字段不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String sortValue;
+
+    /**
      * 旋转角度
      */
-    @NotNull(message = "旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long rotateAngle;
+    @NotBlank(message = "旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String rotateAngle;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -193,24 +193,6 @@ public class DataImageFilesInfoBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 排序字段
-     */
-    @NotNull(message = "排序字段不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long sortValue;
-
-    /**
-     * 小程序上传发票用户ID
-     */
-    @NotBlank(message = "小程序上传发票用户ID不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String userId;
-
-    /**
-     * 微信小程序发票是否使用(0=未使用,1=已使用)
-     */
-    @NotBlank(message = "微信小程序发票是否使用(0=未使用,1=已使用)不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String isUse;
 
 
 }

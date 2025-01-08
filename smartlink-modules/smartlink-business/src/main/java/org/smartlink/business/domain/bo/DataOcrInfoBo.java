@@ -6,13 +6,11 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
 /**
- * ocr信息业务对象 data_ocr_info
+ * 增值税发票业务对象 data_ocr_info
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -25,7 +23,7 @@ public class DataOcrInfoBo extends BaseEntity {
     /**
      * 主键
      */
-    @NotBlank(message = "主键不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "主键不能为空", groups = { EditGroup.class })
     private String id;
 
     /**
@@ -77,12 +75,6 @@ public class DataOcrInfoBo extends BaseEntity {
     private String cancellationMark;
 
     /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
      * 复合人
      */
     @NotBlank(message = "复合人不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -121,8 +113,8 @@ public class DataOcrInfoBo extends BaseEntity {
     /**
      * 发票日期
      */
-    @NotNull(message = "发票日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "发票日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 发票号码
@@ -151,14 +143,14 @@ public class DataOcrInfoBo extends BaseEntity {
     /**
      * 小写金额，（价税合计）
      */
-    @NotNull(message = "小写金额，（价税合计）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long totalLowercase;
+    @NotBlank(message = "小写金额，（价税合计）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String totalLowercase;
 
     /**
      * 税前金额
      */
-    @NotNull(message = "税前金额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long pretaxAmount;
+    @NotBlank(message = "税前金额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String pretaxAmount;
 
     /**
      * 是否有公司印章(0: 没有; 1: 有)
@@ -191,6 +183,12 @@ public class DataOcrInfoBo extends BaseEntity {
     private String machineCode;
 
     /**
+     * 种类
+     */
+    @NotBlank(message = "种类不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String category;
+
+    /**
      * 密码区
      */
     @NotBlank(message = "密码区不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -205,8 +203,8 @@ public class DataOcrInfoBo extends BaseEntity {
     /**
      * 车船税
      */
-    @NotNull(message = "车船税不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long travelTax;
+    @NotBlank(message = "车船税不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String travelTax;
 
     /**
      * 收款人
@@ -241,14 +239,14 @@ public class DataOcrInfoBo extends BaseEntity {
     /**
      * 合计金额（税前）
      */
-    @NotNull(message = "合计金额（税前）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long sumAmount;
+    @NotBlank(message = "合计金额（税前）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String sumAmount;
 
     /**
      * 总税额
      */
-    @NotNull(message = "总税额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long sumTax;
+    @NotBlank(message = "总税额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String sumTax;
 
     /**
      * 大写金额，（加税合计）
@@ -297,12 +295,6 @@ public class DataOcrInfoBo extends BaseEntity {
      */
     @NotBlank(message = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]不能为空", groups = { AddGroup.class, EditGroup.class })
     private String region;
-
-    /**
-     * 睿真token
-     */
-    @NotBlank(message = "睿真token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
 
     /**
      * 红冲/非红冲
@@ -393,18 +385,6 @@ public class DataOcrInfoBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

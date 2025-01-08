@@ -11,8 +11,6 @@ import org.smartlink.business.domain.DataImageFilesInfo;
 /**
  * 票小蜜识别工厂
  *
- * @author maxuhui
- * @date 2021-10-12
  */
 public class GlorityFactory implements IdentificationFactory<IdentifyResults> {
 
@@ -97,9 +95,20 @@ public class GlorityFactory implements IdentificationFactory<IdentifyResults> {
     private final static String GLORITY_DUTY_PAID_PROOF_CODE = "10902";
 
     /**
+     * 非税收入类票据
+     */
+    private final static String NON_TAX_REVENUE_RECEIPTS_CODE = "102015";
+
+    /**
      * 船票
      */
     private final static String GLORITY_STEAMER_TICKET_CODE = "10505a";
+
+    /**
+     * 海关进口货物报关单
+     */
+    private final static String CUSTOMS_IMPORTED_GOODS_CODE = "102018";
+
     // 2022新版电子普通发票
     private final static String GLORITY_TAX_ELECTRONIC_NO_INVOICE_CODE_INVOICE = "10108";
     // 2022新版电子专用发票

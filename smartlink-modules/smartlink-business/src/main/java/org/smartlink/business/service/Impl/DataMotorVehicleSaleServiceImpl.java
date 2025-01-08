@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataMotorVehicleSaleBo;
 import org.smartlink.business.domain.vo.DataMotorVehicleSaleVo;
 import org.smartlink.business.domain.DataMotorVehicleSale;
 import org.smartlink.business.mapper.DataMotorVehicleSaleMapper;
 import org.smartlink.business.service.IDataMotorVehicleSaleService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -83,14 +83,14 @@ public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleSer
         lqw.eq(StringUtils.isNotBlank(bo.getCity()), DataMotorVehicleSale::getCity, bo.getCity());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceCode()), DataMotorVehicleSale::getInvoiceCode, bo.getInvoiceCode());
         lqw.eq(StringUtils.isNotBlank(bo.getCommodityInspectionNo()), DataMotorVehicleSale::getCommodityInspectionNo, bo.getCommodityInspectionNo());
-        lqw.eq(bo.getInvoiceDate() != null, DataMotorVehicleSale::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataMotorVehicleSale::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getDrawer()), DataMotorVehicleSale::getDrawer, bo.getDrawer());
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataMotorVehicleSale::getFileId, bo.getFileId());
-        lqw.eq(bo.getLimitedPeopleCount() != null, DataMotorVehicleSale::getLimitedPeopleCount, bo.getLimitedPeopleCount());
+        lqw.eq(StringUtils.isNotBlank(bo.getLimitedPeopleCount()), DataMotorVehicleSale::getLimitedPeopleCount, bo.getLimitedPeopleCount());
         lqw.eq(StringUtils.isNotBlank(bo.getMachineCode()), DataMotorVehicleSale::getMachineCode, bo.getMachineCode());
         lqw.eq(StringUtils.isNotBlank(bo.getMachineNumber()), DataMotorVehicleSale::getMachineNumber, bo.getMachineNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataMotorVehicleSale::getInvoiceNumber, bo.getInvoiceNumber());
-        lqw.eq(bo.getPreTaxAmount() != null, DataMotorVehicleSale::getPreTaxAmount, bo.getPreTaxAmount());
+        lqw.eq(StringUtils.isNotBlank(bo.getPreTaxAmount()), DataMotorVehicleSale::getPreTaxAmount, bo.getPreTaxAmount());
         lqw.eq(StringUtils.isNotBlank(bo.getProduceArea()), DataMotorVehicleSale::getProduceArea, bo.getProduceArea());
         lqw.eq(StringUtils.isNotBlank(bo.getKind()), DataMotorVehicleSale::getKind, bo.getKind());
         lqw.eq(StringUtils.isNotBlank(bo.getProvince()), DataMotorVehicleSale::getProvince, bo.getProvince());
@@ -100,7 +100,7 @@ public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleSer
         lqw.like(StringUtils.isNotBlank(bo.getSellerBankName()), DataMotorVehicleSale::getSellerBankName, bo.getSellerBankName());
         lqw.eq(StringUtils.isNotBlank(bo.getSellerPhone()), DataMotorVehicleSale::getSellerPhone, bo.getSellerPhone());
         lqw.eq(StringUtils.isNotBlank(bo.getSellerTaxid()), DataMotorVehicleSale::getSellerTaxid, bo.getSellerTaxid());
-        lqw.eq(bo.getTax() != null, DataMotorVehicleSale::getTax, bo.getTax());
+        lqw.eq(StringUtils.isNotBlank(bo.getTax()), DataMotorVehicleSale::getTax, bo.getTax());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxAuthorities()), DataMotorVehicleSale::getTaxAuthorities, bo.getTaxAuthorities());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxAuthoritiesCode()), DataMotorVehicleSale::getTaxAuthoritiesCode, bo.getTaxAuthoritiesCode());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxPaymentCertificateNo()), DataMotorVehicleSale::getTaxPaymentCertificateNo, bo.getTaxPaymentCertificateNo());
@@ -108,7 +108,7 @@ public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleSer
         lqw.eq(StringUtils.isNotBlank(bo.getTaxCode()), DataMotorVehicleSale::getTaxCode, bo.getTaxCode());
         lqw.eq(StringUtils.isNotBlank(bo.getQrCode()), DataMotorVehicleSale::getQrCode, bo.getQrCode());
         lqw.eq(StringUtils.isNotBlank(bo.getTonnage()), DataMotorVehicleSale::getTonnage, bo.getTonnage());
-        lqw.eq(bo.getInvoiceTotal() != null, DataMotorVehicleSale::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataMotorVehicleSale::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataMotorVehicleSale::getInvoiceStamp, bo.getInvoiceStamp());
         lqw.eq(StringUtils.isNotBlank(bo.getCompanySeal()), DataMotorVehicleSale::getCompanySeal, bo.getCompanySeal());
         lqw.eq(StringUtils.isNotBlank(bo.getPageNumber()), DataMotorVehicleSale::getPageNumber, bo.getPageNumber());
@@ -117,11 +117,7 @@ public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleSer
         lqw.eq(StringUtils.isNotBlank(bo.getElectronicNumber()), DataMotorVehicleSale::getElectronicNumber, bo.getElectronicNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getElectronicMark()), DataMotorVehicleSale::getElectronicMark, bo.getElectronicMark());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataMotorVehicleSale::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataMotorVehicleSale::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataMotorVehicleSale::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataMotorVehicleSale::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataMotorVehicleSale::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataMotorVehicleSale::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

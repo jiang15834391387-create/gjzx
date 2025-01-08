@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataDidiItineraryDetailsBo;
 import org.smartlink.business.domain.vo.DataDidiItineraryDetailsVo;
 import org.smartlink.business.domain.DataDidiItineraryDetails;
 import org.smartlink.business.mapper.DataDidiItineraryDetailsMapper;
 import org.smartlink.business.service.IDataDidiItineraryDetailsService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -82,8 +82,7 @@ public class DataDidiItineraryDetailsServiceImpl implements IDataDidiItineraryDe
         lqw.eq(StringUtils.isNotBlank(bo.getTimeGetOn()), DataDidiItineraryDetails::getTimeGetOn, bo.getTimeGetOn());
         lqw.eq(StringUtils.isNotBlank(bo.getTimeGetOff()), DataDidiItineraryDetails::getTimeGetOff, bo.getTimeGetOff());
         lqw.eq(StringUtils.isNotBlank(bo.getProducer()), DataDidiItineraryDetails::getProducer, bo.getProducer());
-        lqw.eq(bo.getInvoiceTotal() != null, DataDidiItineraryDetails::getInvoiceTotal, bo.getInvoiceTotal());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataDidiItineraryDetails::getSaveToken, bo.getSaveToken());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataDidiItineraryDetails::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataDidiItineraryDetails::getDeleteFlag, bo.getDeleteFlag());
         return lqw;
     }

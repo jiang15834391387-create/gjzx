@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -61,8 +59,8 @@ public class DataDutyPaidProofBo extends BaseEntity {
     /**
      * 日期
      */
-    @NotNull(message = "日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 发票号码
@@ -73,8 +71,8 @@ public class DataDutyPaidProofBo extends BaseEntity {
     /**
      * 总计
      */
-    @NotNull(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
+    @NotBlank(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 大写金额
@@ -109,8 +107,8 @@ public class DataDutyPaidProofBo extends BaseEntity {
     /**
      * 税款限缴期限
      */
-    @NotNull(message = "税款限缴期限不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date taxPaymentLimitedTime;
+    @NotBlank(message = "税款限缴期限不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String taxPaymentLimitedTime;
 
     /**
      * 收款国库
@@ -125,12 +123,6 @@ public class DataDutyPaidProofBo extends BaseEntity {
     private String region;
 
     /**
-     * 税务云token
-     */
-    @NotBlank(message = "税务云token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -141,18 +133,6 @@ public class DataDutyPaidProofBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

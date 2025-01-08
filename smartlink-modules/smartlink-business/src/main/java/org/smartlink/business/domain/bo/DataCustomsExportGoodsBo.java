@@ -35,8 +35,8 @@ public class DataCustomsExportGoodsBo extends BaseEntity {
     /**
      * 杂费
      */
-    @NotNull(message = "杂费不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long additionalExpress;
+    @NotBlank(message = "杂费不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String additionalExpress;
 
     /**
      * 支付特许权使用费确认
@@ -119,20 +119,20 @@ public class DataCustomsExportGoodsBo extends BaseEntity {
     /**
      * 运费
      */
-    @NotNull(message = "运费不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long freight;
+    @NotBlank(message = "运费不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String freight;
 
     /**
      * 毛重
      */
-    @NotNull(message = "毛重不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long grossWeight;
+    @NotBlank(message = "毛重不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String grossWeight;
 
     /**
      * 保费
      */
-    @NotNull(message = "保费不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long insurancePremium;
+    @NotBlank(message = "保费不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String insurancePremium;
 
     /**
      * 发票消费类型
@@ -279,12 +279,6 @@ public class DataCustomsExportGoodsBo extends BaseEntity {
     private String invoiceStamp;
 
     /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -295,18 +289,6 @@ public class DataCustomsExportGoodsBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

@@ -67,4 +67,16 @@ public class BaseEntity implements Serializable {
     @TableField(exist = false)
     private Map<String, Object> params = new HashMap<>();
 
+    /**
+     * 备注
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE, exist = false)
+    private String remark;
+
+    /**
+     * 是否删除标识 0-不删除  1-删除
+     */
+    @TableField(exist = false)
+    private String deleteFlag;
+
 }

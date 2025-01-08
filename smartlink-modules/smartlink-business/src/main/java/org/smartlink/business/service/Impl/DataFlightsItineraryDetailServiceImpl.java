@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataFlightsItineraryDetailBo;
 import org.smartlink.business.domain.vo.DataFlightsItineraryDetailVo;
 import org.smartlink.business.domain.DataFlightsItineraryDetail;
 import org.smartlink.business.mapper.DataFlightsItineraryDetailMapper;
 import org.smartlink.business.service.IDataFlightsItineraryDetailService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -72,13 +72,13 @@ public class DataFlightsItineraryDetailServiceImpl implements IDataFlightsItiner
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataFlightsItineraryDetail> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getCarrier()), DataFlightsItineraryDetail::getCarrier, bo.getCarrier());
-        lqw.eq(bo.getInvoiceDate() != null, DataFlightsItineraryDetail::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataFlightsItineraryDetail::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataFlightsItineraryDetail::getFileId, bo.getFileId());
         lqw.eq(StringUtils.isNotBlank(bo.getFlightNumber()), DataFlightsItineraryDetail::getFlightNumber, bo.getFlightNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getStationGetOn()), DataFlightsItineraryDetail::getStationGetOn, bo.getStationGetOn());
         lqw.eq(StringUtils.isNotBlank(bo.getSeat()), DataFlightsItineraryDetail::getSeat, bo.getSeat());
-        lqw.eq(bo.getEffectiveDate() != null, DataFlightsItineraryDetail::getEffectiveDate, bo.getEffectiveDate());
-        lqw.eq(bo.getExpiryDate() != null, DataFlightsItineraryDetail::getExpiryDate, bo.getExpiryDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getEffectiveDate()), DataFlightsItineraryDetail::getEffectiveDate, bo.getEffectiveDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getExpiryDate()), DataFlightsItineraryDetail::getExpiryDate, bo.getExpiryDate());
         lqw.eq(StringUtils.isNotBlank(bo.getOcrId()), DataFlightsItineraryDetail::getOcrId, bo.getOcrId());
         lqw.eq(StringUtils.isNotBlank(bo.getSpaceLevel()), DataFlightsItineraryDetail::getSpaceLevel, bo.getSpaceLevel());
         lqw.eq(StringUtils.isNotBlank(bo.getAllow()), DataFlightsItineraryDetail::getAllow, bo.getAllow());
@@ -88,9 +88,7 @@ public class DataFlightsItineraryDetailServiceImpl implements IDataFlightsItiner
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTime()), DataFlightsItineraryDetail::getInvoiceTime, bo.getInvoiceTime());
         lqw.eq(StringUtils.isNotBlank(bo.getStationGetOff()), DataFlightsItineraryDetail::getStationGetOff, bo.getStationGetOff());
         lqw.eq(StringUtils.isNotBlank(bo.getFlightSegment()), DataFlightsItineraryDetail::getFlightSegment, bo.getFlightSegment());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataFlightsItineraryDetail::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataFlightsItineraryDetail::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataFlightsItineraryDetail::getConfidence, bo.getConfidence());
         return lqw;
     }
 

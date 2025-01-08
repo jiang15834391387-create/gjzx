@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataFlightItinerary;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -76,25 +74,25 @@ public class DataFlightItineraryVo implements Serializable {
      * 填开日期
      */
     @ExcelProperty(value = "填开日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 票价
      */
     @ExcelProperty(value = "票价")
-    private Long fare;
+    private String fare;
 
     /**
      * 燃油附加费
      */
     @ExcelProperty(value = "燃油附加费")
-    private Long fuelSurcharge;
+    private String fuelSurcharge;
 
     /**
      * 保险费
      */
     @ExcelProperty(value = "保险费")
-    private Long insurance;
+    private String insurance;
 
     /**
      * 国内国际标签
@@ -118,13 +116,13 @@ public class DataFlightItineraryVo implements Serializable {
      * 税额
      */
     @ExcelProperty(value = "税额")
-    private Long tax;
+    private String tax;
 
     /**
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票消费类型
@@ -176,7 +174,7 @@ public class DataFlightItineraryVo implements Serializable {
      * GP订单号
      */
     @ExcelProperty(value = "GP订单号")
-    private Long numberOfGpOrder;
+    private String numberOfGpOrder;
 
     /**
      * 提示信息（仅在电子票时返回）
@@ -190,7 +188,7 @@ public class DataFlightItineraryVo implements Serializable {
      */
     @ExcelProperty(value = "其他税费", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "仅=在电子票时返回")
-    private Long otherTaxes;
+    private String otherTaxes;
 
     /**
      * 购买方名称（仅在电子票时返回）
@@ -239,12 +237,6 @@ public class DataFlightItineraryVo implements Serializable {
     private String region;
 
     /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -255,24 +247,6 @@ public class DataFlightItineraryVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

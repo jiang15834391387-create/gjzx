@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -26,6 +24,7 @@ public class DataPassengerCar extends TenantEntity {
     /**
      * 主键
      */
+    @TableId(value = "id")
     private String id;
 
     /**
@@ -46,7 +45,7 @@ public class DataPassengerCar extends TenantEntity {
     /**
      * 日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 出发车站
@@ -71,7 +70,7 @@ public class DataPassengerCar extends TenantEntity {
     /**
      * 总计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 姓名
@@ -99,11 +98,6 @@ public class DataPassengerCar extends TenantEntity {
     private String busNumber;
 
     /**
-     * 睿真token
-     */
-    private String saveToken;
-
-    /**
      * 是否查验标识，（0查验失败，1查验成功）
      */
     private String checkInvoice;
@@ -119,25 +113,10 @@ public class DataPassengerCar extends TenantEntity {
     private String remark;
 
     /**
-     * 置信度
-     */
-    private String confidence;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

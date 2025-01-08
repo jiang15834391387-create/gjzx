@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataFlightsItineraryDetail;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -46,7 +44,7 @@ public class DataFlightsItineraryDetailVo implements Serializable {
      * 乘机日期
      */
     @ExcelProperty(value = "乘机日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 图片表主键
@@ -76,13 +74,13 @@ public class DataFlightsItineraryDetailVo implements Serializable {
      * 客票生效日期
      */
     @ExcelProperty(value = "客票生效日期")
-    private Date effectiveDate;
+    private String effectiveDate;
 
     /**
      * 有效截至日期
      */
     @ExcelProperty(value = "有效截至日期")
-    private Date expiryDate;
+    private String expiryDate;
 
     /**
      * 主表id
@@ -139,12 +137,6 @@ public class DataFlightsItineraryDetailVo implements Serializable {
     private String flightSegment;
 
     /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -155,12 +147,6 @@ public class DataFlightsItineraryDetailVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
 
 
 }
