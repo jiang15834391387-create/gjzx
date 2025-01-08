@@ -23,7 +23,7 @@ import org.smartlink.business.service.IDataOcrDetailsService;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
 /**
- * ocr明细
+ * 增值税发票明细
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -37,7 +37,7 @@ public class DataOcrDetailsController extends BaseController {
     private final IDataOcrDetailsService dataOcrDetailsService;
 
     /**
-     * 查询ocr明细列表
+     * 查询增值税发票明细列表
      */
     @SaCheckPermission("business:ocrDetails:list")
     @GetMapping("/list")
@@ -46,18 +46,18 @@ public class DataOcrDetailsController extends BaseController {
     }
 
     /**
-     * 导出ocr明细列表
+     * 导出增值税发票明细列表
      */
     @SaCheckPermission("business:ocrDetails:export")
-    @Log(title = "ocr明细", businessType = BusinessType.EXPORT)
+    @Log(title = "增值税发票明细", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DataOcrDetailsBo bo, HttpServletResponse response) {
         List<DataOcrDetailsVo> list = dataOcrDetailsService.queryList(bo);
-        ExcelUtil.exportExcel(list, "ocr明细", DataOcrDetailsVo.class, response);
+        ExcelUtil.exportExcel(list, "增值税发票明细", DataOcrDetailsVo.class, response);
     }
 
     /**
-     * 获取ocr明细详细信息
+     * 获取增值税发票明细详细信息
      *
      * @param id 主键
      */
@@ -69,10 +69,10 @@ public class DataOcrDetailsController extends BaseController {
     }
 
     /**
-     * 新增ocr明细
+     * 新增增值税发票明细
      */
     @SaCheckPermission("business:ocrDetails:add")
-    @Log(title = "ocr明细", businessType = BusinessType.INSERT)
+    @Log(title = "增值税发票明细", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody DataOcrDetailsBo bo) {
@@ -80,10 +80,10 @@ public class DataOcrDetailsController extends BaseController {
     }
 
     /**
-     * 修改ocr明细
+     * 修改增值税发票明细
      */
     @SaCheckPermission("business:ocrDetails:edit")
-    @Log(title = "ocr明细", businessType = BusinessType.UPDATE)
+    @Log(title = "增值税发票明细", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DataOcrDetailsBo bo) {
@@ -91,12 +91,12 @@ public class DataOcrDetailsController extends BaseController {
     }
 
     /**
-     * 删除ocr明细
+     * 删除增值税发票明细
      *
      * @param ids 主键串
      */
     @SaCheckPermission("business:ocrDetails:remove")
-    @Log(title = "ocr明细", businessType = BusinessType.DELETE)
+    @Log(title = "增值税发票明细", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable String[] ids) {

@@ -20,6 +20,7 @@ import org.smartlink.common.excel.utils.ExcelUtil;
 import org.smartlink.business.domain.vo.DataImageFilesInfoVo;
 import org.smartlink.business.domain.bo.DataImageFilesInfoBo;
 import org.smartlink.business.service.IDataImageFilesInfoService;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
 /**
  * 图片文件
@@ -40,9 +41,8 @@ public class DataImageFilesInfoController extends BaseController {
      */
     @SaCheckPermission("business:imageFilesInfo:list")
     @GetMapping("/list")
-    public R<List<DataImageFilesInfoVo>> list(DataImageFilesInfoBo bo) {
-        List<DataImageFilesInfoVo> list = dataImageFilesInfoService.queryList(bo);
-        return R.ok(list);
+    public TableDataInfo<DataImageFilesInfoVo> list(DataImageFilesInfoBo bo, PageQuery pageQuery) {
+        return dataImageFilesInfoService.queryPageList(bo, pageQuery);
     }
 
     /**

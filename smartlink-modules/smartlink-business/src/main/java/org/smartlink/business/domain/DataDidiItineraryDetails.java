@@ -85,12 +85,7 @@ public class DataDidiItineraryDetails extends TenantEntity {
     /**
      * 总计
      */
-    private Long invoiceTotal;
-
-    /**
-     * token
-     */
-    private String saveToken;
+    private String invoiceTotal;
 
     /**
      * 是否删除标识 0-不删除  1-删除

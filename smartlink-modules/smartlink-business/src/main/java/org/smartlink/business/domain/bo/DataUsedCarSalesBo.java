@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -145,8 +143,8 @@ public class DataUsedCarSalesBo extends BaseEntity {
     /**
      * 发票日期
      */
-    @NotNull(message = "发票日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "发票日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 二手车市场开户银行及账号
@@ -223,8 +221,8 @@ public class DataUsedCarSalesBo extends BaseEntity {
     /**
      * 价税合计
      */
-    @NotNull(message = "价税合计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
+    @NotBlank(message = "价税合计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 发票联
@@ -289,8 +287,8 @@ public class DataUsedCarSalesBo extends BaseEntity {
     /**
      * 机打号码
      */
-    @NotNull(message = "机打号码不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long machineNumber;
+    @NotBlank(message = "机打号码不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String machineNumber;
 
     /**
      * 数电票号码
@@ -323,12 +321,6 @@ public class DataUsedCarSalesBo extends BaseEntity {
     private String region;
 
     /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -339,24 +331,6 @@ public class DataUsedCarSalesBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

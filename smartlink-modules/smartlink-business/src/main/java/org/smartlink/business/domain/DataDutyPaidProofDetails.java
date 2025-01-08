@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -30,14 +28,14 @@ public class DataDutyPaidProofDetails extends TenantEntity {
     private String id;
 
     /**
-     * 已缴金额
+     * 图片表主键
      */
-    private Long amountPaid;
+    private String fileId;
 
     /**
      * 入库日期
      */
-    private Date entryDate;
+    private String entryDate;
 
     /**
      * 征收机关
@@ -95,14 +93,14 @@ public class DataDutyPaidProofDetails extends TenantEntity {
     private String total;
 
     /**
-     * 图片表主键
+     * 已缴金额
      */
-    private String fileId;
+    private String amountPaid;
 
     /**
      * 实缴金额
      */
-    private Long actualPaidAmount;
+    private String actualPaidAmount;
 
     /**
      * 是否删除标识 0-不删除  1-删除

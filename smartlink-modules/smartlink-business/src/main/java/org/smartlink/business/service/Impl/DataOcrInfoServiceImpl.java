@@ -8,19 +8,19 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataOcrInfoBo;
 import org.smartlink.business.domain.vo.DataOcrInfoVo;
 import org.smartlink.business.domain.DataOcrInfo;
 import org.smartlink.business.mapper.DataOcrInfoMapper;
 import org.smartlink.business.service.IDataOcrInfoService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 
 /**
- * ocr信息Service业务层处理
+ * 增值税发票Service业务层处理
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -32,10 +32,10 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     private final DataOcrInfoMapper baseMapper;
 
     /**
-     * 查询ocr信息
+     * 查询增值税发票
      *
      * @param id 主键
-     * @return ocr信息
+     * @return 增值税发票
      */
     @Override
     public DataOcrInfoVo queryById(String id){
@@ -43,11 +43,11 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     }
 
     /**
-     * 分页查询ocr信息列表
+     * 分页查询增值税发票列表
      *
      * @param bo        查询条件
      * @param pageQuery 分页参数
-     * @return ocr信息分页列表
+     * @return 增值税发票分页列表
      */
     @Override
     public TableDataInfo<DataOcrInfoVo> queryPageList(DataOcrInfoBo bo, PageQuery pageQuery) {
@@ -57,10 +57,10 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     }
 
     /**
-     * 查询符合条件的ocr信息列表
+     * 查询符合条件的增值税发票列表
      *
      * @param bo 查询条件
-     * @return ocr信息列表
+     * @return 增值税发票列表
      */
     @Override
     public List<DataOcrInfoVo> queryList(DataOcrInfoBo bo) {
@@ -79,35 +79,35 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerNo()), DataOcrInfo::getBuyerNo, bo.getBuyerNo());
         lqw.eq(StringUtils.isNotBlank(bo.getCheckInvoice()), DataOcrInfo::getCheckInvoice, bo.getCheckInvoice());
         lqw.eq(StringUtils.isNotBlank(bo.getCancellationMark()), DataOcrInfo::getCancellationMark, bo.getCancellationMark());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataOcrInfo::getCheckResult, bo.getCheckResult());
         lqw.eq(StringUtils.isNotBlank(bo.getChecker()), DataOcrInfo::getChecker, bo.getChecker());
         lqw.eq(StringUtils.isNotBlank(bo.getProvince()), DataOcrInfo::getProvince, bo.getProvince());
         lqw.eq(StringUtils.isNotBlank(bo.getCity()), DataOcrInfo::getCity, bo.getCity());
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataOcrInfo::getFileId, bo.getFileId());
         lqw.eq(StringUtils.isNotBlank(bo.getTitle()), DataOcrInfo::getTitle, bo.getTitle());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceCode()), DataOcrInfo::getInvoiceCode, bo.getInvoiceCode());
-        lqw.eq(bo.getInvoiceDate() != null, DataOcrInfo::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataOcrInfo::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataOcrInfo::getInvoiceNumber, bo.getInvoiceNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getIssuer()), DataOcrInfo::getIssuer, bo.getIssuer());
         lqw.eq(StringUtils.isNotBlank(bo.getItemNames()), DataOcrInfo::getItemNames, bo.getItemNames());
         lqw.eq(StringUtils.isNotBlank(bo.getCheckCode()), DataOcrInfo::getCheckCode, bo.getCheckCode());
-        lqw.eq(bo.getTotalLowercase() != null, DataOcrInfo::getTotalLowercase, bo.getTotalLowercase());
-        lqw.eq(bo.getPretaxAmount() != null, DataOcrInfo::getPretaxAmount, bo.getPretaxAmount());
+        lqw.eq(StringUtils.isNotBlank(bo.getTotalLowercase()), DataOcrInfo::getTotalLowercase, bo.getTotalLowercase());
+        lqw.eq(StringUtils.isNotBlank(bo.getPretaxAmount()), DataOcrInfo::getPretaxAmount, bo.getPretaxAmount());
         lqw.eq(StringUtils.isNotBlank(bo.getCompanySeal()), DataOcrInfo::getCompanySeal, bo.getCompanySeal());
         lqw.eq(StringUtils.isNotBlank(bo.getSellCompanySeal()), DataOcrInfo::getSellCompanySeal, bo.getSellCompanySeal());
         lqw.eq(StringUtils.isNotBlank(bo.getPageNumber()), DataOcrInfo::getPageNumber, bo.getPageNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceSheet()), DataOcrInfo::getInvoiceSheet, bo.getInvoiceSheet());
         lqw.eq(StringUtils.isNotBlank(bo.getMachineCode()), DataOcrInfo::getMachineCode, bo.getMachineCode());
+        lqw.eq(StringUtils.isNotBlank(bo.getCategory()), DataOcrInfo::getCategory, bo.getCategory());
         lqw.eq(StringUtils.isNotBlank(bo.getPassword1()), DataOcrInfo::getPassword1, bo.getPassword1());
         lqw.eq(StringUtils.isNotBlank(bo.getElectronicNumber()), DataOcrInfo::getElectronicNumber, bo.getElectronicNumber());
-        lqw.eq(bo.getTravelTax() != null, DataOcrInfo::getTravelTax, bo.getTravelTax());
+        lqw.eq(StringUtils.isNotBlank(bo.getTravelTax()), DataOcrInfo::getTravelTax, bo.getTravelTax());
         lqw.eq(StringUtils.isNotBlank(bo.getPayee()), DataOcrInfo::getPayee, bo.getPayee());
         lqw.eq(StringUtils.isNotBlank(bo.getSellerAccount()), DataOcrInfo::getSellerAccount, bo.getSellerAccount());
         lqw.eq(StringUtils.isNotBlank(bo.getSellerAddress()), DataOcrInfo::getSellerAddress, bo.getSellerAddress());
         lqw.like(StringUtils.isNotBlank(bo.getSellerName()), DataOcrInfo::getSellerName, bo.getSellerName());
         lqw.eq(StringUtils.isNotBlank(bo.getSellerNo()), DataOcrInfo::getSellerNo, bo.getSellerNo());
-        lqw.eq(bo.getSumAmount() != null, DataOcrInfo::getSumAmount, bo.getSumAmount());
-        lqw.eq(bo.getSumTax() != null, DataOcrInfo::getSumTax, bo.getSumTax());
+        lqw.eq(StringUtils.isNotBlank(bo.getSumAmount()), DataOcrInfo::getSumAmount, bo.getSumAmount());
+        lqw.eq(StringUtils.isNotBlank(bo.getSumTax()), DataOcrInfo::getSumTax, bo.getSumTax());
         lqw.eq(StringUtils.isNotBlank(bo.getTotalUppercase()), DataOcrInfo::getTotalUppercase, bo.getTotalUppercase());
         lqw.eq(StringUtils.isNotBlank(bo.getPurchaseMark()), DataOcrInfo::getPurchaseMark, bo.getPurchaseMark());
         lqw.eq(StringUtils.isNotBlank(bo.getBlockChain()), DataOcrInfo::getBlockChain, bo.getBlockChain());
@@ -116,7 +116,6 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         lqw.eq(StringUtils.isNotBlank(bo.getOilMark()), DataOcrInfo::getOilMark, bo.getOilMark());
         lqw.eq(StringUtils.isNotBlank(bo.getVehicleMark()), DataOcrInfo::getVehicleMark, bo.getVehicleMark());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataOcrInfo::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataOcrInfo::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getRedDashed()), DataOcrInfo::getRedDashed, bo.getRedDashed());
         lqw.eq(StringUtils.isNotBlank(bo.getQrCode()), DataOcrInfo::getQrCode, bo.getQrCode());
         lqw.eq(StringUtils.isNotBlank(bo.getRightInvoiceDate()), DataOcrInfo::getRightInvoiceDate, bo.getRightInvoiceDate());
@@ -131,15 +130,13 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         lqw.eq(StringUtils.isNotBlank(bo.getDeduction()), DataOcrInfo::getDeduction, bo.getDeduction());
         lqw.eq(StringUtils.isNotBlank(bo.getHandwrite()), DataOcrInfo::getHandwrite, bo.getHandwrite());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataOcrInfo::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataOcrInfo::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataOcrInfo::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 
     /**
-     * 新增ocr信息
+     * 新增增值税发票
      *
-     * @param bo ocr信息
+     * @param bo 增值税发票
      * @return 是否新增成功
      */
     @Override
@@ -154,9 +151,9 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     }
 
     /**
-     * 修改ocr信息
+     * 修改增值税发票
      *
-     * @param bo ocr信息
+     * @param bo 增值税发票
      * @return 是否修改成功
      */
     @Override
@@ -174,7 +171,7 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     }
 
     /**
-     * 校验并批量删除ocr信息信息
+     * 校验并批量删除增值税发票信息
      *
      * @param ids     待删除的主键集合
      * @param isValid 是否进行有效性校验

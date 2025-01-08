@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataCustomsImxportGoodsBo;
 import org.smartlink.business.domain.vo.DataCustomsImxportGoodsVo;
 import org.smartlink.business.domain.DataCustomsImxportGoods;
 import org.smartlink.business.mapper.DataCustomsImxportGoodsMapper;
 import org.smartlink.business.service.IDataCustomsImxportGoodsService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class DataCustomsImxportGoodsServiceImpl implements IDataCustomsImxportGo
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataCustomsImxportGoods> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataCustomsImxportGoods::getFileId, bo.getFileId());
-        lqw.eq(bo.getAdditionalExpress() != null, DataCustomsImxportGoods::getAdditionalExpress, bo.getAdditionalExpress());
+        lqw.eq(StringUtils.isNotBlank(bo.getAdditionalExpress()), DataCustomsImxportGoods::getAdditionalExpress, bo.getAdditionalExpress());
         lqw.eq(StringUtils.isNotBlank(bo.getConfirmOfPayRoyalties()), DataCustomsImxportGoods::getConfirmOfPayRoyalties, bo.getConfirmOfPayRoyalties());
         lqw.eq(StringUtils.isNotBlank(bo.getConfirmOfSpecialRelationship()), DataCustomsImxportGoods::getConfirmOfSpecialRelationship, bo.getConfirmOfSpecialRelationship());
         lqw.eq(StringUtils.isNotBlank(bo.getConsumptionCompanyCode()), DataCustomsImxportGoods::getConsumptionCompanyCode, bo.getConsumptionCompanyCode());
@@ -86,9 +86,9 @@ public class DataCustomsImxportGoodsServiceImpl implements IDataCustomsImxportGo
         lqw.like(StringUtils.isNotBlank(bo.getDepartureCountryName()), DataCustomsImxportGoods::getDepartureCountryName, bo.getDepartureCountryName());
         lqw.eq(StringUtils.isNotBlank(bo.getExecutiveCompanyCode()), DataCustomsImxportGoods::getExecutiveCompanyCode, bo.getExecutiveCompanyCode());
         lqw.like(StringUtils.isNotBlank(bo.getExecutiveCompanyName()), DataCustomsImxportGoods::getExecutiveCompanyName, bo.getExecutiveCompanyName());
-        lqw.eq(bo.getFreight() != null, DataCustomsImxportGoods::getFreight, bo.getFreight());
-        lqw.eq(bo.getGrossWeight() != null, DataCustomsImxportGoods::getGrossWeight, bo.getGrossWeight());
-        lqw.eq(bo.getInsurancePremium() != null, DataCustomsImxportGoods::getInsurancePremium, bo.getInsurancePremium());
+        lqw.eq(StringUtils.isNotBlank(bo.getFreight()), DataCustomsImxportGoods::getFreight, bo.getFreight());
+        lqw.eq(StringUtils.isNotBlank(bo.getGrossWeight()), DataCustomsImxportGoods::getGrossWeight, bo.getGrossWeight());
+        lqw.eq(StringUtils.isNotBlank(bo.getInsurancePremium()), DataCustomsImxportGoods::getInsurancePremium, bo.getInsurancePremium());
         lqw.eq(StringUtils.isNotBlank(bo.getKind()), DataCustomsImxportGoods::getKind, bo.getKind());
         lqw.eq(StringUtils.isNotBlank(bo.getKindOfTaxCode()), DataCustomsImxportGoods::getKindOfTaxCode, bo.getKindOfTaxCode());
         lqw.like(StringUtils.isNotBlank(bo.getKindOfTaxName()), DataCustomsImxportGoods::getKindOfTaxName, bo.getKindOfTaxName());
@@ -113,10 +113,7 @@ public class DataCustomsImxportGoodsServiceImpl implements IDataCustomsImxportGo
         lqw.eq(StringUtils.isNotBlank(bo.getFilingEntity()), DataCustomsImxportGoods::getFilingEntity, bo.getFilingEntity());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataCustomsImxportGoods::getRegion, bo.getRegion());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataCustomsImxportGoods::getInvoiceStamp, bo.getInvoiceStamp());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataCustomsImxportGoods::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataCustomsImxportGoods::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataCustomsImxportGoods::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataCustomsImxportGoods::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

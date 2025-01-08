@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataOcrInfo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -17,7 +15,7 @@ import java.util.Date;
 
 
 /**
- * ocr信息视图对象 data_ocr_info
+ * 增值税发票视图对象 data_ocr_info
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -86,12 +84,6 @@ public class DataOcrInfoVo implements Serializable {
     private String cancellationMark;
 
     /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
      * 复合人
      */
     @ExcelProperty(value = "复合人")
@@ -131,7 +123,7 @@ public class DataOcrInfoVo implements Serializable {
      * 发票日期
      */
     @ExcelProperty(value = "发票日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 发票号码
@@ -162,13 +154,13 @@ public class DataOcrInfoVo implements Serializable {
      */
     @ExcelProperty(value = "小写金额，", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "价=税合计")
-    private Long totalLowercase;
+    private String totalLowercase;
 
     /**
      * 税前金额
      */
     @ExcelProperty(value = "税前金额")
-    private Long pretaxAmount;
+    private String pretaxAmount;
 
     /**
      * 是否有公司印章(0: 没有; 1: 有)
@@ -201,6 +193,12 @@ public class DataOcrInfoVo implements Serializable {
     private String machineCode;
 
     /**
+     * 种类
+     */
+    @ExcelProperty(value = "种类")
+    private String category;
+
+    /**
      * 密码区
      */
     @ExcelProperty(value = "密码区")
@@ -217,7 +215,7 @@ public class DataOcrInfoVo implements Serializable {
      * 车船税
      */
     @ExcelProperty(value = "车船税")
-    private Long travelTax;
+    private String travelTax;
 
     /**
      * 收款人
@@ -254,13 +252,13 @@ public class DataOcrInfoVo implements Serializable {
      */
     @ExcelProperty(value = "合计金额", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "税=前")
-    private Long sumAmount;
+    private String sumAmount;
 
     /**
      * 总税额
      */
     @ExcelProperty(value = "总税额")
-    private Long sumTax;
+    private String sumTax;
 
     /**
      * 大写金额，（加税合计）
@@ -310,12 +308,6 @@ public class DataOcrInfoVo implements Serializable {
      */
     @ExcelProperty(value = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]")
     private String region;
-
-    /**
-     * 睿真token
-     */
-    @ExcelProperty(value = "睿真token")
-    private String saveToken;
 
     /**
      * 红冲/非红冲
@@ -406,18 +398,6 @@ public class DataOcrInfoVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

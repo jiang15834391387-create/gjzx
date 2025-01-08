@@ -74,7 +74,7 @@ public class DataQuotaInvoiceVo implements Serializable {
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 是否有公司印章(0: 没有; 1: 有)
@@ -101,12 +101,6 @@ public class DataQuotaInvoiceVo implements Serializable {
     private String region;
 
     /**
-     * 睿真token
-     */
-    @ExcelProperty(value = "睿真token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -117,24 +111,6 @@ public class DataQuotaInvoiceVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

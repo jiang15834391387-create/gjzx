@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -26,6 +24,7 @@ public class DataRailwayTicket extends TenantEntity {
     /**
      * 主键
      */
+    @TableId(value = "id")
     private String id;
 
     /**
@@ -36,7 +35,7 @@ public class DataRailwayTicket extends TenantEntity {
     /**
      * 日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 图片表id
@@ -101,7 +100,7 @@ public class DataRailwayTicket extends TenantEntity {
     /**
      * 合计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票专用章存在性判断
@@ -117,11 +116,6 @@ public class DataRailwayTicket extends TenantEntity {
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
-
-    /**
-     * 睿真token
-     */
-    private String saveToken;
 
     /**
      * 商务类型  退 售 改签 退差
@@ -176,12 +170,12 @@ public class DataRailwayTicket extends TenantEntity {
     /**
      * 退票金额（仅在电子凭证时返回）
      */
-    private Long amountRefunded;
+    private String amountRefunded;
 
     /**
      * 原火车票价款（仅在电子凭证时返回）
      */
-    private Long fareOfOriginalRailwayTicket;
+    private String fareOfOriginalRailwayTicket;
 
     /**
      * 原火车票起点站（仅在电子凭证时返回）
@@ -219,25 +213,10 @@ public class DataRailwayTicket extends TenantEntity {
     private String remark;
 
     /**
-     * 置信度
-     */
-    private String confidence;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

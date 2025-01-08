@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataUsedCarSales;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -155,7 +153,7 @@ public class DataUsedCarSalesVo implements Serializable {
      * 发票日期
      */
     @ExcelProperty(value = "发票日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 二手车市场开户银行及账号
@@ -233,7 +231,7 @@ public class DataUsedCarSalesVo implements Serializable {
      * 价税合计
      */
     @ExcelProperty(value = "价税合计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票联
@@ -300,7 +298,7 @@ public class DataUsedCarSalesVo implements Serializable {
      * 机打号码
      */
     @ExcelProperty(value = "机打号码")
-    private Long machineNumber;
+    private String machineNumber;
 
     /**
      * 数电票号码
@@ -334,12 +332,6 @@ public class DataUsedCarSalesVo implements Serializable {
     private String region;
 
     /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -350,24 +342,6 @@ public class DataUsedCarSalesVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

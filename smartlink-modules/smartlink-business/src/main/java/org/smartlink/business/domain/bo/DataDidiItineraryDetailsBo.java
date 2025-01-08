@@ -95,14 +95,8 @@ public class DataDidiItineraryDetailsBo extends BaseEntity {
     /**
      * 总计
      */
-    @NotNull(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
-
-    /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
+    @NotBlank(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 是否删除标识 0-不删除  1-删除

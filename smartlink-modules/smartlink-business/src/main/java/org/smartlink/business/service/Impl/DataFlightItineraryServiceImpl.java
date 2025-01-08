@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataFlightItineraryBo;
 import org.smartlink.business.domain.vo.DataFlightItineraryVo;
 import org.smartlink.business.domain.DataFlightItinerary;
 import org.smartlink.business.mapper.DataFlightItineraryMapper;
 import org.smartlink.business.service.IDataFlightItineraryService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -77,15 +77,15 @@ public class DataFlightItineraryServiceImpl implements IDataFlightItineraryServi
         lqw.eq(StringUtils.isNotBlank(bo.getAgentCode()), DataFlightItinerary::getAgentCode, bo.getAgentCode());
         lqw.eq(StringUtils.isNotBlank(bo.getCaacDevelopmentFund()), DataFlightItinerary::getCaacDevelopmentFund, bo.getCaacDevelopmentFund());
         lqw.eq(StringUtils.isNotBlank(bo.getCheckCode()), DataFlightItinerary::getCheckCode, bo.getCheckCode());
-        lqw.eq(bo.getInvoiceDate() != null, DataFlightItinerary::getInvoiceDate, bo.getInvoiceDate());
-        lqw.eq(bo.getFare() != null, DataFlightItinerary::getFare, bo.getFare());
-        lqw.eq(bo.getFuelSurcharge() != null, DataFlightItinerary::getFuelSurcharge, bo.getFuelSurcharge());
-        lqw.eq(bo.getInsurance() != null, DataFlightItinerary::getInsurance, bo.getInsurance());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataFlightItinerary::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getFare()), DataFlightItinerary::getFare, bo.getFare());
+        lqw.eq(StringUtils.isNotBlank(bo.getFuelSurcharge()), DataFlightItinerary::getFuelSurcharge, bo.getFuelSurcharge());
+        lqw.eq(StringUtils.isNotBlank(bo.getInsurance()), DataFlightItinerary::getInsurance, bo.getInsurance());
         lqw.eq(StringUtils.isNotBlank(bo.getInternationalFlag()), DataFlightItinerary::getInternationalFlag, bo.getInternationalFlag());
         lqw.eq(StringUtils.isNotBlank(bo.getIssueBy()), DataFlightItinerary::getIssueBy, bo.getIssueBy());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataFlightItinerary::getInvoiceNumber, bo.getInvoiceNumber());
-        lqw.eq(bo.getTax() != null, DataFlightItinerary::getTax, bo.getTax());
-        lqw.eq(bo.getInvoiceTotal() != null, DataFlightItinerary::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getTax()), DataFlightItinerary::getTax, bo.getTax());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataFlightItinerary::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getKind()), DataFlightItinerary::getKind, bo.getKind());
         lqw.eq(StringUtils.isNotBlank(bo.getPrintNumber()), DataFlightItinerary::getPrintNumber, bo.getPrintNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getEndorsement()), DataFlightItinerary::getEndorsement, bo.getEndorsement());
@@ -93,9 +93,9 @@ public class DataFlightItineraryServiceImpl implements IDataFlightItineraryServi
         lqw.eq(StringUtils.isNotBlank(bo.getIssuingStatus()), DataFlightItinerary::getIssuingStatus, bo.getIssuingStatus());
         lqw.eq(StringUtils.isNotBlank(bo.getQrcode()), DataFlightItinerary::getQrcode, bo.getQrcode());
         lqw.eq(StringUtils.isNotBlank(bo.getReceiptNumber()), DataFlightItinerary::getReceiptNumber, bo.getReceiptNumber());
-        lqw.eq(bo.getNumberOfGpOrder() != null, DataFlightItinerary::getNumberOfGpOrder, bo.getNumberOfGpOrder());
+        lqw.eq(StringUtils.isNotBlank(bo.getNumberOfGpOrder()), DataFlightItinerary::getNumberOfGpOrder, bo.getNumberOfGpOrder());
         lqw.eq(StringUtils.isNotBlank(bo.getPromptInformation()), DataFlightItinerary::getPromptInformation, bo.getPromptInformation());
-        lqw.eq(bo.getOtherTaxes() != null, DataFlightItinerary::getOtherTaxes, bo.getOtherTaxes());
+        lqw.eq(StringUtils.isNotBlank(bo.getOtherTaxes()), DataFlightItinerary::getOtherTaxes, bo.getOtherTaxes());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyer()), DataFlightItinerary::getBuyer, bo.getBuyer());
         lqw.eq(StringUtils.isNotBlank(bo.getSeller()), DataFlightItinerary::getSeller, bo.getSeller());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerTaxId()), DataFlightItinerary::getBuyerTaxId, bo.getBuyerTaxId());
@@ -103,11 +103,7 @@ public class DataFlightItineraryServiceImpl implements IDataFlightItineraryServi
         lqw.eq(StringUtils.isNotBlank(bo.getTypeOfBusiness()), DataFlightItinerary::getTypeOfBusiness, bo.getTypeOfBusiness());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataFlightItinerary::getInvoiceStamp, bo.getInvoiceStamp());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataFlightItinerary::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataFlightItinerary::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataFlightItinerary::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getConfidence()), DataFlightItinerary::getConfidence, bo.getConfidence());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataFlightItinerary::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataFlightItinerary::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

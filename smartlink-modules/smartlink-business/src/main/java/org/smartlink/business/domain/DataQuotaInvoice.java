@@ -24,6 +24,7 @@ public class DataQuotaInvoice extends TenantEntity {
     /**
      * 主键
      */
+    @TableId(value = "id")
     private String id;
 
     /**
@@ -59,7 +60,7 @@ public class DataQuotaInvoice extends TenantEntity {
     /**
      * 总计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 是否有公司印章(0: 没有; 1: 有)
@@ -82,11 +83,6 @@ public class DataQuotaInvoice extends TenantEntity {
     private String region;
 
     /**
-     * 睿真token
-     */
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     private String deleteFlag;
@@ -97,25 +93,10 @@ public class DataQuotaInvoice extends TenantEntity {
     private String remark;
 
     /**
-     * 置信度
-     */
-    private String confidence;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

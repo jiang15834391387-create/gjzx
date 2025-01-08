@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataOcrDetails;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -17,7 +15,7 @@ import java.util.Date;
 
 
 /**
- * ocr明细视图对象 data_ocr_details
+ * 增值税发票明细视图对象 data_ocr_details
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -52,13 +50,13 @@ public class DataOcrDetailsVo implements Serializable {
      * 金额
      */
     @ExcelProperty(value = "金额")
-    private Long detailAmount;
+    private String detailAmount;
 
     /**
      * 数量
      */
     @ExcelProperty(value = "数量")
-    private Long detailsCount;
+    private String detailsCount;
 
     /**
      * 明细编号
@@ -88,7 +86,7 @@ public class DataOcrDetailsVo implements Serializable {
      * 单价
      */
     @ExcelProperty(value = "单价")
-    private Long price;
+    private String price;
 
     /**
      * 税率
@@ -106,7 +104,7 @@ public class DataOcrDetailsVo implements Serializable {
      * 税额
      */
     @ExcelProperty(value = "税额")
-    private Long tax;
+    private String tax;
 
     /**
      * 单位
@@ -118,13 +116,13 @@ public class DataOcrDetailsVo implements Serializable {
      * 通行日起止
      */
     @ExcelProperty(value = "通行日起止")
-    private Date currentDateEnd;
+    private String currentDateEnd;
 
     /**
      * 通行日起
      */
     @ExcelProperty(value = "通行日起")
-    private Date currentDateStart;
+    private String currentDateStart;
 
     /**
      * 车牌号
@@ -139,10 +137,10 @@ public class DataOcrDetailsVo implements Serializable {
     private String vehicleType;
 
     /**
-     * 用车时间
+     * 用车时间 
      */
     @ExcelProperty(value = "用车时间 ")
-    private Date usageTime;
+    private String usageTime;
 
     /**
      * 特殊政策标识（0-正常票 1-免税 2-不征税  3-零税率）
@@ -226,7 +224,7 @@ public class DataOcrDetailsVo implements Serializable {
      */
     @ExcelProperty(value = "出行日期", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "s=ervice_type为旅客运输服务，返回此字段")
-    private Date travelDate;
+    private String travelDate;
 
     /**
      * 等级（service_type为旅客运输服务，返回此字段）
@@ -246,12 +244,6 @@ public class DataOcrDetailsVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @ExcelProperty(value = "置信度")
-    private String confidence;
 
 
 }

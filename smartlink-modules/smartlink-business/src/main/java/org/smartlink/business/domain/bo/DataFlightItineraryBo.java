@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -67,26 +65,26 @@ public class DataFlightItineraryBo extends BaseEntity {
     /**
      * 填开日期
      */
-    @NotNull(message = "填开日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "填开日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 票价
      */
-    @NotNull(message = "票价不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long fare;
+    @NotBlank(message = "票价不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String fare;
 
     /**
      * 燃油附加费
      */
-    @NotNull(message = "燃油附加费不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long fuelSurcharge;
+    @NotBlank(message = "燃油附加费不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String fuelSurcharge;
 
     /**
      * 保险费
      */
-    @NotNull(message = "保险费不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long insurance;
+    @NotBlank(message = "保险费不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String insurance;
 
     /**
      * 国内国际标签
@@ -109,14 +107,14 @@ public class DataFlightItineraryBo extends BaseEntity {
     /**
      * 税额
      */
-    @NotNull(message = "税额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long tax;
+    @NotBlank(message = "税额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String tax;
 
     /**
      * 总计
      */
-    @NotNull(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
+    @NotBlank(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 发票消费类型
@@ -163,8 +161,8 @@ public class DataFlightItineraryBo extends BaseEntity {
     /**
      * GP订单号
      */
-    @NotNull(message = "GP订单号不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long numberOfGpOrder;
+    @NotBlank(message = "GP订单号不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String numberOfGpOrder;
 
     /**
      * 提示信息（仅在电子票时返回）
@@ -175,8 +173,8 @@ public class DataFlightItineraryBo extends BaseEntity {
     /**
      * 其他税费（仅在电子票时返回）
      */
-    @NotNull(message = "其他税费（仅在电子票时返回）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long otherTaxes;
+    @NotBlank(message = "其他税费（仅在电子票时返回）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String otherTaxes;
 
     /**
      * 购买方名称（仅在电子票时返回）
@@ -221,12 +219,6 @@ public class DataFlightItineraryBo extends BaseEntity {
     private String region;
 
     /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -237,24 +229,6 @@ public class DataFlightItineraryBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

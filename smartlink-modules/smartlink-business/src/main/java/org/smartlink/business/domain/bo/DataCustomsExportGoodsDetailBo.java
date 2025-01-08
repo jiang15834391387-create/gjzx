@@ -101,8 +101,8 @@ public class DataCustomsExportGoodsDetailBo extends BaseEntity {
     /**
      * 总价
      */
-    @NotNull(message = "总价不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long totalPrice;
+    @NotBlank(message = "总价不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String totalPrice;
 
     /**
      * 成交计量数量单位
@@ -113,14 +113,8 @@ public class DataCustomsExportGoodsDetailBo extends BaseEntity {
     /**
      * 单价
      */
-    @NotNull(message = "单价不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long unitPrice;
-
-    /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
+    @NotBlank(message = "单价不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String unitPrice;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -133,18 +127,6 @@ public class DataCustomsExportGoodsDetailBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

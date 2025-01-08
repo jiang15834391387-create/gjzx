@@ -4,13 +4,11 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
 /**
- * ocr明细对象 data_ocr_details
+ * 增值税发票明细对象 data_ocr_details
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -42,12 +40,12 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 金额
      */
-    private Long detailAmount;
+    private String detailAmount;
 
     /**
      * 数量
      */
-    private Long detailsCount;
+    private String detailsCount;
 
     /**
      * 明细编号
@@ -72,7 +70,7 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 单价
      */
-    private Long price;
+    private String price;
 
     /**
      * 税率
@@ -87,7 +85,7 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 税额
      */
-    private Long tax;
+    private String tax;
 
     /**
      * 单位
@@ -97,12 +95,12 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 通行日起止
      */
-    private Date currentDateEnd;
+    private String currentDateEnd;
 
     /**
      * 通行日起
      */
-    private Date currentDateStart;
+    private String currentDateStart;
 
     /**
      * 车牌号
@@ -115,9 +113,9 @@ public class DataOcrDetails extends TenantEntity {
     private String vehicleType;
 
     /**
-     * 用车时间
+     * 用车时间 
      */
-    private Date usageTime;
+    private String usageTime;
 
     /**
      * 特殊政策标识（0-正常票 1-免税 2-不征税  3-零税率）
@@ -177,7 +175,7 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 出行日期（service_type为旅客运输服务，返回此字段）
      */
-    private Date travelDate;
+    private String travelDate;
 
     /**
      * 等级（service_type为旅客运输服务，返回此字段）
@@ -193,11 +191,6 @@ public class DataOcrDetails extends TenantEntity {
      * 备注
      */
     private String remark;
-
-    /**
-     * 置信度
-     */
-    private String confidence;
 
     /**
      * 版本号

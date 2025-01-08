@@ -1,16 +1,19 @@
 package org.smartlink.business.service.Impl;
 
 import org.smartlink.common.core.utils.MapstructUtils;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.mybatis.core.page.PageQuery;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataImageFilesInfoBo;
 import org.smartlink.business.domain.vo.DataImageFilesInfoVo;
 import org.smartlink.business.domain.DataImageFilesInfo;
 import org.smartlink.business.mapper.DataImageFilesInfoMapper;
 import org.smartlink.business.service.IDataImageFilesInfoService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +42,19 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         return baseMapper.selectVoById(fileId);
     }
 
+    /**
+     * 分页查询图片文件列表
+     *
+     * @param bo        查询条件
+     * @param pageQuery 分页参数
+     * @return 图片文件分页列表
+     */
+    @Override
+    public TableDataInfo<DataImageFilesInfoVo> queryPageList(DataImageFilesInfoBo bo, PageQuery pageQuery) {
+        LambdaQueryWrapper<DataImageFilesInfo> lqw = buildQueryWrapper(bo);
+        Page<DataImageFilesInfoVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
 
     /**
      * 查询符合条件的图片文件列表
@@ -74,17 +90,14 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         lqw.eq(StringUtils.isNotBlank(bo.getPurl()), DataImageFilesInfo::getPurl, bo.getPurl());
         lqw.eq(StringUtils.isNotBlank(bo.getLurl()), DataImageFilesInfo::getLurl, bo.getLurl());
         lqw.eq(StringUtils.isNotBlank(bo.getMessage()), DataImageFilesInfo::getMessage, bo.getMessage());
-        lqw.eq(StringUtils.isNotBlank(bo.getOperateState()), DataImageFilesInfo::getOperateState, bo.getOperateState());
         lqw.like(StringUtils.isNotBlank(bo.getDocumentName()), DataImageFilesInfo::getDocumentName, bo.getDocumentName());
         lqw.eq(StringUtils.isNotBlank(bo.getCheckStatus()), DataImageFilesInfo::getCheckStatus, bo.getCheckStatus());
         lqw.eq(StringUtils.isNotBlank(bo.getFileStatus()), DataImageFilesInfo::getFileStatus, bo.getFileStatus());
-        lqw.eq(bo.getRotateAngle() != null, DataImageFilesInfo::getRotateAngle, bo.getRotateAngle());
+        lqw.eq(StringUtils.isNotBlank(bo.getSortValue()), DataImageFilesInfo::getSortValue, bo.getSortValue());
+        lqw.eq(StringUtils.isNotBlank(bo.getRotateAngle()), DataImageFilesInfo::getRotateAngle, bo.getRotateAngle());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataImageFilesInfo::getDeleteFlag, bo.getDeleteFlag());
         lqw.eq(StringUtils.isNotBlank(bo.getPageTime()), DataImageFilesInfo::getPageTime, bo.getPageTime());
         lqw.eq(StringUtils.isNotBlank(bo.getIncludeTypeArr()), DataImageFilesInfo::getIncludeTypeArr, bo.getIncludeTypeArr());
-        lqw.eq(bo.getSortValue() != null, DataImageFilesInfo::getSortValue, bo.getSortValue());
-        lqw.eq(StringUtils.isNotBlank(bo.getUserId()), DataImageFilesInfo::getUserId, bo.getUserId());
-        lqw.eq(StringUtils.isNotBlank(bo.getIsUse()), DataImageFilesInfo::getIsUse, bo.getIsUse());
         return lqw;
     }
 

@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataDutyPaidProofDetailsBo;
 import org.smartlink.business.domain.vo.DataDutyPaidProofDetailsVo;
 import org.smartlink.business.domain.DataDutyPaidProofDetails;
 import org.smartlink.business.mapper.DataDutyPaidProofDetailsMapper;
 import org.smartlink.business.service.IDataDutyPaidProofDetailsService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -71,8 +71,8 @@ public class DataDutyPaidProofDetailsServiceImpl implements IDataDutyPaidProofDe
     private LambdaQueryWrapper<DataDutyPaidProofDetails> buildQueryWrapper(DataDutyPaidProofDetailsBo bo) {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataDutyPaidProofDetails> lqw = Wrappers.lambdaQuery();
-        lqw.eq(bo.getAmountPaid() != null, DataDutyPaidProofDetails::getAmountPaid, bo.getAmountPaid());
-        lqw.eq(bo.getEntryDate() != null, DataDutyPaidProofDetails::getEntryDate, bo.getEntryDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataDutyPaidProofDetails::getFileId, bo.getFileId());
+        lqw.eq(StringUtils.isNotBlank(bo.getEntryDate()), DataDutyPaidProofDetails::getEntryDate, bo.getEntryDate());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxAgency()), DataDutyPaidProofDetails::getTaxAgency, bo.getTaxAgency());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxPeriod()), DataDutyPaidProofDetails::getTaxPeriod, bo.getTaxPeriod());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxType()), DataDutyPaidProofDetails::getTaxType, bo.getTaxType());
@@ -84,8 +84,8 @@ public class DataDutyPaidProofDetailsServiceImpl implements IDataDutyPaidProofDe
         lqw.eq(StringUtils.isNotBlank(bo.getQuantity()), DataDutyPaidProofDetails::getQuantity, bo.getQuantity());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxRate()), DataDutyPaidProofDetails::getTaxRate, bo.getTaxRate());
         lqw.eq(StringUtils.isNotBlank(bo.getTotal()), DataDutyPaidProofDetails::getTotal, bo.getTotal());
-        lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataDutyPaidProofDetails::getFileId, bo.getFileId());
-        lqw.eq(bo.getActualPaidAmount() != null, DataDutyPaidProofDetails::getActualPaidAmount, bo.getActualPaidAmount());
+        lqw.eq(StringUtils.isNotBlank(bo.getAmountPaid()), DataDutyPaidProofDetails::getAmountPaid, bo.getAmountPaid());
+        lqw.eq(StringUtils.isNotBlank(bo.getActualPaidAmount()), DataDutyPaidProofDetails::getActualPaidAmount, bo.getActualPaidAmount());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataDutyPaidProofDetails::getDeleteFlag, bo.getDeleteFlag());
         return lqw;
     }

@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataSteamerTicketBo;
 import org.smartlink.business.domain.vo.DataSteamerTicketVo;
 import org.smartlink.business.domain.DataSteamerTicket;
 import org.smartlink.business.mapper.DataSteamerTicketMapper;
 import org.smartlink.business.service.IDataSteamerTicketService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -76,22 +76,18 @@ public class DataSteamerTicketServiceImpl implements IDataSteamerTicketService {
         lqw.eq(StringUtils.isNotBlank(bo.getCity()), DataSteamerTicket::getCity, bo.getCity());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceCode()), DataSteamerTicket::getInvoiceCode, bo.getInvoiceCode());
         lqw.eq(StringUtils.isNotBlank(bo.getCurrencyCode()), DataSteamerTicket::getCurrencyCode, bo.getCurrencyCode());
-        lqw.eq(bo.getInvoiceDate() != null, DataSteamerTicket::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataSteamerTicket::getInvoiceDate, bo.getInvoiceDate());
         lqw.like(StringUtils.isNotBlank(bo.getName()), DataSteamerTicket::getName, bo.getName());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceNumber()), DataSteamerTicket::getInvoiceNumber, bo.getInvoiceNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getProvince()), DataSteamerTicket::getProvince, bo.getProvince());
         lqw.eq(StringUtils.isNotBlank(bo.getStationGetOff()), DataSteamerTicket::getStationGetOff, bo.getStationGetOff());
         lqw.eq(StringUtils.isNotBlank(bo.getStationGetOn()), DataSteamerTicket::getStationGetOn, bo.getStationGetOn());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTime()), DataSteamerTicket::getInvoiceTime, bo.getInvoiceTime());
-        lqw.eq(bo.getInvoiceTotal() != null, DataSteamerTicket::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataSteamerTicket::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getKind()), DataSteamerTicket::getKind, bo.getKind());
         lqw.eq(StringUtils.isNotBlank(bo.getUserId()), DataSteamerTicket::getUserId, bo.getUserId());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataSteamerTicket::getInvoiceStamp, bo.getInvoiceStamp());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataSteamerTicket::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataSteamerTicket::getSaveToken, bo.getSaveToken());
-        lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataSteamerTicket::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataSteamerTicket::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataSteamerTicket::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

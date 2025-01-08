@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataNonTaxBo;
 import org.smartlink.business.domain.vo.DataNonTaxVo;
 import org.smartlink.business.domain.DataNonTax;
 import org.smartlink.business.mapper.DataNonTaxMapper;
 import org.smartlink.business.service.IDataNonTaxService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -93,14 +93,11 @@ public class DataNonTaxServiceImpl implements IDataNonTaxService {
         lqw.eq(StringUtils.isNotBlank(bo.getReceiverAccountOpeningBank()), DataNonTax::getReceiverAccountOpeningBank, bo.getReceiverAccountOpeningBank());
         lqw.eq(StringUtils.isNotBlank(bo.getHandler()), DataNonTax::getHandler, bo.getHandler());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataNonTax::getRegion, bo.getRegion());
-        lqw.eq(bo.getInvoiceTotal() != null, DataNonTax::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataNonTax::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getTotalWords()), DataNonTax::getTotalWords, bo.getTotalWords());
-        lqw.eq(bo.getInvoiceDate() != null, DataNonTax::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataNonTax::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataNonTax::getInvoiceStamp, bo.getInvoiceStamp());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataNonTax::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataNonTax::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataNonTax::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataNonTax::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

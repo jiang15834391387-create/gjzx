@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataDidiItineraryBo;
 import org.smartlink.business.domain.vo.DataDidiItineraryVo;
 import org.smartlink.business.domain.DataDidiItinerary;
 import org.smartlink.business.mapper.DataDidiItineraryMapper;
 import org.smartlink.business.service.IDataDidiItineraryService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -73,17 +73,14 @@ public class DataDidiItineraryServiceImpl implements IDataDidiItineraryService {
         LambdaQueryWrapper<DataDidiItinerary> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getFileId()), DataDidiItinerary::getFileId, bo.getFileId());
         lqw.eq(StringUtils.isNotBlank(bo.getTitle()), DataDidiItinerary::getTitle, bo.getTitle());
-        lqw.eq(bo.getInvoiceDate() != null, DataDidiItinerary::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataDidiItinerary::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getTimeGetOff()), DataDidiItinerary::getTimeGetOff, bo.getTimeGetOff());
         lqw.eq(StringUtils.isNotBlank(bo.getTimeGetOn()), DataDidiItinerary::getTimeGetOn, bo.getTimeGetOn());
         lqw.eq(StringUtils.isNotBlank(bo.getPhone()), DataDidiItinerary::getPhone, bo.getPhone());
-        lqw.eq(bo.getInvoiceTotal() != null, DataDidiItinerary::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataDidiItinerary::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getKind()), DataDidiItinerary::getKind, bo.getKind());
         lqw.eq(StringUtils.isNotBlank(bo.getRegion()), DataDidiItinerary::getRegion, bo.getRegion());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataDidiItinerary::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataDidiItinerary::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataDidiItinerary::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataDidiItinerary::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

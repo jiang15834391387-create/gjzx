@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataSteamerTicket;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -70,7 +68,7 @@ public class DataSteamerTicketVo implements Serializable {
      * 日期
      */
     @ExcelProperty(value = "日期")
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 姓名
@@ -112,7 +110,7 @@ public class DataSteamerTicketVo implements Serializable {
      * 总计
      */
     @ExcelProperty(value = "总计")
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票消费类型
@@ -139,34 +137,10 @@ public class DataSteamerTicketVo implements Serializable {
     private String region;
 
     /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
-
-    /**
-     * 是否删除标识 0-不删除  1-删除
-     */
-    @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
-    private String deleteFlag;
-
-    /**
      * 备注
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

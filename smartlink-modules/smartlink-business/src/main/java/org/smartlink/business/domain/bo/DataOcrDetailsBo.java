@@ -6,13 +6,11 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
 /**
- * ocr明细业务对象 data_ocr_details
+ * 增值税发票明细业务对象 data_ocr_details
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -43,14 +41,14 @@ public class DataOcrDetailsBo extends BaseEntity {
     /**
      * 金额
      */
-    @NotNull(message = "金额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long detailAmount;
+    @NotBlank(message = "金额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String detailAmount;
 
     /**
      * 数量
      */
-    @NotNull(message = "数量不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long detailsCount;
+    @NotBlank(message = "数量不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String detailsCount;
 
     /**
      * 明细编号
@@ -79,8 +77,8 @@ public class DataOcrDetailsBo extends BaseEntity {
     /**
      * 单价
      */
-    @NotNull(message = "单价不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long price;
+    @NotBlank(message = "单价不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String price;
 
     /**
      * 税率
@@ -97,8 +95,8 @@ public class DataOcrDetailsBo extends BaseEntity {
     /**
      * 税额
      */
-    @NotNull(message = "税额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long tax;
+    @NotBlank(message = "税额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String tax;
 
     /**
      * 单位
@@ -109,14 +107,14 @@ public class DataOcrDetailsBo extends BaseEntity {
     /**
      * 通行日起止
      */
-    @NotNull(message = "通行日起止不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date currentDateEnd;
+    @NotBlank(message = "通行日起止不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String currentDateEnd;
 
     /**
      * 通行日起
      */
-    @NotNull(message = "通行日起不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date currentDateStart;
+    @NotBlank(message = "通行日起不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String currentDateStart;
 
     /**
      * 车牌号
@@ -131,10 +129,10 @@ public class DataOcrDetailsBo extends BaseEntity {
     private String vehicleType;
 
     /**
-     * 用车时间
+     * 用车时间 
      */
-    @NotNull(message = "用车时间 不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date usageTime;
+    @NotBlank(message = "用车时间 不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String usageTime;
 
     /**
      * 特殊政策标识（0-正常票 1-免税 2-不征税  3-零税率）
@@ -205,8 +203,8 @@ public class DataOcrDetailsBo extends BaseEntity {
     /**
      * 出行日期（service_type为旅客运输服务，返回此字段）
      */
-    @NotNull(message = "出行日期（service_type为旅客运输服务，返回此字段）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date travelDate;
+    @NotBlank(message = "出行日期（service_type为旅客运输服务，返回此字段）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String travelDate;
 
     /**
      * 等级（service_type为旅客运输服务，返回此字段）
@@ -225,12 +223,6 @@ public class DataOcrDetailsBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
 
 
 }

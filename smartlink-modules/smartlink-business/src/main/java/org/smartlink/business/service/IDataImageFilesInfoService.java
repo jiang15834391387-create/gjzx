@@ -2,6 +2,8 @@ package org.smartlink.business.service;
 
 import org.smartlink.business.domain.vo.DataImageFilesInfoVo;
 import org.smartlink.business.domain.bo.DataImageFilesInfoBo;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.mybatis.core.page.PageQuery;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,6 +24,14 @@ public interface IDataImageFilesInfoService {
      */
     DataImageFilesInfoVo queryById(String fileId);
 
+    /**
+     * 分页查询图片文件列表
+     *
+     * @param bo        查询条件
+     * @param pageQuery 分页参数
+     * @return 图片文件分页列表
+     */
+    TableDataInfo<DataImageFilesInfoVo> queryPageList(DataImageFilesInfoBo bo, PageQuery pageQuery);
 
     /**
      * 查询符合条件的图片文件列表

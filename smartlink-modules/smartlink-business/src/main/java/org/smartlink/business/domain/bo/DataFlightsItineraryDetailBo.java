@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -37,8 +35,8 @@ public class DataFlightsItineraryDetailBo extends BaseEntity {
     /**
      * 乘机日期
      */
-    @NotNull(message = "乘机日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "乘机日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 图片表主键
@@ -67,14 +65,14 @@ public class DataFlightsItineraryDetailBo extends BaseEntity {
     /**
      * 客票生效日期
      */
-    @NotNull(message = "客票生效日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date effectiveDate;
+    @NotBlank(message = "客票生效日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String effectiveDate;
 
     /**
      * 有效截至日期
      */
-    @NotNull(message = "有效截至日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date expiryDate;
+    @NotBlank(message = "有效截至日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String expiryDate;
 
     /**
      * 主表id
@@ -131,12 +129,6 @@ public class DataFlightsItineraryDetailBo extends BaseEntity {
     private String flightSegment;
 
     /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -147,12 +139,6 @@ public class DataFlightsItineraryDetailBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
 
 
 }

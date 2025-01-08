@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -47,10 +45,10 @@ public class DataMedicalTreatmentDetailBo extends BaseEntity {
     private String invoiceCode;
 
     /**
-     * 开票日期
+     * 开票日期 
      */
-    @NotNull(message = "开票日期 不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date date;
+    @NotBlank(message = "开票日期 不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String date;
 
     /**
      * 交款人
@@ -61,14 +59,14 @@ public class DataMedicalTreatmentDetailBo extends BaseEntity {
     /**
      * 小计
      */
-    @NotNull(message = "小计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long subtotal;
+    @NotBlank(message = "小计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String subtotal;
 
     /**
      * 总计
      */
-    @NotNull(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long total;
+    @NotBlank(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String total;
 
     /**
      * 收款单位
@@ -91,8 +89,8 @@ public class DataMedicalTreatmentDetailBo extends BaseEntity {
     /**
      * 金额
      */
-    @NotNull(message = "金额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long amount;
+    @NotBlank(message = "金额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String amount;
 
     /**
      * 备注
@@ -107,12 +105,6 @@ public class DataMedicalTreatmentDetailBo extends BaseEntity {
     private String region;
 
     /**
-     * token
-     */
-    @NotBlank(message = "token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -123,18 +115,6 @@ public class DataMedicalTreatmentDetailBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

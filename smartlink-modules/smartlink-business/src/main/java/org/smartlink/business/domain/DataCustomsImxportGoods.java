@@ -35,7 +35,7 @@ public class DataCustomsImxportGoods extends TenantEntity {
     /**
      * 杂费
      */
-    private Long additionalExpress;
+    private String additionalExpress;
 
     /**
      * 支付特许权使用费确认
@@ -105,17 +105,17 @@ public class DataCustomsImxportGoods extends TenantEntity {
     /**
      * 运费
      */
-    private Long freight;
+    private String freight;
 
     /**
      * 毛重
      */
-    private Long grossWeight;
+    private String grossWeight;
 
     /**
      * 保费
      */
-    private Long insurancePremium;
+    private String insurancePremium;
 
     /**
      * 发票消费类型
@@ -238,11 +238,6 @@ public class DataCustomsImxportGoods extends TenantEntity {
     private String invoiceStamp;
 
     /**
-     * token
-     */
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     private String deleteFlag;
@@ -257,16 +252,6 @@ public class DataCustomsImxportGoods extends TenantEntity {
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

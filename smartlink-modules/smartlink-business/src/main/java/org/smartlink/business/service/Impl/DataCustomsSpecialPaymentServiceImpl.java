@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.business.domain.bo.DataCustomsSpecialPaymentBo;
 import org.smartlink.business.domain.vo.DataCustomsSpecialPaymentVo;
 import org.smartlink.business.domain.DataCustomsSpecialPayment;
 import org.smartlink.business.mapper.DataCustomsSpecialPaymentMapper;
 import org.smartlink.business.service.IDataCustomsSpecialPaymentService;
-import org.smartlink.common.core.utils.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -92,7 +92,7 @@ public class DataCustomsSpecialPaymentServiceImpl implements IDataCustomsSpecial
         lqw.eq(StringUtils.isNotBlank(bo.getRevenueAgency()), DataCustomsSpecialPayment::getRevenueAgency, bo.getRevenueAgency());
         lqw.eq(StringUtils.isNotBlank(bo.getSubject()), DataCustomsSpecialPayment::getSubject, bo.getSubject());
         lqw.eq(StringUtils.isNotBlank(bo.getTaxExchangeRateComment()), DataCustomsSpecialPayment::getTaxExchangeRateComment, bo.getTaxExchangeRateComment());
-        lqw.eq(bo.getInvoiceTotal() != null, DataCustomsSpecialPayment::getInvoiceTotal, bo.getInvoiceTotal());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceTotal()), DataCustomsSpecialPayment::getInvoiceTotal, bo.getInvoiceTotal());
         lqw.eq(StringUtils.isNotBlank(bo.getTotalWords()), DataCustomsSpecialPayment::getTotalWords, bo.getTotalWords());
         lqw.eq(StringUtils.isNotBlank(bo.getTransportationTools()), DataCustomsSpecialPayment::getTransportationTools, bo.getTransportationTools());
         lqw.eq(StringUtils.isNotBlank(bo.getIncomeSystem()), DataCustomsSpecialPayment::getIncomeSystem, bo.getIncomeSystem());
@@ -100,12 +100,9 @@ public class DataCustomsSpecialPaymentServiceImpl implements IDataCustomsSpecial
         lqw.eq(StringUtils.isNotBlank(bo.getBudgetLevel()), DataCustomsSpecialPayment::getBudgetLevel, bo.getBudgetLevel());
         lqw.eq(StringUtils.isNotBlank(bo.getApplicationUnitNumber()), DataCustomsSpecialPayment::getApplicationUnitNumber, bo.getApplicationUnitNumber());
         lqw.eq(StringUtils.isNotBlank(bo.getPaymentDeadline()), DataCustomsSpecialPayment::getPaymentDeadline, bo.getPaymentDeadline());
-        lqw.eq(bo.getInvoiceDate() != null, DataCustomsSpecialPayment::getInvoiceDate, bo.getInvoiceDate());
+        lqw.eq(StringUtils.isNotBlank(bo.getInvoiceDate()), DataCustomsSpecialPayment::getInvoiceDate, bo.getInvoiceDate());
         lqw.eq(StringUtils.isNotBlank(bo.getInvoiceStamp()), DataCustomsSpecialPayment::getInvoiceStamp, bo.getInvoiceStamp());
-        lqw.eq(StringUtils.isNotBlank(bo.getSaveToken()), DataCustomsSpecialPayment::getSaveToken, bo.getSaveToken());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataCustomsSpecialPayment::getDeleteFlag, bo.getDeleteFlag());
-        lqw.eq(StringUtils.isNotBlank(bo.getCheckResult()), DataCustomsSpecialPayment::getCheckResult, bo.getCheckResult());
-        lqw.eq(StringUtils.isNotBlank(bo.getPushBusinessInfoFlag()), DataCustomsSpecialPayment::getPushBusinessInfoFlag, bo.getPushBusinessInfoFlag());
         return lqw;
     }
 

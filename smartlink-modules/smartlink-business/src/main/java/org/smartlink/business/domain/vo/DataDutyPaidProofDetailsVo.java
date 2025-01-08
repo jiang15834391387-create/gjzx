@@ -1,7 +1,5 @@
 package org.smartlink.business.domain.vo;
 
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.business.domain.DataDutyPaidProofDetails;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -37,16 +35,16 @@ public class DataDutyPaidProofDetailsVo implements Serializable {
     private String id;
 
     /**
-     * 已缴金额
+     * 图片表主键
      */
-    @ExcelProperty(value = "已缴金额")
-    private Long amountPaid;
+    @ExcelProperty(value = "图片表主键")
+    private String fileId;
 
     /**
      * 入库日期
      */
     @ExcelProperty(value = "入库日期")
-    private Date entryDate;
+    private String entryDate;
 
     /**
      * 征收机关
@@ -115,16 +113,16 @@ public class DataDutyPaidProofDetailsVo implements Serializable {
     private String total;
 
     /**
-     * 图片表主键
+     * 已缴金额
      */
-    @ExcelProperty(value = "图片表主键")
-    private String fileId;
+    @ExcelProperty(value = "已缴金额")
+    private String amountPaid;
 
     /**
      * 实缴金额
      */
     @ExcelProperty(value = "实缴金额")
-    private Long actualPaidAmount;
+    private String actualPaidAmount;
 
     /**
      * 是否删除标识 0-不删除  1-删除

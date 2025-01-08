@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -103,8 +101,8 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     /**
      * 开票日期
      */
-    @NotNull(message = "开票日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "开票日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 开票人
@@ -121,8 +119,8 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     /**
      * 限乘人数
      */
-    @NotNull(message = "限乘人数不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long limitedPeopleCount;
+    @NotBlank(message = "限乘人数不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String limitedPeopleCount;
 
     /**
      * 机打代码
@@ -145,8 +143,8 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     /**
      * 税前金额
      */
-    @NotNull(message = "税前金额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long preTaxAmount;
+    @NotBlank(message = "税前金额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String preTaxAmount;
 
     /**
      * 产地
@@ -205,8 +203,8 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     /**
      * 税额
      */
-    @NotNull(message = "税额不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long tax;
+    @NotBlank(message = "税额不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String tax;
 
     /**
      * 主管税务机关
@@ -253,8 +251,8 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     /**
      * 总计
      */
-    @NotNull(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
+    @NotBlank(message = "总计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 发票专用章存在性判断
@@ -305,12 +303,6 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     private String region;
 
     /**
-     * 税务云token
-     */
-    @NotBlank(message = "税务云token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @NotBlank(message = "是否删除标识 0-不删除  1-删除不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -321,24 +313,6 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

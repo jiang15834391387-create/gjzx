@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -127,7 +125,7 @@ public class DataUsedCarSales extends TenantEntity {
     /**
      * 发票日期
      */
-    private Date invoiceDate;
+    private String invoiceDate;
 
     /**
      * 二手车市场开户银行及账号
@@ -192,7 +190,7 @@ public class DataUsedCarSales extends TenantEntity {
     /**
      * 价税合计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票联
@@ -247,7 +245,7 @@ public class DataUsedCarSales extends TenantEntity {
     /**
      * 机打号码
      */
-    private Long machineNumber;
+    private String machineNumber;
 
     /**
      * 数电票号码
@@ -275,11 +273,6 @@ public class DataUsedCarSales extends TenantEntity {
     private String region;
 
     /**
-     * token
-     */
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     private String deleteFlag;
@@ -290,25 +283,10 @@ public class DataUsedCarSales extends TenantEntity {
     private String remark;
 
     /**
-     * 置信度
-     */
-    private String confidence;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }

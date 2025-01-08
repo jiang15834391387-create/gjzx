@@ -6,8 +6,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 
@@ -25,7 +23,7 @@ public class DataRailwayTicketBo extends BaseEntity {
     /**
      * 主键
      */
-    @NotBlank(message = "主键不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "主键不能为空", groups = { EditGroup.class })
     private String id;
 
     /**
@@ -37,8 +35,8 @@ public class DataRailwayTicketBo extends BaseEntity {
     /**
      * 日期
      */
-    @NotNull(message = "日期不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date invoiceDate;
+    @NotBlank(message = "日期不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceDate;
 
     /**
      * 图片表id
@@ -115,8 +113,8 @@ public class DataRailwayTicketBo extends BaseEntity {
     /**
      * 合计
      */
-    @NotNull(message = "合计不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long invoiceTotal;
+    @NotBlank(message = "合计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String invoiceTotal;
 
     /**
      * 发票专用章存在性判断
@@ -135,12 +133,6 @@ public class DataRailwayTicketBo extends BaseEntity {
      */
     @NotBlank(message = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]不能为空", groups = { AddGroup.class, EditGroup.class })
     private String region;
-
-    /**
-     * 睿真token
-     */
-    @NotBlank(message = "睿真token不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String saveToken;
 
     /**
      * 商务类型  退 售 改签 退差
@@ -205,14 +197,14 @@ public class DataRailwayTicketBo extends BaseEntity {
     /**
      * 退票金额（仅在电子凭证时返回）
      */
-    @NotNull(message = "退票金额（仅在电子凭证时返回）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long amountRefunded;
+    @NotBlank(message = "退票金额（仅在电子凭证时返回）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String amountRefunded;
 
     /**
      * 原火车票价款（仅在电子凭证时返回）
      */
-    @NotNull(message = "原火车票价款（仅在电子凭证时返回）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long fareOfOriginalRailwayTicket;
+    @NotBlank(message = "原火车票价款（仅在电子凭证时返回）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String fareOfOriginalRailwayTicket;
 
     /**
      * 原火车票起点站（仅在电子凭证时返回）
@@ -255,24 +247,6 @@ public class DataRailwayTicketBo extends BaseEntity {
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
-
-    /**
-     * 置信度
-     */
-    @NotBlank(message = "置信度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String confidence;
-
-    /**
-     * 查验结果
-     */
-    @NotBlank(message = "查验结果不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @NotBlank(message = "入台账标识不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pushBusinessInfoFlag;
 
 
 }

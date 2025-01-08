@@ -111,7 +111,7 @@ public class DataCustomsExportGoodsDetailVo implements Serializable {
      * 总价
      */
     @ExcelProperty(value = "总价")
-    private Long totalPrice;
+    private String totalPrice;
 
     /**
      * 成交计量数量单位
@@ -123,13 +123,7 @@ public class DataCustomsExportGoodsDetailVo implements Serializable {
      * 单价
      */
     @ExcelProperty(value = "单价")
-    private Long unitPrice;
-
-    /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
+    private String unitPrice;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -142,18 +136,6 @@ public class DataCustomsExportGoodsDetailVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

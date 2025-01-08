@@ -44,7 +44,7 @@ public class DataCustomsExportGoodsVo implements Serializable {
      * 杂费
      */
     @ExcelProperty(value = "杂费")
-    private Long additionalExpress;
+    private String additionalExpress;
 
     /**
      * 支付特许权使用费确认
@@ -130,19 +130,19 @@ public class DataCustomsExportGoodsVo implements Serializable {
      * 运费
      */
     @ExcelProperty(value = "运费")
-    private Long freight;
+    private String freight;
 
     /**
      * 毛重
      */
     @ExcelProperty(value = "毛重")
-    private Long grossWeight;
+    private String grossWeight;
 
     /**
      * 保费
      */
     @ExcelProperty(value = "保费")
-    private Long insurancePremium;
+    private String insurancePremium;
 
     /**
      * 发票消费类型
@@ -292,12 +292,6 @@ public class DataCustomsExportGoodsVo implements Serializable {
     private String invoiceStamp;
 
     /**
-     * token
-     */
-    @ExcelProperty(value = "token")
-    private String saveToken;
-
-    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")
@@ -308,18 +302,6 @@ public class DataCustomsExportGoodsVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    /**
-     * 查验结果
-     */
-    @ExcelProperty(value = "查验结果")
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    @ExcelProperty(value = "入台账标识")
-    private String pushBusinessInfoFlag;
 
 
 }

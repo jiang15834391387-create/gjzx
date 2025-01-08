@@ -62,7 +62,7 @@ public class DataUsedCarSalesController extends BaseController {
      * @param  id 主键
      */
     @SaCheckPermission("business:usedCarSales:query")
-    @GetMapping("/{id}")
+    @GetMapping("/{ id}")
     public R<DataUsedCarSalesVo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable String  id) {
         return R.ok(dataUsedCarSalesService.queryById( id));
@@ -97,9 +97,9 @@ public class DataUsedCarSalesController extends BaseController {
      */
     @SaCheckPermission("business:usedCarSales:remove")
     @Log(title = "二手车销售统一发票", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @DeleteMapping("/{ ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable String[]  ids) {
-        return toAjax(dataUsedCarSalesService.deleteWithValidByIds(List.of(ids), true));
+        return toAjax(dataUsedCarSalesService.deleteWithValidByIds(List.of( ids), true));
     }
 }

@@ -4,8 +4,6 @@ import org.smartlink.common.tenant.core.TenantEntity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serial;
 
@@ -26,7 +24,13 @@ public class DataTaxiTickets extends TenantEntity {
     /**
      * 主键
      */
+    @TableId(value = "id")
     private String id;
+
+    /**
+     * 图片表id
+     */
+    private String fileId;
 
     /**
      * 标题
@@ -46,12 +50,7 @@ public class DataTaxiTickets extends TenantEntity {
     /**
      * 日期
      */
-    private Date invoiceDate;
-
-    /**
-     * 图片表id
-     */
-    private String fileId;
+    private String invoiceDate;
 
     /**
      * 车牌号
@@ -91,7 +90,7 @@ public class DataTaxiTickets extends TenantEntity {
     /**
      * 总计
      */
-    private Long invoiceTotal;
+    private String invoiceTotal;
 
     /**
      * 发票专用章存在性判断
@@ -101,17 +100,12 @@ public class DataTaxiTickets extends TenantEntity {
     /**
      * 燃油附加费
      */
-    private Long fuelSurcharge;
+    private String fuelSurcharge;
 
     /**
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
-
-    /**
-     * 税务云token
-     */
-    private String saveToken;
 
     /**
      * 是否删除标识 0-不删除  1-删除
@@ -124,25 +118,10 @@ public class DataTaxiTickets extends TenantEntity {
     private String remark;
 
     /**
-     * 置信度
-     */
-    private String confidence;
-
-    /**
      * 版本号
      */
     @Version
     private Long version;
-
-    /**
-     * 查验结果
-     */
-    private String checkResult;
-
-    /**
-     * 入台账标识
-     */
-    private String pushBusinessInfoFlag;
 
 
 }
