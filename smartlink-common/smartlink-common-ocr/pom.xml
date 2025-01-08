@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.smartlink</groupId>
+        <artifactId>smartlink-common</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>smartlink-common-ocr</artifactId>
+
+    <description>
+        smartlink-common-ocr ocr服务
+    </description>
+
+    <dependencies>
+        <!-- moudles-business模块 -->
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-business</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <version>2.6.6</version>
+        </dependency>
+
+        <!-- JSON工具类 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <version>2.6.6</version>
+        </dependency>
+<!--        &lt;!&ndash;  AWS SDK for Java 2.x  &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>software.amazon.awssdk</groupId>-->
+<!--            <artifactId>s3</artifactId>-->
+<!--            <exclusions>-->
+<!--                &lt;!&ndash; 将基于 Netty 的 HTTP 客户端从类路径中移除 &ndash;&gt;-->
+<!--                <exclusion>-->
+<!--                    <groupId>software.amazon.awssdk</groupId>-->
+<!--                    <artifactId>netty-nio-client</artifactId>-->
+<!--                </exclusion>-->
+<!--                &lt;!&ndash; 将基于 CRT 的 HTTP 客户端从类路径中移除 &ndash;&gt;-->
+<!--                <exclusion>-->
+<!--                    <groupId>software.amazon.awssdk</groupId>-->
+<!--                    <artifactId>aws-crt-client</artifactId>-->
+<!--                </exclusion>-->
+<!--                &lt;!&ndash; 将基于 Apache 的 HTTP 客户端从类路径中移除 &ndash;&gt;-->
+<!--                <exclusion>-->
+<!--                    <groupId>software.amazon.awssdk</groupId>-->
+<!--                    <artifactId>apache-client</artifactId>-->
+<!--                </exclusion>-->
+<!--                &lt;!&ndash; 将配置基于 URL 连接的 HTTP 客户端从类路径中移除 &ndash;&gt;-->
+<!--                <exclusion>-->
+<!--                    <groupId>software.amazon.awssdk</groupId>-->
+<!--                    <artifactId>url-connection-client</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
+<!--        &lt;!&ndash; 使用AWS基于 CRT 的 S3 客户端 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>software.amazon.awssdk.crt</groupId>-->
+<!--            <artifactId>aws-crt</artifactId>-->
+<!--        </dependency>-->
+
+<!--        &lt;!&ndash; 基于 AWS CRT 的 S3 客户端的性能增强的 S3 传输管理器 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>software.amazon.awssdk</groupId>-->
+<!--            <artifactId>s3-transfer-manager</artifactId>-->
+<!--        </dependency>-->
+
+    </dependencies>
+
+</project>
