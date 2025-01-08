@@ -1,47 +1,55 @@
 package org.smartlink.web.service;
 
 import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.secure.BCrypt;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.lock.annotation.Lock4j;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthUser;
-import org.smartlink.common.core.constant.CacheConstants;
-import org.smartlink.common.core.constant.Constants;
-import org.smartlink.common.core.constant.GlobalConstants;
-import org.smartlink.common.core.constant.TenantConstants;
+import org.smartlink.common.core.constant.*;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.dto.RoleDTO;
+import org.smartlink.common.core.domain.model.LoginBody;
 import org.smartlink.common.core.domain.model.LoginUser;
+import org.smartlink.common.core.domain.model.SmsLoginBody;
 import org.smartlink.common.core.enums.LoginType;
 import org.smartlink.common.core.enums.TenantStatus;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.exception.user.UserException;
 import org.smartlink.common.core.utils.*;
+import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.log.event.LogininforEvent;
 import org.smartlink.common.mybatis.helper.DataPermissionHelper;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
+import org.smartlink.common.sse.dto.SseMessageDto;
+import org.smartlink.common.sse.utils.SseMessageUtils;
 import org.smartlink.common.tenant.exception.TenantException;
 import org.smartlink.common.tenant.helper.TenantHelper;
 import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.domain.bo.SysSocialBo;
 import org.smartlink.system.domain.vo.*;
-import org.smartlink.system.domain.vo.*;
 import org.smartlink.system.mapper.SysUserMapper;
 import org.smartlink.system.service.*;
-import org.smartlink.common.core.utils.*;
-import org.smartlink.system.service.*;
+import org.smartlink.web.domain.ForgetPasswordReq;
+import org.smartlink.web.domain.vo.LoginVo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 /**
  * 登录校验方法
@@ -65,6 +73,8 @@ public class SysLoginService {
     private final ISysRoleService roleService;
     private final ISysDeptService deptService;
     private final SysUserMapper userMapper;
+    private final ISysClientService clientService;
+    private final ScheduledExecutorService scheduledExecutorService;
 
 
     /**
@@ -105,7 +115,6 @@ public class SysLoginService {
         }
     }
 
-
     /**
      * 退出登录
      */
@@ -128,7 +137,6 @@ public class SysLoginService {
             }
         }
     }
-
     /**
      * 记录登录信息
      *
@@ -146,7 +154,6 @@ public class SysLoginService {
         logininforEvent.setRequest(ServletUtils.getRequest());
         SpringUtils.context().publishEvent(logininforEvent);
     }
-
     /**
      * 构建登录用户
      */
@@ -169,7 +176,6 @@ public class SysLoginService {
         loginUser.setRoles(BeanUtil.copyToList(roles, RoleDTO.class));
         return loginUser;
     }
-
     /**
      * 记录登录信息
      *
@@ -217,7 +223,6 @@ public class SysLoginService {
         // 登录成功 清空错误次数
         RedisUtils.deleteObject(errorKey);
     }
-
     /**
      * 校验租户
      *
@@ -246,5 +251,93 @@ public class SysLoginService {
             throw new TenantException("tenant.expired");
         }
     }
+    /**
+     * 短信登录
+     *
+     * @param loginBody 登录信息
+     * @return 结果
+     */
+    public R<LoginVo> smsLogin(SmsLoginBody loginBody) {
+        String phone= loginBody.getPhonenumber();
+        if (!phone.equals("") && Pattern.compile("^1[3456789]\\d{9}$").matcher(phone).matches()) {
+            // 授权类型和客户端id
+            String clientId = loginBody.getClientId();
+            String grantType = loginBody.getGrantType();
+            SysClientVo client = clientService.queryByClientId(clientId);
+            // 查询不到 client 或 client 内不包含 grantType
+            if (ObjectUtil.isNull(client) || !StringUtils.contains(client.getGrantType(), grantType)) {
+                log.info("客户端id: {} 认证类型：{} 异常!.", clientId, grantType);
+                return R.fail(MessageUtils.message("auth.grant.type.error"));
+            } else if (!UserConstants.NORMAL.equals(client.getStatus())) {
+                return R.fail(MessageUtils.message("auth.grant.type.blocked"));
+            }
+            //根据手机号查询用户信息
+            LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SysUser::getPhonenumber, phone);
+            SysUserVo user = userMapper.selectVoOne(queryWrapper);
+            if (ObjectUtil.isNull(user)) {
+                return R.fail("手机用户不存在");
+            }
+            String key = GlobalConstants.CAPTCHA_CODE_KEY + loginBody.getPhonenumber();
+            String smsCode = RedisUtils.getCacheObject(key);
+            if (StringUtils.isBlank(smsCode) || !smsCode.equals(loginBody.getSmsCode())) {
+                log.info("短信验证码错误");
+                return R.fail("验证码错误");
+            }
+            //校验租户
+            checkTenant(user.getTenantId());
+            //登录
+            String string = JsonUtils.toJsonString(loginBody);
+            LoginBody loginBody1 = JsonUtils.parseObject(string, LoginBody.class);
+            LoginVo loginVo = IAuthStrategy.login(String.valueOf(loginBody1), client, grantType);
 
+            Long userId = LoginHelper.getUserId();
+            scheduledExecutorService.schedule(() -> {
+                SseMessageDto dto = new SseMessageDto();
+                dto.setMessage("欢迎登录smartlink后台管理系统");
+                dto.setUserIds(List.of(userId));
+                SseMessageUtils.publishMessage(dto);
+            }, 5, TimeUnit.SECONDS);
+            return R.ok(loginVo);
+        }else {
+            return R.fail("手机号格式不正确");
+        }
+
+    }
+    /**
+     * 忘记密码
+     *
+     * @param forgetPasswordBody 忘记密码信息
+     * @return 结果
+     */
+    public R<Void> forgetPassword(ForgetPasswordReq forgetPasswordBody) {
+        String phone= forgetPasswordBody.getPhonenumber();
+        if (!phone.equals("") && Pattern.compile("^1[3456789]\\d{9}$").matcher(phone).matches()) {
+            //根据手机号查询用户信息
+            LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SysUser::getPhonenumber, phone);
+            SysUserVo user = userMapper.selectVoOne(queryWrapper);
+            if (ObjectUtil.isNull(user)) {
+                return R.fail("手机用户不存在");
+            }
+            String key = GlobalConstants.CAPTCHA_CODE_KEY +phone;
+            String smsCode = RedisUtils.getCacheObject(key);
+            if (StringUtils.isBlank(smsCode) || !smsCode.equals(forgetPasswordBody.getSmsCode())) {
+                log.info("短信验证码错误 {}", smsCode);
+                return R.fail("验证码错误");
+            }
+            user.setPassword(BCrypt.hashpw(forgetPasswordBody.getNewPassword()));
+            LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(SysUser::getUserId, user.getUserId()).set(SysUser::getPassword,user.getPassword());
+            int update = userMapper.update(null, updateWrapper);
+            if (update > 0) {
+                return R.ok();
+            } else {
+                log.error("修改密码失败，用户 ID：{}", user.getUserId());
+                return R.fail("重置密码失败");
+            }
+        }else {
+            return R.fail("手机号格式不正确");
+        }
+    }
 }

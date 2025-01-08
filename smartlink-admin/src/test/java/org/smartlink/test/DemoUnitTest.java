@@ -1,7 +1,7 @@
 package org.smartlink.test;
 
-import org.smartlink.common.core.config.smartlinkConfig;
 import org.junit.jupiter.api.*;
+import org.smartlink.common.core.config.SmartlinkConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class DemoUnitTest {
 
     @Autowired
-    private smartlinkConfig smartlinkConfig;
+    private SmartlinkConfig smartlinkConfig;
 
     @DisplayName("测试 @SpringBootTest @Test @DisplayName 注解")
     @Test
