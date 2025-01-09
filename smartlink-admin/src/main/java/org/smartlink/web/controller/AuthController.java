@@ -35,7 +35,7 @@ import org.smartlink.system.service.ISysClientService;
 import org.smartlink.system.service.ISysConfigService;
 import org.smartlink.system.service.ISysSocialService;
 import org.smartlink.system.service.ISysTenantService;
-import org.smartlink.web.domain.ForgetPasswordReq;
+import org.smartlink.web.domain.bo.ForgetPasswordBo;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.smartlink.web.domain.vo.TenantListVo;
@@ -101,7 +101,6 @@ public class AuthController {
         loginService.checkTenant(loginBody.getTenantId());
         // 登录
         LoginVo loginVo = IAuthStrategy.login(body, client, grantType);
-
         Long userId = LoginHelper.getUserId();
         scheduledExecutorService.schedule(() -> {
             SseMessageDto dto = new SseMessageDto();
@@ -247,7 +246,7 @@ public class AuthController {
      * @Date: 2025/1/7
      */
     @PostMapping("/forget/password")
-    public R<Void> forgetPassword(@RequestBody ForgetPasswordReq forgetPasswordBody) {
+    public R<Void> forgetPassword(@RequestBody ForgetPasswordBo forgetPasswordBody) {
         return loginService.forgetPassword(forgetPasswordBody);
     }
 
