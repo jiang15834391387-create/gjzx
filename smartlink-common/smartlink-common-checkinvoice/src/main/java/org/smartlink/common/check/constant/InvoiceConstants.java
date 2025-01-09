@@ -225,31 +225,5 @@ public class InvoiceConstants {
 
     public static final HashMap<String,String> INVOICE_ClASS_TYPE = new HashMap<>();
 
-//    static {
-//        INVOICE_ClASS_TYPE.put(TAX_SPECIAL_INVOICE,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(TAX_INVOICE,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(ELECTRONIC_INVOICE,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(ROLL_TICKET,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(ELECTRONIC_OFD_INVOICE,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(ELECTRONIC_INVOICE_ITINERARY,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(OCR_INFORMATION,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(INVOICE_OTHERS,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        //区块链
-//        INVOICE_ClASS_TYPE.put(ELECTRONIC_INVOICE_QUKUAILIAN,"com.datafly.common.domain.invoice.DataOcrInfo");
-//        INVOICE_ClASS_TYPE.put(MOTOR_VEHICLE_SALE,"com.datafly.common.domain.invoice.DataMotorVehicleSale");
-//        INVOICE_ClASS_TYPE.put(USED_CAR_SALES,"com.datafly.common.domain.invoice.DataUsedCarSales");
-//        INVOICE_ClASS_TYPE.put(QUOTA_INVOICE,"com.datafly.common.domain.invoice.DataQuotaInvoice");
-//        INVOICE_ClASS_TYPE.put(AIRCRAFT_INVOICE,"com.datafly.common.domain.invoice.DataAircraftInvoice");
-//        INVOICE_ClASS_TYPE.put(TAXI_TICKETS,"com.datafly.common.domain.invoice.DataTaxiTickets");
-//        INVOICE_ClASS_TYPE.put(RAILWAY_TICKET,"com.datafly.common.domain.invoice.DataRailwayTicket");
-//        INVOICE_ClASS_TYPE.put(PASSENGER_TICKET,"com.datafly.common.domain.invoice.DataPassengerTicket");
-//        INVOICE_ClASS_TYPE.put(FLIGHT_ITINERARY,"com.datafly.common.domain.invoice.DataFlightItinerary");
-//        INVOICE_ClASS_TYPE.put(STEAMER_TICKET,"com.datafly.common.domain.invoice.DataSteamerTicket");
-//        INVOICE_ClASS_TYPE.put(TOLL_ROADS,"com.datafly.common.domain.invoice.DataTollRoads");
-//        INVOICE_ClASS_TYPE.put(RECEIPT,"com.datafly.common.domain.invoice.DataReceipt");
-//        INVOICE_ClASS_TYPE.put(DIDI_ITINERARY,"com.datafly.common.domain.invoice.DataDidiItinerary");
-//        INVOICE_ClASS_TYPE.put(DUTY_PAID_PROOF,"com.datafly.common.domain.invoice.DataDutyPaidProof");
-//        INVOICE_ClASS_TYPE.put(ACCEPTANCE_BILL,"com.datafly.common.domain.invoice.DataAcceptanceBill");
-//    }
 
 }

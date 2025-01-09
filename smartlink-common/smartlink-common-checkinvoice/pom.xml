@@ -13,11 +13,6 @@
     </description>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.smartlink</groupId>-->
-<!--            <artifactId>smartlink-admin</artifactId>-->
-<!--            <version>${revision}</version>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>org.smartlink</groupId>

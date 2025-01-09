@@ -45,47 +45,38 @@ public class DataOcrInfo extends TenantEntity {
      * 购方银行账号
      */
     private String buyerAccount;
-
     /**
      * 购方地址
      */
     private String buyerAddress;
-
     /**
      * 购方名称
      */
     private String buyerName;
-
     /**
      * 购方纳税识别号
      */
     private String buyerNo;
-
     /**
      * 是否查验标识，（0查验失败，1查验成功）
      */
     private String checkInvoice;
-
     /**
      * 作废标志 (N未作废,Y已作废)
      */
     private String cancellationMark;
-
     /**
      * 复合人
      */
     private String checker;
-
     /**
      * 省
      */
     private String province;
-
     /**
      * 市
      */
     private String city;
-
     /**
      * 图片表id
      */
@@ -100,7 +91,6 @@ public class DataOcrInfo extends TenantEntity {
      * 发票代码
      */
     private String invoiceCode;
-
     /**
      * 发票日期
      */
@@ -110,22 +100,18 @@ public class DataOcrInfo extends TenantEntity {
      * 发票号码
      */
     private String invoiceNumber;
-
     /**
      * 开票人
      */
     private String issuer;
-
     /**
      * 品名，每个以逗号隔开
      */
     private String itemNames;
-
     /**
      * 校验码
      */
     private String checkCode;
-
     /**
      * 小写金额，（价税合计）
      */
@@ -145,17 +131,14 @@ public class DataOcrInfo extends TenantEntity {
      * 是否有销售方公司印章(0: 没有; 1: 有)
      */
     private String sellCompanySeal;
-
     /**
      * 发票联
      */
     private String pageNumber;
-
     /**
      * 发票联次
      */
     private String invoiceSheet;
-
     /**
      * 机械码
      */
@@ -185,27 +168,22 @@ public class DataOcrInfo extends TenantEntity {
      * 收款人
      */
     private String payee;
-
     /**
      * 销货方纳税账户
      */
     private String sellerAccount;
-
     /**
      * 销货方纳税地址
      */
     private String sellerAddress;
-
     /**
      * 销货方纳税名称
      */
     private String sellerName;
-
     /**
      * 销货方纳税编号
      */
     private String sellerNo;
-
     /**
      * 合计金额（税前）
      */
@@ -220,32 +198,26 @@ public class DataOcrInfo extends TenantEntity {
      * 大写金额，（加税合计）
      */
     private String totalUppercase;
-
     /**
      * 是否收购
      */
     private String purchaseMark;
-
     /**
      *  区块链标记
      */
     private String blockChain;
-
     /**
      * 是否为电子增票
      */
     private String electronicMark;
-
     /**
      * 通行费标志
      */
     private String transitMark;
-
     /**
      * 机动车标志
      */
     private String oilMark;
-
     /**
      * 机动车标志
      */
@@ -265,52 +237,42 @@ public class DataOcrInfo extends TenantEntity {
      * 红冲/非红冲
      */
     private String redDashed;
-
     /**
      * qr码
      */
     private String qrCode;
-
     /**
      * 右侧打印开票日期
      */
     private String rightInvoiceDate;
-
     /**
      * 增加电子支付标识
      */
     private String elePayId;
-
     /**
      * 打印发票代码
      */
     private String printInvoiceCode;
-
     /**
      * 备注校验码
      */
     private String noteCheckCode;
-
     /**
      * 打印合计
      */
     private String printTotal;
-
     /**
      * 打印校验码
      */
     private String printCheckCode;
-
     /**
      * 右侧打印发票号码
      */
     private String rightInvoiceNumber;
-
     /**
      * 右侧打印发票代码
      */
     private String rightInvoiceCode;
-
     /**
      * 代开(非代开条目为空)
      */
@@ -336,7 +298,6 @@ public class DataOcrInfo extends TenantEntity {
      * 是否删除标识 0-不删除  1-删除
      */
     private String deleteFlag;
-
     /**
      * 备注
      */

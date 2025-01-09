@@ -49,47 +49,38 @@ public class DataMotorVehicleSale extends TenantEntity {
      * 车辆识别代码
      */
     private String carCode;
-
     /**
      * 发动机号码
      */
     private String carEngineCode;
-
     /**
      * 厂牌型号
      */
     private String carModel;
-
     /**
      * 合格证号
      */
     private String certificateNumber;
-
     /**
      * 进口证明书号
      */
     private String certificateOfImport;
-
     /**
      * 是否查验标识，（0查验失败，1查验成功）
      */
     private String checkInvoice;
-
     /**
      * 城市
      */
     private String city;
-
     /**
      * 发票代码
      */
     private String invoiceCode;
-
     /**
      * 商检单号
      */
     private String commodityInspectionNo;
-
     /**
      * 开票日期
      */
@@ -99,12 +90,10 @@ public class DataMotorVehicleSale extends TenantEntity {
      * 开票人
      */
     private String drawer;
-
     /**
      * 图片表id
      */
     private String fileId;
-
     /**
      * 限乘人数
      */
@@ -114,17 +103,14 @@ public class DataMotorVehicleSale extends TenantEntity {
      * 机打代码
      */
     private String machineCode;
-
     /**
      * 机打号码
      */
     private String machineNumber;
-
     /**
      * 发票号码
      */
     private String invoiceNumber;
-
     /**
      * 税前金额
      */
@@ -144,37 +130,30 @@ public class DataMotorVehicleSale extends TenantEntity {
      * 省
      */
     private String province;
-
     /**
      * 销售方名称
      */
     private String seller;
-
     /**
      * 销售方地址
      */
     private String sellerAddress;
-
     /**
      * 销售单位开户账号
      */
     private String sellerBankAccount;
-
     /**
      * 销售单位开户银行
      */
     private String sellerBankName;
-
     /**
      * 销售方手机号
      */
     private String sellerPhone;
-
     /**
      * 销售方税号
      */
     private String sellerTaxid;
-
     /**
      * 税额
      */
@@ -184,37 +163,30 @@ public class DataMotorVehicleSale extends TenantEntity {
      * 主管税务机关
      */
     private String taxAuthorities;
-
     /**
      * 主管税务机关代码
      */
     private String taxAuthoritiesCode;
-
     /**
      * 完税凭证号码
      */
     private String taxPaymentCertificateNo;
-
     /**
      * 税率
      */
     private String taxRate;
-
     /**
      * 税控码
      */
     private String taxCode;
-
     /**
      * 二维码
      */
     private String qrCode;
-
     /**
      * 吨位
      */
     private String tonnage;
-
     /**
      * 总计
      */
@@ -224,22 +196,18 @@ public class DataMotorVehicleSale extends TenantEntity {
      * 发票专用章存在性判断
      */
     private String invoiceStamp;
-
     /**
      * 是否有公司印章
      */
     private String companySeal;
-
     /**
      * 发票联
      */
     private String pageNumber;
-
     /**
      * 发票联次
      */
     private String invoiceSheet;
-
     /**
      * 车辆类型
      */
@@ -264,7 +232,6 @@ public class DataMotorVehicleSale extends TenantEntity {
      * 是否删除标识 0-不删除  1-删除
      */
     private String deleteFlag;
-
     /**
      * 备注
      */
