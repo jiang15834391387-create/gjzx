@@ -18,12 +18,10 @@ public interface ScanImageService {
     /**
      * 文件上传
      *
-     * @param fileUploadDTO 文件信息
-     * @param dataImageFilesInfo 图片文件对象
      * @param multipartFile 文件
      * @return 图片vo
      */
-    DataImageFilesInfoVo uploadImage(FileUploadDTO fileUploadDTO, DataImageFilesInfo dataImageFilesInfo, MultipartFile multipartFile) throws Exception;
+    DataImageFilesInfoVo uploadImage(MultipartFile multipartFile) throws Exception;
 //
 //    /**
 //     * 单据初始化

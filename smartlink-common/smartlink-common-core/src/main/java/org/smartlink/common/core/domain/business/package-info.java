@@ -5,3 +5,5 @@
  * @date 2025-01
  */
 package org.smartlink.common.core.domain.business;
+
+

@@ -17,10 +17,10 @@
 
     <dependencies>
         <!-- moudles-business模块 -->
-        <dependency>
-            <groupId>org.smartlink</groupId>
-            <artifactId>smartlink-business</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.smartlink</groupId>-->
+<!--            <artifactId>smartlink-business</artifactId>-->
+<!--        </dependency>-->
 
         <!--moudles-mybatis模块-->
         <dependency>
@@ -37,6 +37,11 @@
         <dependency>
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-core</artifactId>
         </dependency>
 
 

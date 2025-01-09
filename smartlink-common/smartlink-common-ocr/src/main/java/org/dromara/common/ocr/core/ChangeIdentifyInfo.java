@@ -4,7 +4,7 @@ package org.dromara.common.ocr.core;
 
 import org.dromara.common.ocr.entity.IdentificationData;
 import org.dromara.common.ocr.exception.OcrException;
-import org.smartlink.business.domain.DataImageFilesInfo;
+
 
 /**
  * <p>Title: ChangeIdentifyInfo</p>

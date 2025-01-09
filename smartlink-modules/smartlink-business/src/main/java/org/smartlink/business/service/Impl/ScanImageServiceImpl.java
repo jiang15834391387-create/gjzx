@@ -22,6 +22,8 @@ import org.smartlink.business.utils.ParamConstants;
 import org.smartlink.common.oss.entity.UploadResult;
 import org.smartlink.common.oss.factory.OssFactory;
 import org.smartlink.common.redis.utils.RedisUtils;
+import org.smartlink.system.service.ISysOssService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,11 +53,12 @@ public class ScanImageServiceImpl implements ScanImageService {
 //
 //    private final BreCheckInvoiceService breCheckInvoiceService;
 //    private final HardWareMessageService hardWareMessageService;
+    @Autowired
+    public ISysOssService iSysOssService;
 
     @Override
-    public DataImageFilesInfoVo uploadImage(FileUploadDTO fileUploadDTO, DataImageFilesInfo dataImageFilesInfo, MultipartFile multipartFile) throws Exception {
-        //是否小程序上传
-        boolean wechatUpload = StrUtil.equals(fileUploadDTO.getCip(), Constants.WECHAT_SYMBOL);
+    public DataImageFilesInfoVo uploadImage(MultipartFile multipartFile) throws Exception {
+
         //是否切图
         boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
         //是否单图旋转
@@ -71,6 +74,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         ByteArrayOutputStream byteArrayOutputStream = FilesUtils.thumbnailImage(multipartFile, FilenameUtils.getExtension(fileUploadDTO.getFileName()));
         //缩略图
         ByteArrayOutputStream cutThumbnailImgFile = FilesUtils.thumbnailSmall(byteArrayOutputStream.toByteArray());
+        iSysOssService.upload(cutThumbnailImgFile);
         //压缩图片存储
         UploadResult originalImage = OssFactory.instance().upload(byteArrayOutputStream.toByteArray(), BatchIdUtils.getBatchIdPath(fileUploadDTO.getBatchId(), dataImageFilesInfo.getFileId()), "JPG");
         //缩略图存储
