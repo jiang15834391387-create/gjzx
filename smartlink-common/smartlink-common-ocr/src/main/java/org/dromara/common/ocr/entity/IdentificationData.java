@@ -1,7 +1,7 @@
 package org.dromara.common.ocr.entity;
 
 
-
+import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
 /**
  * <p>Title: IdentificationData</p>

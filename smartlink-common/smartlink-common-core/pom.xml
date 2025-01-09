@@ -107,6 +107,12 @@
             <artifactId>ip2region</artifactId>
         </dependency>
 
+        <!--webclient-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
