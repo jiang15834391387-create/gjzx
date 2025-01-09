@@ -3,7 +3,7 @@ package org.dromara.common.ocr.core;
 
 
 import org.dromara.common.ocr.entity.IdentificationData;
-import org.smartlink.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
 import java.util.List;
 

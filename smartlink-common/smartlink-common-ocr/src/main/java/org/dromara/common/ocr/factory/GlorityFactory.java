@@ -6,7 +6,7 @@ import org.dromara.common.ocr.exception.OcrException;
 import org.dromara.common.ocr.glority.conversion.AircraftInvoiceConversion;
 import org.dromara.common.ocr.glority.conversion.InvoiceConversion;
 import org.dromara.common.ocr.glority.response.IdentifyResults;
-import org.smartlink.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
 /**
  * 票小蜜识别工厂

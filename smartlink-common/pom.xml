@@ -35,6 +35,7 @@
         <module>smartlink-common-tenant</module>
         <module>smartlink-common-websocket</module>
         <module>smartlink-common-sse</module>
+        <module>smartlink-common-entity</module>
     </modules>
 
     <artifactId>smartlink-common</artifactId>

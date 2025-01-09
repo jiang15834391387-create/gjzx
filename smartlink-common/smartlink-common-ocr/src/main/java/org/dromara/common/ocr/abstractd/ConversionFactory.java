@@ -4,7 +4,7 @@ package org.dromara.common.ocr.abstractd;
 import org.dromara.common.ocr.core.ChangeIdentifyInfo;
 import org.dromara.common.ocr.core.IdentificationFactory;
 import org.dromara.common.ocr.factory.OcrFactory;
-import org.smartlink.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
 /**
  * <p>Title: ConversionFactory</p>
