@@ -45,6 +45,17 @@
 
         <dependency>
             <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-oss</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-ocr</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-idempotent</artifactId>
         </dependency>
 
