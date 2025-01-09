@@ -17,7 +17,7 @@ import org.dromara.common.ocr.glority.config.GlorityOcrProperties;
 import org.dromara.common.ocr.glority.response.GlorityResult;
 import org.dromara.common.ocr.glority.response.IdentifyResults;
 import org.dromara.common.ocr.properties.OcrProperties;
-import org.smartlink.business.domain.DataImageFilesInfo;
+//import org.smartlink.business.domain.DataImageFilesInfo;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;

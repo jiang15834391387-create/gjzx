@@ -116,6 +116,11 @@
 
         <dependency>
             <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-system</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-checkinvoice</artifactId>
             <version>${revision}</version>
         </dependency>
