@@ -10,7 +10,7 @@ import org.dromara.common.ocr.core.ChangeIdentifyInfo;
 import org.dromara.common.ocr.entity.IdentificationData;
 import org.dromara.common.ocr.exception.OcrException;
 import org.dromara.common.ocr.glority.response.IdentifyResults;
-import org.smartlink.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
 
 import java.math.BigDecimal;

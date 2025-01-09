@@ -5,7 +5,7 @@ package org.dromara.common.ocr.abstractd;
 import org.dromara.common.ocr.core.IOcrStrategy;
 import org.dromara.common.ocr.entity.IdentificationData;
 import org.dromara.common.ocr.properties.OcrProperties;
-import org.smartlink.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
 import java.util.List;
 

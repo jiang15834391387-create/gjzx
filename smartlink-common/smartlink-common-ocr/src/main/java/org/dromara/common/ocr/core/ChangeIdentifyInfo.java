@@ -4,6 +4,7 @@ package org.dromara.common.ocr.core;
 
 import org.dromara.common.ocr.entity.IdentificationData;
 import org.dromara.common.ocr.exception.OcrException;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
 
 /**
