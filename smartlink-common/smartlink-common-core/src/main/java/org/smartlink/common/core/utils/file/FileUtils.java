@@ -4,15 +4,20 @@ import cn.hutool.core.io.FileUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 
 /**
  * 文件处理工具类
  *
  * @author Lion Li
  */
+
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FileUtils extends FileUtil {
 
@@ -40,4 +45,5 @@ public class FileUtils extends FileUtil {
         String encode = URLEncoder.encode(s, StandardCharsets.UTF_8);
         return encode.replaceAll("\\+", "%20");
     }
+
 }

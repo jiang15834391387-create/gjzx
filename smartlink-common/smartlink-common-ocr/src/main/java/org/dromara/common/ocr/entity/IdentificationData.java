@@ -1,7 +1,7 @@
 package org.dromara.common.ocr.entity;
 
 
-import org.smartlink.business.domain.BaseEntitys;
+
 
 /**
  * <p>Title: IdentificationData</p>
@@ -9,7 +9,7 @@ import org.smartlink.business.domain.BaseEntitys;
  * <p>Description: 存储OCR识别信息</p>
  * @author datafly
  **/
-public class IdentificationData<K extends String, T extends BaseEntitys> {
+public class IdentificationData<K extends String, T extends BaseEntity> {
 
 
     public final K k;
