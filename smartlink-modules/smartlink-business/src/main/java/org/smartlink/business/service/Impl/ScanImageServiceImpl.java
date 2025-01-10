@@ -1,35 +1,47 @@
 package org.smartlink.business.service.Impl;
 
-import cn.hutool.core.codec.Base64;
+
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
-import org.dromara.common.ocr.entity.IdentificationData;
-import org.dromara.common.ocr.factory.OcrFactory;
-import org.smartlink.business.domain.DataImageFilesInfo;
-import org.smartlink.business.domain.vo.DataImageFilesInfoVo;
-import org.smartlink.business.enumd.FileStatusEnumd;
-import org.smartlink.business.scan.dto.FileUploadDTO;
+import org.apache.tika.Tika;
+import org.smartlink.common.core.constant.CacheNames;
+import org.smartlink.common.ocr.constant.OcrConstant;
+import org.smartlink.common.ocr.entity.IdentificationData;
+import org.smartlink.common.ocr.enumd.OcrEnumd;
+import org.smartlink.common.ocr.factory.OcrFactory;
+
+
 import org.smartlink.business.service.ScanImageService;
-import org.smartlink.business.utils.BatchIdUtils;
-import org.smartlink.business.utils.Constants;
-import org.smartlink.business.utils.FilesUtils;
+
+import org.smartlink.common.core.utils.MapstructUtils;
+import org.smartlink.common.core.utils.file.Constants;
 import org.smartlink.common.core.utils.file.FileUtils;
-import org.smartlink.business.utils.ParamConstants;
+
+import org.smartlink.common.core.utils.file.ParamConstants;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.bo.DataImageFilesInfoBo;
+import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
+import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.oss.entity.UploadResult;
 import org.smartlink.common.oss.factory.OssFactory;
+import org.smartlink.common.redis.utils.CacheUtils;
+import org.smartlink.common.redis.utils.QueueUtils;
 import org.smartlink.common.redis.utils.RedisUtils;
+import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.service.ISysOssService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.HashSet;
+import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
+
 
 /**
  * @author shidunkai
@@ -56,60 +68,77 @@ public class ScanImageServiceImpl implements ScanImageService {
     @Autowired
     public ISysOssService iSysOssService;
 
+    @Autowired
+    public IDataImageFilesInfoService iDataImageFilesInfoService;
+
+    // 文件大小上限 (8MB)
+    private static final long MAX_FILE_SIZE = 8 * 1024 * 1024;
+
     @Override
     public DataImageFilesInfoVo uploadImage(MultipartFile multipartFile) throws Exception {
-//
-//        //是否切图
-//        boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
-//        //是否单图旋转
-//        boolean isRotate = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_IMG_ROTATE));
-//        //是否OCR
-//        boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_OFF)) && !wechatUpload && Boolean.valueOf(fileUploadDTO.getIsOcr());
-//        //是否查验
-//        boolean checkOff = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CHECK_OFF));
-//        //是否自定义树节点
-//        String treeNode = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.TREE_NODE_CODE);
-//
-//        //压缩图片
-//        ByteArrayOutputStream byteArrayOutputStream = FilesUtils.thumbnailImage(multipartFile, FilenameUtils.getExtension(fileUploadDTO.getFileName()));
-//        //缩略图
-//        ByteArrayOutputStream cutThumbnailImgFile = FilesUtils.thumbnailSmall(byteArrayOutputStream.toByteArray());
-//        iSysOssService.upload(cutThumbnailImgFile);
-//        //压缩图片存储
-//        UploadResult originalImage = OssFactory.instance().upload(byteArrayOutputStream.toByteArray(), BatchIdUtils.getBatchIdPath(fileUploadDTO.getBatchId(), dataImageFilesInfo.getFileId()), "JPG");
-//        //缩略图存储
-//        UploadResult smallImage = OssFactory.instance().upload(cutThumbnailImgFile.toByteArray(), BatchIdUtils.getBatchIdPath(fileUploadDTO.getBatchId(), "small_" + dataImageFilesInfo.getFileId()), "JPG");
-//
-//        //设置图片存储信息
-//        dataImageFilesInfo.setIurl(originalImage.getUrl());
-//        dataImageFilesInfo.setUrl(originalImage.getUrl());
-//        dataImageFilesInfo.setSurl(smallImage.getUrl());
-//
-//        DataImageTree bigImageTree = new DataImageTree();
-//        //初始化图片信息和树节点
-//        saveOrUpdateImageTree(dataImageFilesInfo,fileUploadDTO,wechatUpload,bigImageTree);
-//
-//        //业务参数判断
-//        if (ocrOff || (wechatUpload && Boolean.parseBoolean(fileUploadDTO.getIsOcr()))) {
-//            //图片识别
-//            List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfo, byteArrayOutputStream.toByteArray());
-//            //是否多图
-//            boolean multigraph = CollectionUtil.isNotEmpty(identificationData) && identificationData.size() > 1;
-//            //单图旋转
+//        QueueUtils.lqm("sys_ocr:OcrConfig");
+//        String jsons = RedisUtils.getCacheObject("sys_ocr:OcrConfig");
+////        boolean s = RedisUtils.getCacheObject("sys_ocr:GLORITY");
+        //文件为空
+        if (multipartFile.isEmpty()){
+            return null;
+        }
+        DataImageFilesInfoBo dataImageFilesInfoBo = new DataImageFilesInfoBo();
+        dataImageFilesInfoBo.setFileId(IdUtil.fastSimpleUUID());
+        //文件类型
+        String fileSuffix = FileUtils.getFileSuffix(multipartFile.getOriginalFilename());
+        //是否切图
+        boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
+        //是否单图旋转
+        boolean isRotate = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_IMG_ROTATE));
+        //ocr识别
+        if (fileSuffix.equals("jpg") || fileSuffix.equals("jpeg") || fileSuffix.equals("png") || fileSuffix.equals("tiff")){
+            //文件最大支持8M
+            if (multipartFile.getSize() > MAX_FILE_SIZE){
+                return null;
+            }
+            //压缩图片
+            ByteArrayOutputStream byteArrayOutputStream = FileUtils.thumbnailImage(multipartFile, FilenameUtils.getExtension(multipartFile.getOriginalFilename()));
+            //缩略图
+            ByteArrayOutputStream cutThumbnailImgFile = FileUtils.thumbnailSmall(byteArrayOutputStream.toByteArray());
+            //转换
+            InputStream cutThumbnailImgFileStream = new ByteArrayInputStream(cutThumbnailImgFile.toByteArray());
+//            Tika tika = new Tika();
+//            Path path = Paths.get(fileFullPath);
+            SysOssVo sysOssVo = iSysOssService.upload(multipartFile);
+            //源文件存储
+            UploadResult originalImage = OssFactory.instance().upload(multipartFile.getInputStream(), dataImageFilesInfoBo.getFileId() + "." + fileSuffix, multipartFile.getSize(), multipartFile.getContentType());
+            //缩略图存储
+            UploadResult smallImage = OssFactory.instance().upload(cutThumbnailImgFileStream, "small_" + dataImageFilesInfoBo.getFileId() + "." + fileSuffix, (long) cutThumbnailImgFile.size(), detectContentType(cutThumbnailImgFileStream));
+
+            //设置图片存储信息
+            dataImageFilesInfoBo.setIurl(originalImage.getUrl());
+            dataImageFilesInfoBo.setSurl(smallImage.getUrl());
+            dataImageFilesInfoBo.setFileMd5(originalImage.getETag());
+            dataImageFilesInfoBo.setFileName(originalImage.getFilename());
+            dataImageFilesInfoBo.setFileSize(String.valueOf(multipartFile.getSize()));
+
+            iDataImageFilesInfoService.insertByBo(dataImageFilesInfoBo);
+            DataImageFilesInfo dataImageFilesInfos = MapstructUtils.convert(dataImageFilesInfoBo, DataImageFilesInfo.class);
+            //图片识别
+            List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfos, Base64.getEncoder().encodeToString(multipartFile.getBytes()));
+            //是否多图
+            boolean multigraph = CollectionUtil.isNotEmpty(identificationData) && identificationData.size() > 1;
+            //单图旋转
 //            if (!multigraph && isRotate) {
 //                //单图且旋转
 //                //切图
-//                byte[] bytes = FilesUtils.imageCut(byteArrayOutputStream.toByteArray(), identificationData.get(0).t.getCoordinate(), identificationData.get(0).t.getBase64(), identificationData.get(0).t.getOption(), identificationData.get(0).t.getOrientation());
+//                byte[] bytes = FileUtils.imageCut(byteArrayOutputStream.toByteArray(), identificationData.get(0).t.getCoordinate(), identificationData.get(0).t.getBase64(), identificationData.get(0).t.getOption(), identificationData.get(0).t.getOrientation());
 //                //切割图片压缩
-//                ByteArrayOutputStream cutThumbnailFile = FilesUtils.thumbnailImage(bytes, "JPG");
+//                ByteArrayOutputStream cutThumbnailFile = FileUtils.thumbnailImage(bytes, "JPG");
 //                //切割缩略图
-//                ByteArrayOutputStream cutThumbnailSmallFile = FilesUtils.thumbnailSmall(cutThumbnailFile.toByteArray());
+//                ByteArrayOutputStream cutThumbnailSmallFile = FileUtils.thumbnailSmall(cutThumbnailFile.toByteArray());
 //                //切割压缩图片存储
 //                UploadResult cutOriginalImage = OssFactory.instance().upload(cutThumbnailFile.toByteArray(), BatchIdUtils.getBatchIdPath(fileUploadDTO.getBatchId(), dataImageFilesInfo.getFileId()), "JPG");
 //                //切割缩略图存储
 //                UploadResult cutSmallImage = OssFactory.instance().upload(cutThumbnailSmallFile.toByteArray(), BatchIdUtils.getBatchIdPath(fileUploadDTO.getBatchId(), "small" + dataImageFilesInfo.getFileId()), "JPG");
-//                dataImageFilesInfo.setIurl(cutOriginalImage.getUrl());
-//                dataImageFilesInfo.setSurl(cutSmallImage.getUrl());
+//                dataImageFilesInfoBo.setIurl(cutOriginalImage.getUrl());
+//                dataImageFilesInfoBo.setSurl(cutSmallImage.getUrl());
 //            }
 //            int i = 1;
 //            HashSet<String> typeSet = new HashSet<>();
@@ -121,15 +150,15 @@ public class ScanImageServiceImpl implements ScanImageService {
 //                    dataImageFilesInfoSm.setParentFileId(dataImageFilesInfo.getFileId());
 //                    dataImageFilesInfoSm.setFolderId(fileUploadDTO.getFolderId());
 //                    dataImageFilesInfoSm.setFileId(IdUtil.simpleUUID());
-//                    dataImageFilesInfoSm.setFileStatus(FileStatusEnumd.UPLOADED_SUCCESSFUL_CODE.getCode());
+//                    dataImageFilesInfoSm.setFileStatus(FileStatusConstants.SAVED_SUCCESSFULLY);
 //                    dataImageFilesInfoSm.setBatchId(dataImageFilesInfo.getBatchId());
 //                    dataImageFilesInfoSm.setMessage("上传成功");
 //                    //切图
-//                    byte[] bytes = FilesUtils.imageCut(byteArrayOutputStream.toByteArray(), identificationDatum.t.getCoordinate(), identificationDatum.t.getBase64(), identificationDatum.t.getOption(), identificationDatum.t.getOrientation());
+//                    byte[] bytes = FileUtils.imageCut(byteArrayOutputStream.toByteArray(), identificationDatum.t.getCoordinate(), identificationDatum.t.getBase64(), identificationDatum.t.getOption(), identificationDatum.t.getOrientation());
 //                    //切割图片压缩
-//                    ByteArrayOutputStream cutThumbnailFile = FilesUtils.thumbnailImage(bytes, "JPG");
+//                    ByteArrayOutputStream cutThumbnailFile = FileUtils.thumbnailImage(bytes, "JPG");
 //                    //切割缩略图
-//                    ByteArrayOutputStream cutThumbnailSmallFile = FilesUtils.thumbnailSmall(cutThumbnailFile.toByteArray());
+//                    ByteArrayOutputStream cutThumbnailSmallFile = FileUtils.thumbnailSmall(cutThumbnailFile.toByteArray());
 //                    //切割压缩图片存储
 //                    UploadResult cutOriginalImage = OssFactory.instance().upload(cutThumbnailFile.toByteArray(), BatchIdUtils.getBatchIdPath(fileUploadDTO.getBatchId(), dataImageFilesInfoSm.getFileId()), "JPG");
 //                    //切割缩略图存储
@@ -174,48 +203,43 @@ public class ScanImageServiceImpl implements ScanImageService {
 //            }
 //            String typeArr = String.join(Constants.CONNECT_COMMA_SYMBOL, typeSet);
 //            dataImageFilesInfo.setIncludeTypeArr(typeArr);
-//        }
-//        // 判断NCC开关是否启用
-//        String status = NcProperties.getDefaultPropertiesStatus();
-//        // 与NC业务系统相关逻辑
-//        boolean ncEnabled = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_NC_BUSINESS));
-//        if (ncEnabled && StrUtil.equals(status, Constants.CONFIG_OFF_STATUS) && Boolean.parseBoolean(fileUploadDTO.getIsOcr()) && !wechatUpload) {
-//            NcImageServiceDTO ncImageServiceDTO = new NcImageServiceDTO();
-//            ncImageServiceDTO.setDataImageFilesInfo(dataImageFilesInfo);
-//            ncImageServiceDTO.setBusinessSerialNo(fileUploadDTO.getBusinessSerialNo());
-//            ncImageServiceDTO.setFile(Base64.encode(multipartFile.getBytes()));
-//            ncImageServiceDTO.setUploadBusinessType(NcConstant.NORMAL_UPLOAD_INVOICE);
-//            dataImageFilesInfo = NcConfigFactory.instance().doBusinessService(ncImageServiceDTO);
-//        }
-//        boolean bipEnabled = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_BIP_BUSINESS));
-//        if (bipEnabled && Boolean.parseBoolean(fileUploadDTO.getIsOcr())) {
-//            NcImageServiceDTO ncImageServiceDTO = new NcImageServiceDTO();
-//            ncImageServiceDTO.setDataImageFilesInfo(dataImageFilesInfo);
-//            ncImageServiceDTO.setBusinessSerialNo(fileUploadDTO.getBusinessSerialNo());
-//            ncImageServiceDTO.setFile(Base64.encode(multipartFile.getBytes()));
-//            ncImageServiceDTO.setBarcode(fileUploadDTO.getBarCode());
-//            ncImageServiceDTO.setBillId(fileUploadDTO.getBusinessSerialNo());
-//            //ncImageServiceDTO.setYtenantId(dataImageFilesInfo.getTenantId());
-//            dataImageFilesInfo = NcConfigFactory.instance().doBusinessService(ncImageServiceDTO);
-//        }
-//
-//
-//        //重扫、补扫修改影像文件状态
-//        upImgStatus(dataImageFilesInfo, fileUploadDTO.getTaskStatus(), fileUploadDTO.getSupplementaryScan());
-//        //图片预处理
-//        breCheckInvoiceService.breCheckInvoice(dataImageFilesInfo, fileUploadDTO.getOrgCode());
-//        //更新源文件,保存树节点
+
+            //手动解析
+        } else if (fileSuffix.equals("OFD") || fileSuffix.equals("XML")){
+
+        } else if (fileSuffix.equals("pdf")){
+
+        } else {}
+
+
+        //是否OCR
+//        boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_OFF)) && !wechatUpload && Boolean.valueOf(fileUploadDTO.getIsOcr());
+        //是否查验
+//        boolean checkOff = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CHECK_OFF));
+        //是否自定义树节点
+//        String treeNode = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.TREE_NODE_CODE);
+
+
+
+
+
+        //更新源文件,保存树节点
 //        saveOrUpdateImageTree(dataImageFilesInfo,fileUploadDTO,wechatUpload,bigImageTree);
-//
-//        //是否自定义树节点
-//        if (StrUtil.isNotBlank(treeNode) && StrUtil.isNotBlank(fileUploadDTO.getBillType())) {
-//            saveCustomize(treeNode,bigImageTree, dataImageFilesInfo, fileUploadDTO.getBillType());
-//        }
-//
-//        //返回
-//        return BeanCopyUtils.copy(dataImageFilesInfo, new DataImageFilesInfoVo());
+
+
+
+        //返回
         return null;
     }
 
+    public static String detectContentType(InputStream inputStream) {
+        try {
+            Tika tika = new Tika();
+            return tika.detect(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

@@ -234,4 +234,10 @@ public class QueueUtils {
         queue.subscribeOnElements(consumer);
     }
 
+
+    public static void  lqm(String queueName) {
+        RBucket<Object> bucket = CLIENT.getBucket(queueName);
+        bucket.get();
+    }
+
 }

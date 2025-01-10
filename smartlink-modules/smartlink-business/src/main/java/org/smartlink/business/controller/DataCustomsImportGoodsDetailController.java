@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.smartlink.common.entity.domain.business.domain.bo.DataCustomsImportGoodsDetailBo;
+import org.smartlink.common.entity.domain.business.domain.vo.DataCustomsImportGoodsDetailVo;
+import org.smartlink.common.entity.domain.business.service.IDataCustomsImportGoodsDetailService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.smartlink.common.idempotent.annotation.RepeatSubmit;
@@ -17,9 +20,7 @@ import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.excel.utils.ExcelUtil;
-import org.smartlink.business.domain.vo.DataCustomsImportGoodsDetailVo;
-import org.smartlink.business.domain.bo.DataCustomsImportGoodsDetailBo;
-import org.smartlink.business.service.IDataCustomsImportGoodsDetailService;
+
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
 /**

@@ -8,14 +8,13 @@ import cn.hutool.core.util.StrUtil;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.smartlink.business.domain.DataImageFilesInfo;
-import org.smartlink.business.domain.vo.DataImageFilesInfoVo;
+
 import org.smartlink.business.scan.dto.FileUploadDTO;
 import org.smartlink.business.service.ScanImageService;
-import org.smartlink.business.utils.FilesUtils;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.utils.file.FileUtils;
 import org.smartlink.common.core.utils.file.MimeTypeUtils;
+import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
 import org.smartlink.common.log.annotation.Log;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;

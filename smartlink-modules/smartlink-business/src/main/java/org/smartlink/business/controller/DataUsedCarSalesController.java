@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.smartlink.common.entity.domain.business.domain.bo.DataUsedCarSalesBo;
+import org.smartlink.common.entity.domain.business.domain.vo.DataUsedCarSalesVo;
+import org.smartlink.common.entity.domain.business.service.IDataUsedCarSalesService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.smartlink.common.idempotent.annotation.RepeatSubmit;
@@ -17,9 +20,7 @@ import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.excel.utils.ExcelUtil;
-import org.smartlink.business.domain.vo.DataUsedCarSalesVo;
-import org.smartlink.business.domain.bo.DataUsedCarSalesBo;
-import org.smartlink.business.service.IDataUsedCarSalesService;
+
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
 /**
@@ -62,10 +63,10 @@ public class DataUsedCarSalesController extends BaseController {
      * @param  id 主键
      */
     @SaCheckPermission("business:usedCarSales:query")
-    @GetMapping("/{ id}")
+    @GetMapping("/{id}")
     public R<DataUsedCarSalesVo> getInfo(@NotNull(message = "主键不能为空")
-                                     @PathVariable String  id) {
-        return R.ok(dataUsedCarSalesService.queryById( id));
+                                     @PathVariable String id) {
+        return R.ok(dataUsedCarSalesService.queryById(id));
     }
 
     /**
@@ -97,9 +98,9 @@ public class DataUsedCarSalesController extends BaseController {
      */
     @SaCheckPermission("business:usedCarSales:remove")
     @Log(title = "二手车销售统一发票", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ ids}")
+    @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
-                          @PathVariable String[]  ids) {
-        return toAjax(dataUsedCarSalesService.deleteWithValidByIds(List.of( ids), true));
+                          @PathVariable String[] ids) {
+        return toAjax(dataUsedCarSalesService.deleteWithValidByIds(List.of(ids), true));
     }
 }
