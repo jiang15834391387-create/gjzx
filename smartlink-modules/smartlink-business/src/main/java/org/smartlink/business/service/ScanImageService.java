@@ -1,11 +1,11 @@
 package org.smartlink.business.service;
 
 
-import org.smartlink.business.domain.DataImageFilesInfo;
-import org.smartlink.business.domain.vo.DataImageFilesInfoVo;
+
 import org.smartlink.business.scan.dto.FileUploadDTO;
 import org.smartlink.business.scan.request.InitializationRequest;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
