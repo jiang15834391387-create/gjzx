@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 增值税发票对象 data_ocr_info
@@ -35,9 +37,9 @@ public class DataOcrInfo extends TenantEntity {
     private String businessSerialNo;
 
     /**
-     * 发票类型
+     * 发票消费类型
      */
-    private String pattern;
+    private String kind;
 
     /**
      * 购方银行账号
@@ -255,6 +257,11 @@ public class DataOcrInfo extends TenantEntity {
     private String region;
 
     /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
      * 红冲/非红冲
      */
     private String redDashed;
@@ -318,6 +325,12 @@ public class DataOcrInfo extends TenantEntity {
      * 备注手写
      */
     private String handwrite;
+
+    /**
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataOcrDetails> details;
 
     /**
      * 是否删除标识 0-不删除  1-删除

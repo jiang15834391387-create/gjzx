@@ -175,6 +175,11 @@ public class DataOcrDetails extends TenantEntity {
     private String passenger;
 
     /**
+     * 有效身份证号（service_type为旅客运输服务，返回此字段）
+     */
+    private String userId;
+
+    /**
      * 出行日期（service_type为旅客运输服务，返回此字段）
      */
     private String travelDate;

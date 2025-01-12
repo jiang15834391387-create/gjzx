@@ -1,7 +1,6 @@
-package org.smartlink.business.enumd;
+package org.smartlink.common.core.enums;
 
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -15,15 +14,27 @@ public enum InvoiceGlorityEnumd {
     /**
      * 增值税专用发票
      */
-    GLORITY_TAX_SPECIAL_INVOICE("10100","增值税专用发票"),
+    GLORITY_TAX_SPECIAL_CODE("10100","增值税专用发票"),
+    /**
+     * 增值税电子专用发票
+     */
+    GLORITY_ELECTRON_TAX_SPECIAL_CODE("10100_1","增值税电子专用发票"),
     /**
      * 增值税普通发票
      */
-    GLORITY_TAX_INVOICE("10101","增值税普通发票"),
+    GLORITY_TAX_CODE("10101","增值税普通发票"),
     /**
      * 增值税电子普通发票
      */
-    GLORITY_ELECTRONIC_INVOICE("10102","增值税电子普通发票"),
+    GLORITY_ELECTRONIC_CODE("10102","增值税电子普通发票"),
+    /**
+     * 区块链电子发票
+     */
+    GLORITY_ELECTRONIC_QUKUAILIAN_CODE("10102_1","区块链电子发票"),
+    /**
+     * 收费公路通行费增值税电子普通发票
+     */
+    GLORITY_ELECTRONIC_ROAD_TOLLS_CODE("10102_2","收费公路通行费增值税电子普通发票"),
     /**
      * 增值税普通发票(卷票)
      */
@@ -119,7 +130,7 @@ public enum InvoiceGlorityEnumd {
     /**
      * 医疗票据
      */
-    MEDICAL_RECEIPTS_CODE("10505a","医疗票据"),
+    MEDICAL_RECEIPTS_CODE("102021","医疗票据"),
     /**
      * 增值税发票清单
      */

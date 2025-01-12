@@ -119,6 +119,13 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         return flag;
     }
 
+    @Override
+    public Boolean insert(DataImageFilesInfo dataImageFilesInfo) {
+        validEntityBeforeSave(dataImageFilesInfo);
+        boolean flag = baseMapper.insert(dataImageFilesInfo) > 0;
+        return flag;
+    }
+
     /**
      * 修改图片文件
      *

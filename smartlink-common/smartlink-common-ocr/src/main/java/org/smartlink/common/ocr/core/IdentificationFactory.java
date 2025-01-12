@@ -3,6 +3,9 @@ package org.smartlink.common.ocr.core;
 
 import org.smartlink.common.ocr.exception.OcrException;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.ocr.glority.response.IdentifyResults;
+
+import java.util.List;
 
 /**
  * <p>Title: IdentificationFactory</p>
@@ -18,7 +21,7 @@ public interface IdentificationFactory<T> {
      * @param t 需要转换的对象
      * @return ChangeIdentifyInfo 如果需要转换的对象不存在或识别错误时则返回{@code null}
      */
-    ChangeIdentifyInfo conversionInfo(DataImageFilesInfo dataImageFilesInfo, T t) throws OcrException;
+    ChangeIdentifyInfo conversionInfo(DataImageFilesInfo dataImageFilesInfo, List<IdentifyResults> identifyResults) throws OcrException;
 
 
 }

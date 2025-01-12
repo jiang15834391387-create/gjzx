@@ -9,17 +9,12 @@ import org.smartlink.common.mybatis.core.domain.BaseEntity;
  * <p>Description: 存储OCR识别信息</p>
  * @author datafly
  **/
-public class IdentificationData<K extends String, T extends BaseEntity> {
-
-
+public class IdentificationData<K extends String, T> {
     public final K k;
-
     public final T t;
-
 
     public IdentificationData(K k, T t) {
         this.k = k;
-
         this.t = t;
     }
 }

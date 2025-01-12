@@ -6,6 +6,8 @@ import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.exception.OcrException;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
+import java.util.List;
+
 
 /**
  * <p>Title: ChangeIdentifyInfo</p>
@@ -14,7 +16,7 @@ import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
  **/
 public interface ChangeIdentifyInfo<T> {
 
-    IdentificationData changeInfo(DataImageFilesInfo dataImageFilesInfo, T t) throws OcrException;
+    List<IdentificationData> changeInfo(DataImageFilesInfo dataImageFilesInfo, T t) throws OcrException;
 
 //    default NccBipOcrResponse.OneDataDTO.DatasDTO.DataDTO reverseConversion(BaseEntity baseEntity) {
 //        return null;

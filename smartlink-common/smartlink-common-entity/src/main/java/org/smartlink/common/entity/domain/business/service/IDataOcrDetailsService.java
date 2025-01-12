@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrDetailsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrDetailsVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -49,6 +50,22 @@ public interface IDataOcrDetailsService {
      * @return 是否新增成功
      */
     Boolean insertByBo(DataOcrDetailsBo bo);
+
+    /**
+     * 新增增值税发票明细
+     *
+     * @param dataOcrDetails 增值税发票明细
+     * @return 是否新增成功
+     */
+    Boolean insert(DataOcrDetails dataOcrDetails);
+
+    /**
+     * 批量新增增值税发票明细
+     *
+     * @param dataOcrDetails 增值税发票明细
+     * @return 是否新增成功
+     */
+    Boolean insertBatch(List<DataOcrDetails> dataOcrDetails);
 
     /**
      * 修改增值税发票明细

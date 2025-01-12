@@ -125,6 +125,30 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     }
 
     /**
+     * 新增增值税发票明细
+     *
+     * @param dataOcrDetails 增值税发票明细
+     * @return 是否新增成功
+     */
+    @Override
+    public Boolean insert(DataOcrDetails dataOcrDetails) {
+        validEntityBeforeSave(dataOcrDetails);
+        boolean flag = baseMapper.insert(dataOcrDetails) > 0;
+        return flag;
+    }
+
+    /**
+     * 批量新增增值税发票明细
+     *
+     * @param dataOcrDetails 增值税发票明细
+     * @return 是否新增成功
+     */
+    @Override
+    public Boolean insertBatch(List<DataOcrDetails> dataOcrDetails) {
+        return baseMapper.insertBatch(dataOcrDetails);
+    }
+
+    /**
      * 修改增值税发票明细
      *
      * @param bo 增值税发票明细
