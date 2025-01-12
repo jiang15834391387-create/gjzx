@@ -3,160 +3,180 @@
  import com.baomidou.mybatisplus.annotation.TableField;
  import com.baomidou.mybatisplus.annotation.TableId;
  import com.baomidou.mybatisplus.annotation.TableName;
+ import com.baomidou.mybatisplus.annotation.Version;
  import lombok.Data;
- import org.smartlink.common.check.doman.InvoiceBaseEntity;
+ import lombok.EqualsAndHashCode;
  import org.smartlink.common.mybatis.core.domain.BaseEntity;
+ import org.smartlink.common.tenant.core.TenantEntity;
 
+ import java.io.Serial;
  import java.util.List;
 
+ /**
+  * 图片文件对象 data_image_files_info
+  *
+  * @author Lion Li
+  * @date 2025-01-08
+  */
+ @Data
+ @EqualsAndHashCode(callSuper = true)
+ @TableName("data_image_files_info")
+ public class DataImageFilesInfo extends TenantEntity {
 
-/**
- * 图片文件对象 invoice_files
- *
- */
-@Data
-@TableName("invoice_files")
-public class DataImageFilesInfo extends InvoiceBaseEntity {
+     @Serial
+     private static final long serialVersionUID = 1L;
 
-    private static final long serialVersionUID = 1L;
+     /**
+      * 图片表主键
+      */
+     @TableId(value = "file_id")
+     private String fileId;
 
-    /**
-     * 图片表主键
-     */
-    @TableId(value = "file_id")
-    private String fileId;
-    /**
-     * 友报账编号
-     */
-    private String barCode;
-    /**
-     * 业务联查使用
-     */
-    private String nccInvestigationNo;
-    /**
-     * 批次号
-     */
-    private String batchId;
-    /**
-     * 税务云返回图片id
-     */
-    private String ncImageId;
-    /**
-     * 客户端ip
-     */
-    private String cip;
-    /**
-     * 文件md5
-     */
-    private String fileMd5;
-    /**
-     * 文件名称
-     */
-    private String fileName;
-    /**
-     * 文件大小
-     */
-    private String fileSize;
-    /**
-     * 补充状态 0待重扫 1补扫 2重扫完成 3事后补扫文件 4本次重扫未提交
-     */
-    private String fileFlowStatus;
-    /**
-     * 文件类型
-     */
-    private String fileType;
-    /**
-     * 票夹文件信息
-     */
-    private String folderId;
-    /**
-     * 圖片是否保密 0-加密 1-正常
-     */
-    private String imageSecret;
-    /**
-     * 缩略图文件
-     */
-    private String surl;
-    /**
-     * 图片源文件，附件源文件
-     */
-    private String iurl;
-    /**
-     * 源文件
-     */
-    private String url;
-    /**
-     * pdf文件
-     */
-    private String purl;
-    /**
-     * 批注文件
-     */
-    private String lurl;
-    /**
-     * 文件信息
-     */
-    private String message;
+     /**
+      * 父文件ID（如果是子文件，则存储原始文件ID）如果 parent_file_id 为 NULL，表示是原始文件。
+      */
+     private String parentFileId;
 
-    /**
-     * 0-删除 1-正常
-     */
-    private String operateState;
-    /**
-     * 文档名
-     */
-    private String documentName;
-    /**
-     * 上级图片ID
-     */
-    private String parentFileId;
-    /**
-     * 文件状态
-     */
-    private String fileStatus;
+     /**
+      * 业务联查使用
+      */
+     private String glorityInvestigationNo;
 
-    /**
-     * 是否删除标识 0-不删除  1-删除
-     */
-    private String deleteFlag;
+     /**
+      * 发票类型
+      */
+     private String invoice;
 
-    /**
-     * 多票据上传包含子发票类型数组
-     */
-    private String includeTypeArr;
-    /**
-     * 租户id
-     */
-    private String tenantId;
-    /**
-     * 备注
-     */
-    private String remark;
+     /**
+      * 条形码
+      */
+     private String barCode;
 
-    /**
-     * 排序字段
-     */
-    private Integer sortValue;
+     /**
+      * 批次号
+      */
+     private String batchId;
 
-    /**
-     * 图片扫描到页面的时间
-     */
-    private String pageTime;
+     /**
+      * ocr返回图片id
+      */
+     private String glorityImageId;
 
-    /**
-     * 图片旋转角度
-     */
-    private int rotateAngle;
+     /**
+      * 客户端ip
+      */
+     private String cip;
 
-    /**
-     * 微信小程序发票是否使用(0=未使用,1=已使用)
-     */
-    private String isUse;
+     /**
+      * 文件md5
+      */
+     private String fileMd5;
 
-    /**
-     * 微信小程序发票是否使用(0=未使用,1=已使用)
-     */
-    private String userId;
+     /**
+      * 文件名称
+      */
+     private String fileName;
+
+     /**
+      * 文件大小
+      */
+     private String fileSize;
+
+     /**
+      * 文件流程状态 0待重扫 1补扫 2重扫完成 3事后补扫文件 4本次重扫未提交
+      */
+     private String fileFlowStatus;
+
+     /**
+      * 文件类型
+      */
+     private String fileType;
+
+     /**
+      * 票夹文件信息
+      */
+     private String folderId;
+
+     /**
+      * 圖片是否保密 0-加密 1-正常
+      */
+     private String imageSecret;
+
+     /**
+      * 缩略图文件
+      */
+     private String surl;
+
+     /**
+      * 图片源文件，附件源文件
+      */
+     private String iurl;
+
+     /**
+      * pdf文件
+      */
+     private String purl;
+
+     /**
+      * 批注文件
+      */
+     private String lurl;
+
+     /**
+      * 文件信息
+      */
+     private String message;
+
+     /**
+      * 文档名
+      */
+     private String documentName;
+
+     /**
+      * 查验状态
+      */
+     private String checkStatus;
+
+     /**
+      * 文件状态
+      */
+     private String fileStatus;
+
+     /**
+      * 排序字段
+      */
+     private String sortValue;
+
+     /**
+      * 旋转角度
+      */
+     private String rotateAngle;
+
+     /**
+      * 是否删除标识 0-不删除  1-删除
+      */
+     private String deleteFlag;
+
+     /**
+      * 图片扫描到页面的时间
+      */
+     private String pageTime;
+
+     /**
+      * 多票据上传包含子发票类型数组
+      */
+     private String includeTypeArr;
+
+     /**
+      * 备注
+      */
+     private String remark;
+
+     /**
+      * 版本号
+      */
+     @Version
+     private Long version;
 
     /**
      * 识别信息文件ID

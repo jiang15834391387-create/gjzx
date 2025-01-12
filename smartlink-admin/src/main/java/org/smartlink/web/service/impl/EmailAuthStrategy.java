@@ -1,5 +1,4 @@
-package org.dromara.web.service.impl;
-
+package org.smartlink.web.service.impl;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjectUtil;

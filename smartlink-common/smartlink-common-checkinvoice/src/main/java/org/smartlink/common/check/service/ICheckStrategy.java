@@ -1,9 +1,8 @@
 package org.smartlink.common.check.service;
 
 
-import org.smartlink.common.check.invoice.DataImageFilesInfo;
-import org.smartlink.common.check.doman.InvoiceBaseEntity;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
+import org.smartlink.common.check.invoice.DataImageFilesInfo;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
 
@@ -22,5 +21,5 @@ public interface ICheckStrategy {
      * @param dto       {@link InvoiceCheckParamDTO }
      * @return baseEntity {@link BaseEntity}
      */
-    InvoiceBaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto);
+    BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto);
 }

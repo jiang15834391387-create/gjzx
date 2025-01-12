@@ -2,12 +2,13 @@ package org.smartlink.common.check.factory;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.smartlink.common.check.service.ICheckStrategy;
-import org.smartlink.common.check.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
 import org.smartlink.common.check.enumd.CheckEnum;
 import org.smartlink.common.check.exception.CheckException;
 import org.smartlink.common.check.properties.CheckProperties;
+import org.smartlink.common.check.properties.RuiZhenCheckProperties;
+import org.smartlink.common.check.service.ICheckStrategy;
+import org.smartlink.common.check.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.core.utils.SpringUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.json.utils.JsonUtils;
@@ -38,7 +39,8 @@ public class CheckFactory {
      * 获取默认实例
      */
     public static ICheckStrategy instance() {
-        // 获取redis 默认厂商
+        RedisUtils.setCacheObject(CheckConstant.SYS_CHECK_KEY+ CheckConstant.CHECK_CONFIG_KEY,
+            CheckConstant.CHECK_SUPPLIER_RUIZHEN);
         String type = RedisUtils.getCacheObject(CheckConstant.CACHE_CONFIG_KEY);
         log.info("默认查验厂商为:{}", type);
         if (StringUtils.isEmpty(type)) {
@@ -63,12 +65,22 @@ public class CheckFactory {
     }
 
     private static void refresh(String type) {
+        RuiZhenCheckProperties ruiZhenCheckProperties = new RuiZhenCheckProperties();
+        ruiZhenCheckProperties.setUrl(CheckConstant.CHECK_URL_RUIZHEN);
+        ruiZhenCheckProperties.setAppKey(CheckConstant.CHECK_APPKEY_RUIZHEN);
+        ruiZhenCheckProperties.setAppSecret(CheckConstant.CHECK_APPSECRET_RUIZHEN);
+        String jsonToStore = JsonUtils.toJsonString(ruiZhenCheckProperties);
+        RedisUtils.setCacheObject(CheckConstant.SYS_CHECK_KEY + type, jsonToStore);
         Object json = RedisUtils.getCacheObject(CheckConstant.SYS_CHECK_KEY + type);
-        CheckProperties properties = JsonUtils.parseObject(json.toString(), CheckProperties.class);
+        RuiZhenCheckProperties properties = JsonUtils.parseObject(json.toString(), RuiZhenCheckProperties.class);
+        CheckProperties checkProperties = new CheckProperties();
+        checkProperties.setConfigKey(type);
+        checkProperties.setDetailInfo(JsonUtils.toJsonString(properties));
         if (properties == null) {
-            throw new CheckException("查验系统异常, '" + type + "'配置信息不存在!");
+           log.error("查验系统异常" + type + "配置信息不存在!{} ",json);
+           throw new CheckException("查验系统异常" + type + "配置信息不存在!");
         }
-        getStrategy(type).init(properties);
+        getStrategy(type).init(checkProperties);
     }
 
     private static AbstractCheckStrategy getStrategy(String type) {

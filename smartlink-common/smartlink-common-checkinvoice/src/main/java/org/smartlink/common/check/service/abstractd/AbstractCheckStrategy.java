@@ -2,15 +2,14 @@ package org.smartlink.common.check.service.abstractd;
 
 
 import org.smartlink.common.check.invoice.DataImageFilesInfo;
-import org.smartlink.common.check.doman.InvoiceBaseEntity;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.service.ICheckStrategy;
 import org.smartlink.common.check.properties.CheckProperties;
+import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
 /**
  * 查验策略：睿真、航信
  *
- * @author 马旭辉
  */
 public abstract class AbstractCheckStrategy implements ICheckStrategy {
 
@@ -28,8 +27,8 @@ public abstract class AbstractCheckStrategy implements ICheckStrategy {
      *
      * @param filesInfo {@link  DataImageFilesInfo}
      * @param dto       {@link InvoiceCheckParamDTO }
-     * @return baseEntity {@link InvoiceBaseEntity}
+     * @return baseEntity {@link BaseEntity}
      */
     @Override
-    public abstract InvoiceBaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto);
+    public abstract BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto);
 }

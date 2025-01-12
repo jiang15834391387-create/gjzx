@@ -5,12 +5,10 @@ import org.smartlink.common.check.service.impl.RuiZhenCheckStrategy;
 
 public enum CheckEnum {
 
-
     /**
      * 睿真
      */
     HANG_XIN("RuiZhen", RuiZhenCheckStrategy.class);
-
 
     /**
      * 百望
