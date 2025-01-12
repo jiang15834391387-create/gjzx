@@ -73,7 +73,7 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataOcrInfo> lqw = Wrappers.lambdaQuery();
         lqw.eq(StringUtils.isNotBlank(bo.getBusinessSerialNo()), DataOcrInfo::getBusinessSerialNo, bo.getBusinessSerialNo());
-        lqw.eq(StringUtils.isNotBlank(bo.getPattern()), DataOcrInfo::getPattern, bo.getPattern());
+        lqw.eq(StringUtils.isNotBlank(bo.getKind()), DataOcrInfo::getKind, bo.getKind());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerAccount()), DataOcrInfo::getBuyerAccount, bo.getBuyerAccount());
         lqw.eq(StringUtils.isNotBlank(bo.getBuyerAddress()), DataOcrInfo::getBuyerAddress, bo.getBuyerAddress());
         lqw.like(StringUtils.isNotBlank(bo.getBuyerName()), DataOcrInfo::getBuyerName, bo.getBuyerName());
@@ -148,6 +148,19 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         if (flag) {
             bo.setId(add.getId());
         }
+        return flag;
+    }
+
+    /**
+     * 新增增值税发票
+     *
+     * @param dataOcrInfo 增值税发票
+     * @return 是否新增成功
+     */
+    @Override
+    public Boolean insert(DataOcrInfo dataOcrInfo) {
+        validEntityBeforeSave(dataOcrInfo);
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
         return flag;
     }
 

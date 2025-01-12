@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
+import org.smartlink.business.service.IDataOcrService;
 import org.smartlink.common.core.constant.CacheNames;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.ocr.constant.OcrConstant;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.enumd.OcrEnumd;
@@ -71,14 +73,14 @@ public class ScanImageServiceImpl implements ScanImageService {
     @Autowired
     public IDataImageFilesInfoService iDataImageFilesInfoService;
 
+    private final IDataOcrService dataOcrService;
+
     // 文件大小上限 (8MB)
     private static final long MAX_FILE_SIZE = 8 * 1024 * 1024;
 
     @Override
     public DataImageFilesInfoVo uploadImage(MultipartFile multipartFile) throws Exception {
-//        QueueUtils.lqm("sys_ocr:OcrConfig");
-//        String jsons = RedisUtils.getCacheObject("sys_ocr:OcrConfig");
-////        boolean s = RedisUtils.getCacheObject("sys_ocr:GLORITY");
+
         //文件为空
         if (multipartFile.isEmpty()){
             return null;
@@ -91,6 +93,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
         //是否单图旋转
         boolean isRotate = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_IMG_ROTATE));
+
         //ocr识别
         if (fileSuffix.equals("jpg") || fileSuffix.equals("jpeg") || fileSuffix.equals("png") || fileSuffix.equals("tiff")){
             //文件最大支持8M
@@ -103,9 +106,6 @@ public class ScanImageServiceImpl implements ScanImageService {
             ByteArrayOutputStream cutThumbnailImgFile = FileUtils.thumbnailSmall(byteArrayOutputStream.toByteArray());
             //转换
             InputStream cutThumbnailImgFileStream = new ByteArrayInputStream(cutThumbnailImgFile.toByteArray());
-//            Tika tika = new Tika();
-//            Path path = Paths.get(fileFullPath);
-            SysOssVo sysOssVo = iSysOssService.upload(multipartFile);
             //源文件存储
             UploadResult originalImage = OssFactory.instance().upload(multipartFile.getInputStream(), dataImageFilesInfoBo.getFileId() + "." + fileSuffix, multipartFile.getSize(), multipartFile.getContentType());
             //缩略图存储
@@ -122,6 +122,13 @@ public class ScanImageServiceImpl implements ScanImageService {
             DataImageFilesInfo dataImageFilesInfos = MapstructUtils.convert(dataImageFilesInfoBo, DataImageFilesInfo.class);
             //图片识别
             List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfos, Base64.getEncoder().encodeToString(multipartFile.getBytes()));
+
+            iDataImageFilesInfoService.insertByBo(dataImageFilesInfoBo);
+            for (IdentificationData identificationDatum : identificationData) {
+                //识别入库
+                R result = dataOcrService.ocrInsertOrUpdateByBaseEntity(identificationDatum.k, identificationDatum.t);
+            }
+
             //是否多图
             boolean multigraph = CollectionUtil.isNotEmpty(identificationData) && identificationData.size() > 1;
             //单图旋转

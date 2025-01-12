@@ -33,10 +33,10 @@ public class DataOcrInfoBo extends BaseEntity {
     private String businessSerialNo;
 
     /**
-     * 发票类型
+     * 发票消费类型
      */
-    @NotBlank(message = "发票类型不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String pattern;
+    @NotBlank(message = "发票消费类型不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String kind;
 
     /**
      * 购方银行账号
@@ -295,6 +295,12 @@ public class DataOcrInfoBo extends BaseEntity {
      */
     @NotBlank(message = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]不能为空", groups = { AddGroup.class, EditGroup.class })
     private String region;
+
+    /**
+     * 图片旋转角度
+     */
+    @NotBlank(message = "图片旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
 
     /**
      * 红冲/非红冲

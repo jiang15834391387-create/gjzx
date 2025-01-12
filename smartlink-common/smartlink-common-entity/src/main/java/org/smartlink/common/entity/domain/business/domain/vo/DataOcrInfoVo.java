@@ -39,10 +39,10 @@ public class DataOcrInfoVo implements Serializable {
     private String businessSerialNo;
 
     /**
-     * 发票类型
+     * 发票消费类型
      */
     @ExcelProperty(value = "发票类型")
-    private String pattern;
+    private String kind;
 
     /**
      * 购方银行账号
@@ -306,6 +306,12 @@ public class DataOcrInfoVo implements Serializable {
      */
     @ExcelProperty(value = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]")
     private String region;
+
+    /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
 
     /**
      * 红冲/非红冲

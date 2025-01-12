@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataImageFilesInfoBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -49,6 +50,14 @@ public interface IDataImageFilesInfoService {
      * @return 是否新增成功
      */
     Boolean insertByBo(DataImageFilesInfoBo bo);
+
+    /**
+     * 新增图片文件
+     *
+     * @param  dataImageFilesInfo 图片文件
+     * @return 是否新增成功
+     */
+    Boolean insert(DataImageFilesInfo dataImageFilesInfo);
 
     /**
      * 修改图片文件

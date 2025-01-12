@@ -201,6 +201,13 @@ public class DataOcrDetailsBo extends BaseEntity {
     private String passenger;
 
     /**
+     * 出行人（service_type为旅客运输服务，返回此字段）
+     */
+    @NotBlank(message = "有效身份证号（service_type为旅客运输服务，返回此字段）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String userId;
+
+
+    /**
      * 出行日期（service_type为旅客运输服务，返回此字段）
      */
     @NotBlank(message = "出行日期（service_type为旅客运输服务，返回此字段）不能为空", groups = { AddGroup.class, EditGroup.class })

@@ -1,4 +1,4 @@
-package org.smartlink.business.enumd;
+package org.smartlink.common.core.enums;
 
 import lombok.Getter;
 
