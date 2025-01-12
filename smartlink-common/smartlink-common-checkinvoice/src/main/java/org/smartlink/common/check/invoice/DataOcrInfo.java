@@ -309,5 +309,14 @@ public class DataOcrInfo extends TenantEntity {
     @Version
     private Long version;
 
+    /**
+     *  发票类型: 0专票 1普票
+     */
+    private String pattern;
+
+    /**
+     * 台账推送业务系统成功标识
+     */
+    private String pushBusinessInfoFlag;
 
 }

@@ -31,20 +31,18 @@ public class DataMotorVehicleSale extends TenantEntity {
     private String id;
 
     /**
-     * 标题
+     * 查验结果
      */
-    private String title;
+    private String checkResult;
 
     /**
      * 购买方名称
      */
     private String buyerName;
-
     /**
      * 购买方税号
      */
     private String buyerId;
-
     /**
      * 车辆识别代码
      */

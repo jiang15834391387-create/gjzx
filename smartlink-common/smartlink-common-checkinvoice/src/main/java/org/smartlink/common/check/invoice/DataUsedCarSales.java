@@ -152,7 +152,7 @@ public class DataUsedCarSales extends TenantEntity {
      */
     private String sellerName;
     /**
-     * 销售方单位代码/个人身份证号
+     * 销售方税号
      */
     private String sellerId;
     /**

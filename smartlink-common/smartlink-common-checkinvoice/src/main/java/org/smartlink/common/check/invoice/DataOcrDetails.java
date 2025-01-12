@@ -59,14 +59,17 @@ public class DataOcrDetails extends TenantEntity {
      * 明细名称
      */
     private String name;
+
     /**
      * 商品编码
      */
     private String commodityCode;
+
     /**
      * 货物或应税劳务名称
      */
     private String commodityName;
+
     /**
      * 单价
      */
@@ -76,10 +79,12 @@ public class DataOcrDetails extends TenantEntity {
      * 税率
      */
     private String taxRate;
+
     /**
      * 规格型号
      */
     private String standard;
+
     /**
      * 税额
      */
@@ -89,6 +94,7 @@ public class DataOcrDetails extends TenantEntity {
      * 单位
      */
     private String unit;
+
     /**
      * 通行日起止
      */
