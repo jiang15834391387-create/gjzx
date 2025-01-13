@@ -1,7 +1,6 @@
 package org.smartlink.common.check.doman.dto;
 
 import lombok.Data;
-import org.smartlink.common.check.service.IBopRequest;
 
 /**
  * 睿真请求参数DTO
@@ -9,7 +8,7 @@ import org.smartlink.common.check.service.IBopRequest;
  * @author maxuhui
  */
 @Data
-public class RuiZhenCheckParamDTO implements IBopRequest {
+public class RuiZhenCheckParamDTO {
 
     /**
      * 购方税号
@@ -36,9 +35,4 @@ public class RuiZhenCheckParamDTO implements IBopRequest {
      */
     private String totalAmount;
 
-    @Override
-    public String getApiName() {
-        //return "baiwang.inputv2.compliancecollect";
-        return "baiwang.input.compliance.validate";
-    }
 }

@@ -1,7 +1,7 @@
-package org.smartlink.common.check.enumd;
+package org.smartlink.business.invoice.enumd;
 
 
-import org.smartlink.common.check.service.impl.RuiZhenCheckStrategy;
+import org.smartlink.business.invoice.service.impl.RuiZhenCheckStrategy;
 
 public enum CheckEnum {
 

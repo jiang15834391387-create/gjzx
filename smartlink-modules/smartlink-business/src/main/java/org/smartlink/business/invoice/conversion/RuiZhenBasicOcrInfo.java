@@ -1,9 +1,9 @@
-package org.smartlink.common.check.conversion;
+package org.smartlink.business.invoice.conversion;
 
 
 import cn.hutool.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.smartlink.common.check.invoice.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.springframework.stereotype.Component;
 
 /**

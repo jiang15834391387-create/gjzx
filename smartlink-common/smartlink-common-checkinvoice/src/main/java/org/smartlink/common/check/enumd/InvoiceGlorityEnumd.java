@@ -2,6 +2,9 @@ package org.smartlink.common.check.enumd;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public enum InvoiceGlorityEnumd {
 

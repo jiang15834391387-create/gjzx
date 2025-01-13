@@ -1,6 +1,5 @@
 package org.smartlink.common.entity.domain.business.service;
 
-
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
@@ -13,11 +12,9 @@ import java.util.List;
 /**
  * 增值税发票Service接口
  *
- * @author Lion Li
  * @date 2025-01-08
  */
 public interface IDataOcrInfoService {
-
     /**
      * 查询增值税发票
      *

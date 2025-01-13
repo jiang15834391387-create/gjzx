@@ -33,6 +33,11 @@
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-excel</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-checkinvoice</artifactId>
+            <version>5.2.3</version>
+        </dependency>
 
     </dependencies>
 

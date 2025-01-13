@@ -1,4 +1,4 @@
-package org.smartlink.common.check.service.impl;
+package org.smartlink.business.invoice.service.impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -13,21 +13,21 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.smartlink.business.invoice.conversion.RuiZhenBasicOcrInfo;
+import org.smartlink.business.invoice.conversion.RuiZhenChangeInvoiceDetails;
+import org.smartlink.business.invoice.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
 import org.smartlink.common.check.constant.FileStatusConstants;
-import org.smartlink.common.check.constant.InvoiceConstants;
-import org.smartlink.common.check.conversion.RuiZhenBasicOcrInfo;
-import org.smartlink.common.check.conversion.RuiZhenChangeInvoiceDetails;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.invoice.DataImageFilesInfo;
-import org.smartlink.common.check.invoice.DataOcrInfo;
-import org.smartlink.common.check.mapper.DataImageFilesInfoMapper;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.check.properties.RuiZhenCheckProperties;
-import org.smartlink.common.check.service.IDataImageFilesInfoService;
-import org.smartlink.common.check.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.utils.RuiZhenRequestUtil;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
+import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
+import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ import java.io.IOException;
  */
 @Slf4j
 @Component
-public class RuiZhenCheckStrategy extends  AbstractCheckStrategy {
+public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
     private static RuiZhenCheckProperties ruiZhenCheckProperties = new RuiZhenCheckProperties();
     private final DataImageFilesInfoMapper dataImageFilesInfoMapper;
     private final RuiZhenBasicOcrInfo basicOcrInfo;

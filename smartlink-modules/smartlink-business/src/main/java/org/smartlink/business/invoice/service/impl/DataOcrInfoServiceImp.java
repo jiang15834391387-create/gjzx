@@ -1,4 +1,4 @@
-package org.smartlink.common.check.service.impl;
+package org.smartlink.business.invoice.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -6,30 +6,29 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-import org.smartlink.common.check.constant.InvoiceConstants;
-import org.smartlink.common.check.doman.BO.DataOcrInfoBo;
-import org.smartlink.common.check.doman.VO.DataOcrInfoVo;
+import org.smartlink.business.invoice.factory.CheckFactory;
+import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.factory.CheckFactory;
-import org.smartlink.common.check.invoice.DataImageFilesInfo;
-import org.smartlink.common.check.invoice.DataOcrDetails;
-import org.smartlink.common.check.invoice.DataOcrInfo;
-import org.smartlink.common.check.mapper.DataImageFilesInfoMapper;
-import org.smartlink.common.check.mapper.DataOcrDetailsMapper;
-import org.smartlink.common.check.mapper.DataOcrInfoMapper;
-import org.smartlink.common.check.service.IDataOcrInfoService;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
+import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
+import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrInfoMapper;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 /**
  * 增值税发票Service业务层处理
  *
@@ -38,7 +37,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Service
-public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
+public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
 
     private final DataOcrInfoMapper baseMapper;
     private final DataImageFilesInfoMapper imageFilesMapper;
@@ -212,10 +211,10 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     }
 
 
-   /**
-    * @Description:增值税专用发票发票修改
-    * @Author: Mr.Meng
-    */
+    /**
+     * @Description:增值税专用发票发票修改
+     * @Author: Mr.Meng
+     */
     @Override
     public R invoiceAlter(DataOcrInfoBo dto) {
         //根据id修改发票信息
@@ -232,7 +231,7 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
                 .eq(DataImageFilesInfo::getFileId, dataOcrInfo.getFileId()));
         final InvoiceCheckParamDTO Dto = new InvoiceCheckParamDTO();
         //增值税专用发票
-        if (InvoiceConstants.GLORITY_TAX_SPECIAL_INVOICE.equals(imageFiles.getInvoice())){
+        if (InvoiceConstants.GLORITY_TAX_SPECIAL_CODE.equals(imageFiles.getInvoice())){
             Dto.setCode(dataOcrInfo.getInvoiceCode());
             Dto.setNumber(dataOcrInfo.getInvoiceNumber());
             Dto.setDate(dataOcrInfo.getInvoiceDate());
@@ -265,4 +264,3 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         return ocrInfo;
     }
 }
-

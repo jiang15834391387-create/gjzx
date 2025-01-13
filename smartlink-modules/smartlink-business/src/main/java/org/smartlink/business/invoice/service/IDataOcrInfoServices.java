@@ -1,23 +1,18 @@
-package org.smartlink.common.check.service;
+package org.smartlink.business.invoice.service;
 
-import org.smartlink.common.check.doman.BO.DataOcrInfoBo;
-import org.smartlink.common.check.doman.VO.DataOcrInfoVo;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.invoice.DataOcrInfo;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
+import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
 import java.util.Collection;
 import java.util.List;
-
-/**
- * 增值税发票Service接口
- *
- * @date 2025-01-08
- */
-public interface IDataOcrInfoService {
+//查验
+public interface IDataOcrInfoServices {
     /**
      * 查询增值税发票
      *
@@ -74,4 +69,5 @@ public interface IDataOcrInfoService {
 
     // 根据fileId查询ocr基本信息和详细信息
     DataOcrInfo getByFileId(String fileId);
+
 }

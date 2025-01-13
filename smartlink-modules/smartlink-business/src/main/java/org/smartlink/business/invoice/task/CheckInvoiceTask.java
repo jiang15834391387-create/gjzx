@@ -1,4 +1,4 @@
-package org.smartlink.common.check.task;
+package org.smartlink.business.invoice.task;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -6,21 +6,21 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.shiro.util.StringUtils;
+import org.smartlink.business.invoice.factory.CheckFactory;
+import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.constant.FileStatusConstants;
-import org.smartlink.common.check.constant.InvoiceConstants;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.enumd.InvoiceGlorityEnumd;
 import org.smartlink.common.check.exception.CheckException;
-import org.smartlink.common.check.factory.CheckFactory;
-import org.smartlink.common.check.invoice.DataImageFilesInfo;
-import org.smartlink.common.check.invoice.DataOcrDetails;
-import org.smartlink.common.check.invoice.DataOcrInfo;
-import org.smartlink.common.check.mapper.DataOcrDetailsMapper;
-import org.smartlink.common.check.mapper.DataOcrInfoMapper;
-import org.smartlink.common.check.service.IDataImageFilesInfoService;
-import org.smartlink.common.check.service.IDataOcrDetailsService;
-import org.smartlink.common.check.service.IDataOcrInfoService;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrInfoMapper;
+import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
+import org.smartlink.common.entity.domain.business.service.IDataOcrDetailsService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
+import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,18 +28,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
 @Slf4j
 @Component
 public class CheckInvoiceTask {
-    private final IDataOcrInfoService dataOcrInfoService;
+    private final IDataOcrInfoServices dataOcrInfoService;
     private final IDataImageFilesInfoService imageFilesInfoService;
     private final DataOcrDetailsMapper detailsMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
-    public CheckInvoiceTask(IDataOcrInfoService dataOcrInfoService, IDataImageFilesInfoService imageFilesInfoService, IDataOcrDetailsService ocrDetailsService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper) {
-        this.dataOcrInfoService = dataOcrInfoService;
+    public CheckInvoiceTask(IDataOcrInfoServices dataOcrInfoService, IDataImageFilesInfoService imageFilesInfoService, IDataOcrDetailsService ocrDetailsService, IDataOcrInfoServices dataOcrInfoService1, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper) {
         this.imageFilesInfoService = imageFilesInfoService;
+        this.dataOcrInfoService = dataOcrInfoService;
         this.detailsMapper = detailsMapper;
         this.ocrInfoMapper = ocrInfoMapper;
+
     }
     @Scheduled(fixedRate = 120000)
 //    @Scheduled(fixedRate = 5000)
@@ -66,7 +68,7 @@ public class CheckInvoiceTask {
                 case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
                     log.info("查验机动车第"+i+"张发票");
                     break;
-                case InvoiceConstants.GLORITY_TAX_SPECIAL_INVOICE:
+                case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
                     log.info("查验增值税专票第"+i+"张发票");
                     final DataOcrInfo ocrInfo = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
@@ -77,8 +79,8 @@ public class CheckInvoiceTask {
                     invoiceCheckParamDTO.setElectron_mark(Integer.valueOf(ocrInfo.getElectronicMark()));
                     invoiceCheckParamDTO.setPretax_amount(ocrInfo.getPretaxAmount());
                     break;
-                case InvoiceConstants.GLORITY_TAX_INVOICE:
-                case InvoiceConstants.GLORITY_ELECTRONIC_INVOICE:
+                case InvoiceConstants.GLORITY_TAX_CODE:
+                case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
                     log.info("查验ocr第"+i+"张发票");
                     final DataOcrInfo ocrInfos = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());

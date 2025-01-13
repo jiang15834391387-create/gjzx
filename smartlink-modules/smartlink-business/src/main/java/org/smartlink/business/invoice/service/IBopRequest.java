@@ -1,4 +1,4 @@
-package org.smartlink.common.check.service;
+package org.smartlink.business.invoice.service;
 
 
 public interface IBopRequest {

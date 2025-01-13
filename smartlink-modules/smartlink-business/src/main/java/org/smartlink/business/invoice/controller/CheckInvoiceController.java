@@ -1,25 +1,25 @@
-package org.smartlink.common.check.controller;
+package org.smartlink.business.invoice.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.smartlink.common.check.doman.BO.DataOcrInfoBo;
+import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.service.IDataOcrInfoService;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 @Slf4j
 @RestController
 @RequestMapping("/check/invoice")
 public class CheckInvoiceController {
 
-     private final IDataOcrInfoService dataOcrInfoService;
+    @Autowired
+    private IDataOcrInfoServices dataOcrInfoService;
 
-    public CheckInvoiceController(IDataOcrInfoService dataOcrInfoService) {
-        this.dataOcrInfoService = dataOcrInfoService;
-    }
     /**
      * 发票查验
      * @param invoiceCheckParamDTO

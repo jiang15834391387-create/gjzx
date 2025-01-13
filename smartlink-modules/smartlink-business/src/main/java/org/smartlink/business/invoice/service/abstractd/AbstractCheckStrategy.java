@@ -1,10 +1,10 @@
-package org.smartlink.common.check.service.abstractd;
+package org.smartlink.business.invoice.service.abstractd;
 
 
-import org.smartlink.common.check.invoice.DataImageFilesInfo;
+import org.smartlink.business.invoice.service.ICheckStrategy;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.service.ICheckStrategy;
 import org.smartlink.common.check.properties.CheckProperties;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
 /**

@@ -1,18 +1,19 @@
-package org.smartlink.common.check.factory;
+package org.smartlink.business.invoice.factory;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.smartlink.business.invoice.enumd.CheckEnum;
+import org.smartlink.business.invoice.service.ICheckStrategy;
+import org.smartlink.business.invoice.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
-import org.smartlink.common.check.enumd.CheckEnum;
 import org.smartlink.common.check.exception.CheckException;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.check.properties.RuiZhenCheckProperties;
-import org.smartlink.common.check.service.ICheckStrategy;
-import org.smartlink.common.check.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.core.utils.SpringUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.redis.utils.RedisUtils;
+
 /**
  * 查验工厂
  *

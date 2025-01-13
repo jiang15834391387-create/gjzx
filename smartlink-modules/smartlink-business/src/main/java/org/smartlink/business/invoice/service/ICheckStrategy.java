@@ -1,8 +1,8 @@
-package org.smartlink.common.check.service;
+package org.smartlink.business.invoice.service;
 
 
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.invoice.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
 

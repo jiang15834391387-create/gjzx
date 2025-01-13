@@ -1,10 +1,8 @@
 package org.smartlink.common.entity.domain.business.service.Impl;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
@@ -119,13 +117,6 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         return flag;
     }
 
-    @Override
-    public Boolean insert(DataImageFilesInfo dataImageFilesInfo) {
-        validEntityBeforeSave(dataImageFilesInfo);
-        boolean flag = baseMapper.insert(dataImageFilesInfo) > 0;
-        return flag;
-    }
-
     /**
      * 修改图片文件
      *
@@ -159,5 +150,10 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteByIds(ids) > 0;
+    }
+
+    @Override
+    public List<DataImageFilesInfo> listlqw(LambdaQueryWrapper<DataImageFilesInfo> queryWrapper) {
+        return this.baseMapper.selectList(queryWrapper);
     }
 }

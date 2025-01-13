@@ -1,6 +1,5 @@
 package org.smartlink.common.entity.domain.business.service;
 
-
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrDetailsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrDetailsVo;
@@ -10,14 +9,7 @@ import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * 增值税发票明细Service接口
- *
- * @author Lion Li
- * @date 2025-01-08
- */
 public interface IDataOcrDetailsService {
-
     /**
      * 查询增值税发票明细
      *
