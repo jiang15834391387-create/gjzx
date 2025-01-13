@@ -21,8 +21,10 @@ import org.smartlink.common.check.conversion.RuiZhenChangeInvoiceDetails;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.invoice.DataImageFilesInfo;
 import org.smartlink.common.check.invoice.DataOcrInfo;
+import org.smartlink.common.check.mapper.DataImageFilesInfoMapper;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.check.properties.RuiZhenCheckProperties;
+import org.smartlink.common.check.service.IDataImageFilesInfoService;
 import org.smartlink.common.check.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.utils.RuiZhenRequestUtil;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
@@ -38,11 +40,12 @@ import java.io.IOException;
 @Component
 public class RuiZhenCheckStrategy extends  AbstractCheckStrategy {
     private static RuiZhenCheckProperties ruiZhenCheckProperties = new RuiZhenCheckProperties();
-
+    private final DataImageFilesInfoMapper dataImageFilesInfoMapper;
     private final RuiZhenBasicOcrInfo basicOcrInfo;
     private final RuiZhenChangeInvoiceDetails changeInvoiceDetails;
 
-    public RuiZhenCheckStrategy(RuiZhenBasicOcrInfo basicOcrInfo, RuiZhenChangeInvoiceDetails changeInvoiceDetails) {
+    public RuiZhenCheckStrategy(IDataImageFilesInfoService imageFilesInfoService, DataImageFilesInfoMapper dataImageFilesInfoMapper, RuiZhenBasicOcrInfo basicOcrInfo, RuiZhenChangeInvoiceDetails changeInvoiceDetails) {
+        this.dataImageFilesInfoMapper = dataImageFilesInfoMapper;
         this.basicOcrInfo = basicOcrInfo;
         this.changeInvoiceDetails = changeInvoiceDetails;
     }
@@ -161,6 +164,8 @@ public class RuiZhenCheckStrategy extends  AbstractCheckStrategy {
         baseEntity = updateInvoicesInfo(filesInfo, details);
         log.info("睿真查验转换后的OCR信息：{}", baseEntity);
         filesInfo.setMessage("睿真发票接口查验成功！");
+        //修改文件状态
+        this.dataImageFilesInfoMapper.updateById(filesInfo);
         return baseEntity;
 
     }

@@ -2,6 +2,9 @@ package org.smartlink.common.check.enumd;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 public enum InvoiceGlorityEnumd {
 
@@ -143,5 +146,22 @@ public enum InvoiceGlorityEnumd {
             }
         }
         return null;
+    }
+
+    /**
+     * 获取增值税相关的发票类型代码
+     */
+    public static List<String> getVatInvoiceCodes() {
+        List<String> list = new ArrayList<>();
+        list.add(GLORITY_TAX_SPECIAL_INVOICE.code);
+        list.add(GLORITY_TAX_INVOICE.code);
+        list.add(GLORITY_ELECTRONIC_INVOICE.code);
+        list.add(GLORITY_ROLL_TICKET_CODE.code);
+        list.add(GLORITY_MOTOR_VEHICLE_SALE_CODE.code);
+        list.add(GLORITY_USED_CAR_SALES_CODE.code);
+        list.add(DIGITAL_INVOICE_VAT_SPECIAL_CODE.code);
+        list.add(DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.code);
+        list.add(DIGITAL_INVOICE_LIST.code);
+        return list;
     }
 }

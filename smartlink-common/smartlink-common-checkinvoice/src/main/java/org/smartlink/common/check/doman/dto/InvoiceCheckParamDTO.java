@@ -35,7 +35,7 @@ public class InvoiceCheckParamDTO implements Serializable {
     /**
      * 电子票标识(增值税专用发票) (默认 0, 1 是)
      */
-    private String electron_mark;
+    private Integer electron_mark;
     /**
      * (增值税专用发票)  机动车(税前金额)   二手车(总价金额 )
      */

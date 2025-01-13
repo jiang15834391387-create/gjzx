@@ -3,6 +3,7 @@ package org.smartlink.common.check.service;
 import org.smartlink.common.check.doman.BO.DataOcrInfoBo;
 import org.smartlink.common.check.doman.VO.DataOcrInfoVo;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
+import org.smartlink.common.check.invoice.DataOcrInfo;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -70,4 +71,7 @@ public interface IDataOcrInfoService {
     BaseEntity checkInvoice(InvoiceCheckParamDTO invoiceCheckParamDTO);
 
     R invoiceAlter(DataOcrInfoBo dto);
+
+    // 根据fileId查询ocr基本信息和详细信息
+    DataOcrInfo getByFileId(String fileId);
 }

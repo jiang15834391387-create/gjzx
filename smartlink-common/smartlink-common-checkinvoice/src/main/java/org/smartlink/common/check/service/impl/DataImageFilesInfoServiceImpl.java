@@ -153,4 +153,9 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         }
         return baseMapper.deleteByIds(ids) > 0;
     }
+
+    @Override
+    public List<DataImageFilesInfo> listlqw(LambdaQueryWrapper<DataImageFilesInfo> queryWrapper) {
+        return this.baseMapper.selectList(queryWrapper);
+    }
 }

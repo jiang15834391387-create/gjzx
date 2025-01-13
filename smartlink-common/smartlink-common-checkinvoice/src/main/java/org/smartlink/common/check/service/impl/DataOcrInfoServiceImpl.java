@@ -1,6 +1,7 @@
 package org.smartlink.common.check.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,8 +12,10 @@ import org.smartlink.common.check.doman.VO.DataOcrInfoVo;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.factory.CheckFactory;
 import org.smartlink.common.check.invoice.DataImageFilesInfo;
+import org.smartlink.common.check.invoice.DataOcrDetails;
 import org.smartlink.common.check.invoice.DataOcrInfo;
 import org.smartlink.common.check.mapper.DataImageFilesInfoMapper;
+import org.smartlink.common.check.mapper.DataOcrDetailsMapper;
 import org.smartlink.common.check.mapper.DataOcrInfoMapper;
 import org.smartlink.common.check.service.IDataOcrInfoService;
 import org.smartlink.common.core.domain.R;
@@ -39,6 +42,7 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
 
     private final DataOcrInfoMapper baseMapper;
     private final DataImageFilesInfoMapper imageFilesMapper;
+    private final DataOcrDetailsMapper dataOcrDetailsMapper;
 
     /**
      * 查询增值税发票
@@ -219,6 +223,10 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         if (ObjectUtil.isEmpty(dataOcrInfo)){
             return R.fail("该发票不存在");
         }
+        int update= baseMapper.updateById(MapstructUtils.convert(dto, DataOcrInfo.class));
+        if (update<=0){
+            return R.fail("修改失败");
+        }
         DataImageFilesInfo imageFiles = imageFilesMapper
             .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
                 .eq(DataImageFilesInfo::getFileId, dataOcrInfo.getFileId()));
@@ -230,13 +238,31 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
             Dto.setDate(dataOcrInfo.getInvoiceDate());
             Dto.setType(imageFiles.getInvoice());
             Dto.setPretax_amount(dataOcrInfo.getPretaxAmount());
-            Dto.setElectron_mark(dataOcrInfo.getElectronicMark());
+            Dto.setElectron_mark(Integer.valueOf(dataOcrInfo.getElectronicMark()));
             //查验发票
             CheckFactory.instance().checkInvoke(imageFiles, Dto);
             return R.ok();
         }
         return R.ok();
 
+    }
+    //根据fileId查询发票信息
+    @Override
+    public DataOcrInfo getByFileId(String fileId) {
+        LambdaQueryWrapper<DataOcrInfo> dataOcrInfoLqw = new LambdaQueryWrapper<>();
+        dataOcrInfoLqw.eq(DataOcrInfo::getFileId,fileId);
+        DataOcrInfo ocrInfo = this.baseMapper.selectOne(dataOcrInfoLqw);
+        if (ocrInfo == null) {
+            return null;
+        }
+        LambdaQueryWrapper<DataOcrDetails> dataOcrDetailsLqw = new LambdaQueryWrapper<>();
+        dataOcrDetailsLqw.eq(DataOcrDetails::getFileId,fileId);
+        final List<DataOcrDetails> ocrDetailsList = this.dataOcrDetailsMapper.selectList(dataOcrDetailsLqw);
+        for (DataOcrDetails dataOcrDetails : ocrDetailsList) {
+            dataOcrDetails.setParams(new JSONObject());
+        }
+        ocrInfo.setDetails(ocrDetailsList);
+        return ocrInfo;
     }
 }
 
