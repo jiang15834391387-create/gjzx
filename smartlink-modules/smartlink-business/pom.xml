@@ -118,7 +118,6 @@
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-system</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-checkinvoice</artifactId>
@@ -135,17 +134,9 @@
             <version>4.5.13</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.15</version>
-        </dependency>
-        <dependency>
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-entity</artifactId>
         </dependency>
-
-
-
     </dependencies>
 
 </project>

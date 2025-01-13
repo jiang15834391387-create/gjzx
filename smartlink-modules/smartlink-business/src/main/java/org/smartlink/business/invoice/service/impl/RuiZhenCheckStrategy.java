@@ -13,11 +13,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.conversion.RuiZhenBasicOcrInfo;
 import org.smartlink.business.invoice.conversion.RuiZhenChangeInvoiceDetails;
 import org.smartlink.business.invoice.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
-import org.smartlink.common.check.constant.FileStatusConstants;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.check.properties.RuiZhenCheckProperties;
@@ -82,7 +82,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
                 response = EntityUtils.toString(responseEntity, "UTF-8");
                 if (StrUtil.isEmpty(response)) {
                     log.error("睿真查验失败，失败原因：查验服务返回缺少体：{}", response);
-                    filesInfo.setFileStatus(FileStatusConstants.INVOICE_CHECK_FAIL);
+                    filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                     filesInfo.setMessage(response);
                     baseEntity.setCheckResult(response);
                     baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
@@ -91,7 +91,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
             }
         } catch (IOException e) {
             log.error("执行睿真查验HTTP请求时发生异常原因：{}", e.getMessage());
-            filesInfo.setFileStatus(FileStatusConstants.INVOICE_CHECK_FAIL);
+            filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
             filesInfo.setMessage("查验HTTP请求失败:" + e.getMessage());
             baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
             baseEntity.setCheckResult("查验HTTP请求失败:" + e.getMessage());
@@ -104,7 +104,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
         if (responseResult.getInt("result") != 1) {
             String message = responseResult.getStr("message");
             log.error("睿真查验失败：" + message);
-            filesInfo.setFileStatus(FileStatusConstants.INVOICE_CHECK_FAIL);
+            filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
             filesInfo.setMessage(message);
             baseEntity.setCheckResult(message);
             baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
@@ -116,7 +116,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
         if (identifyResults == null || identifyResults.isEmpty()) {
             String message = "未找到查验结果";
             log.error("睿真查验失败：" + message);
-            filesInfo.setFileStatus(FileStatusConstants.INVOICE_CHECK_FAIL);
+            filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
             filesInfo.setMessage(message);
             baseEntity.setCheckResult(message);
             baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
@@ -130,7 +130,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
             if (validation.getInt("code") != 10000) {
                 String message = validation.getStr("message");
                 log.error("睿真查验失败：" + message);
-                filesInfo.setFileStatus(FileStatusConstants.INVOICE_CHECK_FAIL);
+                filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                 filesInfo.setMessage(message);
                 baseEntity.setCheckResult(message);
                 baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
@@ -148,7 +148,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
             if (details == null) {
                 String message = "校验失败：明细details 为空";
                 log.error(message);
-                filesInfo.setFileStatus(FileStatusConstants.INVOICE_CHECK_FAIL);
+                filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                 filesInfo.setMessage(message);
                 baseEntity.setCheckResult(message);
                 baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
@@ -157,7 +157,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
         }
         // 如果所有校验都通过
         log.info("睿真发票接口查验成功");
-        filesInfo.setFileStatus(FileStatusConstants.INVOICE_CHECK_SUCCESS);
+        filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
         baseEntity.setCheckResult("查验成功");
         baseEntity.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
         // 更新OCR信息

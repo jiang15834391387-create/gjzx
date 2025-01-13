@@ -6,9 +6,9 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.shiro.util.StringUtils;
+import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.factory.CheckFactory;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
-import org.smartlink.common.check.constant.FileStatusConstants;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.enumd.InvoiceGlorityEnumd;
 import org.smartlink.common.check.exception.CheckException;
@@ -49,7 +49,7 @@ public class CheckInvoiceTask {
         System.out.println("发票查验定时器任务启动了");
         final List<String> vatInvoiceList = InvoiceGlorityEnumd.getVatInvoiceCodes();
         final LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.and(i -> i.eq(DataImageFilesInfo::getFileStatus, FileStatusConstants.INVOICE_CHECK_FAIL).in(DataImageFilesInfo::getInvoice, vatInvoiceList));
+        queryWrapper.and(i -> i.eq(DataImageFilesInfo::getFileStatus, CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode()).in(DataImageFilesInfo::getInvoice, vatInvoiceList));
         final List<DataImageFilesInfo> list = this.imageFilesInfoService.listlqw(queryWrapper);
         if (CollUtil.isEmpty(list)) {
             log.info("没有查询到需要查验的文件图片！");
@@ -106,7 +106,7 @@ public class CheckInvoiceTask {
     @Transactional(rollbackFor = Exception.class)
     public void checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws InvocationTargetException, IllegalAccessException {
         BaseEntity baseEntity= CheckFactory.instance().checkInvoke(filesInfo, invoiceCheckParamDTO);
-        if (!filesInfo.getFileStatus().equals(FileStatusConstants.INVOICE_CHECK_FAIL)) {
+        if (!filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
             DataOcrInfo dataOcrInfo = new DataOcrInfo();
             BeanUtils.copyProperties(baseEntity, dataOcrInfo);
             List<DataOcrDetails> arrayList = new ArrayList<>();
