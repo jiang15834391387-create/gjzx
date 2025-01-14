@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 非税收入类票据对象 data_medical_treatment
@@ -218,6 +220,11 @@ public class DataMedicalTreatment extends TenantEntity {
      * 备注
      */
     private String remark;
+
+
+    //非税票据详情对象
+    @TableField(exist = false)
+    private List<DataMedicalTreatmentDetail> medicalTreatmentDetails;
 
     /**
      * 版本号

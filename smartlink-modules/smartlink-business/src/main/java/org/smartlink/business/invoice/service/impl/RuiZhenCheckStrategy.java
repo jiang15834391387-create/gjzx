@@ -14,16 +14,14 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
-import org.smartlink.business.invoice.conversion.RuiZhenBasicOcrInfo;
-import org.smartlink.business.invoice.conversion.RuiZhenChangeInvoiceDetails;
+import org.smartlink.business.invoice.conversion.*;
 import org.smartlink.business.invoice.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.check.properties.RuiZhenCheckProperties;
 import org.smartlink.common.check.utils.RuiZhenRequestUtil;
-import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
-import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
 import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
@@ -43,11 +41,16 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
     private final DataImageFilesInfoMapper dataImageFilesInfoMapper;
     private final RuiZhenBasicOcrInfo basicOcrInfo;
     private final RuiZhenChangeInvoiceDetails changeInvoiceDetails;
-
-    public RuiZhenCheckStrategy(IDataImageFilesInfoService imageFilesInfoService, DataImageFilesInfoMapper dataImageFilesInfoMapper, RuiZhenBasicOcrInfo basicOcrInfo, RuiZhenChangeInvoiceDetails changeInvoiceDetails) {
+    private final RuiZhenChangeUsedCarSales changeUsedCarSales;
+    private final RuiZhenMotorVehicleSale motorVehicleSale;
+    private final RuiZhenChangeRailwayTicket railwayTicket;
+    public RuiZhenCheckStrategy(IDataImageFilesInfoService imageFilesInfoService, DataImageFilesInfoMapper dataImageFilesInfoMapper, RuiZhenBasicOcrInfo basicOcrInfo, RuiZhenChangeInvoiceDetails changeInvoiceDetails, RuiZhenChangeUsedCarSales changeUsedCarSales, RuiZhenMotorVehicleSale motorVehicleSale, RuiZhenChangeRailwayTicket railwayTicket) {
         this.dataImageFilesInfoMapper = dataImageFilesInfoMapper;
         this.basicOcrInfo = basicOcrInfo;
         this.changeInvoiceDetails = changeInvoiceDetails;
+        this.changeUsedCarSales = changeUsedCarSales;
+        this.motorVehicleSale = motorVehicleSale;
+        this.railwayTicket = railwayTicket;
     }
 
     @Override
@@ -173,12 +176,32 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
     public BaseEntity updateInvoicesInfo(DataImageFilesInfo filesInfo, JSONObject jsonObject) {
         String invoiceType = filesInfo.getInvoice();
         if (StrUtil.equals(InvoiceConstants.GLORITY_USED_CAR_SALES_CODE, invoiceType)) {
-            //二手车销售统一发票(TODO)
-            return null;
+            //二手车销售统一发票
+             DataUsedCarSales dataUsedCarSales = new DataUsedCarSales();
+             // 填充二手车销售统一发票信息
+             this.changeUsedCarSales.changeUsedCarSales(jsonObject, dataUsedCarSales);
+             dataUsedCarSales.setId(IdUtil.simpleUUID());
+             dataUsedCarSales.setFileId(filesInfo.getFileId());
+             dataUsedCarSales.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
+             return dataUsedCarSales;
         }else if(StrUtil.equals(InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE, invoiceType)){
-            //机动车销售统一发票(TODO)
-            return null;
-        }else {
+            //机动车销售统一发票
+            DataMotorVehicleSale dataMotorVehicleSale = new DataMotorVehicleSale();
+            // 填充机动车销售统一发票信息
+            this.motorVehicleSale.changeMotorVehicleSale(jsonObject, dataMotorVehicleSale);
+            dataMotorVehicleSale.setId(IdUtil.simpleUUID());
+            dataMotorVehicleSale.setFileId(filesInfo.getFileId());
+            dataMotorVehicleSale.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
+            return dataMotorVehicleSale;
+        }else if(StrUtil.equals(InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE, invoiceType)){
+             //火车票
+            DataRailwayTicket dataRailwayTicket = new DataRailwayTicket();
+            this.railwayTicket.changeRailwayTicket(jsonObject, dataRailwayTicket);
+            dataRailwayTicket.setId(IdUtil.simpleUUID());
+            dataRailwayTicket.setFileId(filesInfo.getFileId());
+            dataRailwayTicket.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
+            return dataRailwayTicket;
+        } else {
             //增值税
             DataOcrInfo dataOcrInfo = new DataOcrInfo();
             //填充OCR基本信息

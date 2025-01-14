@@ -30,7 +30,6 @@ import java.util.Map;
 public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
 
     private final DataOcrDetailsMapper baseMapper;
-
     /**
      * 查询增值税发票明细
      *

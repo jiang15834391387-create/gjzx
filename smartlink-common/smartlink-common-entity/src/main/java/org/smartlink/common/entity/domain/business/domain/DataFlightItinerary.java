@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 航空电子行程单对象 data_flight_itinerary
@@ -199,6 +201,9 @@ public class DataFlightItinerary extends TenantEntity {
      */
     private String remark;
 
+    //航空电子单明细对象
+    @TableField(exist = false)
+    private List<DataFlightsItineraryDetail> flightItineraryDetails;
     /**
      * 版本号
      */

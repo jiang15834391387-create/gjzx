@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatment;
 import org.smartlink.common.entity.domain.business.domain.bo.DataMedicalTreatmentBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataMedicalTreatmentVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -66,4 +67,6 @@ public interface IDataMedicalTreatmentService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+    // 根据file_id查询非税收入类票据
+    DataMedicalTreatment getByFileId(String fileId);
 }

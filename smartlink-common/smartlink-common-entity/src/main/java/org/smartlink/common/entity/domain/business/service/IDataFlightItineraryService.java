@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataFlightItinerary;
 import org.smartlink.common.entity.domain.business.domain.bo.DataFlightItineraryBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataFlightItineraryVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -66,4 +67,6 @@ public interface IDataFlightItineraryService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+    // 根据文件id查询
+    DataFlightItinerary getByFileId(String fileId);
 }

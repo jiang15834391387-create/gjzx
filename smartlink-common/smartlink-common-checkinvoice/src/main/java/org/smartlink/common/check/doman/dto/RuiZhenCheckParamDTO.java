@@ -8,7 +8,7 @@ import lombok.Data;
  * @author maxuhui
  */
 @Data
-public class RuiZhenCheckParamDTO {
+public class RuiZhenCheckParamDTO   {
 
     /**
      * 购方税号

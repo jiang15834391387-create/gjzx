@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataMotorVehicleSale;
@@ -26,6 +27,7 @@ import java.util.Map;
  * @author Lion Li
  * @date 2025-01-08
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleService {
@@ -172,5 +174,15 @@ public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleSer
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteByIds(ids) > 0;
+    }
+    /*
+       * 根据文件id查询机动车销售发票信息
+     */
+    @Override
+    public DataMotorVehicleSale getByFileId(String fileId) {
+        if (StringUtils.isBlank(fileId)){
+            log.error("机动车销售发票fileId为空", fileId);
+        }
+        return baseMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, fileId));
     }
 }

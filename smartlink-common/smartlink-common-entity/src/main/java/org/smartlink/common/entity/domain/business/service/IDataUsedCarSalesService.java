@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataUsedCarSales;
 import org.smartlink.common.entity.domain.business.domain.bo.DataUsedCarSalesBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataUsedCarSalesVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -66,4 +67,7 @@ public interface IDataUsedCarSalesService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+
+    // 根据文件id查询
+    DataUsedCarSales getByFileId(String fileId);
 }

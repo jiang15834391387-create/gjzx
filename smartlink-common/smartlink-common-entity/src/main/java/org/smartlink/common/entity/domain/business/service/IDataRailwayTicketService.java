@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataRailwayTicket;
 import org.smartlink.common.entity.domain.business.domain.bo.DataRailwayTicketBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataRailwayTicketVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -66,4 +67,6 @@ public interface IDataRailwayTicketService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+    //根据图片id查询火车票
+    DataRailwayTicket getByFileId(String fileId);
 }

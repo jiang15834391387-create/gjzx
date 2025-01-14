@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataFlightItinerary;
@@ -26,6 +27,7 @@ import java.util.Map;
  * @author Lion Li
  * @date 2025-01-08
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DataFlightItineraryServiceImpl implements IDataFlightItineraryService {
@@ -158,5 +160,17 @@ public class DataFlightItineraryServiceImpl implements IDataFlightItineraryServi
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteByIds(ids) > 0;
+    }
+    /*
+    * 获取文件对应的行程单
+     */
+
+    @Override
+    public DataFlightItinerary getByFileId(String fileId) {
+        if (StringUtils.isBlank(fileId)){
+            log.error("行程单文件fileId为空", fileId);
+            return null;
+        }
+        return baseMapper.selectOne(new LambdaQueryWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, fileId));
     }
 }

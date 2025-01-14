@@ -11,6 +11,7 @@ import java.io.Serializable;
  */
 @Data
 public class InvoiceCheckParamDTO implements Serializable {
+
     /**
      * 主键ID
      */

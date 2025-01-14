@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -37,6 +38,7 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 图片表id
      */
+    @TableField(value = "file_id")
     private String fileId;
 
     /**
@@ -157,11 +159,13 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 起始地（service_type为货物运输服务，返回此字段）
      */
+    @TableField("`from`")
     private String from;
 
     /**
      * 到达地（service_type为货物运输服务，返回此字段）
      */
+    @TableField("`to`")
     private String to;
 
     /**

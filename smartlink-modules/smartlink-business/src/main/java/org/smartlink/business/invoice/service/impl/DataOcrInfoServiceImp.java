@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.business.invoice.factory.CheckFactory;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
@@ -35,6 +36,7 @@ import java.util.Map;
  * @author Lion Li
  * @date 2025-01-08
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
@@ -248,6 +250,10 @@ public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
     //根据fileId查询发票信息
     @Override
     public DataOcrInfo getByFileId(String fileId) {
+        if (StringUtils.isBlank(fileId)){
+            log.info("查不到文件图片传入fileId为空", fileId);
+            return null;
+        }
         LambdaQueryWrapper<DataOcrInfo> dataOcrInfoLqw = new LambdaQueryWrapper<>();
         dataOcrInfoLqw.eq(DataOcrInfo::getFileId,fileId);
         DataOcrInfo ocrInfo = this.baseMapper.selectOne(dataOcrInfoLqw);
@@ -256,6 +262,7 @@ public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
         }
         LambdaQueryWrapper<DataOcrDetails> dataOcrDetailsLqw = new LambdaQueryWrapper<>();
         dataOcrDetailsLqw.eq(DataOcrDetails::getFileId,fileId);
+        log.info("fileId：{}",fileId);
         final List<DataOcrDetails> ocrDetailsList = this.dataOcrDetailsMapper.selectList(dataOcrDetailsLqw);
         for (DataOcrDetails dataOcrDetails : ocrDetailsList) {
             dataOcrDetails.setParams(new JSONObject());
