@@ -44,13 +44,17 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
     private final RuiZhenChangeUsedCarSales changeUsedCarSales;
     private final RuiZhenMotorVehicleSale motorVehicleSale;
     private final RuiZhenChangeRailwayTicket railwayTicket;
-    public RuiZhenCheckStrategy(IDataImageFilesInfoService imageFilesInfoService, DataImageFilesInfoMapper dataImageFilesInfoMapper, RuiZhenBasicOcrInfo basicOcrInfo, RuiZhenChangeInvoiceDetails changeInvoiceDetails, RuiZhenChangeUsedCarSales changeUsedCarSales, RuiZhenMotorVehicleSale motorVehicleSale, RuiZhenChangeRailwayTicket railwayTicket) {
+    private final RuiZhenChangeFlightItinerary changeFlightItinerary;
+    private final RuiZhenChangeFlightItineraryDetails changeFlightItineraryDetails;
+    public RuiZhenCheckStrategy(IDataImageFilesInfoService imageFilesInfoService, DataImageFilesInfoMapper dataImageFilesInfoMapper, RuiZhenBasicOcrInfo basicOcrInfo, RuiZhenChangeInvoiceDetails changeInvoiceDetails, RuiZhenChangeUsedCarSales changeUsedCarSales, RuiZhenMotorVehicleSale motorVehicleSale, RuiZhenChangeRailwayTicket railwayTicket, RuiZhenChangeFlightItinerary changeFlightItinerary, RuiZhenChangeFlightItineraryDetails changeFlightItineraryDetails) {
         this.dataImageFilesInfoMapper = dataImageFilesInfoMapper;
         this.basicOcrInfo = basicOcrInfo;
         this.changeInvoiceDetails = changeInvoiceDetails;
         this.changeUsedCarSales = changeUsedCarSales;
         this.motorVehicleSale = motorVehicleSale;
         this.railwayTicket = railwayTicket;
+        this.changeFlightItinerary = changeFlightItinerary;
+        this.changeFlightItineraryDetails = changeFlightItineraryDetails;
     }
 
     @Override
@@ -201,7 +205,18 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
             dataRailwayTicket.setFileId(filesInfo.getFileId());
             dataRailwayTicket.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
             return dataRailwayTicket;
-        } else {
+        }else if (StrUtil.equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE, invoiceType)){
+            //航空运输电子客运行程单基本信息
+            DataFlightItinerary dataFlightItinerary = new DataFlightItinerary();
+            this.changeFlightItinerary.changeFlightItinerary(jsonObject, dataFlightItinerary);
+            // 填充详情信息
+            dataFlightItinerary.setFlightItineraryDetails(this.changeFlightItineraryDetails.changeFlightItineraryDetails(jsonObject));
+            dataFlightItinerary.setId(IdUtil.simpleUUID());
+            dataFlightItinerary.setFileId(filesInfo.getFileId());
+            dataFlightItinerary.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
+            return dataFlightItinerary;
+
+        }else {
             //增值税
             DataOcrInfo dataOcrInfo = new DataOcrInfo();
             //填充OCR基本信息
@@ -213,5 +228,6 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
             dataOcrInfo.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
             return dataOcrInfo;
         }
+
     }
 }

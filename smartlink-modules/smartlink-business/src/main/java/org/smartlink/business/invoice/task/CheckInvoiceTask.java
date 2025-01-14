@@ -1,6 +1,7 @@
 package org.smartlink.business.invoice.task;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -26,7 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * @Description: 查验定时任务
+ * @Author: Mr.Meng
+ *
+ */
 @Slf4j
 @Component
 public class CheckInvoiceTask {
@@ -37,12 +42,14 @@ public class CheckInvoiceTask {
     private final DataUsedCarSalesMapper usedCarSalesMapper;
     private final DataMotorVehicleSaleMapper motorVehicleSaleMapper;
     private final DataRailwayTicketMapper railwayTicketMapper;
+    private final DataFlightItineraryMapper flightItineraryMapper;
+    private final DataFlightsItineraryDetailMapper flightsItineraryDetailMapper;
     private final IDataRailwayTicketService dataRailwayTicketService;
     private final IDataFlightItineraryService dataFlightItineraryService;
     private final IDataMedicalTreatmentService dataMedicalTreatmentDetailService;
     private final IDataMotorVehicleSaleService dataMotorVehicleSaleService;
     private final IDataUsedCarSalesService dataUsedCarSalesService;
-    public CheckInvoiceTask(IDataOcrInfoServices dataOcrInfoService, IDataImageFilesInfoService imageFilesInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService) {
+    public CheckInvoiceTask(IDataOcrInfoServices dataOcrInfoService, IDataImageFilesInfoService imageFilesInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService) {
         this.dataOcrInfoService = dataOcrInfoService;
         this.imageFilesInfoService = imageFilesInfoService;
         this.detailsMapper = detailsMapper;
@@ -50,6 +57,8 @@ public class CheckInvoiceTask {
         this.usedCarSalesMapper = usedCarSalesMapper;
         this.motorVehicleSaleMapper = motorVehicleSaleMapper;
         this.railwayTicketMapper = railwayTicketMapper;
+        this.flightItineraryMapper = flightItineraryMapper;
+        this.flightsItineraryDetailMapper = flightsItineraryDetailMapper;
         this.dataRailwayTicketService = dataRailwayTicketService;
         this.dataFlightItineraryService = dataFlightItineraryService;
         this.dataMedicalTreatmentDetailService = dataMedicalTreatmentDetailService;
@@ -208,9 +217,41 @@ public class CheckInvoiceTask {
                 //转换后火车票
                 railwayTicketConversionAlter(baseEntity,filesInfo);
             }
+            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE)){
+                //转换后航空运输电子客运行程单基本信息
+                flightItineraryConversionAlter(baseEntity,filesInfo);
+            }
 
         }
     }
+    //转换后航空运输电子客运行程单基本信息
+    @Transactional(rollbackFor = Exception.class)
+    public void flightItineraryConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws InvocationTargetException, IllegalAccessException {
+        if (ObjectUtil.isEmpty(baseEntity)){
+            log.info("航空运输电子客运行程单基本信息查验转换后结果为空");
+            return;
+        }
+        log.info("查验转换后的航空运输电子客运行程单基本信息信息：{}", baseEntity);
+        //创建航空运输电子客运行程单基本信息
+        DataFlightItinerary dataFlightItinerary = new DataFlightItinerary();
+        BeanUtils.copyProperties(baseEntity, dataFlightItinerary);
+        List<DataFlightsItineraryDetail> list = new ArrayList<>();
+        List<DataFlightsItineraryDetail> detailList = dataFlightItinerary.getFlightItineraryDetails();
+        if (CollectionUtil.isNotEmpty(detailList)){
+            for (DataFlightsItineraryDetail dataFlightsItineraryDetail : detailList) {
+                DataFlightsItineraryDetail flightsItineraryDetail = new DataFlightsItineraryDetail();
+                BeanUtils.copyProperties(dataFlightsItineraryDetail, flightsItineraryDetail);
+                flightsItineraryDetail.setFileId(filesInfo.getFileId());
+                list.add(flightsItineraryDetail);
+            }
+        }
+        //根据fileId进行修改航空电子单基本信息
+        flightItineraryMapper.update(dataFlightItinerary, new LambdaUpdateWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, filesInfo.getFileId()));
+        for (DataFlightsItineraryDetail flightsItineraryDetail : list) {
+            flightsItineraryDetailMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId()));
+        }
+    }
+
     // 转换后火车票
     private void railwayTicketConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws InvocationTargetException, IllegalAccessException {
         if (ObjectUtil.isEmpty(baseEntity)){
@@ -265,8 +306,8 @@ public class CheckInvoiceTask {
         List<DataOcrDetails> arrayList = new ArrayList<>();
         if (dataOcrInfo.getDetails() != null) {
             List<DataOcrDetails> details = dataOcrInfo.getDetails();
-            DataOcrDetails ocrDetail = new DataOcrDetails();
             for (DataOcrDetails ocrDetails : details) {
+                DataOcrDetails ocrDetail = new DataOcrDetails();
                 BeanUtils.copyProperties(ocrDetails, ocrDetail);
                 ocrDetail.setFileId(filesInfo.getFileId());
                 arrayList.add(ocrDetail);
