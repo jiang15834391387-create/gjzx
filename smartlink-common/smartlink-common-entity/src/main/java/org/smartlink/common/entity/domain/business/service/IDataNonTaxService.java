@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataNonTax;
 import org.smartlink.common.entity.domain.business.domain.bo.DataNonTaxBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataNonTaxVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -34,6 +35,10 @@ public interface IDataNonTaxService {
      */
     TableDataInfo<DataNonTaxVo> queryPageList(DataNonTaxBo bo, PageQuery pageQuery);
 
+
+    Boolean insert(DataNonTax dataOcrInfo);
+
+    DataNonTax selectOneByFileId(String fileId);
     /**
      * 查询符合条件的非税收入类票据列表
      *

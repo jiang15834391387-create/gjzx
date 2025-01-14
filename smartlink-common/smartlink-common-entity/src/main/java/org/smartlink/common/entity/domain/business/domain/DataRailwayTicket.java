@@ -100,6 +100,31 @@ public class DataRailwayTicket extends TenantEntity {
     private String invoiceTime;
 
     /**
+     * 时间
+     */
+    private String kind;
+
+    /**
+     * 开票时间（电子票）
+     */
+    private String dateOfIssue;
+
+    /**
+     * -起始站拼音
+     */
+    private String phonicsOfDepartureStation;
+
+    /**
+     * 终点站拼音
+     */
+    private String phonicsOfDestinationStation;
+
+    /**
+     * 旋转角度
+     */
+    private String orientation;
+
+    /**
      * 合计
      */
     private String invoiceTotal;

@@ -209,6 +209,12 @@ public class DataCustomsSpecialPaymentVo implements Serializable {
     private String paymentDeadline;
 
     /**
+     * 角度
+     */
+    @ExcelProperty(value = "角度")
+    private String orientation;
+
+    /**
      * 日期
      */
     @ExcelProperty(value = "日期")

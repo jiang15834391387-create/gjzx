@@ -18,7 +18,8 @@ import org.smartlink.common.ocr.core.IdentificationFactory;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.exception.OcrException;
 import org.smartlink.common.ocr.glority.config.GlorityOcrProperties;
-import org.smartlink.common.ocr.glority.conversion.InvoiceConversion;
+import org.smartlink.common.ocr.glority.conversion.*;
+
 import org.smartlink.common.ocr.glority.response.GlorityResult;
 import org.smartlink.common.ocr.glority.response.IdentifyResults;
 import org.smartlink.common.ocr.properties.OcrProperties;
@@ -65,13 +66,13 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
         }
         isInit = true;
     }
-    @Autowired
-    private ApplicationContext applicationContext;
+//    @Autowired
+//    private ApplicationContext applicationContext;
 
-    @PostConstruct
-    public void printBeans() {
-        System.out.println(Arrays.toString(applicationContext.getBeanDefinitionNames()));
-    }
+//    @PostConstruct
+//    public void printBeans() {
+//        System.out.println(Arrays.toString(applicationContext.getBeanDefinitionNames()));
+//    }
 
     @Override
     public List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64) throws OcrException {
@@ -87,8 +88,8 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 .with("token", token);
                 //是否切图
                 boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
-                if (true) { // 根据条件判断是否需要添加 extract_level
-                    with.with("extract_level", 1); // 动态值或固定值
+                if (isCrop) {
+                    with.with("extract_level", 1);
                 }
         // 发送请求
         final List<IdentifyResults> responseData = WebClient.create().post()
@@ -137,33 +138,66 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
+                case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
+                case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                     return InvoiceConversion.getInstance();
-//            case GLORITY_QUOTA_INVOICE_CODE:
-//                return QuotaInvoiceConversion.getInstance();
-//            case GLORITY_AIRCRAFT_INVOICE_CODE:
-//                return AircraftInvoiceConversion.getInstance();
-//            case GLORITY_TAXI_TICKETS_CODE:
-//                return TaxiTicketsConversion.getInstance();
-//            case GLORITY_RAILWAY_TICKET_CODE:
-//                return RailwayTicketConversion.getInstance();
-//            case GLORITY_RECEIPT_CODE:
-//                return ReceiptConversion.getInstance();
-//            case GLORITY_MOTOR_VEHICLE_SALE_CODE:
-//                return MotorVehicleSaleConversion.getInstance();
-//            case GLORITY_PASSENGER_TICKET_CODE:
-//                return PassengerTicketConversion.getInstance();
-//            case GLORITY_DIDI_ITINERARY_CODE:
-//                return DidiItineraryConversion.getInstance();
-//            case GLORITY_USED_CAR_SALES_CODE:
-//                return UsedCarSalesConversion.getInstance();
-//            case GLORITY_FLIGHT_ITINERARY_CODE:
-//                return FlightItineraryConversion.getInstance();
-//            case GLORITY_DUTY_PAID_PROOF_CODE:
-//                return DutyPaidProofConversion.getInstance();
-//            case GLORITY_STEAMER_TICKET_CODE:
-//                return SteamerTicketConversion.getInstance();
-//            case GLORITY_TOLL_ROADS_CODE:
-//                return TollRoadsConversion.getInstance();
+                //机动车
+                case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
+                    return MotorVehicleSaleConversion.getInstance();
+                //机票
+                case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                    return FlightItineraryConversion.getInstance();
+                //二手车
+                case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
+                    return UsedCarSalesConversion.getInstance();
+                //船票
+                case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
+                    return SteamerTicketConversion.getInstance();
+                //医疗票
+                case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
+                    return DataMedicalTreatmentConversion.getInstance();
+                //医疗票明细票
+                case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
+                    return DataMedicalTreatmentDetailsConversion.getInstance();
+                //定额发票
+                case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
+                    return QuotaInvoiceConversion.getInstance();
+                //出租车发票
+                case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
+                    return TaxiTicketsConversion.getInstance();
+                //火车发票
+                case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                    return RailwayTicketConversion.getInstance();
+                //客运车发票
+                case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
+                    return PassengerTicketConversion.getInstance();
+                //过路费发票
+                case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
+                    return TollRoadsConversion.getInstance();
+                //小票
+                case InvoiceConstants.GLORITY_RECEIPT_CODE:
+                    return ReceiptConversion.getInstance();
+                //出行发票
+                case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
+                    return DidiItineraryConversion.getInstance();
+                //完税证明发票
+                case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
+                    return DutyPaidProofConversion.getInstance();
+                //完非税收入类发票
+                case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                    return DataNonTaxConversion.getInstance();
+                //海关进口货物报关单发票
+                case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
+                    return DataCustomsImxportGoodsConversion.getInstance();
+                //海关出口货物报关单发票
+                case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
+                    return DataCustomsExportGoodsConversion.getInstance();
+                //海关专用缴款书发票
+                case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
+                    return DataCustomsSpecialPaymentConversion.getInstance();
+                //货物运输电子收款凭证发票
+                case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
+                    return DataElectronicTransportationGoodsConversion.getInstance();
                 default: {
                     return null;
                 }

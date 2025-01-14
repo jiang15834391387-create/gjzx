@@ -65,6 +65,11 @@ public class DataSteamerTicket extends TenantEntity {
     private String name;
 
     /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
      * 发票号码
      */
     private String invoiceNumber;

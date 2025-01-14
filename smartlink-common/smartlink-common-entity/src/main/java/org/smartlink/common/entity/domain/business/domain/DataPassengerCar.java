@@ -100,6 +100,16 @@ public class DataPassengerCar extends TenantEntity {
     private String busNumber;
 
     /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
+     * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
+     */
+    private String region;
+
+    /**
      * 是否查验标识，（0查验失败，1查验成功）
      */
     private String checkInvoice;

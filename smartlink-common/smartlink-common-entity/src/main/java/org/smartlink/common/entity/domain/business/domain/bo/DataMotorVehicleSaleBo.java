@@ -111,6 +111,12 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     private String drawer;
 
     /**
+     * 图片旋转角度
+     */
+    @NotBlank(message = "图片旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
+
+    /**
      * 图片表id
      */
     @NotBlank(message = "图片表id不能为空", groups = { AddGroup.class, EditGroup.class })

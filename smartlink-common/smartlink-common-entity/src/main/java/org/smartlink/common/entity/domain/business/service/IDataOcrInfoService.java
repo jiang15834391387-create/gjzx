@@ -27,6 +27,14 @@ public interface IDataOcrInfoService {
     DataOcrInfoVo queryById(String id);
 
     /**
+     * 查询增值税发票
+     *
+     * @param fileId
+     * @return 增值税发票
+     */
+    List<DataOcrInfo> queryByFileId(String fileId);
+
+    /**
      * 分页查询增值税发票列表
      *
      * @param bo        查询条件
@@ -50,6 +58,8 @@ public interface IDataOcrInfoService {
      * @return 是否新增成功
      */
     Boolean insertByBo(DataOcrInfoBo bo);
+
+    DataOcrInfo selectOneByFileId(String fileId);
 
     /**
      * 新增增值税发票

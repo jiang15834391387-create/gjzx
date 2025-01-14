@@ -61,6 +61,19 @@ public class DataTollRoadsVo implements Serializable {
     private String exit;
 
     /**
+     * 发票消费类型
+     */
+    @ExcelProperty(value = "发票消费类型")
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
+
+    /**
      * 图片表id
      */
     @ExcelProperty(value = "图片表id")

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatment;
+import org.smartlink.common.entity.domain.business.domain.DataMotorVehicleSale;
 import org.smartlink.common.entity.domain.business.domain.bo.DataMedicalTreatmentBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataMedicalTreatmentVo;
 import org.smartlink.common.entity.domain.business.mapper.DataMedicalTreatmentMapper;
@@ -57,6 +58,12 @@ public class DataMedicalTreatmentServiceImpl implements IDataMedicalTreatmentSer
         return TableDataInfo.build(result);
     }
 
+    @Override
+    public Boolean insert(DataMedicalTreatment dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 查询符合条件的非税收入类票据列表
      *
@@ -67,6 +74,18 @@ public class DataMedicalTreatmentServiceImpl implements IDataMedicalTreatmentSer
     public List<DataMedicalTreatmentVo> queryList(DataMedicalTreatmentBo bo) {
         LambdaQueryWrapper<DataMedicalTreatment> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataMedicalTreatment selectOneByFileId(String fileId) {
+        DataMedicalTreatment result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataMedicalTreatment buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataMedicalTreatment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataMedicalTreatment::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataMedicalTreatment> buildQueryWrapper(DataMedicalTreatmentBo bo) {

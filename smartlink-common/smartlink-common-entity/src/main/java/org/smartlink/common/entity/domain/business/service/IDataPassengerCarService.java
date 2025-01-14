@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataPassengerCar;
 import org.smartlink.common.entity.domain.business.domain.bo.DataPassengerCarBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataPassengerCarVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -34,6 +35,9 @@ public interface IDataPassengerCarService {
      */
     TableDataInfo<DataPassengerCarVo> queryPageList(DataPassengerCarBo bo, PageQuery pageQuery);
 
+    Boolean insert(DataPassengerCar dataOcrInfo);
+
+    DataPassengerCar selectOneByFileId(String fileId);
     /**
      * 查询符合条件的客运汽车票列表
      *

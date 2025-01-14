@@ -94,6 +94,18 @@ public class DataMedicalTreatmentVo implements Serializable {
     private String payer;
 
     /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
+
+    /**
+     * 小计
+     */
+    @ExcelProperty(value = "小计")
+    private String subtotal;
+
+    /**
      * 交款人统一社会信用代码
      */
     @ExcelProperty(value = "交款人统一社会信用代码")

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataCustomsSpecialPayment;
+import org.smartlink.common.entity.domain.business.domain.DataDidiItineraryDetails;
 import org.smartlink.common.entity.domain.business.domain.bo.DataCustomsSpecialPaymentBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataCustomsSpecialPaymentVo;
 import org.smartlink.common.entity.domain.business.mapper.DataCustomsSpecialPaymentMapper;
@@ -57,6 +58,12 @@ public class DataCustomsSpecialPaymentServiceImpl implements IDataCustomsSpecial
         return TableDataInfo.build(result);
     }
 
+    @Override
+    public Boolean insert(DataCustomsSpecialPayment dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 查询符合条件的海关专用缴款书列表
      *
@@ -67,6 +74,18 @@ public class DataCustomsSpecialPaymentServiceImpl implements IDataCustomsSpecial
     public List<DataCustomsSpecialPaymentVo> queryList(DataCustomsSpecialPaymentBo bo) {
         LambdaQueryWrapper<DataCustomsSpecialPayment> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataCustomsSpecialPayment selectOneByFileId(String fileId) {
+        DataCustomsSpecialPayment result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataCustomsSpecialPayment buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataCustomsSpecialPayment> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataCustomsSpecialPayment::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataCustomsSpecialPayment> buildQueryWrapper(DataCustomsSpecialPaymentBo bo) {

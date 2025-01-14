@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +70,18 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         return baseMapper.selectVoList(lqw);
     }
 
+    @Override
+    public DataImageFilesInfo selectOneByFileId(String fileId) {
+        DataImageFilesInfo result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataImageFilesInfo buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataImageFilesInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataImageFilesInfo::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
+    }
+
     private LambdaQueryWrapper<DataImageFilesInfo> buildQueryWrapper(DataImageFilesInfoBo bo) {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataImageFilesInfo> lqw = Wrappers.lambdaQuery();
@@ -121,7 +134,6 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
 
     @Override
     public Boolean insert(DataImageFilesInfo dataImageFilesInfo) {
-        validEntityBeforeSave(dataImageFilesInfo);
         boolean flag = baseMapper.insert(dataImageFilesInfo) > 0;
         return flag;
     }

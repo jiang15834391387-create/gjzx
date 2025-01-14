@@ -67,6 +67,19 @@ public class DataTaxiTicketsVo implements Serializable {
     private String licensePlate;
 
     /**
+     * 发票消费类型
+     */
+    @ExcelProperty(value = "发票消费类型")
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "发票消费类型")
+    private String orientation;
+
+    /**
      * 里程
      */
     @ExcelProperty(value = "里程")

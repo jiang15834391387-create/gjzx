@@ -2,6 +2,8 @@ package org.smartlink.common.entity.domain.business.service;
 
 
 
+import org.smartlink.common.entity.domain.business.domain.DataFlightsItineraryDetail;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataFlightsItineraryDetailBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataFlightsItineraryDetailVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -26,6 +28,8 @@ public interface IDataFlightsItineraryDetailService {
      */
     DataFlightsItineraryDetailVo queryById(String id);
 
+    Boolean insertBatch(List<DataFlightsItineraryDetail> dataFlightsItineraryDetails);
+
     /**
      * 分页查询航空电子行程单明细列表
      *
@@ -34,6 +38,8 @@ public interface IDataFlightsItineraryDetailService {
      * @return 航空电子行程单明细分页列表
      */
     TableDataInfo<DataFlightsItineraryDetailVo> queryPageList(DataFlightsItineraryDetailBo bo, PageQuery pageQuery);
+
+    DataFlightsItineraryDetail selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的航空电子行程单明细列表

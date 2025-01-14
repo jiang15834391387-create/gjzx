@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -199,6 +200,12 @@ public class DataCustomsSpecialPaymentBo extends BaseEntity {
      */
     @NotBlank(message = "缴款期限不能为空", groups = { AddGroup.class, EditGroup.class })
     private String paymentDeadline;
+
+    /**
+     * 角度
+     */
+    @NotBlank(message = "角度", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
 
     /**
      * 日期

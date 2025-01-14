@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataNonTax;
+import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
 import org.smartlink.common.entity.domain.business.domain.bo.DataNonTaxBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataNonTaxVo;
 import org.smartlink.common.entity.domain.business.mapper.DataNonTaxMapper;
@@ -67,6 +68,23 @@ public class DataNonTaxServiceImpl implements IDataNonTaxService {
     public List<DataNonTaxVo> queryList(DataNonTaxBo bo) {
         LambdaQueryWrapper<DataNonTax> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public Boolean insert(DataNonTax dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+    @Override
+    public DataNonTax selectOneByFileId(String fileId) {
+        DataNonTax result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataNonTax buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataNonTax> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataNonTax::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataNonTax> buildQueryWrapper(DataNonTaxBo bo) {

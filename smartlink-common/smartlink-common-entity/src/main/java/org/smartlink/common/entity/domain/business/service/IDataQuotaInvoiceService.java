@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataQuotaInvoice;
 import org.smartlink.common.entity.domain.business.domain.bo.DataQuotaInvoiceBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataQuotaInvoiceVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -25,6 +26,8 @@ public interface IDataQuotaInvoiceService {
      */
     DataQuotaInvoiceVo queryById(String id);
 
+    Boolean insert(DataQuotaInvoice dataOcrInfo);
+
     /**
      * 分页查询定额发票列表
      *
@@ -34,6 +37,7 @@ public interface IDataQuotaInvoiceService {
      */
     TableDataInfo<DataQuotaInvoiceVo> queryPageList(DataQuotaInvoiceBo bo, PageQuery pageQuery);
 
+    DataQuotaInvoice selectOneByFileId(String fileId);
     /**
      * 查询符合条件的定额发票列表
      *

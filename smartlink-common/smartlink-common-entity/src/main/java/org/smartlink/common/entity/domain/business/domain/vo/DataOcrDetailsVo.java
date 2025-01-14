@@ -2,6 +2,7 @@ package org.smartlink.common.entity.domain.business.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
@@ -43,6 +44,18 @@ public class DataOcrDetailsVo implements Serializable {
      */
     @ExcelProperty(value = "图片表id")
     private String fileId;
+
+    /**
+     * 项目名称
+     */
+    @ExcelProperty(value = "项目名称")
+    private String projectName;
+
+    /**
+     * 项目编码
+     */
+    @ExcelProperty(value = "项目编码")
+    private String projectCode;
 
     /**
      * 金额
@@ -194,6 +207,7 @@ public class DataOcrDetailsVo implements Serializable {
      */
     @ExcelProperty(value = "起始地", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "s=ervice_type为货物运输服务，返回此字段")
+    @TableField("`from`")
     private String from;
 
     /**
@@ -237,6 +251,30 @@ public class DataOcrDetailsVo implements Serializable {
     @ExcelProperty(value = "等级", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "s=ervice_type为旅客运输服务，返回此字段")
     private String seat;
+
+    /**
+     * 收费标准
+     */
+    @ExcelProperty(value = "收费标准", converter = ExcelDictConvert.class)
+    private String standardOfCharge;
+
+    /**
+     * -税号
+     */
+    @ExcelProperty(value = "-税号", converter = ExcelDictConvert.class)
+    private String taxNumber;
+
+    /**
+     * 服务类型
+     */
+    @ExcelProperty(value = "-服务类型", converter = ExcelDictConvert.class)
+    private String serviceType;
+
+    /**
+     * 订单编号
+     */
+    @ExcelProperty(value = "-订单编号", converter = ExcelDictConvert.class)
+    private String orderNumber;
 
     /**
      * 是否删除标识 0-不删除  1-删除

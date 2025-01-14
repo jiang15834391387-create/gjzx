@@ -1,6 +1,8 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataTaxiTickets;
+import org.smartlink.common.entity.domain.business.domain.DataTollRoads;
 import org.smartlink.common.entity.domain.business.domain.bo.DataTaxiTicketsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataTaxiTicketsVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -33,6 +35,10 @@ public interface IDataTaxiTicketsService {
      * @return 出租车发票分页列表
      */
     TableDataInfo<DataTaxiTicketsVo> queryPageList(DataTaxiTicketsBo bo, PageQuery pageQuery);
+
+    Boolean insert(DataTaxiTickets dataOcrInfo);
+
+    DataTaxiTickets selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的出租车发票列表

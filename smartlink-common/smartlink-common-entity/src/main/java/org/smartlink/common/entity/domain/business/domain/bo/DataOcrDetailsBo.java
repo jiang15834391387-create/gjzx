@@ -1,5 +1,7 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -7,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.excel.convert.ExcelDictConvert;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
 /**
@@ -93,10 +96,28 @@ public class DataOcrDetailsBo extends BaseEntity {
     private String standard;
 
     /**
+     * 收费标准
+     */
+    @NotBlank(message = "收费标准", groups = { AddGroup.class, EditGroup.class })
+    private String standardOfCharge;
+
+    /**
      * 税额
      */
     @NotBlank(message = "税额不能为空", groups = { AddGroup.class, EditGroup.class })
     private String tax;
+
+    /**
+     * 项目名称
+     */
+    @NotBlank(message = "项目名称不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String projectName;
+
+    /**
+     * 项目编码
+     */
+    @NotBlank(message = "项目编码不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String projectCode;
 
     /**
      * 单位
@@ -180,12 +201,14 @@ public class DataOcrDetailsBo extends BaseEntity {
      * 起始地（service_type为货物运输服务，返回此字段）
      */
     @NotBlank(message = "起始地（service_type为货物运输服务，返回此字段）不能为空", groups = { AddGroup.class, EditGroup.class })
+    @TableField("`from`")
     private String from;
 
     /**
      * 到达地（service_type为货物运输服务，返回此字段）
      */
     @NotBlank(message = "到达地（service_type为货物运输服务，返回此字段）不能为空", groups = { AddGroup.class, EditGroup.class })
+    @TableField("`to`")
     private String to;
 
     /**
@@ -218,6 +241,24 @@ public class DataOcrDetailsBo extends BaseEntity {
      */
     @NotBlank(message = "等级（service_type为旅客运输服务，返回此字段）不能为空", groups = { AddGroup.class, EditGroup.class })
     private String seat;
+
+    /**
+     * -税号
+     */
+    @NotBlank(message = "税号不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String taxNumber;
+
+    /**
+     * 服务类型
+     */
+    @NotBlank(message = "服务类型", groups = { AddGroup.class, EditGroup.class })
+    private String serviceType;
+
+    /**
+     * 订单编号
+     */
+    @NotBlank(message = "订单编号", groups = { AddGroup.class, EditGroup.class })
+    private String orderNumber;
 
     /**
      * 是否删除标识 0-不删除  1-删除

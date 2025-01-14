@@ -202,6 +202,12 @@ public class DataMotorVehicleSaleVo implements Serializable {
     private String sellerPhone;
 
     /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
+
+    /**
      * 销售方税号
      */
     @ExcelProperty(value = "销售方税号")

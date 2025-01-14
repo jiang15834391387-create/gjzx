@@ -18,7 +18,7 @@ public interface IdentificationFactory<T> {
     /**
      * 如果识别信息{@code T}不存在则返回{@code null}
      *
-     * @param t 需要转换的对象
+     * @param  identifyResults 需要转换的对象
      * @return ChangeIdentifyInfo 如果需要转换的对象不存在或识别错误时则返回{@code null}
      */
     ChangeIdentifyInfo conversionInfo(DataImageFilesInfo dataImageFilesInfo, List<IdentifyResults> identifyResults) throws OcrException;

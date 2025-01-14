@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatment;
 import org.smartlink.common.entity.domain.business.domain.bo.DataMedicalTreatmentBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataMedicalTreatmentVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -33,6 +34,10 @@ public interface IDataMedicalTreatmentService {
      * @return 非税收入类票据分页列表
      */
     TableDataInfo<DataMedicalTreatmentVo> queryPageList(DataMedicalTreatmentBo bo, PageQuery pageQuery);
+
+    Boolean insert(DataMedicalTreatment dataOcrInfo);
+
+    DataMedicalTreatment selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的非税收入类票据列表

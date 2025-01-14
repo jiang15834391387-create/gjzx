@@ -284,6 +284,12 @@ public class DataCustomsExportGoodsVo implements Serializable {
     private String region;
 
     /**
+     * 角度
+     */
+    @ExcelProperty(value = "角度")
+    private String orientation;
+
+    /**
      * 发票专用章存在性判断
      */
     @ExcelProperty(value = "发票专用章存在性判断")

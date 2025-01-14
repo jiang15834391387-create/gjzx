@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.domain.DataUsedCarSales;
 import org.smartlink.common.entity.domain.business.domain.bo.DataUsedCarSalesBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataUsedCarSalesVo;
@@ -55,6 +56,29 @@ public class DataUsedCarSalesServiceImpl implements IDataUsedCarSalesService {
         LambdaQueryWrapper<DataUsedCarSales> lqw = buildQueryWrapper(bo);
         Page<DataUsedCarSalesVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    public Boolean insertBatch(List<DataUsedCarSales> dataOcrDetails) {
+        return baseMapper.insertBatch(dataOcrDetails);
+    }
+
+    @Override
+    public Boolean insert(DataUsedCarSales dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
+    @Override
+    public DataUsedCarSales selectOneByFileId(String fileId) {
+        DataUsedCarSales result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataUsedCarSales buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataUsedCarSales> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataUsedCarSales::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     /**

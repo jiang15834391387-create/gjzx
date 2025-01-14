@@ -69,6 +69,36 @@ public class DataRailwayTicketVo implements Serializable {
     private String seat;
 
     /**
+     * 消费类型
+     */
+    @ExcelProperty(value = "消费类型")
+    private String kind;
+
+    /**
+     * 开票时间（电子票）
+     */
+    @ExcelProperty(value = "开票时间（电子票）")
+    private String dateOfIssue;
+
+    /**
+     * -起始站拼音
+     */
+    @ExcelProperty(value = "起始站拼音")
+    private String phonicsOfDepartureStation;
+
+    /**
+     * 终点站拼音
+     */
+    @ExcelProperty(value = "终点站拼音")
+    private String phonicsOfDestinationStation;
+
+    /**
+     * 旋转角度
+     */
+    @ExcelProperty(value = "旋转角度")
+    private String orientation;
+
+    /**
      * 座位号
      */
     @ExcelProperty(value = "座位号")

@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -61,6 +62,18 @@ public class DataPassengerCarBo extends BaseEntity {
      */
     @NotBlank(message = "达到车站不能为空", groups = { AddGroup.class, EditGroup.class })
     private String stationGetoff;
+
+    /**
+     * 图片旋转角度
+     */
+    @NotBlank(message = "图片旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
+
+    /**
+     * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
+     */
+    @NotBlank(message = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String region;
 
     /**
      * 发票号码

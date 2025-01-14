@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataTaxiTickets;
+import org.smartlink.common.entity.domain.business.domain.DataTollRoads;
 import org.smartlink.common.entity.domain.business.domain.bo.DataTaxiTicketsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataTaxiTicketsVo;
 import org.smartlink.common.entity.domain.business.mapper.DataTaxiTicketsMapper;
@@ -43,6 +44,8 @@ public class DataTaxiTicketsServiceImpl implements IDataTaxiTicketsService {
         return baseMapper.selectVoById(id);
     }
 
+
+
     /**
      * 分页查询出租车发票列表
      *
@@ -67,6 +70,24 @@ public class DataTaxiTicketsServiceImpl implements IDataTaxiTicketsService {
     public List<DataTaxiTicketsVo> queryList(DataTaxiTicketsBo bo) {
         LambdaQueryWrapper<DataTaxiTickets> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public Boolean insert(DataTaxiTickets dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
+    @Override
+    public DataTaxiTickets selectOneByFileId(String fileId) {
+        DataTaxiTickets result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataTaxiTickets buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataTaxiTickets> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataTaxiTickets::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataTaxiTickets> buildQueryWrapper(DataTaxiTicketsBo bo) {

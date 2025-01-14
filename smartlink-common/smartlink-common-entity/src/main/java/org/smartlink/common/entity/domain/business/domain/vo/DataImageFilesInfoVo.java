@@ -58,6 +58,12 @@ public class DataImageFilesInfoVo implements Serializable {
     private String barCode;
 
     /**
+     * 二维码
+     */
+    @ExcelProperty(value = "二维码")
+    private String qrCode;
+
+    /**
      * 批次号
      */
     @ExcelProperty(value = "批次号")

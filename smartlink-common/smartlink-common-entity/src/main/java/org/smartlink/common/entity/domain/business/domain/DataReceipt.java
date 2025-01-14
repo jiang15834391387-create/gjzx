@@ -60,6 +60,17 @@ public class DataReceipt extends TenantEntity {
     private String storeName;
 
     /**
+     * 发票消费类型
+     */
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
      * 小计
      */
     private String subTotal;

@@ -97,6 +97,12 @@ public class DataElectronicTransportationGoodsVo implements Serializable {
     private String region;
 
     /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
+
+    /**
      * 是否删除标识 0-不删除  1-删除
      */
     @ExcelProperty(value = "是否删除标识 0-不删除  1-删除")

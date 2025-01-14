@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataReceipt;
+import org.smartlink.common.entity.domain.business.domain.DataSteamerTicket;
 import org.smartlink.common.entity.domain.business.domain.bo.DataReceiptBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataReceiptVo;
 import org.smartlink.common.entity.domain.business.mapper.DataReceiptMapper;
@@ -67,6 +68,24 @@ public class DataReceiptServiceImpl implements IDataReceiptService {
     public List<DataReceiptVo> queryList(DataReceiptBo bo) {
         LambdaQueryWrapper<DataReceipt> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataReceipt selectOneByFileId(String fileId) {
+        DataReceipt result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataReceipt buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataReceipt> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataReceipt::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
+    }
+
+    @Override
+    public Boolean insert(DataReceipt dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
     }
 
     private LambdaQueryWrapper<DataReceipt> buildQueryWrapper(DataReceiptBo bo) {

@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -271,6 +272,12 @@ public class DataCustomsExportGoodsBo extends BaseEntity {
      */
     @NotBlank(message = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]不能为空", groups = { AddGroup.class, EditGroup.class })
     private String region;
+
+    /**
+     * 角度
+     */
+    @NotBlank(message = "角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
 
     /**
      * 发票专用章存在性判断

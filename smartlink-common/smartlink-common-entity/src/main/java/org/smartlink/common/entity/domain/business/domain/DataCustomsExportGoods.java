@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 海关出口货物对象 data_customs_export_goods
@@ -233,6 +235,17 @@ public class DataCustomsExportGoods extends TenantEntity {
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
+
+    /**
+     * 角度
+     */
+    private String orientation;
+
+    /**
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataCustomsExportGoodsDetail> details;
 
     /**
      * 发票专用章存在性判断

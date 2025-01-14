@@ -73,6 +73,19 @@ public class DataReceiptVo implements Serializable {
     private String subTotal;
 
     /**
+     * 发票消费类型
+     */
+    @ExcelProperty(value = "发票消费类型")
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "发票消费类型")
+    private String orientation;
+
+    /**
      * 税费
      */
     @ExcelProperty(value = "税费")

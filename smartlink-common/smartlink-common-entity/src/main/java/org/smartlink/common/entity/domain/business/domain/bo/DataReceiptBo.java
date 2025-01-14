@@ -39,6 +39,19 @@ public class DataReceiptBo extends BaseEntity {
     private String invoiceDate;
 
     /**
+     * 发票消费类型
+     */
+    @NotBlank(message = "发票消费类型不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    @NotBlank(message = "图片旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
+
+    /**
      * 时间
      */
     @NotBlank(message = "时间不能为空", groups = { AddGroup.class, EditGroup.class })

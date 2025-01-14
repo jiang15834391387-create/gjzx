@@ -39,15 +39,6 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
         return LazyHolder.INSTANCE;
     }
 
-    /**
-     * 电子专票票小秘
-     */
-    private final static String GLORITY_ELECTRONIC_INVOICE = "10102";
-    // 2022新版电子普通发票
-    private final static String GLORITY_TAX_ELECTRONIC_NO_INVOICE_CODE_INVOICE = "10108";
-    // 2022新版电子专用发票
-    private final static String GLORITY_SPECIAL_ELECTRONIC_NO_INVOICE_CODE_INVOICE = "10107";
-
     @Override
     public List<IdentificationData> changeInfo(DataImageFilesInfo dataImageFilesInfo, List<IdentifyResults> identifyResult) throws OcrException {
         List<IdentificationData> resultsList = new ArrayList<>();
@@ -108,7 +99,13 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setKind(jsonObject.getStr("kind"));
             //发票类型
             String invoiceCode = identifyResults.getType();
-            invoice.setRegion(jsonObject.getStr("Region"));
+            if (identifyResults.getRegion() != null && identifyResults.getRegion().length > 0) {
+                invoice.setRegion(String.join(",", identifyResults.getRegion()));
+            } else {
+                invoice.setRegion(null);
+            }
+            invoice.setOrientation(identifyResults.getOrientation());
+            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
             //发票类型判断
             if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && jsonObject.getStr("electronic_mark").equals("1")) {
                 //增值税电子专用发票
@@ -138,27 +135,40 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             JSONArray list = jsonObject.getJSONArray("items");
             JSONArray list_transports = jsonObject.getJSONArray("transports");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataOcrDetails e = new DataOcrDetails();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setName(fJson.containsKey("name") ? fJson.get("name") : null);
-                e.setStandard(fJson.containsKey("specification") ? fJson.get("specification") : null);
-                e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
-                e.setPrice(fJson.containsKey("price") ? fJson.get("price") : null);
-                e.setDetailAmount(fJson.containsKey("total") ? fJson.get("total") : null);
-                e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
-                e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
+            if (list != null && !list.isEmpty()) {
+                for (Object invoiceDetails : list) {
+                    DataOcrDetails e = new DataOcrDetails();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setName(fJson.containsKey("name") ? fJson.get("name") : null);
+                    if (fJson.containsKey("goods_services")) {
+                        e.setTax(fJson.get("goods_services"));
+                    }
+                    e.setStandard(fJson.containsKey("specification") ? fJson.get("specification") : null);
+                    e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
+                    if (fJson.containsKey("uom")) {
+                        e.setTax(fJson.get("uom"));
+                    }
+                    e.setPrice(fJson.containsKey("price") ? fJson.get("price") : null);
+                    if (fJson.containsKey("unit_price")) {
+                        e.setTax(fJson.get("unit_price"));
+                    }
+                    e.setDetailAmount(fJson.containsKey("total") ? fJson.get("total") : null);
+                    e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
+                    e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
+                    e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    e.setPlaceOfBuildingService(fJson.containsKey("placeOfBuildingService") ? fJson.get("placeOfBuildingService") : null);
+                    e.setBuildingName(fJson.containsKey("building_name") ? fJson.get("building_name") : null);
+                    e.setTitleCertificateNumber(fJson.containsKey("title_certificate_number") ? fJson.get("title_certificate_number") : null);
+                    e.setAreaUnit(fJson.containsKey("area_unit") ? fJson.get("area_unit") : null);
 
-                e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
-                e.setPlaceOfBuildingService(fJson.containsKey("placeOfBuildingService") ? fJson.get("placeOfBuildingService") : null);
-                e.setBuildingName(fJson.containsKey("building_name") ? fJson.get("building_name") : null);
-                e.setTitleCertificateNumber(fJson.containsKey("title_certificate_number") ? fJson.get("title_certificate_number") : null);
-                e.setAreaUnit(fJson.containsKey("area_unit") ? fJson.get("area_unit") : null);
-
-                e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
-                ocrDetailsList.add(e);
+                    e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
+                    if (fJson.containsKey("tax_amount")) {
+                        e.setTax(fJson.get("tax_amount"));
+                    }
+                    ocrDetailsList.add(e);
+                }
             }
             if (list_transports != null && !list_transports.isEmpty()) {
                 for (Object listTransports : list_transports) {
@@ -180,8 +190,8 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             }
             invoice.setDetails(ocrDetailsList);
             //发票待查验
-            invoice.setCheckInvoice(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-            resultsList.add(new IdentificationData<>(dataImageFilesInfo.getInvoice(), invoice));
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
+            resultsList.add(new IdentificationData<>(invoiceCode, invoice, identifyResults.getExtra()));
         }
         return resultsList;
     }

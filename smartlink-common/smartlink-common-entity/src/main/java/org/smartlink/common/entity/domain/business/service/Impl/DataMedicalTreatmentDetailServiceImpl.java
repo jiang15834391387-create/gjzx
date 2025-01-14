@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatment;
 import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatmentDetail;
 import org.smartlink.common.entity.domain.business.domain.bo.DataMedicalTreatmentDetailBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataMedicalTreatmentDetailVo;
@@ -69,6 +70,18 @@ public class DataMedicalTreatmentDetailServiceImpl implements IDataMedicalTreatm
         return baseMapper.selectVoList(lqw);
     }
 
+    @Override
+    public DataMedicalTreatmentDetail selectOneByFileId(String fileId) {
+        DataMedicalTreatmentDetail result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataMedicalTreatmentDetail buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataMedicalTreatmentDetail> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataMedicalTreatmentDetail::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
+    }
+
     private LambdaQueryWrapper<DataMedicalTreatmentDetail> buildQueryWrapper(DataMedicalTreatmentDetailBo bo) {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<DataMedicalTreatmentDetail> lqw = Wrappers.lambdaQuery();
@@ -103,6 +116,12 @@ public class DataMedicalTreatmentDetailServiceImpl implements IDataMedicalTreatm
         if (flag) {
             bo.setId(add.getId());
         }
+        return flag;
+    }
+
+    @Override
+    public Boolean insert(DataMedicalTreatmentDetail dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
         return flag;
     }
 

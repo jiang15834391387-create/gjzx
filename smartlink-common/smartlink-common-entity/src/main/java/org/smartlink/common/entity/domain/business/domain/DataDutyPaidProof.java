@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 完税证明对象 data_duty_paid_proof
@@ -103,6 +105,17 @@ public class DataDutyPaidProof extends TenantEntity {
      * 收款国库
      */
     private String receivingTreasury;
+
+    /**
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataDutyPaidProofDetails> details;
+
+    /**
+     * 图片旋转角度
+     */
+    private String orientation;
 
     /**
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]

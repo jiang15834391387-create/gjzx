@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -61,6 +62,18 @@ public class DataMedicalTreatmentBo extends BaseEntity {
      */
     @NotBlank(message = "是否为电子医疗发票（1:是）不能为空", groups = { AddGroup.class, EditGroup.class })
     private String electronicMark;
+
+    /**
+     * 图片旋转角度
+     */
+    @NotBlank(message = "图片旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
+
+    /**
+     * 小计
+     */
+    @NotBlank(message = "小计不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String subtotal;
 
     /**
      * 发票消费类型

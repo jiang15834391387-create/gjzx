@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatmentDetail;
 import org.smartlink.common.entity.domain.business.domain.bo.DataMedicalTreatmentDetailBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataMedicalTreatmentDetailVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -34,6 +35,8 @@ public interface IDataMedicalTreatmentDetailService {
      */
     TableDataInfo<DataMedicalTreatmentDetailVo> queryPageList(DataMedicalTreatmentDetailBo bo, PageQuery pageQuery);
 
+    DataMedicalTreatmentDetail selectOneByFileId(String fileId);
+
     /**
      * 查询符合条件的医疗票明细列表
      *
@@ -49,6 +52,8 @@ public interface IDataMedicalTreatmentDetailService {
      * @return 是否新增成功
      */
     Boolean insertByBo(DataMedicalTreatmentDetailBo bo);
+
+    Boolean insert(DataMedicalTreatmentDetail dataOcrInfo);
 
     /**
      * 修改医疗票明细

@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataCustomsImportGoodsDetail;
 import org.smartlink.common.entity.domain.business.domain.bo.DataCustomsImportGoodsDetailBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataCustomsImportGoodsDetailVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -24,6 +25,7 @@ public interface IDataCustomsImportGoodsDetailService {
      * @return 海关进口货物明细
      */
     DataCustomsImportGoodsDetailVo queryById(String id);
+    Boolean insertBatch(List<DataCustomsImportGoodsDetail> dataOcrDetails);
 
     /**
      * 分页查询海关进口货物明细列表
@@ -33,6 +35,8 @@ public interface IDataCustomsImportGoodsDetailService {
      * @return 海关进口货物明细分页列表
      */
     TableDataInfo<DataCustomsImportGoodsDetailVo> queryPageList(DataCustomsImportGoodsDetailBo bo, PageQuery pageQuery);
+
+    DataCustomsImportGoodsDetail selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的海关进口货物明细列表

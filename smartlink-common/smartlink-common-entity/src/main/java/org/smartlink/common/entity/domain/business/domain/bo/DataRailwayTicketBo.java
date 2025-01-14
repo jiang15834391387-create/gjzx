@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -97,6 +98,36 @@ public class DataRailwayTicketBo extends BaseEntity {
      */
     @NotBlank(message = "到达车站不能为空", groups = { AddGroup.class, EditGroup.class })
     private String stationGetOff;
+
+    /**
+     * 消费类型
+     */
+    @NotBlank(message = "消费类型不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String kind;
+
+    /**
+     * 开票时间（电子票）
+     */
+    @NotBlank(message = "开票时间（电子票）不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String dateOfIssue;
+
+    /**
+     * -起始站拼音
+     */
+    @NotBlank(message = "起始站拼音不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String phonicsOfDepartureStation;
+
+    /**
+     * 终点站拼音
+     */
+    @NotBlank(message = "终点站拼音不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String phonicsOfDestinationStation;
+
+    /**
+     * 旋转角度
+     */
+    @NotBlank(message = "旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
 
     /**
      * 启始车站

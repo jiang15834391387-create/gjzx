@@ -50,6 +50,11 @@ public class DataImageFilesInfo extends TenantEntity {
     private String barCode;
 
     /**
+     * 二维码
+     */
+    private String qrCode;
+
+    /**
      * 批次号
      */
     private String batchId;

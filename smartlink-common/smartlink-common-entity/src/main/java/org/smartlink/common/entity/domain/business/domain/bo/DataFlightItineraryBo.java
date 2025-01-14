@@ -45,6 +45,18 @@ public class DataFlightItineraryBo extends BaseEntity {
     private String userName;
 
     /**
+     * 身份证
+     */
+    @NotBlank(message = "身份证不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String userId;
+
+    /**
+     * 旋转角度
+     */
+    @NotBlank(message = "旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
+
+    /**
      * 销售单位代号
      */
     @NotBlank(message = "销售单位代号不能为空", groups = { AddGroup.class, EditGroup.class })

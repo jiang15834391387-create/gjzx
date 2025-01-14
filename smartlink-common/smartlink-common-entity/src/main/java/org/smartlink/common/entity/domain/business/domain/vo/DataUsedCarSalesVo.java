@@ -45,6 +45,18 @@ public class DataUsedCarSalesVo implements Serializable {
     private String title;
 
     /**
+     * 标题
+     */
+    @ExcelProperty(value = "标题")
+    private String kind;
+
+    /**
+     * 旋转角度
+     */
+    @ExcelProperty(value = "旋转角度")
+    private String orientation;
+
+    /**
      * 经营、拍卖单位
      */
     @ExcelProperty(value = "经营、拍卖单位")

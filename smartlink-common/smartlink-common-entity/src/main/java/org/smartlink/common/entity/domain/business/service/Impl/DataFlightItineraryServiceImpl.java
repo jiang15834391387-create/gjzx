@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataFlightItinerary;
+import org.smartlink.common.entity.domain.business.domain.DataFlightsItineraryDetail;
 import org.smartlink.common.entity.domain.business.domain.bo.DataFlightItineraryBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataFlightItineraryVo;
 import org.smartlink.common.entity.domain.business.mapper.DataFlightItineraryMapper;
@@ -43,6 +44,12 @@ public class DataFlightItineraryServiceImpl implements IDataFlightItineraryServi
         return baseMapper.selectVoById(id);
     }
 
+    @Override
+    public Boolean insert(DataFlightItinerary dataFlightItinerary) {
+        boolean flag = baseMapper.insert(dataFlightItinerary) > 0;
+        return flag;
+    }
+
     /**
      * 分页查询航空电子行程单列表
      *
@@ -67,6 +74,18 @@ public class DataFlightItineraryServiceImpl implements IDataFlightItineraryServi
     public List<DataFlightItineraryVo> queryList(DataFlightItineraryBo bo) {
         LambdaQueryWrapper<DataFlightItinerary> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataFlightItinerary selectOneByFileId(String fileId) {
+        DataFlightItinerary result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataFlightItinerary buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataFlightItinerary> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataFlightItinerary::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataFlightItinerary> buildQueryWrapper(DataFlightItineraryBo bo) {

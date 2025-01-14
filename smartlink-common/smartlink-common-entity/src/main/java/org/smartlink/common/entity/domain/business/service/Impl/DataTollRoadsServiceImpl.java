@@ -57,6 +57,24 @@ public class DataTollRoadsServiceImpl implements IDataTollRoadsService {
         return TableDataInfo.build(result);
     }
 
+    @Override
+    public Boolean insert(DataTollRoads dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
+    @Override
+    public DataTollRoads selectOneByFileId(String fileId) {
+        DataTollRoads result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataTollRoads buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataTollRoads> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataTollRoads::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
+    }
+
     /**
      * 查询符合条件的过路费列表
      *

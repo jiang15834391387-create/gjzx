@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataElectronicTransportationGoods;
+import org.smartlink.common.entity.domain.business.domain.DataFlightItinerary;
 import org.smartlink.common.entity.domain.business.domain.bo.DataElectronicTransportationGoodsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataElectronicTransportationGoodsVo;
 import org.smartlink.common.entity.domain.business.mapper.DataElectronicTransportationGoodsMapper;
@@ -43,6 +44,12 @@ public class DataElectronicTransportationGoodsServiceImpl implements IDataElectr
         return baseMapper.selectVoById(id);
     }
 
+    @Override
+    public Boolean insert(DataElectronicTransportationGoods dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 分页查询货物运输电子收款凭证列表
      *
@@ -67,6 +74,18 @@ public class DataElectronicTransportationGoodsServiceImpl implements IDataElectr
     public List<DataElectronicTransportationGoodsVo> queryList(DataElectronicTransportationGoodsBo bo) {
         LambdaQueryWrapper<DataElectronicTransportationGoods> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataElectronicTransportationGoods selectOneByFileId(String fileId) {
+        DataElectronicTransportationGoods result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataElectronicTransportationGoods buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataElectronicTransportationGoods> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataElectronicTransportationGoods::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataElectronicTransportationGoods> buildQueryWrapper(DataElectronicTransportationGoodsBo bo) {

@@ -55,6 +55,12 @@ public class DataSteamerTicketVo implements Serializable {
     private String invoiceCode;
 
     /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
+
+    /**
      * 币种
      */
     @ExcelProperty(value = "币种")

@@ -95,6 +95,16 @@ public class DataUsedCarSales extends TenantEntity {
     private String carEngineCode;
 
     /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
+     * 发票消费类型
+     */
+    private String kind;
+
+    /**
      * 厂牌型号
      */
     private String carModel;

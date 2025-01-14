@@ -70,6 +70,22 @@ public class DataQuotaInvoice extends TenantEntity {
     private String companySeal;
 
     /**
+     * 发票消费类型
+     */
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
+     * 定额非经营性标志
+     */
+    private String nonCommercialMark;
+
+    /**
      * 发票专用章存在性判断
      */
     private String invoiceStamp;

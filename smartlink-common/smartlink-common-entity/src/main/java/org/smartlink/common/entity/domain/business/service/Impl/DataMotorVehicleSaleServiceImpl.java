@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataMotorVehicleSale;
+import org.smartlink.common.entity.domain.business.domain.DataNonTax;
 import org.smartlink.common.entity.domain.business.domain.bo.DataMotorVehicleSaleBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataMotorVehicleSaleVo;
 import org.smartlink.common.entity.domain.business.mapper.DataMotorVehicleSaleMapper;
@@ -67,6 +68,18 @@ public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleSer
     public List<DataMotorVehicleSaleVo> queryList(DataMotorVehicleSaleBo bo) {
         LambdaQueryWrapper<DataMotorVehicleSale> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataMotorVehicleSale selectOneByFileId(String fileId) {
+        DataMotorVehicleSale result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataMotorVehicleSale buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataMotorVehicleSale> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataMotorVehicleSale::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataMotorVehicleSale> buildQueryWrapper(DataMotorVehicleSaleBo bo) {
@@ -150,6 +163,12 @@ public class DataMotorVehicleSaleServiceImpl implements IDataMotorVehicleSaleSer
         DataMotorVehicleSale update = MapstructUtils.convert(bo, DataMotorVehicleSale.class);
         validEntityBeforeSave(update);
         return baseMapper.updateById(update) > 0;
+    }
+
+    @Override
+    public Boolean insert(DataMotorVehicleSale dataMotorVehicleSale) {
+        boolean flag = baseMapper.insert(dataMotorVehicleSale) > 0;
+        return flag;
     }
 
     /**

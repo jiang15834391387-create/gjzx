@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -31,6 +32,12 @@ public class DataNonTaxBo extends BaseEntity {
      */
     @NotBlank(message = "图片表id不能为空", groups = { AddGroup.class, EditGroup.class })
     private String fileId;
+
+    /**
+     * 旋转角度
+     */
+    @NotBlank(message = "旋转角度", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
 
     /**
      * 标题

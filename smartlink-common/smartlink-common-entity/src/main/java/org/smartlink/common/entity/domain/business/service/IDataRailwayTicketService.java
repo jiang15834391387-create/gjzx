@@ -1,6 +1,8 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataRailwayTicket;
+import org.smartlink.common.entity.domain.business.domain.DataReceipt;
 import org.smartlink.common.entity.domain.business.domain.bo.DataRailwayTicketBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataRailwayTicketVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -33,6 +35,10 @@ public interface IDataRailwayTicketService {
      * @return 火车票分页列表
      */
     TableDataInfo<DataRailwayTicketVo> queryPageList(DataRailwayTicketBo bo, PageQuery pageQuery);
+
+    Boolean insert(DataRailwayTicket dataOcrInfo);
+
+    DataRailwayTicket selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的火车票列表

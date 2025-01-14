@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataUsedCarSales;
 import org.smartlink.common.entity.domain.business.domain.bo.DataUsedCarSalesBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataUsedCarSalesVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -34,6 +35,8 @@ public interface IDataUsedCarSalesService {
      */
     TableDataInfo<DataUsedCarSalesVo> queryPageList(DataUsedCarSalesBo bo, PageQuery pageQuery);
 
+
+
     /**
      * 查询符合条件的二手车销售统一发票列表
      *
@@ -41,6 +44,12 @@ public interface IDataUsedCarSalesService {
      * @return 二手车销售统一发票列表
      */
     List<DataUsedCarSalesVo> queryList(DataUsedCarSalesBo bo);
+
+    Boolean insert(DataUsedCarSales dataUsedCarSales);
+
+    Boolean insertBatch(List<DataUsedCarSales> dataUsedCarSales);
+
+    DataUsedCarSales selectOneByFileId(String fileId);
 
     /**
      * 新增二手车销售统一发票

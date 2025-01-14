@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -55,6 +56,19 @@ public class DataTollRoadsBo extends BaseEntity {
      */
     @NotBlank(message = "出口不能为空", groups = { AddGroup.class, EditGroup.class })
     private String exit;
+
+    /**
+     * 发票消费类型
+     */
+    @NotBlank(message = "发票消费类型不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    @NotBlank(message = "图片旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
 
     /**
      * 图片表id

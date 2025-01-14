@@ -55,6 +55,17 @@ public class DataTollRoads extends TenantEntity {
     private String exit;
 
     /**
+     * 发票消费类型
+     */
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
      * 图片表id
      */
     private String fileId;

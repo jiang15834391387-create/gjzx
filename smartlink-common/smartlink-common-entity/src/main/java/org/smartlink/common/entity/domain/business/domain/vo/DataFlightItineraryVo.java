@@ -63,6 +63,18 @@ public class DataFlightItineraryVo implements Serializable {
     private String caacDevelopmentFund;
 
     /**
+     * 旋转角度
+     */
+    @ExcelProperty(value = "旋转角度")
+    private String orientation;
+
+    /**
+     * 身份证
+     */
+    @ExcelProperty(value = "身份证")
+    private String userId;
+
+    /**
      * 校验码
      */
     @ExcelProperty(value = "校验码")

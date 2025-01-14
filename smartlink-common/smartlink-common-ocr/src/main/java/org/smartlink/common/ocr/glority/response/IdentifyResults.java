@@ -18,6 +18,11 @@ public class IdentifyResults {
     private String type;
 
     /**
+     * 文件信息
+     */
+    private String message;
+
+    /**
      * 发票顺时针旋转方向
      */
     private String orientation;
@@ -31,6 +36,11 @@ public class IdentifyResults {
      * 发票识别的具体信息, 不同发票类型会不一样
      */
     private JSONObject details;
+
+    /**
+     * extra
+     */
+    private JSONObject extra;
 
 
 }

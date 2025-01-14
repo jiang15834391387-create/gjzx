@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrDetailsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrDetailsVo;
 import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
@@ -58,6 +59,18 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     }
 
     /**
+     * 查询增值税发票
+     *
+     * @param fileId
+     * @return 增值税发票
+     */
+    @Override
+    public List<DataOcrDetails> queryByFileId(String fileId){
+        LambdaQueryWrapper<DataOcrDetails> lqw = buildQueryFileIdWrapper(fileId);
+        return baseMapper.selectList(lqw);
+    }
+
+    /**
      * 查询符合条件的增值税发票明细列表
      *
      * @param bo 查询条件
@@ -67,6 +80,18 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
     public List<DataOcrDetailsVo> queryList(DataOcrDetailsBo bo) {
         LambdaQueryWrapper<DataOcrDetails> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataOcrDetails selectOneByFileId(String fileId) {
+        DataOcrDetails result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataOcrDetails buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataOcrDetails> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataOcrDetails::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataOcrDetails> buildQueryWrapper(DataOcrDetailsBo bo) {
@@ -182,4 +207,12 @@ public class DataOcrDetailsServiceImpl implements IDataOcrDetailsService {
         }
         return baseMapper.deleteByIds(ids) > 0;
     }
+
+    private LambdaQueryWrapper<DataOcrDetails> buildQueryFileIdWrapper(String fileId) {
+        LambdaQueryWrapper<DataOcrDetails> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.select(DataOcrDetails::getFileId, DataOcrDetails::getFileId)
+            .eq(DataOcrDetails::getFileId, fileId);
+        return queryWrapper;
+    }
+
 }

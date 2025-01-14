@@ -1,6 +1,8 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataSteamerTicket;
+import org.smartlink.common.entity.domain.business.domain.DataTaxiTickets;
 import org.smartlink.common.entity.domain.business.domain.bo.DataSteamerTicketBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataSteamerTicketVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -33,6 +35,10 @@ public interface IDataSteamerTicketService {
      * @return 船票分页列表
      */
     TableDataInfo<DataSteamerTicketVo> queryPageList(DataSteamerTicketBo bo, PageQuery pageQuery);
+
+    Boolean insert(DataSteamerTicket dataSteamerTicket);
+
+    DataSteamerTicket selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的船票列表

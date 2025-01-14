@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataPassengerCar;
+import org.smartlink.common.entity.domain.business.domain.DataQuotaInvoice;
 import org.smartlink.common.entity.domain.business.domain.bo.DataPassengerCarBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataPassengerCarVo;
 import org.smartlink.common.entity.domain.business.mapper.DataPassengerCarMapper;
@@ -57,6 +58,13 @@ public class DataPassengerCarServiceImpl implements IDataPassengerCarService {
         return TableDataInfo.build(result);
     }
 
+    @Override
+    public Boolean insert(DataPassengerCar dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
+
     /**
      * 查询符合条件的客运汽车票列表
      *
@@ -67,6 +75,18 @@ public class DataPassengerCarServiceImpl implements IDataPassengerCarService {
     public List<DataPassengerCarVo> queryList(DataPassengerCarBo bo) {
         LambdaQueryWrapper<DataPassengerCar> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataPassengerCar selectOneByFileId(String fileId) {
+        DataPassengerCar result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataPassengerCar buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataPassengerCar> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataPassengerCar::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataPassengerCar> buildQueryWrapper(DataPassengerCarBo bo) {

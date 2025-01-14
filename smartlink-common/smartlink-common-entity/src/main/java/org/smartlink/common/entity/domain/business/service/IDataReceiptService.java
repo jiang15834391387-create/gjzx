@@ -1,6 +1,8 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataReceipt;
+import org.smartlink.common.entity.domain.business.domain.DataSteamerTicket;
 import org.smartlink.common.entity.domain.business.domain.bo.DataReceiptBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataReceiptVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -33,6 +35,10 @@ public interface IDataReceiptService {
      * @return 小票分页列表
      */
     TableDataInfo<DataReceiptVo> queryPageList(DataReceiptBo bo, PageQuery pageQuery);
+
+    Boolean insert(DataReceipt dataOcrInfo);
+
+    DataReceipt selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的小票列表

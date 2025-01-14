@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataDidiItinerary;
 import org.smartlink.common.entity.domain.business.domain.bo.DataDidiItineraryBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataDidiItineraryVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -25,6 +26,8 @@ public interface IDataDidiItineraryService {
      */
     DataDidiItineraryVo queryById(String id);
 
+    Boolean insert(DataDidiItinerary dataOcrInfo);
+
     /**
      * 分页查询滴滴行程单列表
      *
@@ -33,6 +36,8 @@ public interface IDataDidiItineraryService {
      * @return 滴滴行程单分页列表
      */
     TableDataInfo<DataDidiItineraryVo> queryPageList(DataDidiItineraryBo bo, PageQuery pageQuery);
+
+    DataDidiItinerary selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的滴滴行程单列表

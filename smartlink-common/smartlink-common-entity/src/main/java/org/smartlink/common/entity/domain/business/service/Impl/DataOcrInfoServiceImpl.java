@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.domain.DataPassengerCar;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
 import org.smartlink.common.entity.domain.business.mapper.DataOcrInfoMapper;
@@ -44,6 +45,19 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     }
 
     /**
+     * 查询增值税发票
+     *
+     * @param fileId
+     * @return 增值税发票
+     */
+    @Override
+    public List<DataOcrInfo> queryByFileId(String fileId){
+        LambdaQueryWrapper<DataOcrInfo> lqw = buildQueryFileIdWrapper(fileId);
+        return baseMapper.selectList(lqw);
+    }
+
+
+    /**
      * 分页查询增值税发票列表
      *
      * @param bo        查询条件
@@ -67,6 +81,84 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     public List<DataOcrInfoVo> queryList(DataOcrInfoBo bo) {
         LambdaQueryWrapper<DataOcrInfo> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataOcrInfo selectOneByFileId(String fileId) {
+        DataOcrInfo result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataOcrInfo buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataOcrInfo> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataOcrInfo::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
+    }
+
+    private LambdaQueryWrapper<DataOcrInfo> buildQueryFileIdWrapper(String fileId) {
+        LambdaQueryWrapper<DataOcrInfo> queryWrapper = Wrappers.lambdaQuery();
+        queryWrapper.select(
+            DataOcrInfo::getFileId,
+            DataOcrInfo::getBusinessSerialNo,
+            DataOcrInfo::getKind,
+            DataOcrInfo::getBuyerAccount,
+            DataOcrInfo::getBuyerAddress,
+            DataOcrInfo::getBuyerName,
+            DataOcrInfo::getBuyerNo,
+            DataOcrInfo::getCheckInvoice,
+            DataOcrInfo::getCancellationMark,
+            DataOcrInfo::getChecker,
+            DataOcrInfo::getProvince,
+            DataOcrInfo::getCity,
+            DataOcrInfo::getTitle,
+            DataOcrInfo::getInvoiceCode,
+            DataOcrInfo::getInvoiceDate,
+            DataOcrInfo::getInvoiceNumber,
+            DataOcrInfo::getIssuer,
+            DataOcrInfo::getItemNames,
+            DataOcrInfo::getCheckCode,
+            DataOcrInfo::getTotalLowercase,
+            DataOcrInfo::getPretaxAmount,
+            DataOcrInfo::getCompanySeal,
+            DataOcrInfo::getSellCompanySeal,
+            DataOcrInfo::getPageNumber,
+            DataOcrInfo::getInvoiceSheet,
+            DataOcrInfo::getMachineCode,
+            DataOcrInfo::getCategory,
+            DataOcrInfo::getPassword1,
+            DataOcrInfo::getElectronicNumber,
+            DataOcrInfo::getTravelTax,
+            DataOcrInfo::getPayee,
+            DataOcrInfo::getSellerAccount,
+            DataOcrInfo::getSellerAddress,
+            DataOcrInfo::getSellerName,
+            DataOcrInfo::getSellerNo,
+            DataOcrInfo::getSumAmount,
+            DataOcrInfo::getSumTax,
+            DataOcrInfo::getTotalUppercase,
+            DataOcrInfo::getPurchaseMark,
+            DataOcrInfo::getBlockChain,
+            DataOcrInfo::getElectronicMark,
+            DataOcrInfo::getTransitMark,
+            DataOcrInfo::getOilMark,
+            DataOcrInfo::getVehicleMark,
+            DataOcrInfo::getRegion,
+            DataOcrInfo::getRedDashed,
+            DataOcrInfo::getQrCode,
+            DataOcrInfo::getRightInvoiceDate,
+            DataOcrInfo::getElePayId,
+            DataOcrInfo::getPrintInvoiceCode,
+            DataOcrInfo::getNoteCheckCode,
+            DataOcrInfo::getPrintTotal,
+            DataOcrInfo::getPrintCheckCode,
+            DataOcrInfo::getRightInvoiceNumber,
+            DataOcrInfo::getRightInvoiceCode,
+            DataOcrInfo::getReplaceOpen,
+            DataOcrInfo::getDeduction,
+            DataOcrInfo::getHandwrite,
+            DataOcrInfo::getDeleteFlag
+        ).eq(DataOcrInfo::getFileId, fileId);
+        return queryWrapper;
     }
 
     private LambdaQueryWrapper<DataOcrInfo> buildQueryWrapper(DataOcrInfoBo bo) {

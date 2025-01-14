@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -109,6 +110,12 @@ public class DataOcrDetails extends TenantEntity {
      */
     private String licensePlateNum;
 
+
+    /**
+     * 税号
+     */
+    private String taxNumber;
+
     /**
      * 车辆类型
      */
@@ -135,6 +142,16 @@ public class DataOcrDetails extends TenantEntity {
     private String buildingName;
 
     /**
+     * 项目名称
+     */
+    private String projectName;
+
+    /**
+     * 项目编码
+     */
+    private String projectCode;
+
+    /**
      * 产权证书/不动产权证号（service_type为不动产经营租赁服务，返回字段）
      */
     private String titleCertificateNumber;
@@ -157,11 +174,13 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 起始地（service_type为货物运输服务，返回此字段）
      */
+    @TableField("`from`")
     private String from;
 
     /**
      * 到达地（service_type为货物运输服务，返回此字段）
      */
+    @TableField("`to`")
     private String to;
 
     /**
@@ -173,6 +192,11 @@ public class DataOcrDetails extends TenantEntity {
      * 出行人（service_type为旅客运输服务，返回此字段）
      */
     private String passenger;
+
+    /**
+     * 收费标准
+     */
+    private String standardOfCharge;
 
     /**
      * 有效身份证号（service_type为旅客运输服务，返回此字段）
@@ -188,6 +212,19 @@ public class DataOcrDetails extends TenantEntity {
      * 等级（service_type为旅客运输服务，返回此字段）
      */
     private String seat;
+
+
+    /**
+     * 服务类型
+     */
+    private String serviceType;
+
+    /**
+     * 订单编号
+     */
+    private String orderNumber;
+
+
 
     /**
      * 是否删除标识 0-不删除  1-删除

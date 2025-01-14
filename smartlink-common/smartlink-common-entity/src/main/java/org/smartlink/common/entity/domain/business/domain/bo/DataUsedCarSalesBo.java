@@ -75,6 +75,18 @@ public class DataUsedCarSalesBo extends BaseEntity {
     private String buyerName;
 
     /**
+     * 消费类型
+     */
+    @NotBlank(message = "消费类型不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String kind;
+
+    /**
+     * 旋转角度
+     */
+    @NotBlank(message = "旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
+
+    /**
      * 买方单位代码
      */
     @NotBlank(message = "买方单位代码不能为空", groups = { AddGroup.class, EditGroup.class })

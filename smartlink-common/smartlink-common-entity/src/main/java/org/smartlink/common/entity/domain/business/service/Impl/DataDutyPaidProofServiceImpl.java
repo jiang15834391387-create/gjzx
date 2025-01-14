@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataDutyPaidProof;
+import org.smartlink.common.entity.domain.business.domain.DataElectronicTransportationGoods;
 import org.smartlink.common.entity.domain.business.domain.bo.DataDutyPaidProofBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataDutyPaidProofVo;
 import org.smartlink.common.entity.domain.business.mapper.DataDutyPaidProofMapper;
@@ -57,6 +58,12 @@ public class DataDutyPaidProofServiceImpl implements IDataDutyPaidProofService {
         return TableDataInfo.build(result);
     }
 
+    @Override
+    public Boolean insert(DataDutyPaidProof dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 查询符合条件的完税证明列表
      *
@@ -68,6 +75,19 @@ public class DataDutyPaidProofServiceImpl implements IDataDutyPaidProofService {
         LambdaQueryWrapper<DataDutyPaidProof> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
     }
+
+    @Override
+    public DataDutyPaidProof selectOneByFileId(String fileId) {
+        DataDutyPaidProof result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataDutyPaidProof buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataDutyPaidProof> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataDutyPaidProof::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
+    }
+
 
     private LambdaQueryWrapper<DataDutyPaidProof> buildQueryWrapper(DataDutyPaidProofBo bo) {
         Map<String, Object> params = bo.getParams();

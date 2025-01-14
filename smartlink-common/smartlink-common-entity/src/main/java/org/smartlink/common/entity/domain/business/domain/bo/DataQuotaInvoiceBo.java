@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -55,6 +56,25 @@ public class DataQuotaInvoiceBo extends BaseEntity {
      */
     @NotBlank(message = "发票号码不能为空", groups = { AddGroup.class, EditGroup.class })
     private String invoiceNumber;
+
+    /**
+     * 发票消费类型
+     */
+    @NotBlank(message = "发票消费类型不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    @NotBlank(message = "图片旋转角度不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String orientation;
+
+    /**
+     * 定额非经营性标志
+     */
+    @NotBlank(message = "定额非经营性标志不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String nonCommercialMark;
 
     /**
      * 省

@@ -21,7 +21,7 @@ public interface ScanImageService {
      * @param multipartFile 文件
      * @return 图片vo
      */
-    DataImageFilesInfoVo uploadImage(MultipartFile multipartFile) throws Exception;
+    R uploadImage(MultipartFile multipartFile) throws Exception;
 //
 //    /**
 //     * 单据初始化

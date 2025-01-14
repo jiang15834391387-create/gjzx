@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataQuotaInvoice;
+import org.smartlink.common.entity.domain.business.domain.DataRailwayTicket;
 import org.smartlink.common.entity.domain.business.domain.bo.DataQuotaInvoiceBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataQuotaInvoiceVo;
 import org.smartlink.common.entity.domain.business.mapper.DataQuotaInvoiceMapper;
@@ -43,6 +44,12 @@ public class DataQuotaInvoiceServiceImpl implements IDataQuotaInvoiceService {
         return baseMapper.selectVoById(id);
     }
 
+    @Override
+    public Boolean insert(DataQuotaInvoice dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 分页查询定额发票列表
      *
@@ -67,6 +74,18 @@ public class DataQuotaInvoiceServiceImpl implements IDataQuotaInvoiceService {
     public List<DataQuotaInvoiceVo> queryList(DataQuotaInvoiceBo bo) {
         LambdaQueryWrapper<DataQuotaInvoice> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataQuotaInvoice selectOneByFileId(String fileId) {
+        DataQuotaInvoice result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataQuotaInvoice buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataQuotaInvoice> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataQuotaInvoice::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataQuotaInvoice> buildQueryWrapper(DataQuotaInvoiceBo bo) {

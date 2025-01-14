@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataCustomsExportGoods;
+import org.smartlink.common.entity.domain.business.domain.DataCustomsImportGoodsDetail;
 import org.smartlink.common.entity.domain.business.domain.bo.DataCustomsExportGoodsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataCustomsExportGoodsVo;
 import org.smartlink.common.entity.domain.business.mapper.DataCustomsExportGoodsMapper;
@@ -43,6 +44,12 @@ public class DataCustomsExportGoodsServiceImpl implements IDataCustomsExportGood
         return baseMapper.selectVoById(id);
     }
 
+    @Override
+    public Boolean insert(DataCustomsExportGoods dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 分页查询海关出口货物列表
      *
@@ -67,6 +74,18 @@ public class DataCustomsExportGoodsServiceImpl implements IDataCustomsExportGood
     public List<DataCustomsExportGoodsVo> queryList(DataCustomsExportGoodsBo bo) {
         LambdaQueryWrapper<DataCustomsExportGoods> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataCustomsExportGoods selectOneByFileId(String fileId) {
+        DataCustomsExportGoods result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataCustomsExportGoods buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataCustomsExportGoods> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataCustomsExportGoods::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataCustomsExportGoods> buildQueryWrapper(DataCustomsExportGoodsBo bo) {

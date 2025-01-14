@@ -43,6 +43,8 @@ public interface IDataImageFilesInfoService {
      */
     List<DataImageFilesInfoVo> queryList(DataImageFilesInfoBo bo);
 
+    DataImageFilesInfo selectOneByFileId(String fileId);
+
     /**
      * 新增图片文件
      *
@@ -58,6 +60,7 @@ public interface IDataImageFilesInfoService {
      * @return 是否新增成功
      */
     Boolean insert(DataImageFilesInfo dataImageFilesInfo);
+
 
     /**
      * 修改图片文件

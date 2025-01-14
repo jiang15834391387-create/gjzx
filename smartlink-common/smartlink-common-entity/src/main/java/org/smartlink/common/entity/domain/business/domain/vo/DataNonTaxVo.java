@@ -67,6 +67,12 @@ public class DataNonTaxVo implements Serializable {
     private String checker;
 
     /**
+     * 旋转角度
+     */
+    @ExcelProperty(value = "旋转角度")
+    private String orientation;
+
+    /**
      * 收款人
      */
     @ExcelProperty(value = "收款人")

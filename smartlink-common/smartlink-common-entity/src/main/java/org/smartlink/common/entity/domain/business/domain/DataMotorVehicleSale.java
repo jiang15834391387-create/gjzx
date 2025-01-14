@@ -95,6 +95,11 @@ public class DataMotorVehicleSale extends TenantEntity {
     private String invoiceDate;
 
     /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
      * 开票人
      */
     private String drawer;

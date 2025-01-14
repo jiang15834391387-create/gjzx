@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataCustomsExportGoods;
 import org.smartlink.common.entity.domain.business.domain.bo.DataCustomsExportGoodsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataCustomsExportGoodsVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -25,6 +26,8 @@ public interface IDataCustomsExportGoodsService {
      */
     DataCustomsExportGoodsVo queryById(String id);
 
+    Boolean insert(DataCustomsExportGoods dataOcrInfo);
+
     /**
      * 分页查询海关出口货物列表
      *
@@ -33,6 +36,8 @@ public interface IDataCustomsExportGoodsService {
      * @return 海关出口货物分页列表
      */
     TableDataInfo<DataCustomsExportGoodsVo> queryPageList(DataCustomsExportGoodsBo bo, PageQuery pageQuery);
+
+    DataCustomsExportGoods selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的海关出口货物列表

@@ -112,7 +112,7 @@ public enum InvoiceGlorityEnumd {
      */
     REIMBURSABLE_OTHER_CODE("10900","可报销其他发票"),
     /**
-     * 船票
+     * 小票
      */
     GLORITY_RECEIPT_CODE("20100","小票"),
     /**

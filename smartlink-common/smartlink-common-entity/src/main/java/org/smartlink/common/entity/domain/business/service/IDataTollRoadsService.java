@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataTollRoads;
 import org.smartlink.common.entity.domain.business.domain.bo.DataTollRoadsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataTollRoadsVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -33,6 +34,10 @@ public interface IDataTollRoadsService {
      * @return 过路费分页列表
      */
     TableDataInfo<DataTollRoadsVo> queryPageList(DataTollRoadsBo bo, PageQuery pageQuery);
+
+    Boolean insert(DataTollRoads dataOcrInfo);
+
+    DataTollRoads selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的过路费列表

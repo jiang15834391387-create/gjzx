@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataCustomsSpecialPayment;
 import org.smartlink.common.entity.domain.business.domain.bo.DataCustomsSpecialPaymentBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataCustomsSpecialPaymentVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -33,6 +34,10 @@ public interface IDataCustomsSpecialPaymentService {
      * @return 海关专用缴款书分页列表
      */
     TableDataInfo<DataCustomsSpecialPaymentVo> queryPageList(DataCustomsSpecialPaymentBo bo, PageQuery pageQuery);
+
+    DataCustomsSpecialPayment selectOneByFileId(String fileId);
+
+    Boolean insert(DataCustomsSpecialPayment dataOcrInfo);
 
     /**
      * 查询符合条件的海关专用缴款书列表

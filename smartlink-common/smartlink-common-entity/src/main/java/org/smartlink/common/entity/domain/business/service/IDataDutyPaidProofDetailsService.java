@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataDutyPaidProofDetails;
 import org.smartlink.common.entity.domain.business.domain.bo.DataDutyPaidProofDetailsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataDutyPaidProofDetailsVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -25,6 +26,9 @@ public interface IDataDutyPaidProofDetailsService {
      */
     DataDutyPaidProofDetailsVo queryById(String id);
 
+
+    Boolean insertBatch(List<DataDutyPaidProofDetails> dataOcrDetails);
+
     /**
      * 分页查询完税证明明细列表
      *
@@ -33,6 +37,8 @@ public interface IDataDutyPaidProofDetailsService {
      * @return 完税证明明细分页列表
      */
     TableDataInfo<DataDutyPaidProofDetailsVo> queryPageList(DataDutyPaidProofDetailsBo bo, PageQuery pageQuery);
+
+    DataDutyPaidProofDetails selectOneByFileId(String fileId);
 
     /**
      * 查询符合条件的完税证明明细列表

@@ -73,6 +73,25 @@ public class DataQuotaInvoiceVo implements Serializable {
     private String invoiceTotal;
 
     /**
+     * 发票消费类型
+     */
+    @ExcelProperty(value = "发票消费类型")
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
+
+    /**
+     * 定额非经营性标志
+     */
+    @ExcelProperty(value = "定额非经营性标志")
+    private String nonCommercialMark;
+
+    /**
      * 是否有公司印章(0: 没有; 1: 有)
      */
     @ExcelProperty(value = "是否有公司印章(0: 没有; 1: 有)")

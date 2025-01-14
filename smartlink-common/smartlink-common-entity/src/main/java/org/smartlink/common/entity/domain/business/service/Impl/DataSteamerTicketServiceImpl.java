@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataSteamerTicket;
+import org.smartlink.common.entity.domain.business.domain.DataTaxiTickets;
 import org.smartlink.common.entity.domain.business.domain.bo.DataSteamerTicketBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataSteamerTicketVo;
 import org.smartlink.common.entity.domain.business.mapper.DataSteamerTicketMapper;
@@ -55,6 +56,24 @@ public class DataSteamerTicketServiceImpl implements IDataSteamerTicketService {
         LambdaQueryWrapper<DataSteamerTicket> lqw = buildQueryWrapper(bo);
         Page<DataSteamerTicketVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    public Boolean insert(DataSteamerTicket dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
+    @Override
+    public DataSteamerTicket selectOneByFileId(String fileId) {
+        DataSteamerTicket result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataSteamerTicket buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataSteamerTicket> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataSteamerTicket::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     /**

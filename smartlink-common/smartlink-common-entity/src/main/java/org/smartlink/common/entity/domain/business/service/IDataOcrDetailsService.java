@@ -2,6 +2,7 @@ package org.smartlink.common.entity.domain.business.service;
 
 
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrDetailsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrDetailsVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -36,6 +37,14 @@ public interface IDataOcrDetailsService {
     TableDataInfo<DataOcrDetailsVo> queryPageList(DataOcrDetailsBo bo, PageQuery pageQuery);
 
     /**
+     * 查询增值税明细发票
+     *
+     * @param fileId
+     * @return 增值税发票
+     */
+    List<DataOcrDetails> queryByFileId(String fileId);
+
+    /**
      * 查询符合条件的增值税发票明细列表
      *
      * @param bo 查询条件
@@ -58,6 +67,8 @@ public interface IDataOcrDetailsService {
      * @return 是否新增成功
      */
     Boolean insert(DataOcrDetails dataOcrDetails);
+
+    DataOcrDetails selectOneByFileId(String fileId);
 
     /**
      * 批量新增增值税发票明细

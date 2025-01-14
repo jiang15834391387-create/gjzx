@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 航空电子行程单对象 data_flight_itinerary
@@ -78,6 +80,16 @@ public class DataFlightItinerary extends TenantEntity {
      * 保险费
      */
     private String insurance;
+
+    /**
+     * 身份证
+     */
+    private String userId;
+
+    /**
+     * 旋转角度
+     */
+    private String orientation;
 
     /**
      * 国内国际标签
@@ -173,6 +185,12 @@ public class DataFlightItinerary extends TenantEntity {
      * 增值税税率（仅在电子票时返回）
      */
     private String taxRate;
+
+    /**
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataFlightsItineraryDetail> details;
 
     /**
      * 商务类型 售 或 退

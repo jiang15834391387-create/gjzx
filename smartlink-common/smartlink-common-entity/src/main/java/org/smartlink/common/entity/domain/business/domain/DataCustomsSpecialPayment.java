@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 海关专用缴款书对象 data_customs_special_payment
@@ -178,6 +180,18 @@ public class DataCustomsSpecialPayment extends TenantEntity {
      * 日期
      */
     private String invoiceDate;
+
+    /**
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataOcrDetails> details;
+
+
+    /**
+     * 角度
+     */
+    private String orientation;
 
     /**
      * 发票专用章存在性判断

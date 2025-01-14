@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 滴滴行程单对象 data_didi_itinerary
@@ -65,6 +67,12 @@ public class DataDidiItinerary extends TenantEntity {
     private String invoiceTotal;
 
     /**
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataDidiItineraryDetails> details;
+
+    /**
      * 发票消费类型
      */
     private String kind;
@@ -73,6 +81,11 @@ public class DataDidiItinerary extends TenantEntity {
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
+
+    /**
+     * 旋转角度
+     */
+    private String orientation;
 
     /**
      * 是否删除标识 0-不删除  1-删除

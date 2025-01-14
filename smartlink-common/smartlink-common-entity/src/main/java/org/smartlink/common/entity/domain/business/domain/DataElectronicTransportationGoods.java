@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -8,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 货物运输电子收款凭证对象 data_electronic_transportation_goods
@@ -83,6 +85,17 @@ public class DataElectronicTransportationGoods extends TenantEntity {
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;
+
+    /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataOcrDetails> details;
 
     /**
      * 是否删除标识 0-不删除  1-删除

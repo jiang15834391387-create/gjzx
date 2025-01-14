@@ -57,6 +57,12 @@ public class DataRailwayTicketServiceImpl implements IDataRailwayTicketService {
         return TableDataInfo.build(result);
     }
 
+    @Override
+    public Boolean insert(DataRailwayTicket dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 查询符合条件的火车票列表
      *
@@ -67,6 +73,18 @@ public class DataRailwayTicketServiceImpl implements IDataRailwayTicketService {
     public List<DataRailwayTicketVo> queryList(DataRailwayTicketBo bo) {
         LambdaQueryWrapper<DataRailwayTicket> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataRailwayTicket selectOneByFileId(String fileId) {
+        DataRailwayTicket result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataRailwayTicket buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataRailwayTicket> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataRailwayTicket::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataRailwayTicket> buildQueryWrapper(DataRailwayTicketBo bo) {

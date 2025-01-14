@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataElectronicTransportationGoods;
 import org.smartlink.common.entity.domain.business.domain.bo.DataElectronicTransportationGoodsBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataElectronicTransportationGoodsVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -24,6 +25,10 @@ public interface IDataElectronicTransportationGoodsService {
      * @return 货物运输电子收款凭证
      */
     DataElectronicTransportationGoodsVo queryById(String id);
+
+    Boolean insert(DataElectronicTransportationGoods dataOcrInfo);
+
+    DataElectronicTransportationGoods selectOneByFileId(String fileId);
 
     /**
      * 分页查询货物运输电子收款凭证列表

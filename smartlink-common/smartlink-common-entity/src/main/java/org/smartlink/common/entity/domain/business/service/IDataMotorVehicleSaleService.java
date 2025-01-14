@@ -1,6 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
 
 
+import org.smartlink.common.entity.domain.business.domain.DataMotorVehicleSale;
 import org.smartlink.common.entity.domain.business.domain.bo.DataMotorVehicleSaleBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataMotorVehicleSaleVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -34,6 +35,8 @@ public interface IDataMotorVehicleSaleService {
      */
     TableDataInfo<DataMotorVehicleSaleVo> queryPageList(DataMotorVehicleSaleBo bo, PageQuery pageQuery);
 
+    DataMotorVehicleSale selectOneByFileId(String fileId);
+
     /**
      * 查询符合条件的机动车销售发票列表
      *
@@ -57,6 +60,9 @@ public interface IDataMotorVehicleSaleService {
      * @return 是否修改成功
      */
     Boolean updateByBo(DataMotorVehicleSaleBo bo);
+
+
+    Boolean insert(DataMotorVehicleSale dataMotorVehicleSale);
 
     /**
      * 校验并批量删除机动车销售发票信息

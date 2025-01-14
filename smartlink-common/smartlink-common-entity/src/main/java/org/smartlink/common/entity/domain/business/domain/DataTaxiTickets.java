@@ -45,6 +45,17 @@ public class DataTaxiTickets extends TenantEntity {
     private String city;
 
     /**
+     * 发票消费类型
+     */
+    private String kind;
+
+
+    /**
+     * 图片旋转角度
+     */
+    private String orientation;
+
+    /**
      * 发票代码
      */
     private String invoiceCode;

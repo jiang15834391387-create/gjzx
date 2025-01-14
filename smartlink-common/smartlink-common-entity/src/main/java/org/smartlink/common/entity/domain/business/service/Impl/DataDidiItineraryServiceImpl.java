@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataDidiItinerary;
+import org.smartlink.common.entity.domain.business.domain.DataDutyPaidProofDetails;
 import org.smartlink.common.entity.domain.business.domain.bo.DataDidiItineraryBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataDidiItineraryVo;
 import org.smartlink.common.entity.domain.business.mapper.DataDidiItineraryMapper;
@@ -43,6 +44,13 @@ public class DataDidiItineraryServiceImpl implements IDataDidiItineraryService {
         return baseMapper.selectVoById(id);
     }
 
+
+    @Override
+    public Boolean insert(DataDidiItinerary dataOcrInfo) {
+        boolean flag = baseMapper.insert(dataOcrInfo) > 0;
+        return flag;
+    }
+
     /**
      * 分页查询滴滴行程单列表
      *
@@ -67,6 +75,18 @@ public class DataDidiItineraryServiceImpl implements IDataDidiItineraryService {
     public List<DataDidiItineraryVo> queryList(DataDidiItineraryBo bo) {
         LambdaQueryWrapper<DataDidiItinerary> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataDidiItinerary selectOneByFileId(String fileId) {
+        DataDidiItinerary result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataDidiItinerary buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataDidiItinerary> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataDidiItinerary::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataDidiItinerary> buildQueryWrapper(DataDidiItineraryBo bo) {

@@ -121,6 +121,12 @@ public class DataDutyPaidProofVo implements Serializable {
     private String receivingTreasury;
 
     /**
+     * 图片旋转角度
+     */
+    @ExcelProperty(value = "图片旋转角度")
+    private String orientation;
+
+    /**
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     @ExcelProperty(value = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]")
