@@ -15,6 +15,7 @@
         <module>smartlink-job</module>
         <module>smartlink-system</module>
         <module>smartlink-workflow</module>
+        <module>smartlink-business</module>
     </modules>
 
     <artifactId>smartlink-modules</artifactId>

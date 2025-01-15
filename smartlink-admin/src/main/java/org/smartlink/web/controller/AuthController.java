@@ -16,6 +16,7 @@ import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginBody;
 import org.smartlink.common.core.domain.model.RegisterBody;
+import org.smartlink.common.core.domain.model.SmsLoginBody;
 import org.smartlink.common.core.domain.model.SocialLoginBody;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
@@ -27,8 +28,6 @@ import org.smartlink.common.social.utils.SocialUtils;
 import org.smartlink.common.sse.dto.SseMessageDto;
 import org.smartlink.common.sse.utils.SseMessageUtils;
 import org.smartlink.common.tenant.helper.TenantHelper;
-import org.smartlink.common.websocket.dto.WebSocketMessageDto;
-import org.smartlink.common.websocket.utils.WebSocketUtils;
 import org.smartlink.system.domain.bo.SysTenantBo;
 import org.smartlink.system.domain.vo.SysClientVo;
 import org.smartlink.system.domain.vo.SysTenantVo;
@@ -36,13 +35,13 @@ import org.smartlink.system.service.ISysClientService;
 import org.smartlink.system.service.ISysConfigService;
 import org.smartlink.system.service.ISysSocialService;
 import org.smartlink.system.service.ISysTenantService;
+import org.smartlink.web.domain.ForgetPasswordReq;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.smartlink.web.domain.vo.TenantListVo;
 import org.smartlink.web.service.IAuthStrategy;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
-import org.smartlink.common.core.utils.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -233,5 +232,24 @@ public class AuthController {
         result.setVoList(CollUtil.isNotEmpty(list) ? list : voList);
         return R.ok(result);
     }
+    /**
+     * @Description:短信登录
+     * @Author: Mr.Meng
+     * @Date: 2025/1/7
+     */
+    @PostMapping("/sms/login")
+    public R<LoginVo> smsLogin(@RequestBody SmsLoginBody loginBody) {
+        return loginService.smsLogin(loginBody);
+    }
+    /**
+     * @Description:忘记密码
+     * @Author: Mr.Meng
+     * @Date: 2025/1/7
+     */
+    @PostMapping("/forget/password")
+    public R<Void> forgetPassword(@RequestBody ForgetPasswordReq forgetPasswordBody) {
+        return loginService.forgetPassword(forgetPasswordBody);
+    }
+
 
 }

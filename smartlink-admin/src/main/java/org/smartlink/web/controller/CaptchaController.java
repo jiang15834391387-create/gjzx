@@ -49,7 +49,6 @@ public class CaptchaController {
 
     private final CaptchaProperties captchaProperties;
     private final MailProperties mailProperties;
-
     /**
      * 短信验证码
      *
@@ -73,7 +72,6 @@ public class CaptchaController {
         }
         return R.ok();
     }
-
     /**
      * 邮箱验证码
      *
@@ -96,7 +94,6 @@ public class CaptchaController {
         }
         return R.ok();
     }
-
     /**
      * 生成验证码
      */

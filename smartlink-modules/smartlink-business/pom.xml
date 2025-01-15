@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.smartlink</groupId>
+        <artifactId>smartlink-modules</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>smartlink-business</artifactId>
+
+    <description>
+        business 业务模块
+    </description>
+
+    <dependencies>
+
+        <!-- 通用工具-->
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-doc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-sms</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-mail</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-idempotent</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-mybatis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-log</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-excel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-security</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-ratelimiter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-translation</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-sensitive</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-encrypt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-tenant</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-websocket</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>

@@ -345,6 +345,12 @@
                 <version>${revision}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-business</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <!--  工作流模块  -->
             <dependency>
                 <groupId>org.smartlink</groupId>
