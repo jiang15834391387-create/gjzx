@@ -72,7 +72,7 @@ public class WfDefinitionConfigServiceImpl implements IWfDefinitionConfigService
      * @param definitionId 流程定义id
      */
     @Override
-    public List<WfDefinitionConfigVo> getByTableNameNotDefId(String tableName, String definitionId) {
+    public List<WfDefinitionConfigVo> getByTableNameNotDefId(String tableName,String definitionId) {
         return baseMapper.selectVoList(new LambdaQueryWrapper<WfDefinitionConfig>()
             .eq(WfDefinitionConfig::getTableName, tableName)
             .ne(WfDefinitionConfig::getDefinitionId, definitionId));

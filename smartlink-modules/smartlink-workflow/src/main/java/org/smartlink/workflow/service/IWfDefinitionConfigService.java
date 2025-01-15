@@ -46,7 +46,8 @@ public interface IWfDefinitionConfigService {
      * @param tableName    表名
      * @return 结果
      */
-    List<WfDefinitionConfigVo> getByTableNameNotDefId(String tableName, String definitionId);
+    List<WfDefinitionConfigVo> getByTableNameNotDefId(String tableName
+        ,String definitionId);
 
     /**
      * 查询流程定义配置列表

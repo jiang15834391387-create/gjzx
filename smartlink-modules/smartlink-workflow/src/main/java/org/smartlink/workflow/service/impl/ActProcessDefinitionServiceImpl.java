@@ -7,6 +7,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -379,6 +380,21 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
             }
         }
 
+    }
+
+    @Override
+    public String definitionXmlByTableName(String tableName) {
+        List<WfDefinitionConfigVo> wfDefinitionConfigVos = wfDefinitionConfigMapper.selectVoList(
+            new LambdaQueryWrapper<WfDefinitionConfig>().eq(WfDefinitionConfig::getTableName, tableName).orderByDesc(WfDefinitionConfig::getVersion));
+        if (CollUtil.isNotEmpty(wfDefinitionConfigVos)) {
+            String processDefinitionId = wfDefinitionConfigVos.get(0).getDefinitionId();
+            StringBuilder xml = new StringBuilder();
+            ProcessDefinition processDefinition = repositoryService.getProcessDefinition(processDefinitionId);
+            InputStream inputStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
+            xml.append(IoUtil.read(inputStream, StandardCharsets.UTF_8));
+            return xml.toString();
+        }
+        return "";
     }
 
     /**

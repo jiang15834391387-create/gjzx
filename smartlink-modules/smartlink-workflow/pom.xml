@@ -113,6 +113,10 @@
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-system</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

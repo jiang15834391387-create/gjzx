@@ -20,4 +20,6 @@ public interface SysDictDataMapper extends BaseMapperPlus<SysDictData, SysDictDa
                 .eq(SysDictData::getDictType, dictType)
                 .orderByAsc(SysDictData::getDictSort));
     }
+
+    List<String> selectDictList();
 }
