@@ -238,4 +238,18 @@ public class DataMedicalTreatment extends TenantEntity {
     private Long version;
 
 
+    /**
+     * 新增缺失参数
+     * OCR详情
+     */
+    @TableField(exist = false)
+    private List<DataOcrDetails> details;
+
+    /**
+     * 新增缺失参数
+     * 角度
+     */
+    private String orientation;
+
+
 }

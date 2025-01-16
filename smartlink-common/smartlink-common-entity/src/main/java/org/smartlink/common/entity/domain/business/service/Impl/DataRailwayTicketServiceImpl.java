@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataRailwayTicket;
@@ -26,6 +27,7 @@ import java.util.Map;
  * @author Lion Li
  * @date 2025-01-08
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DataRailwayTicketServiceImpl implements IDataRailwayTicketService {
@@ -179,5 +181,17 @@ public class DataRailwayTicketServiceImpl implements IDataRailwayTicketService {
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteByIds(ids) > 0;
+    }
+
+    /*
+     * 根据文件id查询火车票信息
+     */
+    @Override
+    public DataRailwayTicket getByFileId(String fileId) {
+        if (StringUtils.isBlank(fileId)){
+            log.error("火车票fileId为空", fileId);
+            return null;
+        }
+        return baseMapper.selectOne(new LambdaQueryWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, fileId));
     }
 }

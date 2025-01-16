@@ -44,6 +44,7 @@ public class DataCustomsExportGoodsDetailServiceImpl implements IDataCustomsExpo
         return baseMapper.selectVoById(id);
     }
 
+
     /**
      * 分页查询海关出口货物明细列表
      *
@@ -58,6 +59,11 @@ public class DataCustomsExportGoodsDetailServiceImpl implements IDataCustomsExpo
         return TableDataInfo.build(result);
     }
 
+    @Override
+    public Boolean insertBatch(List<DataCustomsExportGoodsDetail> dataOcrDetails) {
+        return baseMapper.insertBatch(dataOcrDetails);
+    }
+
     /**
      * 查询符合条件的海关出口货物明细列表
      *
@@ -68,6 +74,18 @@ public class DataCustomsExportGoodsDetailServiceImpl implements IDataCustomsExpo
     public List<DataCustomsExportGoodsDetailVo> queryList(DataCustomsExportGoodsDetailBo bo) {
         LambdaQueryWrapper<DataCustomsExportGoodsDetail> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public DataCustomsExportGoodsDetail selectOneByFileId(String fileId) {
+        DataCustomsExportGoodsDetail result = buildQueryWrapperByFileId(fileId);
+        return result;
+    }
+
+    private DataCustomsExportGoodsDetail buildQueryWrapperByFileId(String fileId) {
+        LambdaQueryWrapper<DataCustomsExportGoodsDetail> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(DataCustomsExportGoodsDetail::getFileId, fileId); // 使用 Lambda 表达式
+        return baseMapper.selectOne(lambdaQueryWrapper); // 返回查询结果
     }
 
     private LambdaQueryWrapper<DataCustomsExportGoodsDetail> buildQueryWrapper(DataCustomsExportGoodsDetailBo bo) {

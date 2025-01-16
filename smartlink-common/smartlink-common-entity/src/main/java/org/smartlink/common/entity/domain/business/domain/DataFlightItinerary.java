@@ -223,5 +223,10 @@ public class DataFlightItinerary extends TenantEntity {
     @Version
     private Long version;
 
-
+    /**
+     * 新增缺失参数
+     */
+    //航空电子单明细对象
+    @TableField(exist = false)
+    private List<DataFlightsItineraryDetail> flightItineraryDetails;
 }
