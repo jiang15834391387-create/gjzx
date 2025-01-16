@@ -5,7 +5,7 @@ import org.smartlink.common.entity.domain.business.domain.DataRailwayTicket;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RuiZhenChangeRailwayTicket{
+public class RegenaiChangeRailwayTicket{
     public void changeRailwayTicket(JSONObject jsonObject, DataRailwayTicket dataRailwayTicket) {
         dataRailwayTicket.setInvoiceNumber(jsonObject.getStr("number"));
         //乘车日期

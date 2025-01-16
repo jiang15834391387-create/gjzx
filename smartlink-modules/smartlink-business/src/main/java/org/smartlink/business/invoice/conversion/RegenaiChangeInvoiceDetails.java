@@ -16,7 +16,7 @@ import java.util.List;
  *
  */
 @Component
-public class RuiZhenChangeInvoiceDetails {
+public class RegenaiChangeInvoiceDetails {
     public List<DataOcrDetails> changeInvoiceDetails(String fileId, JSONObject jsonObject) {
         JSONArray jsonArray = jsonObject.getJSONArray("items");
         List<DataOcrDetails> ocrDetailsList = new ArrayList<>();

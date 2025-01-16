@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class RuiZhenBasicOcrInfo {
+public class RegenaiBasicOcrInfo {
 
     public void setBasicOcrInfo(JSONObject jsonObject, DataOcrInfo ocrInfo) {
         ocrInfo.setInvoiceCode(jsonObject.getStr("code"));

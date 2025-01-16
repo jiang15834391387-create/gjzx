@@ -13,7 +13,7 @@ import java.util.List;
  * 航空运输电子客票行程单详情转换
  */
 @Component
-public class RuiZhenChangeFlightItineraryDetails {
+public class RegenaiChangeFlightItineraryDetails {
     public List<DataFlightsItineraryDetail> changeFlightItineraryDetails(JSONObject jsonObject) {
         JSONArray jsonArray = jsonObject.getJSONArray("flights");
         List<DataFlightsItineraryDetail> flightsItineraryDetails = new ArrayList<>();

@@ -120,7 +120,7 @@
         </dependency>
         <dependency>
             <groupId>org.smartlink</groupId>
-            <artifactId>smartlink-common-checkinvoice</artifactId>
+            <artifactId>smartlink-common-check</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>

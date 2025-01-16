@@ -5,6 +5,8 @@ import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
+import java.io.IOException;
+
 
 /**
  * 查验策略
@@ -21,5 +23,5 @@ public interface ICheckStrategy {
      * @param dto       {@link InvoiceCheckParamDTO }
      * @return baseEntity {@link BaseEntity}
      */
-    BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto);
+    BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto) throws IOException;
 }

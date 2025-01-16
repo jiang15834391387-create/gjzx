@@ -1,14 +1,14 @@
 package org.smartlink.business.invoice.enumd;
 
 
-import org.smartlink.business.invoice.service.impl.RuiZhenCheckStrategy;
+import org.smartlink.business.invoice.service.impl.RegenaiCheckStrategy;
 
 public enum CheckEnum {
 
     /**
      * 睿真
      */
-    HANG_XIN("RuiZhen", RuiZhenCheckStrategy.class);
+    HANG_XIN("RuiZhen", RegenaiCheckStrategy.class);
 
     /**
      * 百望

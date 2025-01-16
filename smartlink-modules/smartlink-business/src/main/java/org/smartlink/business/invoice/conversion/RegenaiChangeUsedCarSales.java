@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class RuiZhenChangeUsedCarSales {
+public class RegenaiChangeUsedCarSales {
 
     public void changeUsedCarSales(JSONObject jsonObject, DataUsedCarSales usedCarSales) {
         usedCarSales.setInvoiceCode(jsonObject.getStr("code"));
