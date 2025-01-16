@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>org.smartlink</groupId>
-            <artifactId>smartlink-common-checkinvoice</artifactId>
+            <artifactId>smartlink-common-check</artifactId>
             <version>5.2.3</version>
         </dependency>
 

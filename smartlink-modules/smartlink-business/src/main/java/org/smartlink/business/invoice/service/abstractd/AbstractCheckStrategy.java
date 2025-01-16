@@ -7,6 +7,8 @@ import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 
+import java.io.IOException;
+
 /**
  * 查验策略：睿真、航信
  *
@@ -30,5 +32,5 @@ public abstract class AbstractCheckStrategy implements ICheckStrategy {
      * @return baseEntity {@link BaseEntity}
      */
     @Override
-    public abstract BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto);
+    public abstract BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto) throws IOException;
 }

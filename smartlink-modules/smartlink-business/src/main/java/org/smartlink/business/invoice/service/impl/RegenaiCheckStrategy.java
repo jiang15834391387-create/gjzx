@@ -23,7 +23,6 @@ import org.smartlink.common.check.properties.RuiZhenCheckProperties;
 import org.smartlink.common.check.utils.RuiZhenRequestUtil;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
-import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Component;
@@ -36,17 +35,18 @@ import java.io.IOException;
  */
 @Slf4j
 @Component
-public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
+public class RegenaiCheckStrategy extends AbstractCheckStrategy {
     private static RuiZhenCheckProperties ruiZhenCheckProperties = new RuiZhenCheckProperties();
     private final DataImageFilesInfoMapper dataImageFilesInfoMapper;
-    private final RuiZhenBasicOcrInfo basicOcrInfo;
-    private final RuiZhenChangeInvoiceDetails changeInvoiceDetails;
-    private final RuiZhenChangeUsedCarSales changeUsedCarSales;
-    private final RuiZhenMotorVehicleSale motorVehicleSale;
-    private final RuiZhenChangeRailwayTicket railwayTicket;
-    private final RuiZhenChangeFlightItinerary changeFlightItinerary;
-    private final RuiZhenChangeFlightItineraryDetails changeFlightItineraryDetails;
-    public RuiZhenCheckStrategy(IDataImageFilesInfoService imageFilesInfoService, DataImageFilesInfoMapper dataImageFilesInfoMapper, RuiZhenBasicOcrInfo basicOcrInfo, RuiZhenChangeInvoiceDetails changeInvoiceDetails, RuiZhenChangeUsedCarSales changeUsedCarSales, RuiZhenMotorVehicleSale motorVehicleSale, RuiZhenChangeRailwayTicket railwayTicket, RuiZhenChangeFlightItinerary changeFlightItinerary, RuiZhenChangeFlightItineraryDetails changeFlightItineraryDetails) {
+    private final RegenaiBasicOcrInfo basicOcrInfo;
+    private final RegenaiChangeInvoiceDetails changeInvoiceDetails;
+    private final RegenaiChangeUsedCarSales changeUsedCarSales;
+    private final RegenaiMotorVehicleSale motorVehicleSale;
+    private final RegenaiChangeRailwayTicket railwayTicket;
+    private final RegenaiChangeFlightItinerary changeFlightItinerary;
+    private final RegenaiChangeFlightItineraryDetails changeFlightItineraryDetails;
+
+    public RegenaiCheckStrategy(DataImageFilesInfoMapper dataImageFilesInfoMapper, RegenaiBasicOcrInfo basicOcrInfo, RegenaiChangeInvoiceDetails changeInvoiceDetails, RegenaiChangeUsedCarSales changeUsedCarSales, RegenaiMotorVehicleSale motorVehicleSale, RegenaiChangeRailwayTicket railwayTicket, RegenaiChangeFlightItinerary changeFlightItinerary, RegenaiChangeFlightItineraryDetails changeFlightItineraryDetails) {
         this.dataImageFilesInfoMapper = dataImageFilesInfoMapper;
         this.basicOcrInfo = basicOcrInfo;
         this.changeInvoiceDetails = changeInvoiceDetails;
@@ -56,6 +56,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
         this.changeFlightItinerary = changeFlightItinerary;
         this.changeFlightItineraryDetails = changeFlightItineraryDetails;
     }
+
 
     @Override
     public void init(CheckProperties properties) {
@@ -72,7 +73,7 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
     }
 
     @Override
-    public BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto) {
+    public BaseEntity checkInvoke(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO dto) throws IOException {
         String bodyString = RuiZhenRequestUtil.getGlobalInfo(dto, ruiZhenCheckProperties);
         log.info("睿真查验接口请求参数：" + bodyString);
         HttpClient client = HttpClientBuilder.create().build();
@@ -81,8 +82,8 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
         StringEntity entity = new StringEntity(bodyString, "UTF-8");
         post.setEntity(entity);
         String response = null;
-        BaseEntity baseEntity = new BaseEntity();
-        try {
+        BaseEntity baseEntity = null;
+
             HttpResponse result = client.execute(post);
             HttpEntity responseEntity = result.getEntity();
             if (responseEntity != null) {
@@ -91,19 +92,16 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
                     log.error("睿真查验失败，失败原因：查验服务返回缺少体：{}", response);
                     filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                     filesInfo.setMessage(response);
+                    filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+                    baseEntity=new BaseEntity();
                     baseEntity.setCheckResult(response);
                     baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
+                    //修改文件状态
+                    this.dataImageFilesInfoMapper.updateById(filesInfo);
                     return baseEntity;
                 }
             }
-        } catch (IOException e) {
-            log.error("执行睿真查验HTTP请求时发生异常原因：{}", e.getMessage());
-            filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-            filesInfo.setMessage("查验HTTP请求失败:" + e.getMessage());
-            baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
-            baseEntity.setCheckResult("查验HTTP请求失败:" + e.getMessage());
-            return baseEntity;
-        }
+
         log.info("睿真查验返回结果：{}", response);
         // 解析 JSON 响应
         JSONObject responseResult = JSONUtil.parseObj(response);
@@ -113,8 +111,12 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
             log.error("睿真查验失败：" + message);
             filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
             filesInfo.setMessage(message);
+            filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+            baseEntity=new BaseEntity();
             baseEntity.setCheckResult(message);
             baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
+            //修改文件状态
+            this.dataImageFilesInfoMapper.updateById(filesInfo);
             return baseEntity;
         }
         // 获取 response.data.identify_results
@@ -125,13 +127,17 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
             log.error("睿真查验失败：" + message);
             filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
             filesInfo.setMessage(message);
+            filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+            baseEntity=new BaseEntity();
             baseEntity.setCheckResult(message);
             baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
+            //修改文件状态
+            this.dataImageFilesInfoMapper.updateById(filesInfo);
             return baseEntity;
         }
         // 遍历 identify_results 验证 validation.code 和 items 是否符合要求
-        for (Object result : identifyResults) {
-            JSONObject identifyResult = (JSONObject) result;
+        for (Object results : identifyResults) {
+            JSONObject identifyResult = (JSONObject) results;
             JSONObject validation = identifyResult.getJSONObject("validation");
             // 检查 validation.code 是否为 10000
             if (validation.getInt("code") != 10000) {
@@ -139,8 +145,12 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
                 log.error("睿真查验失败：" + message);
                 filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                 filesInfo.setMessage(message);
+                filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+                baseEntity=new BaseEntity();
                 baseEntity.setCheckResult(message);
                 baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
+                //修改文件状态
+                this.dataImageFilesInfoMapper.updateById(filesInfo);
                 return baseEntity;
             }
 
@@ -148,29 +158,35 @@ public class RuiZhenCheckStrategy extends AbstractCheckStrategy {
         JSONObject details = null;
         // 遍历 identify_results 数组
         for (int i = 0; i < identifyResults.toArray().length; i++) {
-            JSONObject result = identifyResults.getJSONObject(i);
+            JSONObject results = identifyResults.getJSONObject(i);
             // 获取 details 对象
-            details = result.getJSONObject("details");
+            details = results.getJSONObject("details");
             // 判断 details 是否为空
             if (details == null) {
                 String message = "校验失败：明细details 为空";
                 log.error(message);
                 filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                 filesInfo.setMessage(message);
+                filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+                baseEntity=new BaseEntity();
                 baseEntity.setCheckResult(message);
                 baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
+                //修改文件状态
+                this.dataImageFilesInfoMapper.updateById(filesInfo);
                 return baseEntity;
             }
         }
         // 如果所有校验都通过
         log.info("睿真发票接口查验成功");
         filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
+        filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
+        filesInfo.setMessage("发票接口查验成功！");
+        baseEntity=new BaseEntity();
         baseEntity.setCheckResult("查验成功");
         baseEntity.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
         // 更新OCR信息
         baseEntity = updateInvoicesInfo(filesInfo, details);
         log.info("睿真查验转换后的OCR信息：{}", baseEntity);
-        filesInfo.setMessage("睿真发票接口查验成功！");
         //修改文件状态
         this.dataImageFilesInfoMapper.updateById(filesInfo);
         return baseEntity;

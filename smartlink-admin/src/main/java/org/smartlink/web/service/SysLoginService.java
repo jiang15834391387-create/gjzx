@@ -258,7 +258,8 @@ public class SysLoginService {
      */
     public R<LoginVo> smsLogin(SmsLoginBody loginBody) {
         String phone= loginBody.getPhonenumber();
-        String regex = "^1[3-9]\\d{9}$";
+        //redis获取hash里面的值
+        String regex = RedisUtils.getCacheMapValue(loginBody.getTenantId()+CacheConstants.CAPTCHA_CODE_KEY , "sys.phone.regex");
         if (!StrUtil.isBlankIfStr(phone) && ReUtil.isMatch(regex,phone)) {
             // 授权类型和客户端id
             String clientId = loginBody.getClientId();
@@ -309,7 +310,8 @@ public class SysLoginService {
      */
     public R<Void> forgetPassword(ForgetPasswordBo forgetPasswordBody) {
         String phone= forgetPasswordBody.getPhonenumber();
-        String regex = "^1[3-9]\\d{9}$";
+        //redis获取hash里面的值
+        String regex = RedisUtils.getCacheMapValue(forgetPasswordBody.getTenantId()+CacheConstants.CAPTCHA_CODE_KEY , "sys.phone.regex");
         if (!StrUtil.isBlankIfStr(phone) && ReUtil.isMatch(regex,phone)) {
             //根据手机号查询用户信息
             SysUserVo user = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhonenumber, phone));

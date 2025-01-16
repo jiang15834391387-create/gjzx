@@ -10,11 +10,13 @@ import java.io.Serializable;
  */
 @Data
 public class RuiZhenCheckProperties implements Serializable {
-
+    //厂商
+    private String regenai;
+    //请求地址
     private String url;
-
+    //appKey
     private String appKey;
-
+    //appSecret
     private String appSecret;
 
 }

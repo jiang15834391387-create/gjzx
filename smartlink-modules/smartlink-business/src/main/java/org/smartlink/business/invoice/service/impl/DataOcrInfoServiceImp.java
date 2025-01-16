@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.invoice.factory.CheckFactory;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
@@ -21,17 +22,18 @@ import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
 import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
 import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
 import org.smartlink.common.entity.domain.business.mapper.DataOcrInfoMapper;
-import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 /**
- * 增值税发票Service业务层处理
+ * 增值税发票Service业务层处理(查验)
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -40,7 +42,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Service
 public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
-
     private final DataOcrInfoMapper baseMapper;
     private final DataImageFilesInfoMapper imageFilesMapper;
     private final DataOcrDetailsMapper dataOcrDetailsMapper;
@@ -198,27 +199,13 @@ public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
         return baseMapper.deleteByIds(ids) > 0;
     }
 
-    /**
-     *
-     *发票的验真
-     */
-    @Override
-    public BaseEntity checkInvoice(InvoiceCheckParamDTO invoiceCheckParamDTO) {
-        DataOcrInfoVo dataOcrInfoVo = baseMapper.selectVoById(invoiceCheckParamDTO.getId());
-        DataImageFilesInfo imageFiles = imageFilesMapper
-            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
-                .eq(DataImageFilesInfo::getFileId, dataOcrInfoVo.getFileId()));
-        return CheckFactory.instance().checkInvoke(imageFiles, invoiceCheckParamDTO);
-
-    }
-
 
     /**
      * @Description:增值税专用发票发票修改
      * @Author: Mr.Meng
      */
     @Override
-    public R invoiceAlter(DataOcrInfoBo dto) {
+    public R invoiceAlter(DataOcrInfoBo dto) throws IOException {
         //根据id修改发票信息
         DataOcrInfo dataOcrInfo = baseMapper.selectById(dto.getId());
         if (ObjectUtil.isEmpty(dataOcrInfo)){
@@ -270,4 +257,6 @@ public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
         ocrInfo.setDetails(ocrDetailsList);
         return ocrInfo;
     }
+
+
 }

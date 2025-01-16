@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class RuiZhenChangeFlightItinerary {
+public class RegenaiChangeFlightItinerary {
     public void changeFlightItinerary(JSONObject jsonObject, DataFlightItinerary dataFlightItinerary) {
         //发票号码
         dataFlightItinerary.setInvoiceNumber(jsonObject.getStr("receipt_number"));

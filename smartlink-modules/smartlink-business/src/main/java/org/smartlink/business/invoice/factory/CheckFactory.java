@@ -40,10 +40,11 @@ public class CheckFactory {
      * 获取默认实例
      */
     public static ICheckStrategy instance() {
-        RedisUtils.setCacheObject(CheckConstant.SYS_CHECK_KEY+ CheckConstant.CHECK_CONFIG_KEY,
-            CheckConstant.CHECK_SUPPLIER_RUIZHEN);
-        String type = RedisUtils.getCacheObject(CheckConstant.CACHE_CONFIG_KEY);
-        log.info("默认查验厂商为:{}", type);
+        Object cacheMapValue = RedisUtils.getCacheMapValue(CheckConstant.CHECK_CONFIG_KEY, CheckConstant.CHECK_CONFIG);
+        log.info("默认查验厂商为:{}", cacheMapValue);
+        RuiZhenCheckProperties properties = JsonUtils.parseObject(cacheMapValue.toString(), RuiZhenCheckProperties.class);
+        log.info("默认查验厂商为:{}", properties.getRegenai());
+        String type = properties.getRegenai();
         if (StringUtils.isEmpty(type)) {
             throw new CheckException("查验服务类型无法找到!");
         }
@@ -66,19 +67,13 @@ public class CheckFactory {
     }
 
     private static void refresh(String type) {
-        RuiZhenCheckProperties ruiZhenCheckProperties = new RuiZhenCheckProperties();
-        ruiZhenCheckProperties.setUrl(CheckConstant.CHECK_URL_RUIZHEN);
-        ruiZhenCheckProperties.setAppKey(CheckConstant.CHECK_APPKEY_RUIZHEN);
-        ruiZhenCheckProperties.setAppSecret(CheckConstant.CHECK_APPSECRET_RUIZHEN);
-        String jsonToStore = JsonUtils.toJsonString(ruiZhenCheckProperties);
-        RedisUtils.setCacheObject(CheckConstant.SYS_CHECK_KEY + type, jsonToStore);
-        Object json = RedisUtils.getCacheObject(CheckConstant.SYS_CHECK_KEY + type);
-        RuiZhenCheckProperties properties = JsonUtils.parseObject(json.toString(), RuiZhenCheckProperties.class);
+        Object cacheMapValue = RedisUtils.getCacheMapValue(CheckConstant.CHECK_CONFIG_KEY, CheckConstant.CHECK_CONFIG);
+        log.info("默认查验厂商为:{}", cacheMapValue);
+        RuiZhenCheckProperties properties = JsonUtils.parseObject(cacheMapValue.toString(), RuiZhenCheckProperties.class);
         CheckProperties checkProperties = new CheckProperties();
-        checkProperties.setConfigKey(type);
         checkProperties.setDetailInfo(JsonUtils.toJsonString(properties));
         if (properties == null) {
-           log.error("查验系统异常" + type + "配置信息不存在!{} ",json);
+           log.error("查验系统异常" + type + "配置信息不存在!{} ",properties);
            throw new CheckException("查验系统异常" + type + "配置信息不存在!");
         }
         getStrategy(type).init(checkProperties);
