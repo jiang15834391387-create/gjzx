@@ -236,6 +236,7 @@ public class AuthController {
      * @Author: Mr.Meng
      * @Date: 2025/1/7
      */
+    @ApiEncrypt
     @PostMapping("/sms/login")
     public R<LoginVo> smsLogin(@RequestBody SmsLoginBody loginBody) {
         return loginService.smsLogin(loginBody);

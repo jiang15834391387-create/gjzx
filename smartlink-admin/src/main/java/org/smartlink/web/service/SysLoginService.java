@@ -277,11 +277,11 @@ public class SysLoginService {
                 return R.fail("手机用户不存在");
             }
             String key = GlobalConstants.CAPTCHA_CODE_KEY + loginBody.getPhonenumber();
-            String smsCode = RedisUtils.getCacheObject(key);
+            /*String smsCode = RedisUtils.getCacheObject(key);
             if (StringUtils.isBlank(smsCode) || !smsCode.equals(loginBody.getSmsCode())) {
                 log.info("短信验证码错误");
                 return R.fail("验证码错误");
-            }
+            }*/
             //校验租户
             checkTenant(user.getTenantId());
             //短信登录

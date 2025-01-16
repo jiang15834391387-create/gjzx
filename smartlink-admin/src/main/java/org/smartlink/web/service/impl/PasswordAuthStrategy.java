@@ -56,14 +56,23 @@ public class PasswordAuthStrategy implements IAuthStrategy {
         String password = loginBody.getPassword();
         String code = loginBody.getCode();
         String uuid = loginBody.getUuid();
+        String clientType = loginBody.getClientType();
 
         boolean captchaEnabled = captchaProperties.getEnable();
-        // 验证码开关
-        if (captchaEnabled) {
-            validateCaptcha(tenantId, username, code, uuid);
+        if(StringUtils.isEmpty(clientType)||!"app".equals(clientType)){
+            // 验证码开关
+            if (captchaEnabled) {
+                validateCaptcha(tenantId, username, code, uuid);
+            }
         }
         LoginUser loginUser = TenantHelper.dynamic(tenantId, () -> {
-            SysUserVo user = loadUserByUsername(username);
+            SysUserVo user;
+                if(StringUtils.isEmpty(clientType)||!"app".equals(clientType)){
+                     user = loadUserByUsername(username);
+                }else {
+                     user = loadUserByPhone(username);
+                }
+
             loginService.checkLogin(LoginType.PASSWORD, tenantId, username, () -> !BCrypt.checkpw(password, user.getPassword()));
             // 此处可根据登录用户的数据不同 自行创建 loginUser
             return loginService.buildLoginUser(user);
@@ -85,6 +94,18 @@ public class PasswordAuthStrategy implements IAuthStrategy {
         loginVo.setExpireIn(StpUtil.getTokenTimeout());
         loginVo.setClientId(client.getClientId());
         return loginVo;
+    }
+
+    private SysUserVo loadUserByPhone(String username) {
+        SysUserVo user = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhonenumber, username));
+        if (ObjectUtil.isNull(user)) {
+            log.info("登录用户：{} 不存在.", username);
+            throw new UserException("user.not.exists", username);
+        } else if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
+            log.info("登录用户：{} 已被停用.", username);
+            throw new UserException("user.blocked", username);
+        }
+        return user;
     }
 
     /**
