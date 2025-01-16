@@ -15,6 +15,8 @@ import org.smartlink.business.scan.dto.FileUploadDTO;
 import org.smartlink.business.service.ScanImageService;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.utils.file.FileUtils;
+import org.smartlink.common.core.utils.file.MimeTypeUtils;
+import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
 import org.smartlink.common.log.annotation.Log;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.annotation.Validated;

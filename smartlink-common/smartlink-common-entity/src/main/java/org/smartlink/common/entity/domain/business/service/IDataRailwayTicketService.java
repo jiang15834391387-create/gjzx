@@ -72,4 +72,6 @@ public interface IDataRailwayTicketService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+    //根据图片id查询火车票
+    DataRailwayTicket getByFileId(String fileId);
 }

@@ -35,8 +35,6 @@ public interface IDataUsedCarSalesService {
      */
     TableDataInfo<DataUsedCarSalesVo> queryPageList(DataUsedCarSalesBo bo, PageQuery pageQuery);
 
-
-
     /**
      * 查询符合条件的二手车销售统一发票列表
      *
@@ -75,4 +73,7 @@ public interface IDataUsedCarSalesService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+
+    // 根据文件id查询
+    DataUsedCarSales getByFileId(String fileId);
 }

@@ -71,4 +71,6 @@ public interface IDataMedicalTreatmentService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+    // 根据file_id查询非税收入类票据
+    DataMedicalTreatment getByFileId(String fileId);
 }

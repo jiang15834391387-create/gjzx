@@ -72,4 +72,6 @@ public interface IDataMotorVehicleSaleService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+    // 根据文件id查询机动车信息
+    DataMotorVehicleSale getByFileId(String fileId);
 }

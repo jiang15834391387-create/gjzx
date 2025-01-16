@@ -1,16 +1,19 @@
 package org.smartlink.common.entity.domain.business.service.Impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.entity.domain.business.domain.DataPassengerCar;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
+import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
 import org.smartlink.common.entity.domain.business.mapper.DataOcrInfoMapper;
 import org.smartlink.common.entity.domain.business.service.IDataOcrInfoService;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -27,11 +30,14 @@ import java.util.Map;
  * @author Lion Li
  * @date 2025-01-08
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
 
     private final DataOcrInfoMapper baseMapper;
+    private final DataImageFilesInfoMapper imageFilesInfoMapper;
+
 
     /**
      * 查询增值税发票
@@ -266,7 +272,21 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
     public Boolean updateByBo(DataOcrInfoBo bo) {
         DataOcrInfo update = MapstructUtils.convert(bo, DataOcrInfo.class);
         validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        Boolean result = baseMapper.updateById(update) > 0;
+        if (!result){
+            return false;
+        }
+        if (StringUtils.isNotBlank(bo.getFileId())){
+            //根据fileId查询文件信息
+            DataImageFilesInfo dataImageFilesInfo = imageFilesInfoMapper
+                .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, bo.getFileId()));
+            if (ObjectUtil.isEmpty(dataImageFilesInfo)){
+                log.info("根据fileId查询文件信息为空");
+            }
+            dataImageFilesInfo.setFileStatus("0");
+            imageFilesInfoMapper.updateById(dataImageFilesInfo);
+        }
+        return true;
     }
 
     /**
@@ -290,4 +310,5 @@ public class DataOcrInfoServiceImpl implements IDataOcrInfoService {
         }
         return baseMapper.deleteByIds(ids) > 0;
     }
+
 }

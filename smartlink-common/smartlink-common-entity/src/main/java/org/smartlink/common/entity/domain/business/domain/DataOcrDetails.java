@@ -38,6 +38,7 @@ public class DataOcrDetails extends TenantEntity {
     /**
      * 图片表id
      */
+    @TableField(value = "file_id")
     private String fileId;
 
     /**

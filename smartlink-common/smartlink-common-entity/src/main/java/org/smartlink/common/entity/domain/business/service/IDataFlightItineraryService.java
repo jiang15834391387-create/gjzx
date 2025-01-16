@@ -71,4 +71,6 @@ public interface IDataFlightItineraryService {
      * @return 是否删除成功
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
+    // 根据文件id查询
+    DataFlightItinerary getByFileId(String fileId);
 }

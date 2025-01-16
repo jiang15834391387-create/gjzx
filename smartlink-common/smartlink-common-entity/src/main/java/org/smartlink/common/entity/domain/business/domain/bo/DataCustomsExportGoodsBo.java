@@ -274,12 +274,6 @@ public class DataCustomsExportGoodsBo extends BaseEntity {
     private String region;
 
     /**
-     * 角度
-     */
-    @NotBlank(message = "角度不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String orientation;
-
-    /**
      * 发票专用章存在性判断
      */
     @NotBlank(message = "发票专用章存在性判断不能为空", groups = { AddGroup.class, EditGroup.class })

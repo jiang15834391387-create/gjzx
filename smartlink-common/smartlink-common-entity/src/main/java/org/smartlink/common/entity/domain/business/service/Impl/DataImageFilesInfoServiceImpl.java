@@ -1,5 +1,4 @@
 package org.smartlink.common.entity.domain.business.service.Impl;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -171,5 +170,10 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteByIds(ids) > 0;
+    }
+
+    @Override
+    public List<DataImageFilesInfo> listlqw(LambdaQueryWrapper<DataImageFilesInfo> queryWrapper) {
+        return this.baseMapper.selectList(queryWrapper);
     }
 }

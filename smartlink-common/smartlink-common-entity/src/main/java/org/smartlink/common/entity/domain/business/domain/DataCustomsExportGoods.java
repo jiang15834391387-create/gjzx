@@ -237,17 +237,6 @@ public class DataCustomsExportGoods extends TenantEntity {
     private String region;
 
     /**
-     * 角度
-     */
-    private String orientation;
-
-    /**
-     * OCR详情
-     */
-    @TableField(exist = false)
-    private List<DataCustomsExportGoodsDetail> details;
-
-    /**
      * 发票专用章存在性判断
      */
     private String invoiceStamp;

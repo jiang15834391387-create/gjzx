@@ -1,14 +1,5 @@
 package org.smartlink.business.service.Impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +16,9 @@ import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapp
 import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
 import org.smartlink.common.entity.domain.business.service.*;
 import org.smartlink.common.entity.domain.business.service.Impl.DataUsedCarSalesServiceImpl;
+import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
+import org.smartlink.common.entity.domain.business.service.IDataOcrDetailsService;
+import org.smartlink.common.entity.domain.business.service.IDataOcrInfoService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
@@ -44,11 +38,20 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 
+/**
+ * @author Zhang Shuai
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class IDataOcrServiceImpl implements IDataOcrService {
 
+
+    private final DataOcrDetailsMapper dataOcrDetailsMapper;
+    private final DataImageFilesInfoMapper dataImageFilesInfoMapper;
+    private final DataDidiItineraryDetailsMapper dataDidiItineraryDetailsMapper;
+
+    private final IDataImageFilesInfoService dataImageFilesInfoService;
     private final IDataOcrInfoService iDataOcrInfoService;
     private final IDataOcrDetailsService iDataOcrDetailsService;
 

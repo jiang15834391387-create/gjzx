@@ -198,6 +198,5 @@ public interface Constants {
      */
     String QR_CODE_BAR_CODE_TYPE = "barCode";
 
-
 }
 

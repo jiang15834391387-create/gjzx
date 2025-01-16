@@ -107,12 +107,6 @@ public class DataMedicalTreatment extends TenantEntity {
     private String medicalRecordNumber;
 
     /**
-     * OCR详情
-     */
-    @TableField(exist = false)
-    private List<DataOcrDetails> details;
-
-    /**
      * 住院号
      */
     private String inpatientNumber;
@@ -126,11 +120,6 @@ public class DataMedicalTreatment extends TenantEntity {
      * 医保编号
      */
     private String medicalInsuranceNumber;
-
-    /**
-     * 图片旋转角度
-     */
-    private String orientation;
 
     /**
      * 就诊日期
@@ -236,6 +225,11 @@ public class DataMedicalTreatment extends TenantEntity {
      * 备注
      */
     private String remark;
+
+
+    //非税票据详情对象
+    @TableField(exist = false)
+    private List<DataMedicalTreatmentDetail> medicalTreatmentDetails;
 
     /**
      * 版本号

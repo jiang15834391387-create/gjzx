@@ -18,6 +18,7 @@ import org.smartlink.common.ocr.core.IdentificationFactory;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.exception.OcrException;
 import org.smartlink.common.ocr.glority.config.GlorityOcrProperties;
+import org.smartlink.common.ocr.glority.conversion.InvoiceConversion;
 import org.smartlink.common.ocr.glority.conversion.*;
 
 import org.smartlink.common.ocr.glority.response.GlorityResult;
@@ -52,6 +53,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
 
     private static GlorityOcrProperties glorityOcrProperties = new GlorityOcrProperties();
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public void init(OcrProperties properties) {
         super.init(properties);

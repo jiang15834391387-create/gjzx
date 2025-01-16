@@ -7,16 +7,16 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.lock.annotation.Lock4j;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthUser;
 import org.smartlink.common.core.constant.*;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.dto.RoleDTO;
-import org.smartlink.common.core.domain.model.LoginBody;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.SmsLoginBody;
 import org.smartlink.common.core.enums.LoginType;
@@ -38,7 +38,7 @@ import org.smartlink.system.domain.bo.SysSocialBo;
 import org.smartlink.system.domain.vo.*;
 import org.smartlink.system.mapper.SysUserMapper;
 import org.smartlink.system.service.*;
-import org.smartlink.web.domain.ForgetPasswordReq;
+import org.smartlink.web.domain.bo.ForgetPasswordBo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 /**
  * 登录校验方法
@@ -259,7 +258,9 @@ public class SysLoginService {
      */
     public R<LoginVo> smsLogin(SmsLoginBody loginBody) {
         String phone= loginBody.getPhonenumber();
-        if (!phone.equals("") && Pattern.compile("^1[3456789]\\d{9}$").matcher(phone).matches()) {
+        //redis获取hash里面的值
+        String regex = RedisUtils.getCacheMapValue(loginBody.getTenantId()+CacheConstants.CAPTCHA_CODE_KEY , "sys.phone.regex");
+        if (!StrUtil.isBlankIfStr(phone) && ReUtil.isMatch(regex,phone)) {
             // 授权类型和客户端id
             String clientId = loginBody.getClientId();
             String grantType = loginBody.getGrantType();
@@ -272,25 +273,21 @@ public class SysLoginService {
                 return R.fail(MessageUtils.message("auth.grant.type.blocked"));
             }
             //根据手机号查询用户信息
-            LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(SysUser::getPhonenumber, phone);
-            SysUserVo user = userMapper.selectVoOne(queryWrapper);
+            SysUserVo user = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhonenumber, phone));
             if (ObjectUtil.isNull(user)) {
                 return R.fail("手机用户不存在");
             }
             String key = GlobalConstants.CAPTCHA_CODE_KEY + loginBody.getPhonenumber();
-            String smsCode = RedisUtils.getCacheObject(key);
+            /*String smsCode = RedisUtils.getCacheObject(key);
             if (StringUtils.isBlank(smsCode) || !smsCode.equals(loginBody.getSmsCode())) {
                 log.info("短信验证码错误");
                 return R.fail("验证码错误");
-            }
+            }*/
             //校验租户
             checkTenant(user.getTenantId());
-            //登录
+            //短信登录
             String string = JsonUtils.toJsonString(loginBody);
-            LoginBody loginBody1 = JsonUtils.parseObject(string, LoginBody.class);
-            LoginVo loginVo = IAuthStrategy.login(String.valueOf(loginBody1), client, grantType);
-
+            LoginVo loginVo = IAuthStrategy.login(string, client, grantType);
             Long userId = LoginHelper.getUserId();
             scheduledExecutorService.schedule(() -> {
                 SseMessageDto dto = new SseMessageDto();
@@ -303,6 +300,7 @@ public class SysLoginService {
             return R.fail("手机号格式不正确");
         }
 
+
     }
     /**
      * 忘记密码
@@ -310,26 +308,24 @@ public class SysLoginService {
      * @param forgetPasswordBody 忘记密码信息
      * @return 结果
      */
-    public R<Void> forgetPassword(ForgetPasswordReq forgetPasswordBody) {
+    public R<Void> forgetPassword(ForgetPasswordBo forgetPasswordBody) {
         String phone= forgetPasswordBody.getPhonenumber();
-        if (!phone.equals("") && Pattern.compile("^1[3456789]\\d{9}$").matcher(phone).matches()) {
+        //redis获取hash里面的值
+        String regex = RedisUtils.getCacheMapValue(forgetPasswordBody.getTenantId()+CacheConstants.CAPTCHA_CODE_KEY , "sys.phone.regex");
+        if (!StrUtil.isBlankIfStr(phone) && ReUtil.isMatch(regex,phone)) {
             //根据手机号查询用户信息
-            LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(SysUser::getPhonenumber, phone);
-            SysUserVo user = userMapper.selectVoOne(queryWrapper);
+            SysUserVo user = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhonenumber, phone));
             if (ObjectUtil.isNull(user)) {
                 return R.fail("手机用户不存在");
             }
-            String key = GlobalConstants.CAPTCHA_CODE_KEY +phone;
-            String smsCode = RedisUtils.getCacheObject(key);
+            String smsCode = RedisUtils.getCacheObject(GlobalConstants.CAPTCHA_CODE_KEY +phone);
             if (StringUtils.isBlank(smsCode) || !smsCode.equals(forgetPasswordBody.getSmsCode())) {
                 log.info("短信验证码错误 {}", smsCode);
-                return R.fail("验证码错误");
+                return R.fail("短信验证码错误");
             }
             user.setPassword(BCrypt.hashpw(forgetPasswordBody.getNewPassword()));
-            LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(SysUser::getUserId, user.getUserId()).set(SysUser::getPassword,user.getPassword());
-            int update = userMapper.update(null, updateWrapper);
+            SysUserMapper userMapper = SpringUtils.getBean(SysUserMapper.class);
+            int update = userMapper.updateById(BeanUtil.toBean(user, SysUser.class));
             if (update > 0) {
                 return R.ok();
             } else {
