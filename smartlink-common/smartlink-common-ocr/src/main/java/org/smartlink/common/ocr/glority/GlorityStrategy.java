@@ -52,7 +52,6 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
 
     private static GlorityOcrProperties glorityOcrProperties = new GlorityOcrProperties();
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public void init(OcrProperties properties) {
         super.init(properties);
@@ -66,16 +65,9 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
         }
         isInit = true;
     }
-//    @Autowired
-//    private ApplicationContext applicationContext;
-
-//    @PostConstruct
-//    public void printBeans() {
-//        System.out.println(Arrays.toString(applicationContext.getBeanDefinitionNames()));
-//    }
 
     @Override
-    public List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64) throws OcrException {
+    public List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64, String fileSuffix) throws OcrException {
         log.info("进入票小米OCR识别");
         // 计数
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
@@ -88,7 +80,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 .with("token", token);
                 //是否切图
                 boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
-                if (isCrop) {
+                if (isCrop || fileSuffix.equals("pdf")) {
                     with.with("extract_level", 1);
                 }
         // 发送请求
@@ -113,13 +105,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 return dataList != null ? dataList.stream() : Stream.empty(); // 处理可能为 null 的返回值
             })
             .collect(Collectors.toList());
-//        for (IdentificationData identificationData : collect) {
-//            if(!InvoiceConstants.IMAGE_OTHERS.equals(identificationData.k)){
-//                return collect;
-//            }
-//        }
-//        List<IdentificationData> collect2 = new ArrayList<>(1);
-//        collect2.add( identificationDataList);
+
         return identificationDataList;
     }
 

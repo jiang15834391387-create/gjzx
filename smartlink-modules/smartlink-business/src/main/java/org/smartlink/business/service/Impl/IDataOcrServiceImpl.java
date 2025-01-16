@@ -88,7 +88,7 @@ public class IDataOcrServiceImpl implements IDataOcrService {
      * @return 0 失败 1 成功
      */
     @Override
-    public R ocrInsert(String key, Object obj) throws Exception {
+    public R<T> ocrInsert(String key, Object obj) throws Exception {
         if (key.isEmpty()){
             return R.warn("发票类型识别为空！");
         }

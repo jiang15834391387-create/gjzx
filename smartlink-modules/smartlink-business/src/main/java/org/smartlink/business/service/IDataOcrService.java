@@ -27,7 +27,7 @@ public interface IDataOcrService {
      * @param obj 发票实体
      * @return 0 失败 1 成功
      */
-    R ocrInsert(String key, Object obj) throws Exception;
+    R<T> ocrInsert(String key, Object obj) throws Exception;
 
 
 

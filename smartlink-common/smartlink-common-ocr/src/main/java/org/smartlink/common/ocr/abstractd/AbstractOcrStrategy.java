@@ -25,5 +25,5 @@ public abstract class AbstractOcrStrategy implements IOcrStrategy {
     }
 
     @Override
-    public abstract List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64);
+    public abstract List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64, String fileSufix);
 }

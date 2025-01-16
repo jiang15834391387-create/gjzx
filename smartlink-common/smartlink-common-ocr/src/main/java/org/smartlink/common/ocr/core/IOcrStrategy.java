@@ -19,5 +19,5 @@ public interface IOcrStrategy {
      * @param base64 图片字节
      * @return 返回k，识别实体
      */
-    List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64);
+    List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64, String fileSuffix);
 }

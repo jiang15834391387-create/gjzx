@@ -2,6 +2,7 @@ package org.smartlink.business.service;
 
 
 
+import org.apache.poi.ss.formula.functions.T;
 import org.smartlink.business.scan.dto.FileUploadDTO;
 import org.smartlink.business.scan.request.InitializationRequest;
 import org.smartlink.common.core.domain.R;
@@ -21,7 +22,7 @@ public interface ScanImageService {
      * @param multipartFile 文件
      * @return 图片vo
      */
-    R uploadImage(MultipartFile multipartFile) throws Exception;
+    R<T> uploadImage(MultipartFile multipartFile) throws Exception;
 //
 //    /**
 //     * 单据初始化

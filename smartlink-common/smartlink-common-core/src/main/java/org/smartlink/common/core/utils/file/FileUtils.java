@@ -11,19 +11,22 @@ import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.smartlink.common.core.domain.model.UrlMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -247,6 +250,45 @@ public class FileUtils extends FileUtil {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             Thumbnails.of(byteArrayInputStream).sourceRegion(rectangle).size(intRegion[2] - intRegion[0], intRegion[3] - intRegion[1]).outputQuality(1f).rotate(orientation).toOutputStream(byteArrayOutputStream);
             return byteArrayOutputStream.toByteArray();
+        }
+    }
+
+    /**
+     * 从邮件内容中提取文件链接
+     * @param emailContent 邮件内容
+     * @return 文件链接
+     */
+    public static String extractFileUrlFromEmail(String emailContent) {
+        // 示例：提取邮件内容中的 URL
+        Pattern urlPattern = Pattern.compile("http[s]?://[^\\s]+");
+        Matcher matcher = urlPattern.matcher(emailContent);
+        return matcher.find() ? matcher.group() : null;
+    }
+
+    public static MultipartFile downloadFileFromUrl(String fileUrl) throws Exception {
+        HttpURLConnection connection = (HttpURLConnection) new URL(fileUrl).openConnection();
+        connection.setRequestMethod("GET");
+
+        // 检查响应码
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            throw new IOException("Failed to download file, HTTP response code: " + responseCode);
+        }
+
+        // 获取文件内容
+        try (InputStream inputStream = connection.getInputStream();
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            byte[] fileContent = outputStream.toByteArray();
+            String fileName = Paths.get(new URL(fileUrl).getPath()).getFileName().toString();
+            String contentType = Files.probeContentType(Paths.get(fileName));
+
+            return new UrlMultipartFile(fileContent, fileName, contentType);
         }
     }
 
