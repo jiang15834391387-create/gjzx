@@ -57,7 +57,7 @@ public class InvoiceRecognitionController {
     @PostMapping("/upload")
     public R<T> upload(@RequestParam(value = "file", required = false) MultipartFile file,
                        @RequestParam(value = "fileUrl", required = false) String fileUrl) throws Exception {
-        R<T> dataImageFilesInfo = null;
+        R dataImageFilesInfo = null;
         // 参数校验：确保至少提供文件或参数
         if (file == null && (fileUrl == null || fileUrl.isEmpty())) {
             return R.ok("上传文件和文件地址参数不能同时为空");

@@ -79,7 +79,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 .with("timestamp", timestamp)
                 .with("token", token);
                 //是否切图
-                boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
+                boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_CUT));
                 if (isCrop || fileSuffix.equals("pdf")) {
                     with.with("extract_level", 1);
                 }

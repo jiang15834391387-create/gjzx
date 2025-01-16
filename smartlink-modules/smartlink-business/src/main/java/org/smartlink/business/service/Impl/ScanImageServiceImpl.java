@@ -66,17 +66,18 @@ public class ScanImageServiceImpl implements ScanImageService {
     public R<T> uploadImage(MultipartFile multipartFile) throws Exception {
 
             //是否OCR
-            boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_OFF));
+            boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_OFF));
             //是否查验
-            boolean checkOff = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_CHECK_OFF));
+            boolean checkOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY ,ParamConstants.SYS_CHECK_OFF));
+
             DataImageFilesInfo dataImageFilesInfo = new DataImageFilesInfo();
             dataImageFilesInfo.setFileId(IdUtil.fastSimpleUUID());
             //文件类型
             String fileSuffix = FileUtils.getFileSuffix(multipartFile.getOriginalFilename());
             //是否切图
-            boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_OCR_CUT));
+            boolean isCrop = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_CUT));
             //是否单图旋转
-            boolean isRotate = Boolean.parseBoolean(RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_IMG_ROTATE));
+            boolean isRotate = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_IMG_ROTATE));
             //ocr识别
             List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfo, Base64.getEncoder().encodeToString(multipartFile.getBytes()), fileSuffix);
             //文件类型是否符合参数配置
@@ -87,10 +88,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                      /////////////////
                         dataImageFilesInfo.setMessage(dataImageFilesInfo.getMessage());
                         dataImageFilesInfo.setInvoice(identificationData.get(0).k);
-
                         ByteArrayOutputStream outputStream = exportOfdToStream(multipartFile.getBytes(), "PNG", 20d);
-//                        Path outputPath = Paths.get("D:/HuaChuang_LqmWork/output.png");
-//                        Files.write(outputPath, outputStream.toByteArray());
                         //切割图片压缩
                         ByteArrayOutputStream cutThumbnailFile = FileUtils.thumbnailImage(outputStream.toByteArray(), "png");
                         //缩略图
@@ -110,12 +108,6 @@ public class ScanImageServiceImpl implements ScanImageService {
                         dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
                         iDataImageFilesInfoService.insert(dataImageFilesInfo);
                         updateFileId(entity, dataImageFilesInfo.getFileId());
-//                        //发票入库
-//                         R<T> result = dataOcrService.ocrInsert(identificationData.get(0).k, identificationData.get(0).t);
-//                        //发票查验
-//                        for (int identificationDatum  = 0; identificationDatum  < identificationData.size(); identificationDatum ++) {
-//                            R<T> result = dataOcrService.ocrInsert(identificationData.get(identificationDatum).k, identificationData.get(identificationDatum).t);
-//                        }
 
                     } else if (fileSuffix.equals("xml")) {
                         //源文件存储
@@ -131,12 +123,6 @@ public class ScanImageServiceImpl implements ScanImageService {
                         dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
                         iDataImageFilesInfoService.insert(dataImageFilesInfo);
                         updateFileId(entity, dataImageFilesInfo.getFileId());
-//                        //发票入库
-//                        R<T> result = dataOcrService.ocrInsert(identificationData.get(0).k, identificationData.get(0).t);
-                        //                //发票查验
-                        //                for (int identificationDatum  = 0; identificationDatum  < identificationData.size(); identificationDatum ++) {
-                        //                    R<T> result = dataOcrService.ocrInsert(identificationData.get(identificationDatum).k, identificationData.get(identificationDatum).t);
-                        //                }
 
                     } else if (fileSuffix.equals("pdf")) {//pdf类型
 
@@ -184,14 +170,6 @@ public class ScanImageServiceImpl implements ScanImageService {
                             iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
                             updateFileId(entity, dataImageFilesInfoSm.getFileId());
                         }
-//                        //发票入库
-//                        for (int identificationDatum = 0; identificationDatum < identificationData.size(); identificationDatum++) {
-//                            R<T> result = dataOcrService.ocrInsert(identificationData.get(identificationDatum).k, identificationData.get(identificationDatum).t);
-//                        }
-                        //                //发票查验
-                        //                for (int identificationDatum  = 0; identificationDatum  < identificationData.size(); identificationDatum ++) {
-                        //                    R<T> result = dataOcrService.ocrInsert(identificationData.get(identificationDatum).k, identificationData.get(identificationDatum).t);
-                        //                }
 
                     } else {//图片相关类型
 
@@ -284,19 +262,12 @@ public class ScanImageServiceImpl implements ScanImageService {
                                 updateFileId(entity, dataImageFilesInfoSm.getFileId());
                             }
                         }
-//                        //发票入库
-//                        for (IdentificationData identificationDatum : identificationData) {
-//                            R<T> result = dataOcrService.ocrInsert(identificationDatum.k, identificationDatum.t);
-//                        }
-                        //                //查验发票
-                        //                for (IdentificationData identificationDatum : identificationData) {
-                        //                    R result = dataOcrService.ocrInsert(identificationDatum.k, identificationDatum.t);
-                        //                }
+
                     }
 
                     //发票入库
                     for (IdentificationData identificationDatum : identificationData) {
-                        R<T> result = dataOcrService.ocrInsert(identificationDatum.k, identificationDatum.t);
+                        dataOcrService.ocrInsert(identificationDatum.k, identificationDatum.t);
                     }
 
 //                    //发票查验
@@ -372,10 +343,11 @@ public class ScanImageServiceImpl implements ScanImageService {
      * @param fileSuffix   文件类型
      */
     public boolean isFileTypeAllowed(String fileSuffix) throws Exception {
-        String a = ".AVIF,.WMF,.EMF,.JPEG,.FPX,.BMP,.GIF,.SVG,.ICO,.PNG,.JPG,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.ofd,.xml";
-        RedisUtils.setCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_INVOICE_TYPE, a);
+//        String a = ".AVIF,.WMF,.EMF,.JPEG,.FPX,.BMP,.GIF,.SVG,.ICO,.PNG,.JPG,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.ofd,.xml";
+//        RedisUtils.setCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_INVOICE_TYPE, a);
         // 从 Redis 获取允许的文件类型
-        String fileTypes = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_INVOICE_TYPE);
+//        String fileTypes = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_INVOICE_TYPE);
+        String fileTypes = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY ,ParamConstants.SYS_INVOICE_TYPE);
         if (StringUtils.hasText(fileTypes)) {
             // 转换为 Set，并去掉类型前的 `.`
             Set<String> allowedTypes = Arrays.stream(fileTypes.split(","))
