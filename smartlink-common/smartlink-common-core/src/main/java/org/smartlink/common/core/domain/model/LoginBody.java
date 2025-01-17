@@ -50,4 +50,9 @@ public class LoginBody implements Serializable {
      * 唯一标识
      */
     private String clientType;
+
+    //客户端key
+    private String clientType;
+
+
 }

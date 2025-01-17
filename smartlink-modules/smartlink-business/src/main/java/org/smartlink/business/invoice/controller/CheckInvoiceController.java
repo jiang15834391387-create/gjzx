@@ -5,16 +5,14 @@ import org.smartlink.business.invoice.service.ICheckService;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/check/invoice")
+@RequestMapping("/invoice")
 public class CheckInvoiceController {
 
     private final IDataOcrInfoServices dataOcrInfoService;
@@ -25,7 +23,6 @@ public class CheckInvoiceController {
         this.service = service;
     }
 
-
     /**
      * 增值税专用发票修改
      * @param dto
@@ -35,6 +32,16 @@ public class CheckInvoiceController {
     public R invoiceAlter(@RequestBody DataOcrInfoBo dto) throws IOException {
         return dataOcrInfoService.invoiceAlter(dto);
     }
+    /**
+     *
+     *批量删除发票
+     */
+    @GetMapping("/remove")
+    public R remove(@RequestParam(required = false) String[] ids) {
+        return service.deleteWithValidByIds(List.of(ids));
+    }
+
+
 
 
 

@@ -1,6 +1,7 @@
 package org.smartlink.web.service;
 
 import cn.dev33.satoken.secure.BCrypt;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.constant.Constants;
@@ -48,6 +49,12 @@ public class SysRegisterService {
         String userType = UserType.getUserType(registerBody.getUserType()).getUserType();
 
         boolean captchaEnabled = captchaProperties.getEnable();
+
+        //判断是否是pc端
+        String clientType = registerBody.getClientType();
+        if (StrUtil.isNotBlank(clientType)&& clientType.equals("app")){
+            captchaEnabled=false;
+        }
         // 验证码开关
         if (captchaEnabled) {
             validateCaptcha(tenantId, username, registerBody.getCode(), registerBody.getUuid());
