@@ -1,10 +1,11 @@
 package org.smartlink.business.invoice.conversion;
 
-import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -17,13 +18,24 @@ import java.util.List;
  */
 @Component
 public class RegenaiChangeInvoiceDetails {
+    private final DataOcrDetailsMapper ocrDetailsMapper;
+
+    public RegenaiChangeInvoiceDetails(DataOcrDetailsMapper ocrDetailsMapper) {
+        this.ocrDetailsMapper = ocrDetailsMapper;
+    }
+
     public List<DataOcrDetails> changeInvoiceDetails(String fileId, JSONObject jsonObject) {
+        //根据fileId获取ocr详情列表
+        List<DataOcrDetails> details = ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
         JSONArray jsonArray = jsonObject.getJSONArray("items");
         List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject detail = jsonArray.getJSONObject(i);
             DataOcrDetails ocrDetails = new DataOcrDetails();
-            ocrDetails.setId(IdUtil.simpleUUID());
+            //详情表id
+            ocrDetails.setId(details.get(i).getId());
+            //fileId
+            ocrDetails.setFileId(fileId);
            //详细名称
             ocrDetails.setName(detail.getStr("name"));
             //规格型号

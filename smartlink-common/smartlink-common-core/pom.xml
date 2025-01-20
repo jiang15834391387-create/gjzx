@@ -86,11 +86,11 @@
             <artifactId>aspose-cells</artifactId>
             <version>22.8</version>
         </dependency>
-        <dependency>
-            <groupId>com.aspose</groupId>
-            <artifactId>aspose.slides</artifactId>
-            <version>22.6</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.aspose</groupId>-->
+<!--            <artifactId>aspose.slides</artifactId>-->
+<!--            <version>22.6</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.ofdrw</groupId>
             <artifactId>ofdrw-full</artifactId>

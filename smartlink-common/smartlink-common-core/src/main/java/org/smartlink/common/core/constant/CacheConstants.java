@@ -32,4 +32,8 @@ public interface CacheConstants {
      */
      String CAPTCHA_CODE_KEY = ":sys_config";
 
+
+    // redis缓存配置
+    String SYS_CONFIG_KEYS = "sys_config";
+
 }

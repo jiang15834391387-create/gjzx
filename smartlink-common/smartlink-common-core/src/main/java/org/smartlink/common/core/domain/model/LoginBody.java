@@ -50,4 +50,7 @@ public class LoginBody implements Serializable {
      * 唯一标识
      */
     private String clientType;
+
+    //短信code
+    private String smsCode;
 }

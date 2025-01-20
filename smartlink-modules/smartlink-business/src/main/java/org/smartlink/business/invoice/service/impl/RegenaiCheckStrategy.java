@@ -45,8 +45,9 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
     private final RegenaiChangeRailwayTicket railwayTicket;
     private final RegenaiChangeFlightItinerary changeFlightItinerary;
     private final RegenaiChangeFlightItineraryDetails changeFlightItineraryDetails;
-
-    public RegenaiCheckStrategy(DataImageFilesInfoMapper dataImageFilesInfoMapper, RegenaiBasicOcrInfo basicOcrInfo, RegenaiChangeInvoiceDetails changeInvoiceDetails, RegenaiChangeUsedCarSales changeUsedCarSales, RegenaiMotorVehicleSale motorVehicleSale, RegenaiChangeRailwayTicket railwayTicket, RegenaiChangeFlightItinerary changeFlightItinerary, RegenaiChangeFlightItineraryDetails changeFlightItineraryDetails) {
+    private final RegenaiMedicalTreatment medicalTreatment;
+    private final RegenaichangeMedicalTreatmentDetails changeMedicalTreatmentDetails;
+    public RegenaiCheckStrategy(DataImageFilesInfoMapper dataImageFilesInfoMapper, RegenaiBasicOcrInfo basicOcrInfo, RegenaiChangeInvoiceDetails changeInvoiceDetails, RegenaiChangeUsedCarSales changeUsedCarSales, RegenaiMotorVehicleSale motorVehicleSale, RegenaiChangeRailwayTicket railwayTicket, RegenaiChangeFlightItinerary changeFlightItinerary, RegenaiChangeFlightItineraryDetails changeFlightItineraryDetails, RegenaiMedicalTreatment medicalTreatment, RegenaichangeMedicalTreatmentDetails changeMedicalTreatmentDetails) {
         this.dataImageFilesInfoMapper = dataImageFilesInfoMapper;
         this.basicOcrInfo = basicOcrInfo;
         this.changeInvoiceDetails = changeInvoiceDetails;
@@ -55,6 +56,8 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         this.railwayTicket = railwayTicket;
         this.changeFlightItinerary = changeFlightItinerary;
         this.changeFlightItineraryDetails = changeFlightItineraryDetails;
+        this.medicalTreatment = medicalTreatment;
+        this.changeMedicalTreatmentDetails = changeMedicalTreatmentDetails;
     }
 
 
@@ -226,12 +229,22 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             DataFlightItinerary dataFlightItinerary = new DataFlightItinerary();
             this.changeFlightItinerary.changeFlightItinerary(jsonObject, dataFlightItinerary);
             // 填充详情信息
-            dataFlightItinerary.setFlightItineraryDetails(this.changeFlightItineraryDetails.changeFlightItineraryDetails(jsonObject));
+            dataFlightItinerary.setFlightItineraryDetails(this.changeFlightItineraryDetails.changeFlightItineraryDetails(jsonObject,filesInfo.getFileId()));
             dataFlightItinerary.setId(IdUtil.simpleUUID());
             dataFlightItinerary.setFileId(filesInfo.getFileId());
             dataFlightItinerary.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
             return dataFlightItinerary;
 
+        }else if (StrUtil.equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE, invoiceType)){
+            //非税收入类发票基本信息
+            DataMedicalTreatment medicalTreatment = new DataMedicalTreatment();
+            this.medicalTreatment.changeMedicalTreatment(jsonObject, medicalTreatment);
+            // 填充详情信息
+            medicalTreatment.setMedicalTreatmentDetails(this.changeMedicalTreatmentDetails.changeMedicalTreatmentDetails(jsonObject,filesInfo.getFileId()));
+            medicalTreatment.setId(IdUtil.simpleUUID());
+            medicalTreatment.setFileId(filesInfo.getFileId());
+            medicalTreatment.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
+            return medicalTreatment;
         }else {
             //增值税
             DataOcrInfo dataOcrInfo = new DataOcrInfo();

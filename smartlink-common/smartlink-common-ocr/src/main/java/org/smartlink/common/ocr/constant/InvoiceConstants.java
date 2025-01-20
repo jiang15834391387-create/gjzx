@@ -1,7 +1,5 @@
 package org.smartlink.common.ocr.constant;
 
-import java.util.HashMap;
-
 /**
  * OCR通用常量信息
  *
@@ -132,5 +130,8 @@ public class InvoiceConstants {
      * 增值税发票清单
      */
     public static final String DIGITAL_INVOICE_LIST = "10110";
+
+    //条件1
+    public static final String ONE="1";
 
 }

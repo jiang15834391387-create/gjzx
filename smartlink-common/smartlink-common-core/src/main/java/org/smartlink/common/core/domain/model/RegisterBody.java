@@ -29,6 +29,9 @@ public class RegisterBody extends LoginBody {
     @Length(min = UserConstants.PASSWORD_MIN_LENGTH, max = UserConstants.PASSWORD_MAX_LENGTH, message = "{user.password.length.valid}")
     private String password;
 
+    //用户类型
     private String userType;
 
+    //手机号
+    private String phonenumber;
 }

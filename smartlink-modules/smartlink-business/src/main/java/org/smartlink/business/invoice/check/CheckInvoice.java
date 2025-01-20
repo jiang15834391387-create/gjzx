@@ -6,23 +6,18 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.shiro.util.StringUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.factory.CheckFactory;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.exception.CheckException;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.service.*;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
-import org.smartlink.common.ocr.entity.IdentificationData;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -34,7 +29,6 @@ import java.util.List;
 @Component
 public class CheckInvoice {
     private final IDataOcrInfoServices dataOcrInfoService;
-    private final IDataImageFilesInfoService imageFilesInfoService;
     private final DataOcrDetailsMapper detailsMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
     private final DataUsedCarSalesMapper usedCarSalesMapper;
@@ -42,14 +36,15 @@ public class CheckInvoice {
     private final DataRailwayTicketMapper railwayTicketMapper;
     private final DataFlightItineraryMapper flightItineraryMapper;
     private final DataFlightsItineraryDetailMapper flightsItineraryDetailMapper;
+    private final DataMedicalTreatmentMapper medicalTreatmentMapper;
+    private final DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper;
     private final IDataRailwayTicketService dataRailwayTicketService;
     private final IDataFlightItineraryService dataFlightItineraryService;
     private final IDataMedicalTreatmentService dataMedicalTreatmentDetailService;
     private final IDataMotorVehicleSaleService dataMotorVehicleSaleService;
     private final IDataUsedCarSalesService dataUsedCarSalesService;
-    public CheckInvoice(IDataOcrInfoServices dataOcrInfoService, IDataImageFilesInfoService imageFilesInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService) {
+    public CheckInvoice(IDataOcrInfoServices dataOcrInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataMedicalTreatmentMapper medicalTreatmentMapper, DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService) {
         this.dataOcrInfoService = dataOcrInfoService;
-        this.imageFilesInfoService = imageFilesInfoService;
         this.detailsMapper = detailsMapper;
         this.ocrInfoMapper = ocrInfoMapper;
         this.usedCarSalesMapper = usedCarSalesMapper;
@@ -57,42 +52,25 @@ public class CheckInvoice {
         this.railwayTicketMapper = railwayTicketMapper;
         this.flightItineraryMapper = flightItineraryMapper;
         this.flightsItineraryDetailMapper = flightsItineraryDetailMapper;
+        this.medicalTreatmentMapper = medicalTreatmentMapper;
+        this.medicalTreatmentDetailMapper = medicalTreatmentDetailMapper;
         this.dataRailwayTicketService = dataRailwayTicketService;
         this.dataFlightItineraryService = dataFlightItineraryService;
         this.dataMedicalTreatmentDetailService = dataMedicalTreatmentDetailService;
         this.dataMotorVehicleSaleService = dataMotorVehicleSaleService;
         this.dataUsedCarSalesService = dataUsedCarSalesService;
     }
-
-
     //查验方法
-    public void check(boolean checkOff,IdentificationData identificationDatum,  DataImageFilesInfo filesInfo) throws IOException, InvocationTargetException, IllegalAccessException {
-        // 判断小程序入口上传的发票 如果没有开启小程序查验开关，不允许走查验逻辑
-//        if(wechatUpload && !Boolean.parseBoolean(fileUploadDTO.getIsCheck())){
-//            return;
-//        }
-        // 判断PC端入口上传的发票 如果没有开启PC端查验开关，不允许走查验逻辑
-        if(!checkOff){
-            return;
-        }
-        //获取发票类型
-        String invoiceType = filesInfo.getInvoice();
-        if (invoiceType.equals(InvoiceConstants.GLORITY_TAX_SPECIAL_CODE)
-            || invoiceType.equals(InvoiceConstants.GLORITY_TAX_CODE)
-            || invoiceType.equals(InvoiceConstants.GLORITY_ELECTRONIC_CODE)
-            || invoiceType.equals(InvoiceConstants.GLORITY_ROLL_TICKET_CODE)
-            || invoiceType.equals(InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE)
-            || invoiceType.equals(InvoiceConstants.GLORITY_USED_CAR_SALES_CODE)
-            || invoiceType.equals(InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE)
-            || invoiceType.equals(InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE)
-            || invoiceType.equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE)
-            || invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
-            || invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)
-        ){
+    public void check(boolean checkOff,DataImageFilesInfo filesInfo) throws Exception {
+            //判断是否开启查验
+            if(!checkOff){
+                return;
+            }
+            //获取发票类型
+            String invoiceType = filesInfo.getInvoice();
             InvoiceCheckParamDTO invoiceCheckParamDTO=null;
             switch (invoiceType){
                 case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
-                    log.info("查验二手车发票");
                     final DataUsedCarSales dataUsedCarSales =dataUsedCarSalesService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(dataUsedCarSales.getInvoiceCode());
@@ -102,7 +80,6 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setPretax_amount(dataUsedCarSales.getTotalUppercase());
                     break;
                 case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
-                    log.info("查验机动车发票");
                     final DataMotorVehicleSale dataMotorVehicleSale =dataMotorVehicleSaleService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(dataMotorVehicleSale.getInvoiceCode());
@@ -112,7 +89,6 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getPreTaxAmount());
                     break;
                 case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
-                    log.info("查验火车发票发票");
                     final DataRailwayTicket railwayTicket =dataRailwayTicketService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setNumber(railwayTicket.getInvoiceNumber());
@@ -121,7 +97,6 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                     break;
                 case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
-                    log.info("查验航空运输电子客票发票");
                     final DataFlightItinerary dataFlightItinerary = dataFlightItineraryService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setReceipt_numbe(dataFlightItinerary.getInvoiceNumber());
@@ -130,7 +105,6 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                     break;
                 case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-                    log.info("查验机打发票发票");
                     final DataOcrInfo ocrInfoss = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(ocrInfoss.getInvoiceCode());
@@ -142,7 +116,6 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setArea(ocrInfoss.getProvince());
                     break;
                 case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
-                    log.info("查验非税收入票据发票");
                     final DataMedicalTreatment medicalTreatment = this.dataMedicalTreatmentDetailService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(medicalTreatment.getInvoiceCode());
@@ -157,7 +130,6 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setCheck_code(checkCodess);
                     break;
                 case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
-                    log.info("查验增值税专票发票");
                     final DataOcrInfo ocrInfo = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(ocrInfo.getInvoiceCode());
@@ -172,10 +144,9 @@ public class CheckInvoice {
                 case InvoiceConstants.GLORITY_TAX_CODE:
                 case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
-                    log.info("查验增值税发票");
                     final DataOcrInfo ocrInfos = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
                     if (StrUtil.isNotBlank(ocrInfos.getBlockChain())){
-                        if (ocrInfos.getBlockChain().equals("1")){
+                        if (ocrInfos.getBlockChain().equals(InvoiceConstants.ONE)){
                             invoiceCheckParamDTO.setElectron_mark(Integer.valueOf(ocrInfos.getBlockChain()));
                         }
                         if (StrUtil.isNotBlank(ocrInfos.getSellerNo())){
@@ -183,7 +154,6 @@ public class CheckInvoice {
                         }
                         if (StrUtil.isNotBlank(ocrInfos.getProvince())){
                             invoiceCheckParamDTO.setArea(ocrInfos.getProvince());
-
                         }
                     }
                     if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
@@ -204,19 +174,13 @@ public class CheckInvoice {
                         checkCodes = checkCodes.substring(checkCodes.length() - 6);
                     }
                     invoiceCheckParamDTO.setCheck_code(checkCodes);
-
                     break;
-                default:
-                    throw new CheckException("发票类型有误!");
             }
             this.checkInvoice(filesInfo,invoiceCheckParamDTO);
 
-    }
-
-
  }
     //传递查验参数调用查验工厂
-    public BaseEntity checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws InvocationTargetException, IllegalAccessException, IOException {
+    public BaseEntity checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
         BaseEntity baseEntity= CheckFactory.instance().checkInvoke(filesInfo, invoiceCheckParamDTO);
         if (filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())&&filesInfo.getCheckStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
            //如果是增值税（专用/普通/电子专用）或增值税电子普通发票 或区块链电子发票  或机打发票 或增值税普通发票(卷票)或数电票(增值税专用发票/普通发票)
@@ -228,7 +192,7 @@ public class CheckInvoice {
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ROLL_TICKET_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)) {
-                log.info("fileinfo", filesInfo.getInvoice());
+                //转换后增值税发票
                 ocrConversionAlter(baseEntity,filesInfo);
                 return baseEntity;
             }
@@ -252,28 +216,53 @@ public class CheckInvoice {
                 flightItineraryConversionAlter(baseEntity,filesInfo);
                 return baseEntity;
             }
+            if (filesInfo.getInvoice().equals(InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE)||filesInfo.getInvoice().equals(InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE)){
+                //转换后医疗/非税
+                medicalTreatmentConversionAlter(baseEntity,filesInfo);
+                return baseEntity;
+            }
 
         }
         log.info("查验发票查验失败结果：{}", baseEntity);
         return baseEntity;
     }
-
-    public void flightItineraryConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws InvocationTargetException, IllegalAccessException {
+    //医疗/非税
+    private void medicalTreatmentConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
+        if (ObjectUtil.isEmpty(baseEntity)){
+            log.info("医疗/非税查验转换后结果为空");
+            return;
+        }
+        log.info("修改查验转换后的医疗/非税信息：{}", baseEntity);
+        DataMedicalTreatment medicalTreatment=BeanUtil.toBean(baseEntity, DataMedicalTreatment.class);
+        List<DataMedicalTreatmentDetail> list = new ArrayList<>();
+        List<DataMedicalTreatmentDetail> detailList = medicalTreatment.getMedicalTreatmentDetails();
+        if (CollectionUtil.isNotEmpty(detailList)){
+            for (DataMedicalTreatmentDetail detail : detailList) {
+                DataMedicalTreatmentDetail flightsItineraryDetail=BeanUtil.toBean(detail, DataMedicalTreatmentDetail.class);
+                detail.setFileId(filesInfo.getFileId());
+                list.add(flightsItineraryDetail);
+            }
+        }
+        medicalTreatmentMapper.update(medicalTreatment, new LambdaUpdateWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, filesInfo.getFileId()));
+        //修改详情表
+        for (DataMedicalTreatmentDetail flightsItineraryDetail : list) {
+            medicalTreatmentDetailMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, filesInfo.getFileId()));
+        }
+    }
+   //航空电子信息客运
+    public void flightItineraryConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
             log.info("航空运输电子客运行程单基本信息查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的航空运输电子客运行程单基本信息信息：{}", baseEntity);
         //创建航空运输电子客运行程单基本信息
-        DataFlightItinerary dataFlightItinerary = new DataFlightItinerary();
-        BeanUtils.copyProperties(baseEntity, dataFlightItinerary);
-        dataFlightItinerary=BeanUtil.toBean(baseEntity, DataFlightItinerary.class);
+        DataFlightItinerary dataFlightItinerary=BeanUtil.toBean(baseEntity, DataFlightItinerary.class);
         List<DataFlightsItineraryDetail> list = new ArrayList<>();
         List<DataFlightsItineraryDetail> detailList = dataFlightItinerary.getFlightItineraryDetails();
         if (CollectionUtil.isNotEmpty(detailList)){
             for (DataFlightsItineraryDetail dataFlightsItineraryDetail : detailList) {
-                DataFlightsItineraryDetail flightsItineraryDetail = new DataFlightsItineraryDetail();
-                flightsItineraryDetail=BeanUtil.toBean(dataFlightsItineraryDetail, DataFlightsItineraryDetail.class);
+                DataFlightsItineraryDetail flightsItineraryDetail=BeanUtil.toBean(dataFlightsItineraryDetail, DataFlightsItineraryDetail.class);
                 flightsItineraryDetail.setFileId(filesInfo.getFileId());
                 list.add(flightsItineraryDetail);
             }
@@ -281,70 +270,62 @@ public class CheckInvoice {
         //根据fileId进行修改航空电子单基本信息
         flightItineraryMapper.update(dataFlightItinerary, new LambdaUpdateWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, filesInfo.getFileId()));
         for (DataFlightsItineraryDetail flightsItineraryDetail : list) {
-            flightsItineraryDetailMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId()));
+            flightsItineraryDetailMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId()).eq(DataFlightsItineraryDetail::getId, flightsItineraryDetail.getId()));
         }
 
     }
 
     // 转换后火车票
-    private void railwayTicketConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws InvocationTargetException, IllegalAccessException {
+    private void railwayTicketConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
             log.info("火车票查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的火车票信息：{}", baseEntity);
-        DataRailwayTicket dataRailwayTicket = new DataRailwayTicket();
-        dataRailwayTicket=BeanUtil.toBean(baseEntity, DataRailwayTicket.class);
-
-
+        DataRailwayTicket dataRailwayTicket=BeanUtil.toBean(baseEntity, DataRailwayTicket.class);
         //根据fileId进行修改
         railwayTicketMapper.update(dataRailwayTicket,new LambdaUpdateWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, filesInfo.getFileId()));
-
     }
 
     // 转换后机动车销售统一发票
-    private void motorVehicleSaleConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws InvocationTargetException, IllegalAccessException {
+    private void motorVehicleSaleConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
             log.info("机动车销售统一发票查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的机动车信息：{}", baseEntity);
-        DataMotorVehicleSale dataMotorVehicleSale = new DataMotorVehicleSale();
-        dataMotorVehicleSale=BeanUtil.toBean(baseEntity, DataMotorVehicleSale.class);
+        DataMotorVehicleSale dataMotorVehicleSale=BeanUtil.toBean(baseEntity, DataMotorVehicleSale.class);
         //根据fileId进行修改
         motorVehicleSaleMapper.update(dataMotorVehicleSale,new LambdaUpdateWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, filesInfo.getFileId()));
 
     }
 
     //转换后机动二手车销售统一发票
-    private void usedCsrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws InvocationTargetException, IllegalAccessException {
+    private void usedCsrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
             log.info("二手车销售统一发票查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的二手车信息：{}", baseEntity);
-        DataUsedCarSales dataUsedCarSales = new DataUsedCarSales();
-        dataUsedCarSales=BeanUtil.toBean(baseEntity, DataUsedCarSales.class);
+        DataUsedCarSales dataUsedCarSales=BeanUtil.toBean(baseEntity, DataUsedCarSales.class);
         //根据fileId进行修改
         usedCarSalesMapper.update(dataUsedCarSales,new LambdaUpdateWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, filesInfo.getFileId()));
     }
 
     //转换后ocr信息修改
-    public void ocrConversionAlter(BaseEntity baseEntity,DataImageFilesInfo filesInfo) throws InvocationTargetException, IllegalAccessException {
+    public void ocrConversionAlter(BaseEntity baseEntity,DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
             log.info("ocr查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的OCR信息：{}", baseEntity);
-        DataOcrInfo dataOcrInfo = new DataOcrInfo();
-        dataOcrInfo = BeanUtil.toBean(baseEntity, DataOcrInfo.class);
+        DataOcrInfo dataOcrInfo = BeanUtil.toBean(baseEntity, DataOcrInfo.class);
         log.info("修改查验转换后的OCR信息：{}", dataOcrInfo);
         List<DataOcrDetails> arrayList = new ArrayList<>();
-        if (dataOcrInfo.getDetails() != null) {
+        if (CollectionUtil.isNotEmpty(dataOcrInfo.getDetails())) {
             List<DataOcrDetails> details = dataOcrInfo.getDetails();
             for (DataOcrDetails ocrDetails : details) {
-                DataOcrDetails ocrDetail = new DataOcrDetails();
-                ocrDetail = BeanUtil.toBean(ocrDetails, DataOcrDetails.class);
+                DataOcrDetails ocrDetail = BeanUtil.toBean(ocrDetails, DataOcrDetails.class);
                 ocrDetail.setFileId(filesInfo.getFileId());
                 arrayList.add(ocrDetail);
             }
@@ -352,7 +333,7 @@ public class CheckInvoice {
         //根据file_id修改ocr基本信息
         ocrInfoMapper.update(dataOcrInfo, new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()));
         for (DataOcrDetails detail : arrayList) {
-            detailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()));
+            detailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
         }
     }
 }
