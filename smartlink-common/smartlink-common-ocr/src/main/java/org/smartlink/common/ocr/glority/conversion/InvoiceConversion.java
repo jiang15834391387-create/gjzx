@@ -107,13 +107,13 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setOrientation(identifyResults.getOrientation());
             dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
             //发票类型判断
-            if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && jsonObject.getStr("electronic_mark").equals("1")) {
+            if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("electronic_mark"))) {
                 //增值税电子专用发票
                 dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && jsonObject.getStr("block_chain").equals("1")) {
+            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("block_chain"))) {
                 //区块链电子发票
                 dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && jsonObject.getStr("transit_mark").equals("1")) {
+            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("transit_mark"))) {
                 //收费公路通行费增值税电子普通发票
                 dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode());
             } else if (InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode().equals(invoiceCode)) {

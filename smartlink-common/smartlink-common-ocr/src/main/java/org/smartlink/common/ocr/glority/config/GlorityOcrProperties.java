@@ -5,9 +5,9 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 票小米配置
+ * 票小秘配置
  *
- * @author zouchaung
+ * @author lqm
  */
 @Data
 public class GlorityOcrProperties implements Serializable {

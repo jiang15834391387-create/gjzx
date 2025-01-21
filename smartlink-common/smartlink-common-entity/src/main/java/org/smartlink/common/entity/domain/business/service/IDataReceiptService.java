@@ -36,8 +36,17 @@ public interface IDataReceiptService {
      */
     TableDataInfo<DataReceiptVo> queryPageList(DataReceiptBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataReceipt dataOcrInfo);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataReceipt selectOneByFileId(String fileId);
 
     /**

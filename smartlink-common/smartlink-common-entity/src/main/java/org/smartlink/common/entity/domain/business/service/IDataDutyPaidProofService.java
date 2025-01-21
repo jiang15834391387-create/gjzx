@@ -35,8 +35,14 @@ public interface IDataDutyPaidProofService {
      */
     TableDataInfo<DataDutyPaidProofVo> queryPageList(DataDutyPaidProofBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     DataDutyPaidProof selectOneByFileId(String fileId);
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataDutyPaidProof dataOcrInfo);
 
     /**

@@ -37,6 +37,12 @@ public interface IDataCustomsExportGoodsDetailService {
      */
     TableDataInfo<DataCustomsExportGoodsDetailVo> queryPageList(DataCustomsExportGoodsDetailBo bo, PageQuery pageQuery);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataCustomsExportGoodsDetail selectOneByFileId(String fileId);
 
     /**

@@ -2,12 +2,12 @@ package org.smartlink.business.service;
 
 
 
+import jakarta.mail.internet.MimeMultipart;
 import org.apache.poi.ss.formula.functions.T;
-import org.smartlink.business.scan.dto.FileUploadDTO;
-import org.smartlink.business.scan.request.InitializationRequest;
 import org.smartlink.common.core.domain.R;
-import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * @author shidunkai
@@ -22,7 +22,14 @@ public interface ScanImageService {
      * @param multipartFile 文件
      * @return 图片vo
      */
-    R<T> uploadImage(MultipartFile multipartFile) throws Exception;
+    R<T> uploadImage(MultipartFile multipartFile, String uploadType) throws Exception;
+
+    /**
+     * 邮件识别
+     *
+     * @return 邮件文件
+     */
+    List<MultipartFile> fetchFilesFromEmail() throws Exception;
 //
 //    /**
 //     * 单据初始化

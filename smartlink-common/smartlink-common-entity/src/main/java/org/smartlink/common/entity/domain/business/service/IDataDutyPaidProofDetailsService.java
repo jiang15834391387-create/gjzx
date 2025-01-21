@@ -38,6 +38,9 @@ public interface IDataDutyPaidProofDetailsService {
      */
     TableDataInfo<DataDutyPaidProofDetailsVo> queryPageList(DataDutyPaidProofDetailsBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     DataDutyPaidProofDetails selectOneByFileId(String fileId);
 
     /**

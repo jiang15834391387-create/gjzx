@@ -1,5 +1,6 @@
 package org.smartlink.business.controller;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,10 +43,7 @@ public class InvoiceQueryController {
     //@SaCheckPermission("service:scan:upload")
     @Log(title = "查询到图片内容+发票信息", businessType = BusinessType.INSERT)
     @GetMapping("/queryOneInfo")
-    public R queryOneInfo(@RequestParam(value = "fileId") String fileId) throws Exception {
-            if (fileId.isEmpty()){
-                return R.ok("fileId不能为空!");
-            }
+    public R queryOneInfo(@RequestParam(value = "fileId")  @NotBlank String fileId) throws Exception {
         R res = iInvoiceInfoService.queryOneInfo(fileId);
         return res;
     }

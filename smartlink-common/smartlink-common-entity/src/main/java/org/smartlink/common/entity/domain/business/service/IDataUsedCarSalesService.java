@@ -43,10 +43,23 @@ public interface IDataUsedCarSalesService {
      */
     List<DataUsedCarSalesVo> queryList(DataUsedCarSalesBo bo);
 
+    /**
+     * 新增二手车发票
+     *
+     */
     Boolean insert(DataUsedCarSales dataUsedCarSales);
 
+    /**
+     * 批量新增二手车发票
+     */
     Boolean insertBatch(List<DataUsedCarSales> dataUsedCarSales);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataUsedCarSales selectOneByFileId(String fileId);
 
     /**

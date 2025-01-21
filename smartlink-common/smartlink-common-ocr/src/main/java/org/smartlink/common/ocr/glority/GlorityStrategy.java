@@ -61,7 +61,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
         // 使用 Jackson 将 JSON 字符串直接转换为对象
         try {
             glorityOcrProperties = properties.getDetailInfo();
-            log.info("票小米Ocr初始化完成！初始化参数：{}", properties);
+            log.info("票小秘Ocr初始化完成！初始化参数：{}", properties);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -70,7 +70,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
 
     @Override
     public List<IdentificationData> getIdentificationData(DataImageFilesInfo dataImageFilesInfo, String base64, String fileSuffix) throws OcrException {
-        log.info("进入票小米OCR识别");
+        log.info("进入票小秘OCR识别");
         // 计数
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
         // 使用md5加密

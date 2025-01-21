@@ -36,8 +36,14 @@ public interface IDataNonTaxService {
     TableDataInfo<DataNonTaxVo> queryPageList(DataNonTaxBo bo, PageQuery pageQuery);
 
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataNonTax dataOcrInfo);
 
+    /**
+     * 新增发票
+     */
     DataNonTax selectOneByFileId(String fileId);
     /**
      * 查询符合条件的非税收入类票据列表

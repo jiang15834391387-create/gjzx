@@ -35,8 +35,17 @@ public interface IDataCustomsSpecialPaymentService {
      */
     TableDataInfo<DataCustomsSpecialPaymentVo> queryPageList(DataCustomsSpecialPaymentBo bo, PageQuery pageQuery);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataCustomsSpecialPayment selectOneByFileId(String fileId);
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataCustomsSpecialPayment dataOcrInfo);
 
     /**

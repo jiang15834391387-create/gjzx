@@ -59,6 +59,12 @@ public interface IDataOcrInfoService {
      */
     Boolean insertByBo(DataOcrInfoBo bo);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataOcrInfo selectOneByFileId(String fileId);
 
     /**

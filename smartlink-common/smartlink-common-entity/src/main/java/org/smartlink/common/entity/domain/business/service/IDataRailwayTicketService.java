@@ -36,8 +36,17 @@ public interface IDataRailwayTicketService {
      */
     TableDataInfo<DataRailwayTicketVo> queryPageList(DataRailwayTicketBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataRailwayTicket dataOcrInfo);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataRailwayTicket selectOneByFileId(String fileId);
 
     /**

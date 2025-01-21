@@ -37,6 +37,12 @@ public interface IDataQuotaInvoiceService {
      */
     TableDataInfo<DataQuotaInvoiceVo> queryPageList(DataQuotaInvoiceBo bo, PageQuery pageQuery);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataQuotaInvoice selectOneByFileId(String fileId);
     /**
      * 查询符合条件的定额发票列表

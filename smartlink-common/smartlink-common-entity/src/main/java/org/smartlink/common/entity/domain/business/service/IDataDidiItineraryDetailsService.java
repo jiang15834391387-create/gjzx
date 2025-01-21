@@ -37,6 +37,9 @@ public interface IDataDidiItineraryDetailsService {
      */
     TableDataInfo<DataDidiItineraryDetailsVo> queryPageList(DataDidiItineraryDetailsBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     DataDidiItineraryDetails selectOneByFileId(String fileId);
 
     /**

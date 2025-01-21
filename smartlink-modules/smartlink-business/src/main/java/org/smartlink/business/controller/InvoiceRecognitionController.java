@@ -6,12 +6,14 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.undertow.server.handlers.form.FormData;
+import jakarta.mail.BodyPart;
+import jakarta.mail.Multipart;
+import jakarta.mail.internet.MimeMultipart;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.poi.ss.formula.functions.T;
-import org.smartlink.business.scan.dto.FileUploadDTO;
 import org.smartlink.business.service.ScanImageService;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.utils.file.FileUtils;
@@ -31,6 +33,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,27 +56,27 @@ public class InvoiceRecognitionController {
     private final ScanImageService scanImageService;
 
     //@SaCheckPermission("service:scan:upload")
-    @Log(title = "扫描图片上传", businessType = BusinessType.INSERT)
+    /**
+     * 发票上传
+     *
+     * @param file 文件对象
+     * @param uploadType 上传类型 0 邮件 1 手动
+     */
+    @Log(title = "发票上传", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
     public R<T> upload(@RequestParam(value = "file", required = false) MultipartFile file,
-                       @RequestParam(value = "fileUrl", required = false) String fileUrl) throws Exception {
+                       @RequestParam(value = "uploadType") String uploadType) throws Exception {
         R dataImageFilesInfo = null;
-        // 参数校验：确保至少提供文件或参数
-        if (file == null && (fileUrl == null || fileUrl.isEmpty())) {
-            return R.ok("上传文件和文件地址参数不能同时为空");
-        }
-        if (!fileUrl.isEmpty()){
-            String fileUrlMatche = FileUtils.extractFileUrlFromEmail(fileUrl);
-            if (fileUrl == null) {
-                return R.fail("无法从邮件内容中提取有效的文件链接");
+            if (uploadType.equals("0")){
+                List<MultipartFile> fetchFilesFromEmail = scanImageService.fetchFilesFromEmail();
+                if (fetchFilesFromEmail.size()!= 0){
+                    for (MultipartFile multipart : fetchFilesFromEmail) {
+                        dataImageFilesInfo = scanImageService.uploadImage(multipart, uploadType);
+                    }
+                }
+            } else {
+                    dataImageFilesInfo = scanImageService.uploadImage(file, uploadType);
             }
-            // 下载文件并转换为 MultipartFile
-            MultipartFile multipartFile = FileUtils.downloadFileFromUrl(fileUrlMatche);
-            dataImageFilesInfo = scanImageService.uploadImage(multipartFile);
-        }
-        if (!file.isEmpty()){
-            dataImageFilesInfo = scanImageService.uploadImage(file);
-        }
 
         return dataImageFilesInfo;
     }

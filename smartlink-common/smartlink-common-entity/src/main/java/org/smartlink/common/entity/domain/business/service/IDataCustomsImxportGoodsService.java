@@ -37,6 +37,9 @@ public interface IDataCustomsImxportGoodsService {
      */
     TableDataInfo<DataCustomsImxportGoodsVo> queryPageList(DataCustomsImxportGoodsBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     DataCustomsImxportGoods selectOneByFileId(String fileId);
 
     /**

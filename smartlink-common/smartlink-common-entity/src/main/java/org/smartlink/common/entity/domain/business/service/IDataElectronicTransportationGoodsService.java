@@ -26,8 +26,17 @@ public interface IDataElectronicTransportationGoodsService {
      */
     DataElectronicTransportationGoodsVo queryById(String id);
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataElectronicTransportationGoods dataOcrInfo);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataElectronicTransportationGoods selectOneByFileId(String fileId);
 
     /**

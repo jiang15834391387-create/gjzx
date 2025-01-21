@@ -68,10 +68,16 @@ public interface IDataOcrDetailsService {
      */
     Boolean insert(DataOcrDetails dataOcrDetails);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataOcrDetails selectOneByFileId(String fileId);
 
     /**
-     * 批量新增增值税发票明细
+     * 批量新增发票明细
      *
      * @param dataOcrDetails 增值税发票明细
      * @return 是否新增成功

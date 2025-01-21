@@ -35,8 +35,17 @@ public interface IDataPassengerCarService {
      */
     TableDataInfo<DataPassengerCarVo> queryPageList(DataPassengerCarBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataPassengerCar dataOcrInfo);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataPassengerCar selectOneByFileId(String fileId);
     /**
      * 查询符合条件的客运汽车票列表

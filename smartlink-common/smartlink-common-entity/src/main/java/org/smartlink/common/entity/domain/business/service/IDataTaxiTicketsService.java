@@ -36,8 +36,19 @@ public interface IDataTaxiTicketsService {
      */
     TableDataInfo<DataTaxiTicketsVo> queryPageList(DataTaxiTicketsBo bo, PageQuery pageQuery);
 
+
+    /**
+     * 新增发票
+     */
     Boolean insert(DataTaxiTickets dataOcrInfo);
 
+
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataTaxiTickets selectOneByFileId(String fileId);
 
     /**

@@ -36,8 +36,18 @@ public interface IDataSteamerTicketService {
      */
     TableDataInfo<DataSteamerTicketVo> queryPageList(DataSteamerTicketBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     *
+     */
     Boolean insert(DataSteamerTicket dataSteamerTicket);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataSteamerTicket selectOneByFileId(String fileId);
 
     /**

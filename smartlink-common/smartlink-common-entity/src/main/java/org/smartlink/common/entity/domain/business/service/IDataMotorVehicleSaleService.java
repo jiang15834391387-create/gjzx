@@ -35,6 +35,12 @@ public interface IDataMotorVehicleSaleService {
      */
     TableDataInfo<DataMotorVehicleSaleVo> queryPageList(DataMotorVehicleSaleBo bo, PageQuery pageQuery);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataMotorVehicleSale selectOneByFileId(String fileId);
 
     /**

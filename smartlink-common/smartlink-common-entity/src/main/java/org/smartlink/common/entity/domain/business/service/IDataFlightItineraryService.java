@@ -37,6 +37,12 @@ public interface IDataFlightItineraryService {
      */
     TableDataInfo<DataFlightItineraryVo> queryPageList(DataFlightItineraryBo bo, PageQuery pageQuery);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataFlightItinerary selectOneByFileId(String fileId);
 
     /**

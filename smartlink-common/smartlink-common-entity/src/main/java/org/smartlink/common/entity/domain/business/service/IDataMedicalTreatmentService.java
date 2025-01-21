@@ -35,8 +35,17 @@ public interface IDataMedicalTreatmentService {
      */
     TableDataInfo<DataMedicalTreatmentVo> queryPageList(DataMedicalTreatmentBo bo, PageQuery pageQuery);
 
+    /**
+     * 新增发票
+     */
     Boolean insert(DataMedicalTreatment dataOcrInfo);
 
+    /**
+     * 查询发票
+     *
+     * @param fileId 文件id
+     * @return 是否新增成功
+     */
     DataMedicalTreatment selectOneByFileId(String fileId);
 
     /**
