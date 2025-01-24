@@ -7,7 +7,6 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.mail.*;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.internet.MimeUtility;
@@ -18,10 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.james.mime4j.codec.DecoderUtil;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.tika.Tika;
-import org.eclipse.angus.mail.util.MailSSLSocketFactory;
 import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.service.IDataOcrService;
 import org.smartlink.common.core.domain.R;
@@ -29,20 +26,15 @@ import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.factory.OcrFactory;
-
-
 import org.smartlink.business.service.ScanImageService;
-
 import org.smartlink.common.core.utils.file.Constants;
 import org.smartlink.common.core.utils.file.FileUtils;
-
 import org.smartlink.common.core.utils.file.ParamConstants;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.oss.entity.UploadResult;
 import org.smartlink.common.oss.factory.OssFactory;
 import org.smartlink.common.redis.utils.RedisUtils;
-import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.domain.vo.SysUserVo;
 import org.smartlink.system.service.ISysOssService;
@@ -56,15 +48,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 
 import static org.smartlink.common.core.utils.file.FileUtils.getFileSuffix;
@@ -73,10 +59,9 @@ import static org.smartlink.common.core.utils.file.PDFUtil.pdfToImg;
 
 
 /**
- * @author shidunkai
+ * @author lqm
  * @title 文件上传实现
  * @description 文件上传实现
- * @date 2022-04
  */
 @Service
 @RequiredArgsConstructor
@@ -99,6 +84,7 @@ public class ScanImageServiceImpl implements ScanImageService {
 
         //是否OCR
         boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_OFF));
+        if (ocrOff){
         //是否查验
         boolean checkOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_CHECK_OFF));
         //是否切图
@@ -120,54 +106,63 @@ public class ScanImageServiceImpl implements ScanImageService {
         if (isFileTypeAllowed(fileSuffix)) {
             //ocr识别
             List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfo, Base64.getEncoder().encodeToString(multipartFile.getBytes()), fileSuffix);
+            if (identificationData.size() == 0) {
+                return R.fail(dataImageFilesInfo.getMessage());
+            }
             //ocr识别
             if (fileSuffix.equals("ofd")) {
 
-                /////////////////
-                dataImageFilesInfo.setMessage(dataImageFilesInfo.getMessage());
-                dataImageFilesInfo.setInvoice(identificationData.get(0).k);
-                ByteArrayOutputStream outputStream = exportOfdToStream(multipartFile.getBytes(), "PNG", 20d);
-                //切割图片压缩
-                ByteArrayOutputStream cutThumbnailFile = FileUtils.thumbnailImage(outputStream.toByteArray(), "png");
-                //缩略图
-                ByteArrayOutputStream multigraphCutThumbnailImgFile = FileUtils.thumbnailSmall(cutThumbnailFile.toByteArray());
-                //转换
-                InputStream multigraphCutThumbnailImgFileStream = new ByteArrayInputStream(multigraphCutThumbnailImgFile.toByteArray());
-                //源文件存储
-                UploadResult multigraphOriginalImage = OssFactory.instance().upload(multipartFile.getInputStream(), dataImageFilesInfo.getFileId() + "." + "ofd", multipartFile.getSize(), multipartFile.getContentType());
-                //缩略图存储
-                UploadResult multigraphSmallImage = OssFactory.instance().upload(multigraphCutThumbnailImgFileStream, "small_" + dataImageFilesInfo.getFileId() + "." + "png", (long) multigraphCutThumbnailImgFile.size(), detectContentType(multigraphCutThumbnailImgFileStream));
-                Object entity = identificationData.get(0).t;
-                dataImageFilesInfo.setFileName(multigraphOriginalImage.getFilename());
-                dataImageFilesInfo.setIurl(multigraphOriginalImage.getUrl());
-                dataImageFilesInfo.setFileMd5(multigraphOriginalImage.getETag());
-                dataImageFilesInfo.setSurl(multigraphSmallImage.getUrl());
-                dataImageFilesInfo.setFileSize(String.valueOf(multipartFile.getSize()));
-                dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-                iDataImageFilesInfoService.insert(dataImageFilesInfo);
-                updateFileId(entity, dataImageFilesInfo.getFileId());
+                for (IdentificationData identificationDaOfd : identificationData) {
+                    DataImageFilesInfo dataImageFilesInfoOfd = new DataImageFilesInfo();
+                    dataImageFilesInfoOfd.setFileId(IdUtil.simpleUUID());
+                    dataImageFilesInfoOfd.setMessage(dataImageFilesInfo.getMessage());
+                    dataImageFilesInfoOfd.setInvoice(identificationDaOfd.k);
+                    ByteArrayOutputStream outputStream = exportOfdToStream(multipartFile.getBytes(), "PNG", 20d);
+                    //切割图片压缩
+                    ByteArrayOutputStream cutThumbnailFile = FileUtils.thumbnailImage(outputStream.toByteArray(), "png");
+                    //缩略图
+                    ByteArrayOutputStream multigraphCutThumbnailImgFile = FileUtils.thumbnailSmall(cutThumbnailFile.toByteArray());
+                    //转换
+                    InputStream multigraphCutThumbnailImgFileStream = new ByteArrayInputStream(multigraphCutThumbnailImgFile.toByteArray());
+                    //源文件存储
+                    UploadResult multigraphOriginalImage = OssFactory.instance().upload(multipartFile.getInputStream(), dataImageFilesInfoOfd.getFileId() + "." + "ofd", multipartFile.getSize(), multipartFile.getContentType());
+                    //缩略图存储
+                    UploadResult multigraphSmallImage = OssFactory.instance().upload(multigraphCutThumbnailImgFileStream, "small_" + dataImageFilesInfoOfd.getFileId() + "." + "png", (long) multigraphCutThumbnailImgFile.size(), detectContentType(multigraphCutThumbnailImgFileStream));
+                    Object entity = identificationDaOfd.t;
+                    dataImageFilesInfoOfd.setFileName(multigraphOriginalImage.getFilename());
+                    dataImageFilesInfoOfd.setIurl(multigraphOriginalImage.getUrl());
+                    dataImageFilesInfoOfd.setFileMd5(multigraphOriginalImage.getETag());
+                    dataImageFilesInfoOfd.setSurl(multigraphSmallImage.getUrl());
+                    dataImageFilesInfoOfd.setFileSize(String.valueOf(multipartFile.getSize()));
+                    dataImageFilesInfoOfd.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
+                    iDataImageFilesInfoService.insert(dataImageFilesInfoOfd);
+                    updateFileId(entity, dataImageFilesInfoOfd.getFileId());
+                }
 
             } else if (fileSuffix.equals("xml")) {
-                //源文件存储
-                UploadResult multigraphOriginalXml = OssFactory.instance().upload(multipartFile.getInputStream(), dataImageFilesInfo.getFileId() + "." + "xml", multipartFile.getSize(), multipartFile.getContentType());
-                ////////////////
-                Object entity = identificationData.get(0).t;
-                dataImageFilesInfo.setMessage(dataImageFilesInfo.getMessage());
-                dataImageFilesInfo.setInvoice(identificationData.get(0).k);
-                dataImageFilesInfo.setFileName(multigraphOriginalXml.getFilename());
-                dataImageFilesInfo.setIurl(multigraphOriginalXml.getUrl());
-                dataImageFilesInfo.setFileMd5(multigraphOriginalXml.getETag());
-                dataImageFilesInfo.setFileSize(String.valueOf(multipartFile.getSize()));
-                dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-                iDataImageFilesInfoService.insert(dataImageFilesInfo);
-                updateFileId(entity, dataImageFilesInfo.getFileId());
+
+                for (IdentificationData identificationDaXml : identificationData) {
+                    DataImageFilesInfo dataImageFilesInfoXml = new DataImageFilesInfo();
+                    dataImageFilesInfoXml.setFileId(IdUtil.simpleUUID());
+                    //源文件存储
+                    UploadResult multigraphOriginalXml = OssFactory.instance().upload(multipartFile.getInputStream(), dataImageFilesInfoXml.getFileId() + "." + "xml", multipartFile.getSize(), multipartFile.getContentType());
+                    Object entity = identificationDaXml.t;
+                    dataImageFilesInfoXml.setMessage(dataImageFilesInfo.getMessage());
+                    dataImageFilesInfoXml.setInvoice(identificationDaXml.k);
+                    dataImageFilesInfoXml.setFileName(multigraphOriginalXml.getFilename());
+                    dataImageFilesInfoXml.setIurl(multigraphOriginalXml.getUrl());
+                    dataImageFilesInfoXml.setFileMd5(multigraphOriginalXml.getETag());
+                    dataImageFilesInfoXml.setFileSize(String.valueOf(multipartFile.getSize()));
+                    dataImageFilesInfoXml.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
+                    iDataImageFilesInfoService.insert(dataImageFilesInfoXml);
+                    updateFileId(entity, dataImageFilesInfoXml.getFileId());
+                }
 
             } else if (fileSuffix.equals("pdf")) {//pdf类型
 
                 SysOssVo pdfUpload = iSysOssService.upload(multipartFile);
                 // 读取 PDF 文件并转换为字节数组
                 List<byte[]> images = pdfToImg(multipartFile.getBytes());
-                /////////
                 String orientationStr = "";
                 for (int identificationDatum = 0; identificationDatum < identificationData.size(); identificationDatum++) {
 
@@ -225,15 +220,10 @@ public class ScanImageServiceImpl implements ScanImageService {
                 //设置图片存储信息
                 dataImageFilesInfo.setIurl(originalImage.getUrl());
                 dataImageFilesInfo.setSurl(smallImage.getUrl());
-                // 移除首尾多余的引号
                 dataImageFilesInfo.setFileMd5(originalImage.getETag());
                 dataImageFilesInfo.setFileName(originalImage.getFilename());
                 dataImageFilesInfo.setFileSize(String.valueOf(multipartFile.getSize()));
 
-                /////////////////////
-                if (identificationData.size() == 0) {
-                    return R.fail("识别失败!");
-                }
                 //是否多图
                 boolean multigraph = CollectionUtil.isNotEmpty(identificationData) && identificationData.size() > 1;
                 String orientationStr = "";
@@ -268,7 +258,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                         Object entity = identificationDatum.t;
                         String jsonString = cn.hutool.json.JSONUtil.toJsonStr(entity);
                         JSONObject jsonObject = JSONUtil.parseObj(jsonString);
-                        //切图
+
                         DataImageFilesInfo dataImageFilesInfoSm = new DataImageFilesInfo();
                         dataImageFilesInfoSm.setParentFileId(dataImageFilesInfo.getFileId());
                         dataImageFilesInfoSm.setFileId(IdUtil.simpleUUID());
@@ -308,23 +298,31 @@ public class ScanImageServiceImpl implements ScanImageService {
                 dataOcrService.ocrInsert(identificationDatum.k, identificationDatum.t);
             }
 
-            //发票查验
-            for (IdentificationData identificationDatum : identificationData) {
-                Object entity = identificationDatum.t;
-                String jsonString = cn.hutool.json.JSONUtil.toJsonStr(entity);
-                JSONObject jsonObject = JSONUtil.parseObj(jsonString);
-                String CheckFileId = jsonObject.getStr("fileId");
-                DataImageFilesInfo dataImageFilesInfoCheck = new DataImageFilesInfo();
-                dataImageFilesInfoCheck.setInvoice(identificationDatum.k);
-                dataImageFilesInfoCheck.setFileId(CheckFileId);
-                checkInvoice.check(checkOff, dataImageFilesInfoCheck);
+            //是否查验
+            if (checkOff){
+                //发票查验
+                for (IdentificationData identificationDatum : identificationData) {
+                    DataImageFilesInfo dataImageFilesInfoCheck = new DataImageFilesInfo();
+                    Object entity = identificationDatum.t;
+                    JSONObject jsonObject = JSONUtil.parseObj(cn.hutool.json.JSONUtil.toJsonStr(entity));
+                    String CheckFileId = jsonObject.getStr("fileId");
+                    dataImageFilesInfoCheck.setInvoice(identificationDatum.k);
+                    dataImageFilesInfoCheck.setFileId(CheckFileId);
+                    checkInvoice.check(checkOff, dataImageFilesInfoCheck);
+                }
             }
 
         } else {
             return R.ok("文件类型不符合参数配置！");
         }
-        //返回
+
         return R.ok("操作成功!");
+
+        } else {
+
+            return R.ok("用户已关闭ocr功能!");
+        }
+
     }
 
     public static String detectContentType(InputStream inputStream) {
@@ -385,10 +383,7 @@ public class ScanImageServiceImpl implements ScanImageService {
      * @param fileSuffix 文件类型
      */
     public boolean isFileTypeAllowed(String fileSuffix) throws Exception {
-//        String a = ".AVIF,.WMF,.EMF,.JPEG,.FPX,.BMP,.GIF,.SVG,.ICO,.PNG,.JPG,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.ofd,.xml";
-//        RedisUtils.setCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_INVOICE_TYPE, a);
         // 从 Redis 获取允许的文件类型
-//        String fileTypes = RedisUtils.getCacheObject(Constants.SYS_CONFIG_KEY + ParamConstants.SYS_INVOICE_TYPE);
         String fileTypes = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_INVOICE_TYPE);
         if (StringUtils.hasText(fileTypes)) {
             // 转换为 Set，并去掉类型前的 `.`
@@ -568,6 +563,7 @@ public class ScanImageServiceImpl implements ScanImageService {
 
         return multipartFiles;
     }
+
     /*
      * 根据域名设置邮件服务器参数
      */
