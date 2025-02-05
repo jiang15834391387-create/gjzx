@@ -67,7 +67,7 @@ public class DataDidiItinerary extends TenantEntity {
     private String invoiceTotal;
 
     /**
-     * OCR详情
+     * 详情对象
      */
     @TableField(exist = false)
     private List<DataDidiItineraryDetails> details;

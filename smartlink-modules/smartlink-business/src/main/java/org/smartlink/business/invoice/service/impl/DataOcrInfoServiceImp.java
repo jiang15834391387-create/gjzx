@@ -199,41 +199,6 @@ public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
         return baseMapper.deleteByIds(ids) > 0;
     }
 
-
-    /**
-     * @Description:增值税专用发票发票修改
-     * @Author: Mr.Meng
-     */
-    @Override
-    public R invoiceAlter(DataOcrInfoBo dto) throws IOException {
-        //根据id修改发票信息
-        DataOcrInfo dataOcrInfo = baseMapper.selectById(dto.getId());
-        if (ObjectUtil.isEmpty(dataOcrInfo)){
-            return R.fail("该发票不存在");
-        }
-        int update= baseMapper.updateById(MapstructUtils.convert(dto, DataOcrInfo.class));
-        if (update<=0){
-            return R.fail("修改失败");
-        }
-        DataImageFilesInfo imageFiles = imageFilesMapper
-            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
-                .eq(DataImageFilesInfo::getFileId, dataOcrInfo.getFileId()));
-        final InvoiceCheckParamDTO Dto = new InvoiceCheckParamDTO();
-        //增值税专用发票
-        if (InvoiceConstants.GLORITY_TAX_SPECIAL_CODE.equals(imageFiles.getInvoice())){
-            Dto.setCode(dataOcrInfo.getInvoiceCode());
-            Dto.setNumber(dataOcrInfo.getInvoiceNumber());
-            Dto.setDate(dataOcrInfo.getInvoiceDate());
-            Dto.setType(imageFiles.getInvoice());
-            Dto.setPretax_amount(dataOcrInfo.getPretaxAmount());
-            Dto.setElectron_mark(Integer.valueOf(dataOcrInfo.getElectronicMark()));
-            //查验发票
-            CheckFactory.instance().checkInvoke(imageFiles, Dto);
-            return R.ok();
-        }
-        return R.ok();
-
-    }
     //根据fileId查询发票信息
     @Override
     public DataOcrInfo getByFileId(String fileId) {

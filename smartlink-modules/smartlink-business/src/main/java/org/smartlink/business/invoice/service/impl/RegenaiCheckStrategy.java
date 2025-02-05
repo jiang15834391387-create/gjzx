@@ -183,7 +183,7 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         log.info("睿真发票接口查验成功");
         filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
         filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
-        filesInfo.setMessage("发票接口查验成功！");
+        filesInfo.setMessage("发票查验成功！");
         baseEntity=new BaseEntity();
         baseEntity.setCheckResult("查验成功");
         baseEntity.setCheckInvoice(CheckConstant.SUCCESS_CHECK);

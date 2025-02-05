@@ -68,7 +68,7 @@ public class CheckInvoice {
             }
             //获取发票类型
             String invoiceType = filesInfo.getInvoice();
-            InvoiceCheckParamDTO invoiceCheckParamDTO=null;
+        InvoiceCheckParamDTO invoiceCheckParamDTO = new InvoiceCheckParamDTO();
             switch (invoiceType){
                 case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
                     final DataUsedCarSales dataUsedCarSales =dataUsedCarSalesService.getByFileId(filesInfo.getFileId());
@@ -147,7 +147,7 @@ public class CheckInvoice {
                     final DataOcrInfo ocrInfos = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
                     if (StrUtil.isNotBlank(ocrInfos.getBlockChain())){
                         if (ocrInfos.getBlockChain().equals(InvoiceConstants.ONE)){
-                            invoiceCheckParamDTO.setElectron_mark(Integer.valueOf(ocrInfos.getBlockChain()));
+                            invoiceCheckParamDTO.setBlock_chain(Integer.valueOf(ocrInfos.getBlockChain()));
                         }
                         if (StrUtil.isNotBlank(ocrInfos.getSellerNo())){
                             invoiceCheckParamDTO.setSeller_tax_id(ocrInfos.getSellerNo());
@@ -229,7 +229,7 @@ public class CheckInvoice {
     //医疗/非税
     private void medicalTreatmentConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
         if (ObjectUtil.isEmpty(baseEntity)){
-            log.info("医疗/非税查验转换后结果为空");
+            log.error("医疗/非税查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的医疗/非税信息：{}", baseEntity);
@@ -252,7 +252,7 @@ public class CheckInvoice {
    //航空电子信息客运
     public void flightItineraryConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
-            log.info("航空运输电子客运行程单基本信息查验转换后结果为空");
+            log.error("航空运输电子客运行程单基本信息查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的航空运输电子客运行程单基本信息信息：{}", baseEntity);
@@ -278,7 +278,7 @@ public class CheckInvoice {
     // 转换后火车票
     private void railwayTicketConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
-            log.info("火车票查验转换后结果为空");
+            log.error("火车票查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的火车票信息：{}", baseEntity);
@@ -290,7 +290,7 @@ public class CheckInvoice {
     // 转换后机动车销售统一发票
     private void motorVehicleSaleConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
-            log.info("机动车销售统一发票查验转换后结果为空");
+            log.error("机动车销售统一发票查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的机动车信息：{}", baseEntity);
@@ -303,7 +303,7 @@ public class CheckInvoice {
     //转换后机动二手车销售统一发票
     private void usedCsrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
-            log.info("二手车销售统一发票查验转换后结果为空");
+            log.error("二手车销售统一发票查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的二手车信息：{}", baseEntity);
@@ -315,7 +315,7 @@ public class CheckInvoice {
     //转换后ocr信息修改
     public void ocrConversionAlter(BaseEntity baseEntity,DataImageFilesInfo filesInfo) throws Exception {
         if (ObjectUtil.isEmpty(baseEntity)){
-            log.info("ocr查验转换后结果为空");
+            log.error("ocr查验转换后结果为空");
             return;
         }
         log.info("修改查验转换后的OCR信息：{}", baseEntity);
@@ -336,4 +336,5 @@ public class CheckInvoice {
             detailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
         }
     }
+
 }

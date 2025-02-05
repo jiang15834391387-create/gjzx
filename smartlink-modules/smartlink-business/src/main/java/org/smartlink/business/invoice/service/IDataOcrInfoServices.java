@@ -62,8 +62,6 @@ public interface IDataOcrInfoServices {
      */
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
 
-    //发票修改
-    R invoiceAlter(DataOcrInfoBo dto) throws IOException;
 
     // 根据fileId查询ocr基本信息和详细信息
     DataOcrInfo getByFileId(String fileId);

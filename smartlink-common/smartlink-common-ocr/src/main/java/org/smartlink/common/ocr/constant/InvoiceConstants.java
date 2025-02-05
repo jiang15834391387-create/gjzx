@@ -131,7 +131,7 @@ public class InvoiceConstants {
      */
     public static final String DIGITAL_INVOICE_LIST = "10110";
 
-    //条件1
+    //条件1   电子标识
     public static final String ONE="1";
 
 }
