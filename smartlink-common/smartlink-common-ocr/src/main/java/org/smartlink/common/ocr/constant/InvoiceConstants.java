@@ -130,8 +130,8 @@ public class InvoiceConstants {
      * 增值税发票清单
      */
     public static final String DIGITAL_INVOICE_LIST = "10110";
-
-    //条件1   电子标识
-    public static final String ONE="1";
-
+   /**
+    *区块链标识
+    */
+   public static final String ONE = "1";
 }

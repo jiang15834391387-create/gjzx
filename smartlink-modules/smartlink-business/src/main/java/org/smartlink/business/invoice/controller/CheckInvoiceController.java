@@ -34,4 +34,10 @@ public class CheckInvoiceController extends BaseController {
     public R<Void> remove(@RequestParam(required = false) String[] ids) {
         return toAjax(service.deleteWithValidByIds(List.of(ids)));
     }
+    /**
+     *发票列表查询
+     *
+     */
+
+
 }

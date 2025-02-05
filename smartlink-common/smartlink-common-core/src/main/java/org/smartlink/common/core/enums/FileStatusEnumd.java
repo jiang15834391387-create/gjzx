@@ -24,7 +24,24 @@ public enum FileStatusEnumd {
      * 文件无效
      */
     INVALID_CODE("3","文件无效"),
-    ;
+
+    /**
+     * 文件修改状态
+     */
+    UPDATE_YES("4","修改成功"),
+
+    /**
+     * 待报销
+     */
+    TO_BE_REIMBURSED("5","待报销"),
+    /**
+     * 已报销
+     */
+    REIMBURSED("6","已报销"),
+    /**
+     * 已删除
+     */
+    DELETED("7","已删除");
 
     FileStatusEnumd(String code, String desc) {
         this.code = code;

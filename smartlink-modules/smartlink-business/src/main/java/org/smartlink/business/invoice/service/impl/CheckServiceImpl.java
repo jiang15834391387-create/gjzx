@@ -14,6 +14,7 @@ import org.smartlink.business.invoice.service.ICheckService;
 import org.smartlink.common.check.doman.BillRequest;
 import org.smartlink.common.check.doman.InvoiceRequest;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
+import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
@@ -174,126 +175,126 @@ public class CheckServiceImpl implements ICheckService {
 
     //删除ocr发票
     private int removeOcrInvoice(DataImageFilesInfo filesInfo) {
-       ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()).set(DataOcrInfo::getFileId, InvoiceConstants.ONE));
-       ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).set(DataOcrDetails::getFileId, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()).set(DataOcrInfo::getFileId, FileStatusEnumd.DELETED.getCode()));
+       ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).set(DataOcrDetails::getFileId, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
     //删除货物运输电子收款凭证发票
     private int removeElectronicPaymentGoodsTransportation(DataImageFilesInfo filesInfo) {
-       paymentMapper.update(new LambdaUpdateWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, filesInfo.getFileId()).set(DataElectronicTransportationGoods::getFileId, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       paymentMapper.update(new LambdaUpdateWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, filesInfo.getFileId()).set(DataElectronicTransportationGoods::getFileId, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
 
     //删除海关专用缴款书发票
     private int removeCustomsSpecialPayment(DataImageFilesInfo filesInfo) {
-      customsSpecialPaymentMapper.update(new LambdaUpdateWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, filesInfo.getFileId()).set(DataCustomsSpecialPayment::getFileId, InvoiceConstants.ONE));
-      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+      customsSpecialPaymentMapper.update(new LambdaUpdateWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, filesInfo.getFileId()).set(DataCustomsSpecialPayment::getFileId, FileStatusEnumd.DELETED.getCode()));
+      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
       return 1;
     }
     //删除海关出口货物报关单发票
     private int removeCustomsExportGoods(DataImageFilesInfo filesInfo) {
-       customsExportGoodsMapper.update(new LambdaUpdateWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getFileId, filesInfo.getFileId()).set(DataCustomsExportGoods::getDeleteFlag, InvoiceConstants.ONE));
-       customsExportGoodsDetailMapper.update(new LambdaUpdateWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, filesInfo.getFileId()).set(DataCustomsExportGoodsDetail::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       customsExportGoodsMapper.update(new LambdaUpdateWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getFileId, filesInfo.getFileId()).set(DataCustomsExportGoods::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       customsExportGoodsDetailMapper.update(new LambdaUpdateWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, filesInfo.getFileId()).set(DataCustomsExportGoodsDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
 
     //删除海关进口货物报关单发票
     private int removeCustomsImportGoods(DataImageFilesInfo filesInfo) {
-       customsImportGoodsMapper.update(new LambdaUpdateWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getFileId, filesInfo.getFileId()).set(DataCustomsImxportGoods::getDeleteFlag, InvoiceConstants.ONE));
-       customsImportGoodsDetailMapper.update(new LambdaUpdateWrapper<DataCustomsImportGoodsDetail>().eq(DataCustomsImportGoodsDetail::getFileId, filesInfo.getFileId()).set(DataCustomsImportGoodsDetail::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       customsImportGoodsMapper.update(new LambdaUpdateWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getFileId, filesInfo.getFileId()).set(DataCustomsImxportGoods::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       customsImportGoodsDetailMapper.update(new LambdaUpdateWrapper<DataCustomsImportGoodsDetail>().eq(DataCustomsImportGoodsDetail::getFileId, filesInfo.getFileId()).set(DataCustomsImportGoodsDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
     // 删除完税证明发票
     private int removeDutyPaidProof(DataImageFilesInfo filesInfo) {
-        paidProofMapper.update(new LambdaUpdateWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getFileId, filesInfo.getFileId()).set(DataDutyPaidProof::getDeleteFlag, InvoiceConstants.ONE));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+        paidProofMapper.update(new LambdaUpdateWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getFileId, filesInfo.getFileId()).set(DataDutyPaidProof::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         return 1;
     }
     // 删除滴滴行程单发票/电子行程单
     private int removeDidiItinerary(DataImageFilesInfo filesInfo) {
-       didiItineraryMapper.update(new LambdaUpdateWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getFileId, filesInfo.getFileId()).set(DataDidiItinerary::getDeleteFlag, InvoiceConstants.ONE));
-       didiItineraryDetailsMapper.update(new LambdaUpdateWrapper<DataDidiItineraryDetails>().eq(DataDidiItineraryDetails::getFileId, filesInfo.getFileId()).set(DataDidiItineraryDetails::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       didiItineraryMapper.update(new LambdaUpdateWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getFileId, filesInfo.getFileId()).set(DataDidiItinerary::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       didiItineraryDetailsMapper.update(new LambdaUpdateWrapper<DataDidiItineraryDetails>().eq(DataDidiItineraryDetails::getFileId, filesInfo.getFileId()).set(DataDidiItineraryDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
 
     //删除小票
     private int removeReceipt(DataImageFilesInfo filesInfo) {
-        dataReceiptMapper.update(new LambdaUpdateWrapper<DataReceipt>().eq(DataReceipt::getFileId, filesInfo.getFileId()).set(DataReceipt::getDeleteFlag, InvoiceConstants.ONE));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+        dataReceiptMapper.update(new LambdaUpdateWrapper<DataReceipt>().eq(DataReceipt::getFileId, filesInfo.getFileId()).set(DataReceipt::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         return 1;
     }
 
     //删除过路费
     private int removeTollRoads(DataImageFilesInfo filesInfo) {
-      tollRoadsMapper.update(new LambdaUpdateWrapper<DataTollRoads>().eq(DataTollRoads::getFileId, filesInfo.getFileId()).set(DataTollRoads::getDeleteFlag, InvoiceConstants.ONE));
-      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+      tollRoadsMapper.update(new LambdaUpdateWrapper<DataTollRoads>().eq(DataTollRoads::getFileId, filesInfo.getFileId()).set(DataTollRoads::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
       return 1;
     }
 
     //删除客车发票
     private int removePassengerCar(DataImageFilesInfo filesInfo) {
-        passengerCarMapper.update(new LambdaUpdateWrapper<DataPassengerCar>().eq(DataPassengerCar::getFileId, filesInfo.getFileId()).set(DataPassengerCar::getDeleteFlag, InvoiceConstants.ONE));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+        passengerCarMapper.update(new LambdaUpdateWrapper<DataPassengerCar>().eq(DataPassengerCar::getFileId, filesInfo.getFileId()).set(DataPassengerCar::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         return 1;
     }
 
     //删除火车票
     private int removeRailwayTicket(DataImageFilesInfo filesInfo) {
-       railwayTicketMapper.update(new LambdaUpdateWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, filesInfo.getFileId()).set(DataRailwayTicket::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       railwayTicketMapper.update(new LambdaUpdateWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, filesInfo.getFileId()).set(DataRailwayTicket::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
 
     //删除出租车发票
     private int removeTaxiTickets(DataImageFilesInfo filesInfo) {
-      taxiTicketsMapper.update(new LambdaUpdateWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getFileId, filesInfo.getFileId()).set(DataTaxiTickets::getDeleteFlag, InvoiceConstants.ONE));
-      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+      taxiTicketsMapper.update(new LambdaUpdateWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getFileId, filesInfo.getFileId()).set(DataTaxiTickets::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
       return 1;
     }
 
     //删除定额发票
     private int removeQuotaInvoice(DataImageFilesInfo filesInfo) {
-       quotaInvoiceMapper.update(new LambdaUpdateWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getFileId, filesInfo.getFileId()).set(DataQuotaInvoice::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       quotaInvoiceMapper.update(new LambdaUpdateWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getFileId, filesInfo.getFileId()).set(DataQuotaInvoice::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
 
     //删除医疗发票
     private int removeMedicalTicket(DataImageFilesInfo filesInfo) {
-       dataMedicalTreatmentMapper.update(new LambdaUpdateWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, filesInfo.getFileId()).set(DataMedicalTreatment::getDeleteFlag, InvoiceConstants.ONE));
-       dataMedicalTreatmentDetailMapper.update(new LambdaUpdateWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, filesInfo.getFileId()).set(DataMedicalTreatmentDetail::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       dataMedicalTreatmentMapper.update(new LambdaUpdateWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, filesInfo.getFileId()).set(DataMedicalTreatment::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       dataMedicalTreatmentDetailMapper.update(new LambdaUpdateWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, filesInfo.getFileId()).set(DataMedicalTreatmentDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
     //船票
     private int removeSteamerTicket(DataImageFilesInfo filesInfo) {
-        steamerTicketMapper.update(new LambdaUpdateWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getFileId, filesInfo.getFileId()).set(DataSteamerTicket::getDeleteFlag, InvoiceConstants.ONE));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+        steamerTicketMapper.update(new LambdaUpdateWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getFileId, filesInfo.getFileId()).set(DataSteamerTicket::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         return 1;
     }
 
     //删除机票(航空电子客运)发票
     private int removeFilghtItinerary(DataImageFilesInfo filesInfo) {
-       flightItineraryMapper.update(new LambdaUpdateWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, filesInfo.getFileId()).set(DataFlightItinerary::getDeleteFlag, InvoiceConstants.ONE));
-       flightsItineraryDetailMapper.update(new LambdaUpdateWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId()).set(DataFlightsItineraryDetail::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       flightItineraryMapper.update(new LambdaUpdateWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, filesInfo.getFileId()).set(DataFlightItinerary::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       flightsItineraryDetailMapper.update(new LambdaUpdateWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId()).set(DataFlightsItineraryDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
     //删除二手车发票
     private int removeUserCarSaleInvoice(DataImageFilesInfo filesInfo) {
-       usedCarSalesMapper.update(new LambdaUpdateWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, filesInfo.getFileId()).set(DataUsedCarSales::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       usedCarSalesMapper.update(new LambdaUpdateWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, filesInfo.getFileId()).set(DataUsedCarSales::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
     //删除机动车销售发票
     private int removeVehicleSaleInvoice(DataImageFilesInfo filesInfo) {
-       motorVehicleSaleMapper.update(new LambdaUpdateWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, filesInfo.getFileId()).set(DataMotorVehicleSale::getDeleteFlag, InvoiceConstants.ONE));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, InvoiceConstants.ONE));
+       motorVehicleSaleMapper.update(new LambdaUpdateWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, filesInfo.getFileId()).set(DataMotorVehicleSale::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        return 1;
     }
 
@@ -486,26 +487,26 @@ public class CheckServiceImpl implements ICheckService {
                 return 0;
             }
         }
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, flightItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES));
+        if (count<=0){
+            return 0;
+        }
         return 1;
     }
 
     //处理数电票/普通发票修改
     private int updateOrdinaryInvoice(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
         DataOcrInfo ocrInfo = BeanUtil.toBean(generalInfo, DataOcrInfo.class);
-        int updateResult = ocrInfoMapper.updateById(ocrInfo);
-        if (updateResult <= 0) {
-            return 0;
-        }
+        ocrInfoMapper.updateById(ocrInfo);
         List<DataOcrDetails> ocrDetails = details.stream()
             .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
             .toList();
 
         for (DataOcrDetails item : ocrDetails) {
-            int i = ocrDetailsMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
+            ocrDetailsMapper.updateById(item);
         }
+        //根据file_id修改图片表信息
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
 
@@ -661,109 +662,80 @@ public class CheckServiceImpl implements ICheckService {
             }
         }
         //根据file_id修改ocr基本信息
-        int updated=ocrInfoMapper.update(dataOcrInfo, new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()));
-        if (updated<=0){
-            return 0;
-        }
+        ocrInfoMapper.update(dataOcrInfo, new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()));
         for (DataOcrDetails detail : arrayList) {
-            int update=ocrDetailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
-            if (update<=0){
-               return 0;
-            }
+           ocrDetailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
         }
         return 1;
     }
-
     //修改机动车销售发票
     private int updateVehicleSaleInvoice (Map < String, Object > generalInfo){
         DataMotorVehicleSale motorVehicleSale = BeanUtil.toBean(generalInfo, DataMotorVehicleSale.class);
-        int updateResult = motorVehicleSaleMapper.updateById(motorVehicleSale);
-        if (updateResult <= 0){
-            return 0;
-        }
+        motorVehicleSaleMapper.updateById(motorVehicleSale);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, motorVehicleSale.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改二手车销售发票
     private int updateCarSaleInvoice (Map < String, Object > generalInfo){
         DataUsedCarSales usedCarSales = BeanUtil.toBean(generalInfo, DataUsedCarSales.class);
-        int updateResult=usedCarSalesMapper.updateById(usedCarSales);
-        if (updateResult <= 0){
-            return 0;
-        }
+        usedCarSalesMapper.updateById(usedCarSales);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, usedCarSales.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改船票
     private int updateSteamerTicket (Map < String, Object > generalInfo){
         DataSteamerTicket steamerTicket = BeanUtil.toBean(generalInfo, DataSteamerTicket.class);
-        int updateResult =steamerTicketMapper.updateById(steamerTicket);
-        if (updateResult <= 0){
-            return 0;
-        }
+        steamerTicketMapper.updateById(steamerTicket);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, steamerTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改定额发票
     private int updateQuotaInvoice (Map < String, Object > generalInfo){
         DataQuotaInvoice quotaInvoice = BeanUtil.toBean(generalInfo, DataQuotaInvoice.class);
-        int updateResult =quotaInvoiceMapper.updateById(quotaInvoice);
-        if (updateResult <= 0){
-            return 0;
-        }
+        quotaInvoiceMapper.updateById(quotaInvoice);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, quotaInvoice.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改出租车票
     private int updateTaxiTickets (Map < String, Object > generalInfo){
         DataTaxiTickets taxiTickets = BeanUtil.toBean(generalInfo, DataTaxiTickets.class);
-        int updateResult =taxiTicketsMapper.updateById(taxiTickets);
-        if (updateResult <= 0){
-            return 0;
-        }
+        taxiTicketsMapper.updateById(taxiTickets);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, taxiTickets.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改火车票
     private int updateRailwayTicket (Map < String, Object > generalInfo){
         DataRailwayTicket railwayTicket = BeanUtil.toBean(generalInfo, DataRailwayTicket.class);
-        int updateResult =railwayTicketMapper.updateById(railwayTicket);
-        if (updateResult <= 0){
-            return 0;
-        }
+        railwayTicketMapper.updateById(railwayTicket);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, railwayTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改汽车票
     private int updatePassengerCar (Map < String, Object > generalInfo){
         DataPassengerCar passengerCar = BeanUtil.toBean(generalInfo, DataPassengerCar.class);
-        int updateResult =passengerCarMapper.updateById(passengerCar);
-        if (updateResult <= 0){
-            return 0;
-        }
+        passengerCarMapper.updateById(passengerCar);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, passengerCar.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改过路费
     private int updateTollRoads (Map < String, Object > generalInfo){
         DataTollRoads tollRoads = BeanUtil.toBean(generalInfo, DataTollRoads.class);
-        int updateResult =tollRoadsMapper.updateById(tollRoads);
-        if (updateResult <= 0){
-            return 0;
-        }
+        tollRoadsMapper.updateById(tollRoads);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, tollRoads.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改小票
     private int updateReceipt (Map < String, Object > generalInfo){
         DataReceipt receipt = BeanUtil.toBean(generalInfo, DataReceipt.class);
-        int updateResult =dataReceiptMapper.updateById(receipt);
-        if (updateResult <= 0){
-            return 0;
-        }
+        dataReceiptMapper.updateById(receipt);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, receipt.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改完税证明
     private int updateDutyPaidProof (Map < String, Object > generalInfo){
         DataDutyPaidProof dutyPaidProof = BeanUtil.toBean(generalInfo, DataDutyPaidProof.class);
-        int updateResult =paidProofMapper.updateById(dutyPaidProof);
-        if (updateResult <= 0){
-            return 0;
-        }
+        paidProofMapper.updateById(dutyPaidProof);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
-
 }
-

@@ -222,7 +222,6 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             this.railwayTicket.changeRailwayTicket(jsonObject, dataRailwayTicket);
             dataRailwayTicket.setId(IdUtil.simpleUUID());
             dataRailwayTicket.setFileId(filesInfo.getFileId());
-            dataRailwayTicket.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
             return dataRailwayTicket;
         }else if (StrUtil.equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE, invoiceType)){
             //航空运输电子客运行程单基本信息
@@ -232,7 +231,6 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             dataFlightItinerary.setFlightItineraryDetails(this.changeFlightItineraryDetails.changeFlightItineraryDetails(jsonObject,filesInfo.getFileId()));
             dataFlightItinerary.setId(IdUtil.simpleUUID());
             dataFlightItinerary.setFileId(filesInfo.getFileId());
-            dataFlightItinerary.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
             return dataFlightItinerary;
 
         }else if (StrUtil.equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE, invoiceType)){
@@ -243,7 +241,6 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             medicalTreatment.setMedicalTreatmentDetails(this.changeMedicalTreatmentDetails.changeMedicalTreatmentDetails(jsonObject,filesInfo.getFileId()));
             medicalTreatment.setId(IdUtil.simpleUUID());
             medicalTreatment.setFileId(filesInfo.getFileId());
-            medicalTreatment.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
             return medicalTreatment;
         }else {
             //增值税
