@@ -5,22 +5,29 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.util.StringUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.invoice.service.ICheckService;
 import org.smartlink.common.check.doman.BillRequest;
+import org.smartlink.common.check.doman.InvoicePageQuery;
 import org.smartlink.common.check.doman.InvoiceRequest;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
+import org.smartlink.common.check.doman.vo.InvoiceVo;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
+import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -47,6 +54,7 @@ public class CheckServiceImpl implements ICheckService {
     private final DataDidiItineraryMapper didiItineraryMapper;
     private final DataDidiItineraryDetailsMapper didiItineraryDetailsMapper;
     private final DataDutyPaidProofMapper paidProofMapper;
+    private final DataDutyPaidProofDetailsMapper paidProofDetailsMapper;
     private final DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper;
     private final DataCustomsImxportGoodsMapper customsImportGoodsMapper;
     private final DataCustomsExportGoodsMapper customsExportGoodsMapper;
@@ -55,8 +63,7 @@ public class CheckServiceImpl implements ICheckService {
     private final DataElectronicTransportationGoodsMapper paymentMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
     private final DataOcrDetailsMapper ocrDetailsMapper;
-
-    public CheckServiceImpl(CheckInvoice checkInvoice, DataImageFilesInfoMapper filesInfoMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataSteamerTicketMapper steamerTicketMapper, DataMedicalTreatmentMapper dataMedicalTreatmentMapper, DataMedicalTreatmentDetailMapper dataMedicalTreatmentDetailMapper, DataQuotaInvoiceMapper quotaInvoiceMapper, DataTaxiTicketsMapper taxiTicketsMapper, DataRailwayTicketMapper railwayTicketMapper, DataPassengerCarMapper passengerCarMapper, DataTollRoadsMapper tollRoadsMapper, DataReceiptMapper dataReceiptMapper, DataDidiItineraryMapper didiItineraryMapper, DataDidiItineraryDetailsMapper didiItineraryDetailsMapper, DataDutyPaidProofMapper paidProofMapper, DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper, DataCustomsImxportGoodsMapper customsImportGoodsMapper, DataCustomsExportGoodsMapper customsExportGoodsMapper, DataCustomsExportGoodsDetailMapper customsExportGoodsDetailMapper, DataCustomsSpecialPaymentMapper customsSpecialPaymentMapper, DataElectronicTransportationGoodsMapper paymentMapper, DataOcrInfoMapper ocrInfoMapper, DataOcrDetailsMapper ocrDetailsMapper) {
+    public CheckServiceImpl(CheckInvoice checkInvoice, DataImageFilesInfoMapper filesInfoMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataSteamerTicketMapper steamerTicketMapper, DataMedicalTreatmentMapper dataMedicalTreatmentMapper, DataMedicalTreatmentDetailMapper dataMedicalTreatmentDetailMapper, DataQuotaInvoiceMapper quotaInvoiceMapper, DataTaxiTicketsMapper taxiTicketsMapper, DataRailwayTicketMapper railwayTicketMapper, DataPassengerCarMapper passengerCarMapper, DataTollRoadsMapper tollRoadsMapper, DataReceiptMapper dataReceiptMapper, DataDidiItineraryMapper didiItineraryMapper, DataDidiItineraryDetailsMapper didiItineraryDetailsMapper, DataDutyPaidProofMapper paidProofMapper, DataDutyPaidProofDetailsMapper paidProofDetailsMapper, DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper, DataCustomsImxportGoodsMapper customsImportGoodsMapper, DataCustomsExportGoodsMapper customsExportGoodsMapper, DataCustomsExportGoodsDetailMapper customsExportGoodsDetailMapper, DataCustomsSpecialPaymentMapper customsSpecialPaymentMapper, DataElectronicTransportationGoodsMapper paymentMapper, DataOcrInfoMapper ocrInfoMapper, DataOcrDetailsMapper ocrDetailsMapper) {
         this.checkInvoice = checkInvoice;
         this.filesInfoMapper = filesInfoMapper;
         this.motorVehicleSaleMapper = motorVehicleSaleMapper;
@@ -75,6 +82,7 @@ public class CheckServiceImpl implements ICheckService {
         this.didiItineraryMapper = didiItineraryMapper;
         this.didiItineraryDetailsMapper = didiItineraryDetailsMapper;
         this.paidProofMapper = paidProofMapper;
+        this.paidProofDetailsMapper = paidProofDetailsMapper;
         this.customsImportGoodsDetailMapper = customsImportGoodsDetailMapper;
         this.customsImportGoodsMapper = customsImportGoodsMapper;
         this.customsExportGoodsMapper = customsExportGoodsMapper;
@@ -98,61 +106,81 @@ public class CheckServiceImpl implements ICheckService {
                 return 0;
             }
             String invoiceType = filesInfo.getInvoice();
+            if (StrUtil.isEmpty(invoiceType)){
+                return 0;
+            }
             //根据发票类型判断,调用不同的发票删除方法,使用switch
             switch (invoiceType) {
                 //机动车销售发票
                 case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
-                    return removeVehicleSaleInvoice(filesInfo);
+                     removeVehicleSaleInvoice(filesInfo);
+                     break;
                 //二手车发票
                 case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
-                    return removeUserCarSaleInvoice(filesInfo);
+                     removeUserCarSaleInvoice(filesInfo);
+                     break;
                 //机票
                 case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
-                    return removeFilghtItinerary(filesInfo);
+                     removeFilghtItinerary(filesInfo);
+                     break;
                 //船票
                 case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
-                    return removeSteamerTicket(filesInfo);
+                     removeSteamerTicket(filesInfo);
+                     break;
                 //医疗票明细票 非税收入类发票
                 case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
                 case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
                 case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
-                    return removeMedicalTicket(filesInfo);
+                     removeMedicalTicket(filesInfo);
+                     break;
                 //定额发票
                 case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
-                    return removeQuotaInvoice(filesInfo);
+                     removeQuotaInvoice(filesInfo);
+                     break;
                 //出租车发票
                 case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
-                    return removeTaxiTickets(filesInfo);
+                     removeTaxiTickets(filesInfo);
+                     break;
                 //火车发票
                 case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
-                    return removeRailwayTicket(filesInfo);
+                     removeRailwayTicket(filesInfo);
+                     break;
                 //客运车发票
                 case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
-                    return removePassengerCar(filesInfo);
+                     removePassengerCar(filesInfo);
+                     break;
                 //过路费发票
                 case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
-                    return removeTollRoads(filesInfo);
+                     removeTollRoads(filesInfo);
+                     break;
                 //小票
                 case InvoiceConstants.GLORITY_RECEIPT_CODE:
-                    return removeReceipt(filesInfo);
+                     removeReceipt(filesInfo);
+                     break;
                 //出行发票
                 case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
-                    return removeDidiItinerary(filesInfo);
+                     removeDidiItinerary(filesInfo);
+                     break;
                 //完税证明发票
                 case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
-                    return removeDutyPaidProof(filesInfo);
+                     removeDutyPaidProof(filesInfo);
+                     break;
                 //海关进口货物报关单发票
                 case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
-                    return removeCustomsImportGoods(filesInfo);
+                     removeCustomsImportGoods(filesInfo);
+                     break;
                 //海关出口货物报关单发票
                 case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
-                    return removeCustomsExportGoods(filesInfo);
+                     removeCustomsExportGoods(filesInfo);
+                     break;
                 //海关专用缴款书发票
                 case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
-                    return removeCustomsSpecialPayment(filesInfo);
+                     removeCustomsSpecialPayment(filesInfo);
+                     break;
                 //货物运输电子收款凭证发票
                 case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
-                    return removeElectronicPaymentGoodsTransportation(filesInfo);
+                     removeElectronicPaymentGoodsTransportation(filesInfo);
+                     break;
                 //增值税、机打
                 case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
                 case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
@@ -166,136 +194,122 @@ public class CheckServiceImpl implements ICheckService {
                 case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
                 case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
-                    return removeOcrInvoice(filesInfo);
-
+                     removeOcrInvoice(filesInfo);
+                     break;
+                default: {
+                    return 0;
+                }
             }
         }
-        return 0;
+        return 1;
     }
 
     //删除ocr发票
-    private int removeOcrInvoice(DataImageFilesInfo filesInfo) {
-       ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()).set(DataOcrInfo::getFileId, FileStatusEnumd.DELETED.getCode()));
-       ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).set(DataOcrDetails::getFileId, FileStatusEnumd.DELETED.getCode()));
+    private void removeOcrInvoice(DataImageFilesInfo filesInfo) {
+       ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()).set(DataOcrInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).set(DataOcrDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
     }
     //删除货物运输电子收款凭证发票
-    private int removeElectronicPaymentGoodsTransportation(DataImageFilesInfo filesInfo) {
-       paymentMapper.update(new LambdaUpdateWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, filesInfo.getFileId()).set(DataElectronicTransportationGoods::getFileId, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+    private void removeElectronicPaymentGoodsTransportation(DataImageFilesInfo filesInfo) {
+       paymentMapper.update(new LambdaUpdateWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, filesInfo.getFileId()).set(DataElectronicTransportationGoods::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除海关专用缴款书发票
-    private int removeCustomsSpecialPayment(DataImageFilesInfo filesInfo) {
-      customsSpecialPaymentMapper.update(new LambdaUpdateWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, filesInfo.getFileId()).set(DataCustomsSpecialPayment::getFileId, FileStatusEnumd.DELETED.getCode()));
-      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-      return 1;
+    private void removeCustomsSpecialPayment(DataImageFilesInfo filesInfo) {
+      customsSpecialPaymentMapper.update(new LambdaUpdateWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, filesInfo.getFileId()).set(DataCustomsSpecialPayment::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     //删除海关出口货物报关单发票
-    private int removeCustomsExportGoods(DataImageFilesInfo filesInfo) {
+    private void removeCustomsExportGoods(DataImageFilesInfo filesInfo) {
        customsExportGoodsMapper.update(new LambdaUpdateWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getFileId, filesInfo.getFileId()).set(DataCustomsExportGoods::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        customsExportGoodsDetailMapper.update(new LambdaUpdateWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, filesInfo.getFileId()).set(DataCustomsExportGoodsDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除海关进口货物报关单发票
-    private int removeCustomsImportGoods(DataImageFilesInfo filesInfo) {
+    private void removeCustomsImportGoods(DataImageFilesInfo filesInfo) {
        customsImportGoodsMapper.update(new LambdaUpdateWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getFileId, filesInfo.getFileId()).set(DataCustomsImxportGoods::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        customsImportGoodsDetailMapper.update(new LambdaUpdateWrapper<DataCustomsImportGoodsDetail>().eq(DataCustomsImportGoodsDetail::getFileId, filesInfo.getFileId()).set(DataCustomsImportGoodsDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     // 删除完税证明发票
-    private int removeDutyPaidProof(DataImageFilesInfo filesInfo) {
+    private void removeDutyPaidProof(DataImageFilesInfo filesInfo) {
         paidProofMapper.update(new LambdaUpdateWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getFileId, filesInfo.getFileId()).set(DataDutyPaidProof::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        return 1;
+        paidProofDetailsMapper.update(new LambdaUpdateWrapper<DataDutyPaidProofDetails>().eq(DataDutyPaidProofDetails::getFileId, filesInfo.getFileId()).set(DataDutyPaidProofDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     // 删除滴滴行程单发票/电子行程单
-    private int removeDidiItinerary(DataImageFilesInfo filesInfo) {
+    private void removeDidiItinerary(DataImageFilesInfo filesInfo) {
        didiItineraryMapper.update(new LambdaUpdateWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getFileId, filesInfo.getFileId()).set(DataDidiItinerary::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        didiItineraryDetailsMapper.update(new LambdaUpdateWrapper<DataDidiItineraryDetails>().eq(DataDidiItineraryDetails::getFileId, filesInfo.getFileId()).set(DataDidiItineraryDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除小票
-    private int removeReceipt(DataImageFilesInfo filesInfo) {
+    private void removeReceipt(DataImageFilesInfo filesInfo) {
         dataReceiptMapper.update(new LambdaUpdateWrapper<DataReceipt>().eq(DataReceipt::getFileId, filesInfo.getFileId()).set(DataReceipt::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        return 1;
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除过路费
-    private int removeTollRoads(DataImageFilesInfo filesInfo) {
+    private void removeTollRoads(DataImageFilesInfo filesInfo) {
       tollRoadsMapper.update(new LambdaUpdateWrapper<DataTollRoads>().eq(DataTollRoads::getFileId, filesInfo.getFileId()).set(DataTollRoads::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-      return 1;
+      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除客车发票
-    private int removePassengerCar(DataImageFilesInfo filesInfo) {
+    private void removePassengerCar(DataImageFilesInfo filesInfo) {
         passengerCarMapper.update(new LambdaUpdateWrapper<DataPassengerCar>().eq(DataPassengerCar::getFileId, filesInfo.getFileId()).set(DataPassengerCar::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        return 1;
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除火车票
-    private int removeRailwayTicket(DataImageFilesInfo filesInfo) {
+    private void removeRailwayTicket(DataImageFilesInfo filesInfo) {
        railwayTicketMapper.update(new LambdaUpdateWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, filesInfo.getFileId()).set(DataRailwayTicket::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除出租车发票
-    private int removeTaxiTickets(DataImageFilesInfo filesInfo) {
+    private void removeTaxiTickets(DataImageFilesInfo filesInfo) {
       taxiTicketsMapper.update(new LambdaUpdateWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getFileId, filesInfo.getFileId()).set(DataTaxiTickets::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-      return 1;
+      filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除定额发票
-    private int removeQuotaInvoice(DataImageFilesInfo filesInfo) {
+    private void removeQuotaInvoice(DataImageFilesInfo filesInfo) {
        quotaInvoiceMapper.update(new LambdaUpdateWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getFileId, filesInfo.getFileId()).set(DataQuotaInvoice::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除医疗发票
-    private int removeMedicalTicket(DataImageFilesInfo filesInfo) {
+    private void removeMedicalTicket(DataImageFilesInfo filesInfo) {
        dataMedicalTreatmentMapper.update(new LambdaUpdateWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, filesInfo.getFileId()).set(DataMedicalTreatment::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        dataMedicalTreatmentDetailMapper.update(new LambdaUpdateWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, filesInfo.getFileId()).set(DataMedicalTreatmentDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     //船票
-    private int removeSteamerTicket(DataImageFilesInfo filesInfo) {
+    private void removeSteamerTicket(DataImageFilesInfo filesInfo) {
         steamerTicketMapper.update(new LambdaUpdateWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getFileId, filesInfo.getFileId()).set(DataSteamerTicket::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-        return 1;
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除机票(航空电子客运)发票
-    private int removeFilghtItinerary(DataImageFilesInfo filesInfo) {
+    private void removeFilghtItinerary(DataImageFilesInfo filesInfo) {
        flightItineraryMapper.update(new LambdaUpdateWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, filesInfo.getFileId()).set(DataFlightItinerary::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
        flightsItineraryDetailMapper.update(new LambdaUpdateWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId()).set(DataFlightsItineraryDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     //删除二手车发票
-    private int removeUserCarSaleInvoice(DataImageFilesInfo filesInfo) {
+    private void removeUserCarSaleInvoice(DataImageFilesInfo filesInfo) {
        usedCarSalesMapper.update(new LambdaUpdateWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, filesInfo.getFileId()).set(DataUsedCarSales::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
     }
     //删除机动车销售发票
-    private int removeVehicleSaleInvoice(DataImageFilesInfo filesInfo) {
+    private void removeVehicleSaleInvoice(DataImageFilesInfo filesInfo) {
        motorVehicleSaleMapper.update(new LambdaUpdateWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, filesInfo.getFileId()).set(DataMotorVehicleSale::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       return 1;
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
     }
 
     /**
@@ -319,8 +333,11 @@ public class CheckServiceImpl implements ICheckService {
         // 根据发票类型处理逻辑
         switch (invoiceType) {
             case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
             case InvoiceConstants.GLORITY_TAX_CODE:
             case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
             case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 // 处理增值税发票
@@ -328,6 +345,8 @@ public class CheckServiceImpl implements ICheckService {
             // 数电票普通发票/机打发票
             case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
+            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 return updateOrdinaryInvoice(generalInfo, details);
             //机动车销售发票
             case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
@@ -369,7 +388,7 @@ public class CheckServiceImpl implements ICheckService {
                 return updateDidiItinerary(generalInfo, details);
             //完税证明发票
             case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
-                return updateDutyPaidProof(generalInfo);
+                return updateDutyPaidProof(generalInfo,details);
             //海关进口货物报关单发票
             case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
                 return updateCustomsImportGoods(generalInfo, details);
@@ -385,6 +404,7 @@ public class CheckServiceImpl implements ICheckService {
         }
         return 0;
     }
+
     //修改海关专用缴款书发票
     private int updateCustomsSpecialPayment(Map<String, Object> generalInfo) {
         DataCustomsSpecialPayment customsSpecialPayment = BeanUtil.toBean(generalInfo, DataCustomsSpecialPayment.class);
@@ -732,10 +752,563 @@ public class CheckServiceImpl implements ICheckService {
         return 1;
     }
     //修改完税证明
-    private int updateDutyPaidProof (Map < String, Object > generalInfo){
+    private int updateDutyPaidProof (Map < String, Object > generalInfo, List<Map<String, Object>> details){
         DataDutyPaidProof dutyPaidProof = BeanUtil.toBean(generalInfo, DataDutyPaidProof.class);
         paidProofMapper.updateById(dutyPaidProof);
+        List<DataDutyPaidProofDetails> ocrDetails = details.stream()
+            .map(item -> BeanUtil.toBean(item, DataDutyPaidProofDetails.class))
+            .toList();
+
+        for (DataDutyPaidProofDetails item : ocrDetails) {
+            paidProofDetailsMapper.updateById(item);
+        }
         filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
+    }
+
+    /**
+     *发票夹列表信息(待报销,已报销,未报销)
+     */
+    @Override
+    public Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) {
+        Page<InvoiceVo> invoiceVoPage = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
+
+        LambdaQueryWrapper<DataImageFilesInfo> eq = new LambdaQueryWrapper<DataImageFilesInfo>()
+            .eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
+            .eq(DataImageFilesInfo::getFileFlowStatus, pageQuery.getStatus());
+        List<DataImageFilesInfo> dataImageFilesInfos = filesInfoMapper.selectList(eq);
+
+        if (CollectionUtil.isEmpty(dataImageFilesInfos)) {
+            return invoiceVoPage;
+        }
+        List<InvoiceVo> invoiceVosList = new ArrayList<>();
+        //根据fileId查询ocr信息并组装成InvoiceVo
+        posttingOcrinfo(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询机动车销售发票信息并组装成InvoiceVo
+        posttingCarSaleInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询二手机销售发票信息并组装成InvoiceVo
+        posttingSecondCarSaleInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询航空电子客运单票信息并组装成InvoiceVo
+        posttingAirTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询船票并组装成InvoiceVo
+        posttingShipTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询医疗票/非税票组成InvoiceVo
+        posttingMedicalTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询定额发票组成InvoiceVo
+        posttingQuotaInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询出租车票组成InvoiceVo
+        posttingTaxiTickets(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询火车票组成InvoiceVo
+        posttingRailwayTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询客运车票组成InvoiceVo
+        posttingPassengerCar(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询过路费发票组成InvoiceVo
+        posttingTollRoads(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询小票组成InvoiceVo
+        posttingReceipt(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询出行发票滴滴组成InvoiceVo
+        posttingTravelInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询完税证明发票组成InvoiceVo
+        posttingDutyPaidProof(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询海关专用缴款书发票组成InvoiceVo
+        posttingCustomsSpecialPayment(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询货物运输电子收款凭证发票组成InvoiceVo
+        posttingElectronicTransportationGoods(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询海关出口货物组成InvoiceVo
+        posttingCustomsExportGoods(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        //查询海关进口货物组成InvoiceVo
+        posttingCustomsImportGoods(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        invoiceVoPage.setRecords(invoiceVosList);
+        invoiceVoPage.setTotal(invoiceVosList.size());
+        // 计算总计金额
+        BigDecimal totalAmount = invoiceVosList.stream()
+            .map(InvoiceVo::getMoneyAsBigDecimal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 将BigDecimal类型的totalAmount转换为String类型后赋值给grossAmount
+        String totalAmountStr = totalAmount.toString();
+        invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
+        return invoiceVoPage;
+    }
+    //查询海关进口货物组成InvoiceVo
+    private void posttingCustomsImportGoods(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> customsImportGoodsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataCustomsImxportGoods> customsImportGoods = customsImportGoodsMapper.selectList(new LambdaQueryWrapper<DataCustomsImxportGoods>()
+                    .eq(DataCustomsImxportGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsImxportGoods::getCreateBy, userId));
+                return customsImportGoods.stream().map(
+                    dataCustomsImportGoods -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(dataCustomsImportGoods, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(dataCustomsImportGoods.getFreight());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    });
+            }
+        ).toList();
+        invoiceVosList.addAll(customsImportGoodsList);
+    }
+
+    //查询海关出口货物组成InvoiceVo
+    private void posttingCustomsExportGoods(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> customsExportGoodsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataCustomsExportGoods> customsExportGoods = customsExportGoodsMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoods>()
+                    .eq(DataCustomsExportGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsExportGoods::getCreateBy, userId));
+                return customsExportGoods.stream().map(
+                    dataCustomsExportGoods -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(dataCustomsExportGoods, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(dataCustomsExportGoods.getFreight());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    });
+            }
+        ).toList();
+        invoiceVosList.addAll(customsExportGoodsList);
+    }
+
+    //查询货物运输电子收款凭证发票组成InvoiceVo
+    private void posttingElectronicTransportationGoods(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> electronicTransportationGoodsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataElectronicTransportationGoods> dataElectronicTransportationGoods = paymentMapper.selectList(new LambdaQueryWrapper<DataElectronicTransportationGoods>()
+                    .eq(DataElectronicTransportationGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataElectronicTransportationGoods::getCreateBy, userId));
+                return dataElectronicTransportationGoods.stream().map(
+                    dataElectronicTransportationGoods1 -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(dataElectronicTransportationGoods1, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(dataElectronicTransportationGoods1.getTotalPrice());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    });
+            }).toList();
+        invoiceVosList.addAll(electronicTransportationGoodsList);
+    }
+
+    //海关专用缴款书发票组成InvoiceVo
+    private void posttingCustomsSpecialPayment(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> customsSpecialPaymentList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataCustomsSpecialPayment> dataCustomsSpecialPayment = customsSpecialPaymentMapper.selectList(new LambdaQueryWrapper<DataCustomsSpecialPayment>()
+                    .eq(DataCustomsSpecialPayment::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsSpecialPayment::getCreateBy, userId));
+                return dataCustomsSpecialPayment.stream().map(
+                    dataCustomsSpecialPayments -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(dataCustomsSpecialPayments, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(dataCustomsSpecialPayments.getInvoiceTotal());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    });
+            }).toList();
+        invoiceVosList.addAll(customsSpecialPaymentList);
+    }
+
+    //查询完税证明发票组成InvoiceVo
+    private void posttingDutyPaidProof(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> dutyPaidProofList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataDutyPaidProof> dataDutyPaidProof = paidProofMapper.selectList(new LambdaQueryWrapper<DataDutyPaidProof>()
+                    .eq(DataDutyPaidProof::getFileId, dataImageFilesInfo.getFileId()).eq(DataDutyPaidProof::getCreateBy, userId));
+                return dataDutyPaidProof.stream().map(
+                    dataDutyPaidProofs -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(dataDutyPaidProofs, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(dataDutyPaidProofs.getInvoiceTotal());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    }
+                );
+            }
+        ).toList();
+        invoiceVosList.addAll(dutyPaidProofList);
+
+    }
+
+    //查询出行发票滴滴组成InvoiceVo
+    private void posttingTravelInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> travelInvoiceList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataDidiItinerary> dataDidiItinerary = didiItineraryMapper.selectList(new LambdaQueryWrapper<DataDidiItinerary>()
+                    .eq(DataDidiItinerary::getFileId, dataImageFilesInfo.getFileId()).eq(DataDidiItinerary::getCreateBy, userId));
+                return dataDidiItinerary.stream().map(
+                    dataDidiItinerars -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(dataDidiItinerars, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(dataDidiItinerars.getInvoiceTotal());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    });
+            }).toList();
+        invoiceVosList.addAll(travelInvoiceList);
+
+    }
+
+    //查询小票组成InvoiceVo
+    private void posttingReceipt(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> receiptList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataReceipt> receipt = dataReceiptMapper.selectList(new LambdaQueryWrapper<DataReceipt>()
+                    .eq(DataReceipt::getFileId, dataImageFilesInfo.getFileId()).eq(DataReceipt::getCreateBy, userId));
+                return receipt.stream().map(
+                    receipts -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(receipts, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(receipts.getInvoiceTotal());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    }
+                );
+            }
+        ).toList();
+        invoiceVosList.addAll(receiptList);
+    }
+
+    //查询过路费发票组成InvoiceVo
+    private void posttingTollRoads(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> tollRoadsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataTollRoads> tollRoads = tollRoadsMapper.selectList(new LambdaQueryWrapper<DataTollRoads>()
+                    .eq(DataTollRoads::getFileId, dataImageFilesInfo.getFileId()).eq(DataTollRoads::getCreateBy, userId));
+                return tollRoads.stream().map(
+                    tollRoad -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(tollRoad, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(tollRoad.getInvoiceTotal());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    }
+                );
+            }
+        ).toList();
+        invoiceVosList.addAll(tollRoadsList);
+    }
+
+    //查询客运车票组成InvoiceVo
+    private void posttingPassengerCar(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> passengerCarsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataPassengerCar> passengerCars = passengerCarMapper.selectList(new LambdaQueryWrapper<DataPassengerCar>()
+                    .eq(DataPassengerCar::getFileId, dataImageFilesInfo.getFileId()).eq(DataPassengerCar::getCreateBy, userId));
+                return passengerCars.stream().map(
+                    passengerCar -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(passengerCar, InvoiceVo.class);
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(passengerCar.getInvoiceTotal());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    }
+                );
+            }
+        ).toList();
+        invoiceVosList.addAll(passengerCarsList);
+    }
+
+    //查询火车票组成InvoiceVo
+    private void posttingRailwayTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> railwayTicketsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataRailwayTicket> railwayTickets = railwayTicketMapper.selectList(new LambdaQueryWrapper<DataRailwayTicket>()
+                    .eq(DataRailwayTicket::getFileId, dataImageFilesInfo.getFileId()).eq(DataRailwayTicket::getCreateBy, userId));
+                return railwayTickets.stream().map(
+                    railwayTicket -> {
+                        InvoiceVo invoiceVo = BeanUtil.toBean(railwayTicket, InvoiceVo.class);
+                        invoiceVo.setBuyerName(railwayTicket.getBuyer());
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                        invoiceVo.setMoney(railwayTicket.getInvoiceTotal());
+                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        return invoiceVo;
+                    });
+            }).toList();
+        invoiceVosList.addAll(railwayTicketsList);
+    }
+    //查询出租车票组成InvoiceVo
+    private void posttingTaxiTickets(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> taxiTicketsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataTaxiTickets> taxiTickets = taxiTicketsMapper.selectList(new LambdaQueryWrapper<DataTaxiTickets>()
+                    .eq(DataTaxiTickets::getFileId, dataImageFilesInfo.getFileId()).eq(DataTaxiTickets::getCreateBy, userId));
+                return taxiTickets.stream().map(taxiTicket -> {
+                    InvoiceVo invoiceVo = BeanUtil.toBean(taxiTicket, InvoiceVo.class);
+                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                    invoiceVo.setMoney(taxiTicket.getInvoiceTotal());
+                    invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                    invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    return invoiceVo;
+                });
+            }
+        ).toList();
+        invoiceVosList.addAll(taxiTicketsList);
+    }
+
+    //查询定额发票组成InvoiceVo
+    private void posttingQuotaInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataQuotaInvoice> dataQuotaInvoices = quotaInvoiceMapper.selectList(new LambdaQueryWrapper<DataQuotaInvoice>()
+                    .eq(DataQuotaInvoice::getFileId, dataImageFilesInfo.getFileId()).eq(DataQuotaInvoice::getCreateBy, userId));
+                return dataQuotaInvoices.stream().map(dataQuotaInvoice -> {
+                    InvoiceVo invoiceVo = BeanUtil.toBean(dataQuotaInvoice, InvoiceVo.class);
+                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                    invoiceVo.setMoney(dataQuotaInvoice.getInvoiceTotal());
+                    invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                    invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    return invoiceVo;
+                });
+            }
+        ).toList();
+        invoiceVosList.addAll(invoiceList);
+    }
+
+    //查询医疗票/非税票组成InvoiceVo
+    private void posttingMedicalTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataMedicalTreatment> dataMedicalTickets = dataMedicalTreatmentMapper.selectList(new LambdaQueryWrapper<DataMedicalTreatment>()
+                    .eq(DataMedicalTreatment::getFileId, dataImageFilesInfo.getFileId()).eq(DataMedicalTreatment::getCreateBy, userId));
+                return dataMedicalTickets.stream().map(dataMedicalTicket -> {
+                    InvoiceVo invoiceVo = BeanUtil.toBean(dataMedicalTicket, InvoiceVo.class);
+                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                    invoiceVo.setMoney(dataMedicalTicket.getInvoiceTotal());
+                    invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                    invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    return invoiceVo;
+                });
+            }
+        ).toList();
+        invoiceVosList.addAll(invoiceList);
+    }
+
+    //查询船票并组装成InvoiceVo
+    private void posttingShipTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataSteamerTicket> dataShipTickets = steamerTicketMapper.selectList(new LambdaQueryWrapper<DataSteamerTicket>()
+                    .eq(DataSteamerTicket::getFileId, dataImageFilesInfo.getFileId()).eq(DataSteamerTicket::getCreateBy, userId));
+                return dataShipTickets.stream().map(dataShipTicket -> {
+                    InvoiceVo invoiceVo = BeanUtil.toBean(dataShipTicket, InvoiceVo.class);
+                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                    invoiceVo.setMoney(dataShipTicket.getInvoiceTotal());
+                    invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                    invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    return invoiceVo;
+                });
+            }
+        ).toList();
+        invoiceVosList.addAll(invoiceList);
+    }
+
+    //查询航空电子客运单票信息并组装成InvoiceVo
+    private void posttingAirTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataFlightItinerary> dataAirTickets = flightItineraryMapper.selectList(new LambdaQueryWrapper<DataFlightItinerary>()
+                    .eq(DataFlightItinerary::getFileId, dataImageFilesInfo.getFileId()).eq(DataFlightItinerary::getCreateBy, userId));
+                return dataAirTickets.stream().map(dataAirTicket -> {
+                    InvoiceVo invoiceVo = BeanUtil.toBean(dataAirTicket, InvoiceVo.class);
+                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                    invoiceVo.setMoney(dataAirTicket.getInvoiceTotal());
+                    invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                    invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    return invoiceVo;
+                });
+            }).toList();
+        invoiceVosList.addAll(invoiceList);
+    }
+
+    //查询二手车销售发票信息并组装成InvoiceVo
+    private void posttingSecondCarSaleInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataUsedCarSales> dataSecondCarSaleInvoices = usedCarSalesMapper.selectList(new LambdaQueryWrapper<DataUsedCarSales>()
+                    .eq(DataUsedCarSales::getFileId, dataImageFilesInfo.getFileId()).eq(DataUsedCarSales::getCreateBy, userId));
+                return dataSecondCarSaleInvoices.stream().map(dataSecondCarSaleInvoice -> {
+                    InvoiceVo invoiceVo = BeanUtil.toBean(dataSecondCarSaleInvoice, InvoiceVo.class);
+                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                    invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                    invoiceVo.setMoney(dataSecondCarSaleInvoice.getInvoiceTotal());
+                    invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    return invoiceVo;
+                });
+
+            }).toList();
+               invoiceVosList.addAll(invoiceList);
+    }
+
+    //查询机动车销售发票信息并组装成InvoiceVo
+    public void posttingCarSaleInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos,Long userId) {
+        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataMotorVehicleSale> dataCarSaleInvoices = motorVehicleSaleMapper.selectList(new LambdaQueryWrapper<DataMotorVehicleSale>()
+                    .eq(DataMotorVehicleSale::getFileId, dataImageFilesInfo.getFileId()).eq(DataMotorVehicleSale::getCreateBy, userId));
+                return dataCarSaleInvoices.stream().map(dataCarSaleInvoice -> {
+                    InvoiceVo invoiceVo = BeanUtil.toBean(dataCarSaleInvoice, InvoiceVo.class);
+                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                    invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                    invoiceVo.setMoney(dataCarSaleInvoice.getInvoiceTotal());
+                    invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    return invoiceVo;
+                });
+        }).toList();
+        invoiceVosList.addAll(invoiceList);
+    }
+
+    //根据fileId查询ocr信息并组装成InvoiceVo
+    public void posttingOcrinfo(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(dataImageFilesInfo -> {
+            List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(new LambdaQueryWrapper<DataOcrInfo>()
+                .eq(DataOcrInfo::getFileId, dataImageFilesInfo.getFileId()).eq(DataOcrInfo::getCreateBy, userId));
+            return dataOcrInfos.stream().map(dataOcrInfo -> {
+                InvoiceVo invoiceVo = BeanUtil.toBean(dataOcrInfo, InvoiceVo.class);
+                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                invoiceVo.setMoney(dataOcrInfo.getTotalLowercase());
+                invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                return invoiceVo;
+            });
+        }).toList();
+        invoiceVosList.addAll(invoiceList);
+    }
+    /*
+    * 发票详情信息查询
+     */
+    @Override
+    public R<DataResponseDTO> selectInvoiceDetail(String fileId) {
+        //根据fileId查询发票信息
+        DataImageFilesInfo res = filesInfoMapper.selectOne(new LambdaQueryWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId));
+        if (ObjectUtil.isEmpty(res)){
+            return R.fail();
+        }
+            if (!res.getFileId().isEmpty()) {
+                String invoiceType = res.getInvoice();
+                Object info = null;
+                Object detailInfo = null;
+                switch (invoiceType) {
+                    //增值税、机打
+                    case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
+                    case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
+                    case InvoiceConstants.GLORITY_TAX_CODE:
+                    case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
+                    case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
+                    case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
+                    case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+                    case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+                    case InvoiceConstants.DIGITAL_INVOICE_LIST:
+                    case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
+                    case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
+                    case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //机动车
+                    case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
+                        info=motorVehicleSaleMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //航空运输电子客票行程单
+                    case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                        info=flightItineraryMapper.selectOne(new LambdaQueryWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, fileId));
+                        detailInfo=flightsItineraryDetailMapper.selectList(new LambdaQueryWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //二手车
+                    case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
+                        info=usedCarSalesMapper.selectOne(new LambdaQueryWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //船票
+                    case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
+                        info=steamerTicketMapper.selectOne(new LambdaQueryWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //医疗票明细票
+                    case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
+                    case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
+                    case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                        info=dataMedicalTreatmentMapper.selectOne(new LambdaQueryWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, fileId));
+                        detailInfo=dataMedicalTreatmentDetailMapper.selectList(new LambdaQueryWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //定额发票
+                    case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
+                        info=quotaInvoiceMapper.selectOne(new LambdaQueryWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //出租车发票
+                    case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
+                        info=taxiTicketsMapper.selectOne(new LambdaQueryWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //火车发票
+                    case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                        info=railwayTicketMapper.selectOne(new LambdaQueryWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //客运车发票
+                    case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
+                        info=passengerCarMapper.selectOne(new LambdaQueryWrapper<DataPassengerCar>().eq(DataPassengerCar::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //过路费发票
+                    case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
+                        info=tollRoadsMapper.selectOne(new LambdaQueryWrapper<DataTollRoads>().eq(DataTollRoads::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //小票
+                    case InvoiceConstants.GLORITY_RECEIPT_CODE:
+                        info=dataReceiptMapper.selectOne(new LambdaQueryWrapper<DataReceipt>().eq(DataReceipt::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //出行发票/滴滴
+                    case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
+                        info=didiItineraryMapper.selectOne(new LambdaQueryWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getFileId, fileId));
+                        detailInfo=didiItineraryDetailsMapper.selectList(new LambdaQueryWrapper<DataDidiItineraryDetails>().eq(DataDidiItineraryDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //完税证明发票
+                    case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
+                        info=paidProofMapper.selectOne(new LambdaQueryWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getFileId, fileId));
+                        detailInfo=paidProofDetailsMapper.selectList(new LambdaQueryWrapper<DataDutyPaidProofDetails>().eq(DataDutyPaidProofDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //海关进口货物报关单发票
+                    case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
+                        info=customsImportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getFileId, fileId));
+                        detailInfo=customsExportGoodsDetailMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //海关出口货物报关单发票
+                    case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
+                        info=customsExportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getFileId, fileId));
+                        detailInfo=customsExportGoodsDetailMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //海关专用缴款书发票
+                    case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
+                        info=customsSpecialPaymentMapper.selectOne(new LambdaQueryWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    //货物运输电子收款凭证发票
+                    case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
+                        info=paymentMapper.selectOne(new LambdaQueryWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
+                    default: {
+                        return R.fail();
+                    }
+                }
+            }
+
+        return R.fail();
     }
 }

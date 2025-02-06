@@ -1,23 +1,19 @@
 package org.smartlink.common.ocr.glority.conversion;
 
 import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.core.enums.InvoiceGlorityEnumd;
-import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatment;
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
-import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.exception.OcrException;
 import org.smartlink.common.ocr.glority.response.IdentifyResults;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -56,7 +52,6 @@ public class DataMedicalTreatmentDetailsConversion implements ChangeIdentifyInfo
             invoice.setKind(jsonObject.getStr("kind"));
             invoice.setPayee(jsonObject.getStr("payee"));
             invoice.setPayer(jsonObject.getStr("payer"));
-            invoice.setSubtotal(jsonObject.getStr("subtotal"));
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();

@@ -59,7 +59,6 @@ public class FlightItineraryConversion implements ChangeIdentifyInfo<List<Identi
         flightItinerary.setId(IdUtil.simpleUUID());
         flightItinerary.setFileId(dataImageFilesInfo.getFileId());
         flightItinerary.setInsurance(jsonObject.getStr("insurance"));
-        flightItinerary.setUserId(jsonObject.getStr("user_id"));
         flightItinerary.setInvoiceNumber(jsonObject.getStr("number"));
         flightItinerary.setInvoiceDate(jsonObject.getStr("date"));
         flightItinerary.setFuelSurcharge(jsonObject.getStr("fuel_surcharge"));

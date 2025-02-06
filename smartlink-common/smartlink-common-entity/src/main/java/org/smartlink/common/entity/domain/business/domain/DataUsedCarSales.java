@@ -26,8 +26,8 @@ public class DataUsedCarSales extends TenantEntity {
     /**
      * 主键
      */
-    @TableId(value = " id")
-    private String  id;
+    @TableId(value = "id")
+    private String id;
 
     /**
      * 图片表id

@@ -82,11 +82,6 @@ public class DataFlightItinerary extends TenantEntity {
     private String insurance;
 
     /**
-     * 身份证
-     */
-    private String userId;
-
-    /**
      * 旋转角度
      */
     private String orientation;

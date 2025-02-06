@@ -57,11 +57,6 @@ public class DataMedicalTreatment extends TenantEntity {
     private String checkCode;
 
     /**
-     * 小计
-     */
-    private String subtotal;
-
-    /**
      * 是否为电子医疗发票（1:是）
      */
     private String electronicMark;

@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
@@ -52,6 +53,7 @@ public class DataTollRoads extends TenantEntity {
     /**
      * 出口
      */
+    @TableField("`exit`")
     private String exit;
 
     /**

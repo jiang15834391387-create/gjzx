@@ -1,9 +1,14 @@
 package org.smartlink.business.invoice.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.business.invoice.service.ICheckService;
+import org.smartlink.common.check.doman.InvoicePageQuery;
 import org.smartlink.common.check.doman.InvoiceRequest;
+import org.smartlink.common.check.doman.vo.InvoiceVo;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
 import org.smartlink.common.web.core.BaseController;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +43,16 @@ public class CheckInvoiceController extends BaseController {
      *发票列表查询
      *
      */
-
-
+    @PostMapping("/selectPage")
+    public Page<InvoiceVo> getSelectInvoices(@RequestBody InvoicePageQuery pageQuery) {
+        return service.getInvoicePage(pageQuery);
+    }
+    /**
+     *发票详情查询
+     *
+     */
+    @GetMapping("/invoiceDetail")
+    public R<DataResponseDTO> selectInvoiceDetail(@RequestParam(value = "fileId")  @NotBlank String fileId){
+        return service.selectInvoiceDetail(fileId);
+    }
 }

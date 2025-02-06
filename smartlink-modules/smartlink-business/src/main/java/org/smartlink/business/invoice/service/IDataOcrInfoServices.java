@@ -1,13 +1,11 @@
 package org.smartlink.business.invoice.service;
 
-import org.smartlink.common.core.domain.R;
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 //查验
@@ -65,5 +63,4 @@ public interface IDataOcrInfoServices {
 
     // 根据fileId查询ocr基本信息和详细信息
     DataOcrInfo getByFileId(String fileId);
-
 }
