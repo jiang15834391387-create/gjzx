@@ -32,10 +32,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.*;
 
 @Slf4j
 @Service
 public class CheckServiceImpl implements ICheckService {
+    private static final int EXPECTED_CPU_UTILIZATION = 1;
+    private static final int WAIT_TO_COMPUTE_RATIO = 9;
     private final CheckInvoice checkInvoice;
     private final DataImageFilesInfoMapper filesInfoMapper;
     private final DataMotorVehicleSaleMapper motorVehicleSaleMapper;
@@ -770,7 +773,7 @@ public class CheckServiceImpl implements ICheckService {
      *发票夹列表信息(待报销,已报销,未报销)
      */
     @Override
-    public Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) {
+    public Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
         Page<InvoiceVo> invoiceVoPage = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
 
         LambdaQueryWrapper<DataImageFilesInfo> eq = new LambdaQueryWrapper<DataImageFilesInfo>()
@@ -782,42 +785,38 @@ public class CheckServiceImpl implements ICheckService {
             return invoiceVoPage;
         }
         List<InvoiceVo> invoiceVosList = new ArrayList<>();
-        //根据fileId查询ocr信息并组装成InvoiceVo
-        posttingOcrinfo(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询机动车销售发票信息并组装成InvoiceVo
-        posttingCarSaleInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询二手机销售发票信息并组装成InvoiceVo
-        posttingSecondCarSaleInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询航空电子客运单票信息并组装成InvoiceVo
-        posttingAirTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询船票并组装成InvoiceVo
-        posttingShipTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询医疗票/非税票组成InvoiceVo
-        posttingMedicalTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询定额发票组成InvoiceVo
-        posttingQuotaInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询出租车票组成InvoiceVo
-        posttingTaxiTickets(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询火车票组成InvoiceVo
-        posttingRailwayTicket(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询客运车票组成InvoiceVo
-        posttingPassengerCar(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询过路费发票组成InvoiceVo
-        posttingTollRoads(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询小票组成InvoiceVo
-        posttingReceipt(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询出行发票滴滴组成InvoiceVo
-        posttingTravelInvoice(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询完税证明发票组成InvoiceVo
-        posttingDutyPaidProof(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询海关专用缴款书发票组成InvoiceVo
-        posttingCustomsSpecialPayment(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询货物运输电子收款凭证发票组成InvoiceVo
-        posttingElectronicTransportationGoods(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询海关出口货物组成InvoiceVo
-        posttingCustomsExportGoods(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
-        //查询海关进口货物组成InvoiceVo
-        posttingCustomsImportGoods(invoiceVosList, dataImageFilesInfos, pageQuery.getUserId());
+        // 创建线程池
+        ExecutorService executorService = Executors.newFixedThreadPool(18);
+        List<Future<List<InvoiceVo>>> futures = new ArrayList<>();
+
+        // 提交任务，将任务包装成 Callable
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingOcrinfo(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingSecondCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingAirTicket(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingShipTicket(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingMedicalTicket(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingQuotaInvoice(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingTaxiTickets(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingRailwayTicket(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingPassengerCar(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingTollRoads(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingReceipt(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingTravelInvoice(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingDutyPaidProof(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCustomsSpecialPayment(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId())));
+        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCustomsImportGoods(dataImageFilesInfos, pageQuery.getUserId())));
+
+        // 获取结果
+        for (Future<List<InvoiceVo>> future : futures) {
+            try {
+                invoiceVosList.addAll(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
         invoiceVoPage.setRecords(invoiceVosList);
         invoiceVoPage.setTotal(invoiceVosList.size());
         // 计算总计金额
@@ -827,11 +826,16 @@ public class CheckServiceImpl implements ICheckService {
         // 将BigDecimal类型的totalAmount转换为String类型后赋值给grossAmount
         String totalAmountStr = totalAmount.toString();
         invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
+        // 关闭线程池
+        executorService.shutdown();
         return invoiceVoPage;
     }
+
+
     //查询海关进口货物组成InvoiceVo
-    private void posttingCustomsImportGoods(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> customsImportGoodsList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingCustomsImportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> customsImportGoodsList;
+        customsImportGoodsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataCustomsImxportGoods> customsImportGoods = customsImportGoodsMapper.selectList(new LambdaQueryWrapper<DataCustomsImxportGoods>()
                     .eq(DataCustomsImxportGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsImxportGoods::getCreateBy, userId));
@@ -847,12 +851,13 @@ public class CheckServiceImpl implements ICheckService {
                     });
             }
         ).toList();
-        invoiceVosList.addAll(customsImportGoodsList);
+        return customsImportGoodsList;
     }
 
     //查询海关出口货物组成InvoiceVo
-    private void posttingCustomsExportGoods(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> customsExportGoodsList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingCustomsExportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> customsExportGoodsList;
+        customsExportGoodsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataCustomsExportGoods> customsExportGoods = customsExportGoodsMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoods>()
                     .eq(DataCustomsExportGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsExportGoods::getCreateBy, userId));
@@ -868,12 +873,13 @@ public class CheckServiceImpl implements ICheckService {
                     });
             }
         ).toList();
-        invoiceVosList.addAll(customsExportGoodsList);
+        return customsExportGoodsList;
     }
 
     //查询货物运输电子收款凭证发票组成InvoiceVo
-    private void posttingElectronicTransportationGoods(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> electronicTransportationGoodsList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingElectronicTransportationGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> electronicTransportationGoodsList;
+        electronicTransportationGoodsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataElectronicTransportationGoods> dataElectronicTransportationGoods = paymentMapper.selectList(new LambdaQueryWrapper<DataElectronicTransportationGoods>()
                     .eq(DataElectronicTransportationGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataElectronicTransportationGoods::getCreateBy, userId));
@@ -888,12 +894,13 @@ public class CheckServiceImpl implements ICheckService {
                         return invoiceVo;
                     });
             }).toList();
-        invoiceVosList.addAll(electronicTransportationGoodsList);
+        return electronicTransportationGoodsList;
     }
 
     //海关专用缴款书发票组成InvoiceVo
-    private void posttingCustomsSpecialPayment(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> customsSpecialPaymentList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingCustomsSpecialPayment(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> customsSpecialPaymentList;
+        customsSpecialPaymentList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataCustomsSpecialPayment> dataCustomsSpecialPayment = customsSpecialPaymentMapper.selectList(new LambdaQueryWrapper<DataCustomsSpecialPayment>()
                     .eq(DataCustomsSpecialPayment::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsSpecialPayment::getCreateBy, userId));
@@ -908,12 +915,13 @@ public class CheckServiceImpl implements ICheckService {
                         return invoiceVo;
                     });
             }).toList();
-        invoiceVosList.addAll(customsSpecialPaymentList);
+        return customsSpecialPaymentList;
     }
 
     //查询完税证明发票组成InvoiceVo
-    private void posttingDutyPaidProof(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> dutyPaidProofList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingDutyPaidProof(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> dutyPaidProofList;
+        dutyPaidProofList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataDutyPaidProof> dataDutyPaidProof = paidProofMapper.selectList(new LambdaQueryWrapper<DataDutyPaidProof>()
                     .eq(DataDutyPaidProof::getFileId, dataImageFilesInfo.getFileId()).eq(DataDutyPaidProof::getCreateBy, userId));
@@ -930,13 +938,13 @@ public class CheckServiceImpl implements ICheckService {
                 );
             }
         ).toList();
-        invoiceVosList.addAll(dutyPaidProofList);
-
+        return dutyPaidProofList;
     }
 
     //查询出行发票滴滴组成InvoiceVo
-    private void posttingTravelInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> travelInvoiceList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingTravelInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> travelInvoiceList;
+        travelInvoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataDidiItinerary> dataDidiItinerary = didiItineraryMapper.selectList(new LambdaQueryWrapper<DataDidiItinerary>()
                     .eq(DataDidiItinerary::getFileId, dataImageFilesInfo.getFileId()).eq(DataDidiItinerary::getCreateBy, userId));
@@ -951,13 +959,13 @@ public class CheckServiceImpl implements ICheckService {
                         return invoiceVo;
                     });
             }).toList();
-        invoiceVosList.addAll(travelInvoiceList);
-
+        return travelInvoiceList;
     }
 
     //查询小票组成InvoiceVo
-    private void posttingReceipt(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> receiptList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingReceipt(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> receiptList;
+        receiptList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataReceipt> receipt = dataReceiptMapper.selectList(new LambdaQueryWrapper<DataReceipt>()
                     .eq(DataReceipt::getFileId, dataImageFilesInfo.getFileId()).eq(DataReceipt::getCreateBy, userId));
@@ -974,12 +982,13 @@ public class CheckServiceImpl implements ICheckService {
                 );
             }
         ).toList();
-        invoiceVosList.addAll(receiptList);
+        return receiptList;
     }
 
     //查询过路费发票组成InvoiceVo
-    private void posttingTollRoads(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> tollRoadsList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingTollRoads(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> tollRoadsList;
+        tollRoadsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataTollRoads> tollRoads = tollRoadsMapper.selectList(new LambdaQueryWrapper<DataTollRoads>()
                     .eq(DataTollRoads::getFileId, dataImageFilesInfo.getFileId()).eq(DataTollRoads::getCreateBy, userId));
@@ -996,12 +1005,13 @@ public class CheckServiceImpl implements ICheckService {
                 );
             }
         ).toList();
-        invoiceVosList.addAll(tollRoadsList);
+        return tollRoadsList;
     }
 
     //查询客运车票组成InvoiceVo
-    private void posttingPassengerCar(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> passengerCarsList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingPassengerCar(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> passengerCarsList;
+        passengerCarsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataPassengerCar> passengerCars = passengerCarMapper.selectList(new LambdaQueryWrapper<DataPassengerCar>()
                     .eq(DataPassengerCar::getFileId, dataImageFilesInfo.getFileId()).eq(DataPassengerCar::getCreateBy, userId));
@@ -1018,12 +1028,13 @@ public class CheckServiceImpl implements ICheckService {
                 );
             }
         ).toList();
-        invoiceVosList.addAll(passengerCarsList);
+        return passengerCarsList;
     }
 
     //查询火车票组成InvoiceVo
-    private void posttingRailwayTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> railwayTicketsList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingRailwayTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> railwayTicketsList;
+        railwayTicketsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataRailwayTicket> railwayTickets = railwayTicketMapper.selectList(new LambdaQueryWrapper<DataRailwayTicket>()
                     .eq(DataRailwayTicket::getFileId, dataImageFilesInfo.getFileId()).eq(DataRailwayTicket::getCreateBy, userId));
@@ -1039,11 +1050,12 @@ public class CheckServiceImpl implements ICheckService {
                         return invoiceVo;
                     });
             }).toList();
-        invoiceVosList.addAll(railwayTicketsList);
+        return railwayTicketsList;
     }
     //查询出租车票组成InvoiceVo
-    private void posttingTaxiTickets(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> taxiTicketsList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingTaxiTickets(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> taxiTicketsList;
+        taxiTicketsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataTaxiTickets> taxiTickets = taxiTicketsMapper.selectList(new LambdaQueryWrapper<DataTaxiTickets>()
                     .eq(DataTaxiTickets::getFileId, dataImageFilesInfo.getFileId()).eq(DataTaxiTickets::getCreateBy, userId));
@@ -1058,12 +1070,13 @@ public class CheckServiceImpl implements ICheckService {
                 });
             }
         ).toList();
-        invoiceVosList.addAll(taxiTicketsList);
+        return taxiTicketsList;
     }
 
     //查询定额发票组成InvoiceVo
-    private void posttingQuotaInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingQuotaInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList;
+        invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataQuotaInvoice> dataQuotaInvoices = quotaInvoiceMapper.selectList(new LambdaQueryWrapper<DataQuotaInvoice>()
                     .eq(DataQuotaInvoice::getFileId, dataImageFilesInfo.getFileId()).eq(DataQuotaInvoice::getCreateBy, userId));
@@ -1078,12 +1091,13 @@ public class CheckServiceImpl implements ICheckService {
                 });
             }
         ).toList();
-        invoiceVosList.addAll(invoiceList);
+        return invoiceList;
     }
 
     //查询医疗票/非税票组成InvoiceVo
-    private void posttingMedicalTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingMedicalTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList;
+        invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataMedicalTreatment> dataMedicalTickets = dataMedicalTreatmentMapper.selectList(new LambdaQueryWrapper<DataMedicalTreatment>()
                     .eq(DataMedicalTreatment::getFileId, dataImageFilesInfo.getFileId()).eq(DataMedicalTreatment::getCreateBy, userId));
@@ -1098,12 +1112,13 @@ public class CheckServiceImpl implements ICheckService {
                 });
             }
         ).toList();
-        invoiceVosList.addAll(invoiceList);
+        return invoiceList;
     }
 
     //查询船票并组装成InvoiceVo
-    private void posttingShipTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingShipTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList;
+        invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataSteamerTicket> dataShipTickets = steamerTicketMapper.selectList(new LambdaQueryWrapper<DataSteamerTicket>()
                     .eq(DataSteamerTicket::getFileId, dataImageFilesInfo.getFileId()).eq(DataSteamerTicket::getCreateBy, userId));
@@ -1118,12 +1133,13 @@ public class CheckServiceImpl implements ICheckService {
                 });
             }
         ).toList();
-        invoiceVosList.addAll(invoiceList);
+        return invoiceList;
     }
 
     //查询航空电子客运单票信息并组装成InvoiceVo
-    private void posttingAirTicket(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingAirTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList;
+        invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataFlightItinerary> dataAirTickets = flightItineraryMapper.selectList(new LambdaQueryWrapper<DataFlightItinerary>()
                     .eq(DataFlightItinerary::getFileId, dataImageFilesInfo.getFileId()).eq(DataFlightItinerary::getCreateBy, userId));
@@ -1137,12 +1153,13 @@ public class CheckServiceImpl implements ICheckService {
                     return invoiceVo;
                 });
             }).toList();
-        invoiceVosList.addAll(invoiceList);
+        return invoiceList;
     }
 
     //查询二手车销售发票信息并组装成InvoiceVo
-    private void posttingSecondCarSaleInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+    private List<InvoiceVo> posttingSecondCarSaleInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList;
+        invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataUsedCarSales> dataSecondCarSaleInvoices = usedCarSalesMapper.selectList(new LambdaQueryWrapper<DataUsedCarSales>()
                     .eq(DataUsedCarSales::getFileId, dataImageFilesInfo.getFileId()).eq(DataUsedCarSales::getCreateBy, userId));
@@ -1157,12 +1174,13 @@ public class CheckServiceImpl implements ICheckService {
                 });
 
             }).toList();
-               invoiceVosList.addAll(invoiceList);
+        return invoiceList;
     }
 
     //查询机动车销售发票信息并组装成InvoiceVo
-    public void posttingCarSaleInvoice(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos,Long userId) {
-        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(
+    public List<InvoiceVo> posttingCarSaleInvoice(List<DataImageFilesInfo> dataImageFilesInfos,Long userId) {
+        List<InvoiceVo> invoiceList;
+        invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
                 List<DataMotorVehicleSale> dataCarSaleInvoices = motorVehicleSaleMapper.selectList(new LambdaQueryWrapper<DataMotorVehicleSale>()
                     .eq(DataMotorVehicleSale::getFileId, dataImageFilesInfo.getFileId()).eq(DataMotorVehicleSale::getCreateBy, userId));
@@ -1176,12 +1194,13 @@ public class CheckServiceImpl implements ICheckService {
                     return invoiceVo;
                 });
         }).toList();
-        invoiceVosList.addAll(invoiceList);
+        return invoiceList;
     }
 
     //根据fileId查询ocr信息并组装成InvoiceVo
-    public void posttingOcrinfo(List<InvoiceVo> invoiceVosList, List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> invoiceList = dataImageFilesInfos.stream().flatMap(dataImageFilesInfo -> {
+    public List<InvoiceVo> posttingOcrinfo(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> invoiceList;
+        invoiceList = dataImageFilesInfos.stream().flatMap(dataImageFilesInfo -> {
             List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(new LambdaQueryWrapper<DataOcrInfo>()
                 .eq(DataOcrInfo::getFileId, dataImageFilesInfo.getFileId()).eq(DataOcrInfo::getCreateBy, userId));
             return dataOcrInfos.stream().map(dataOcrInfo -> {
@@ -1194,7 +1213,7 @@ public class CheckServiceImpl implements ICheckService {
                 return invoiceVo;
             });
         }).toList();
-        invoiceVosList.addAll(invoiceList);
+        return invoiceList;
     }
     /*
     * 发票详情信息查询

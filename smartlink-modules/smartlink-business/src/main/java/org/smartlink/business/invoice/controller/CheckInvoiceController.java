@@ -13,6 +13,7 @@ import org.smartlink.common.web.core.BaseController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RestController
@@ -44,7 +45,7 @@ public class CheckInvoiceController extends BaseController {
      *
      */
     @PostMapping("/selectPage")
-    public Page<InvoiceVo> getSelectInvoices(@RequestBody InvoicePageQuery pageQuery) {
+    public Page<InvoiceVo> getSelectInvoices(@RequestBody InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
         return service.getInvoicePage(pageQuery);
     }
     /**
