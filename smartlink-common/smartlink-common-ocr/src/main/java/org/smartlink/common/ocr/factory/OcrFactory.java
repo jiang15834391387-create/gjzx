@@ -4,6 +4,8 @@ package org.smartlink.common.ocr.factory;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.smartlink.common.core.utils.file.Constants;
+import org.smartlink.common.core.utils.file.ParamConstants;
 import org.smartlink.common.ocr.abstractd.AbstractOcrStrategy;
 import org.smartlink.common.ocr.constant.OcrConstant;
 import org.smartlink.common.ocr.core.IOcrStrategy;
@@ -72,7 +74,8 @@ public class OcrFactory {
      */
     public static Class<?> instanceObj() {
         // 获取redis 默认厂商
-        String type = RedisUtils.getCacheObject(OcrConstant.CACHE_CONFIG_KEY);
+//        String type = RedisUtils.getCacheObject(OcrConstant.CACHE_CONFIG_KEY);
+        String type = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, OcrConstant.CACHE_CONFIG_KEY);
         log.info("默认OCR识别为:{}", type);
         if (StringUtils.isEmpty(type)) {
             throw new OcrException("OCR识别服务类型无法找到!");
@@ -85,7 +88,8 @@ public class OcrFactory {
     }
 
     private static void refresh(String type) {
-        Object json = RedisUtils.getCacheObject(OcrConstant.SYS_OCR_KEY + type);
+//        Object json = RedisUtils.getCacheObject(OcrConstant.SYS_OCR_KEY + type);
+        Object json = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, OcrConstant.SYS_OCR_KEY + type);
         OcrProperties properties = JsonUtils.parseObject(json.toString(), OcrProperties.class);
         if (properties == null) {
             throw new OcrException("识别系统异常, '" + type + "'配置信息不存在!");

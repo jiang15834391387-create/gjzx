@@ -123,6 +123,11 @@ public interface Constants {
     String SYS_CONFIG_KEY = "sys_config";
 
     /**
+     * 文件预览key
+     */
+    String KK_FILE_VIEW = "kk.file.view";
+
+    /**
      * 字典管理 cache key
      */
     String SYS_DICT_KEY = "sys_dict:";

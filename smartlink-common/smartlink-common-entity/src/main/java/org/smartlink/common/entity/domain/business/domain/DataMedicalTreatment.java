@@ -221,11 +221,6 @@ public class DataMedicalTreatment extends TenantEntity {
      */
     private String remark;
 
-
-    //非税票据详情对象
-    @TableField(exist = false)
-    private List<DataMedicalTreatmentDetail> medicalTreatmentDetails;
-
     /**
      * 版本号
      */
