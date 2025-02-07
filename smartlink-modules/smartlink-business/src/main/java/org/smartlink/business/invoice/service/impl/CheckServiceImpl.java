@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 @Slf4j
 @Service
@@ -785,37 +786,58 @@ public class CheckServiceImpl implements ICheckService {
             return invoiceVoPage;
         }
         List<InvoiceVo> invoiceVosList = new ArrayList<>();
-        // 创建线程池
-        ExecutorService executorService = Executors.newFixedThreadPool(18);
-        List<Future<List<InvoiceVo>>> futures = new ArrayList<>();
+        int coreCount = Runtime.getRuntime().availableProcessors();
+        // 核心线程数设置为 CPU 核心数的 2 倍
+        int corePoolSize = coreCount * 2;
+        // 最大线程数设置为 CPU 核心数的 4 倍
+        int maximumPoolSize = coreCount * 4;
+        // 空闲线程存活时间设置为 60 秒
+        long keepAliveTime = 60L;
+        BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+            corePoolSize,
+            maximumPoolSize,
+            keepAliveTime,
+            TimeUnit.SECONDS,
+            workQueue);
+        List<Callable<List<InvoiceVo>>> tasks = new ArrayList<>();
+        tasks.add(() -> posttingOcrinfo(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingSecondCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingAirTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingShipTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingMedicalTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingQuotaInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingTaxiTickets(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingRailwayTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingPassengerCar(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingTollRoads(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingReceipt(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingTravelInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingDutyPaidProof(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingCustomsSpecialPayment(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> posttingCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId()));
+        CompletableFuture<List<InvoiceVo>>[] futures;
+        futures = new CompletableFuture[tasks.size()];
+        for (int i = 0; i < tasks.size(); i++) {
+            Callable<List<InvoiceVo>> callable = tasks.get(i);
+            Supplier<List<InvoiceVo>> supplier = () -> {
+                try {
+                    return callable.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            };
+            futures[i] = CompletableFuture.supplyAsync(supplier, threadPoolExecutor);
+        }
+        // 使用allOf等待所有任务完成
+        CompletableFuture.allOf(futures).join();
 
-        // 提交任务，将任务包装成 Callable
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingOcrinfo(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingSecondCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingAirTicket(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingShipTicket(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingMedicalTicket(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingQuotaInvoice(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingTaxiTickets(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingRailwayTicket(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingPassengerCar(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingTollRoads(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingReceipt(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingTravelInvoice(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingDutyPaidProof(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCustomsSpecialPayment(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId())));
-        futures.add(executorService.submit((Callable<List<InvoiceVo>>) () -> posttingCustomsImportGoods(dataImageFilesInfos, pageQuery.getUserId())));
+        // 收集所有任务的结果
+        for (CompletableFuture<List<InvoiceVo>> future : futures) {
+            invoiceVosList.addAll(future.get());
 
-        // 获取结果
-        for (Future<List<InvoiceVo>> future : futures) {
-            try {
-                invoiceVosList.addAll(future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
         }
         invoiceVoPage.setRecords(invoiceVosList);
         invoiceVoPage.setTotal(invoiceVosList.size());
@@ -826,12 +848,16 @@ public class CheckServiceImpl implements ICheckService {
         // 将BigDecimal类型的totalAmount转换为String类型后赋值给grossAmount
         String totalAmountStr = totalAmount.toString();
         invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
+        // 进行分页处理
+        int startIndex =((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
+        int endIndex = Math.min(startIndex +pageQuery.getPageSize(), invoiceVosList.size());
+        List<InvoiceVo> pageData = invoiceVosList.subList(startIndex, endIndex);
+        invoiceVoPage.setRecords(pageData);
+        invoiceVoPage.setTotal(invoiceVosList.size());
         // 关闭线程池
-        executorService.shutdown();
+        threadPoolExecutor.shutdown();
         return invoiceVoPage;
     }
-
-
     //查询海关进口货物组成InvoiceVo
     private List<InvoiceVo> posttingCustomsImportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> customsImportGoodsList;

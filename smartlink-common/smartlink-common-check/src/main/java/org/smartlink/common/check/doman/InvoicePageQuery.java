@@ -8,9 +8,9 @@ import lombok.Data;
 @Data
 public class InvoicePageQuery {
     //页码
-    private Long pageNum;
+    private int pageNum;
     //每页条数
-    private Long pageSize;
+    private int pageSize;
     //用户id
     private Long userId;
     //报销状态
