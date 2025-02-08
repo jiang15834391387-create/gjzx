@@ -3,8 +3,8 @@ package org.smartlink.business.invoice.conversion;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import org.smartlink.common.entity.domain.business.domain.DataMedicalTreatmentDetail;
-import org.smartlink.common.entity.domain.business.mapper.DataMedicalTreatmentDetailMapper;
+import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,21 +15,21 @@ import java.util.List;
  */
 @Component
 public class RegenaichangeMedicalTreatmentDetails {
-    private final DataMedicalTreatmentDetailMapper flightsItineraryDetailMapper;
+    private final DataOcrDetailsMapper detailsMapper;
 
-    public RegenaichangeMedicalTreatmentDetails(DataMedicalTreatmentDetailMapper flightsItineraryDetailMapper) {
-        this.flightsItineraryDetailMapper = flightsItineraryDetailMapper;
+    public RegenaichangeMedicalTreatmentDetails(DataOcrDetailsMapper detailsMapper) {
+        this.detailsMapper = detailsMapper;
     }
 
-    public List<DataMedicalTreatmentDetail> changeMedicalTreatmentDetails(JSONObject jsonObject, String fileId) {
+    public List<DataOcrDetails> changeMedicalTreatmentDetails(JSONObject jsonObject, String fileId) {
         //根据fileId条件获取非税详情列表
-        List<DataMedicalTreatmentDetail>detailList=flightsItineraryDetailMapper.selectList(new LambdaQueryWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, fileId));
+        List<DataOcrDetails>detailList=detailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
         JSONArray jsonArray = jsonObject.getJSONArray("items1");
-        List<DataMedicalTreatmentDetail> medicalTreatmentDetails = new ArrayList<>();
+        List<DataOcrDetails> medicalTreatmentDetails = new ArrayList<>();
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject  entries = jsonArray.getJSONObject(i);
             //创建详情对象
-            DataMedicalTreatmentDetail medicalTreatment = new DataMedicalTreatmentDetail();
+            DataOcrDetails medicalTreatment = new DataOcrDetails();
             //详情id
             medicalTreatment.setId(detailList.get(i).getId());
             //fileid
@@ -37,11 +37,11 @@ public class RegenaichangeMedicalTreatmentDetails {
             //项目名称
             medicalTreatment.setProjectName(entries.getStr("name"));
             //数量
-            medicalTreatment.setQuantity(entries.getStr("quantity"));
+            medicalTreatment.setDetailsCount(entries.getStr("quantity"));
             //金额
-            medicalTreatment.setAmount(entries.getStr("total"));
+            medicalTreatment.setDetailAmount(entries.getStr("total"));
             //备注
-            medicalTreatment.setComment(entries.getStr("remarks"));
+            medicalTreatment.setRemark(entries.getStr("remarks"));
             medicalTreatmentDetails.add(medicalTreatment);
         }
         return medicalTreatmentDetails;

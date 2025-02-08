@@ -238,7 +238,7 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             DataMedicalTreatment medicalTreatment = new DataMedicalTreatment();
             this.medicalTreatment.changeMedicalTreatment(jsonObject, medicalTreatment);
             // 填充详情信息
-            medicalTreatment.setMedicalTreatmentDetails(this.changeMedicalTreatmentDetails.changeMedicalTreatmentDetails(jsonObject,filesInfo.getFileId()));
+            medicalTreatment.setDetails(this.changeMedicalTreatmentDetails.changeMedicalTreatmentDetails(jsonObject,filesInfo.getFileId()));
             medicalTreatment.setId(IdUtil.simpleUUID());
             medicalTreatment.setFileId(filesInfo.getFileId());
             return medicalTreatment;
