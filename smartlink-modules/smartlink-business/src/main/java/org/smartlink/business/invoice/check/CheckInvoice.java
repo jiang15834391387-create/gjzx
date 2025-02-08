@@ -43,7 +43,8 @@ public class CheckInvoice {
     private final IDataMedicalTreatmentService dataMedicalTreatmentDetailService;
     private final IDataMotorVehicleSaleService dataMotorVehicleSaleService;
     private final IDataUsedCarSalesService dataUsedCarSalesService;
-    public CheckInvoice(IDataOcrInfoServices dataOcrInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataMedicalTreatmentMapper medicalTreatmentMapper, DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService) {
+    private final DataNonTaxMapper dataNonTaxMapper;
+    public CheckInvoice(IDataOcrInfoServices dataOcrInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataMedicalTreatmentMapper medicalTreatmentMapper, DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService, DataNonTaxMapper dataNonTaxMapper) {
         this.dataOcrInfoService = dataOcrInfoService;
         this.detailsMapper = detailsMapper;
         this.ocrInfoMapper = ocrInfoMapper;
@@ -59,6 +60,7 @@ public class CheckInvoice {
         this.dataMedicalTreatmentDetailService = dataMedicalTreatmentDetailService;
         this.dataMotorVehicleSaleService = dataMotorVehicleSaleService;
         this.dataUsedCarSalesService = dataUsedCarSalesService;
+        this.dataNonTaxMapper = dataNonTaxMapper;
     }
     //查验方法
     public void check(boolean checkOff,DataImageFilesInfo filesInfo) throws Exception {
@@ -216,37 +218,66 @@ public class CheckInvoice {
                 flightItineraryConversionAlter(baseEntity,filesInfo);
                 return baseEntity;
             }
-            if (filesInfo.getInvoice().equals(InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE)||filesInfo.getInvoice().equals(InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE)){
-                //转换后医疗/非税
+            if (filesInfo.getInvoice().equals(InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE)){
+                //转换后医疗票
                 medicalTreatmentConversionAlter(baseEntity,filesInfo);
                 return baseEntity;
             }
-
+            //非税收入
+            if (filesInfo.getInvoice().equals(InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE)){
+                //转换后非税收入
+                nonTaxRevenueReceiptsConversionAlter(baseEntity,filesInfo);
+                return baseEntity;
+            }
         }
         log.info("查验发票查验失败结果：{}", baseEntity);
         return baseEntity;
     }
-    //医疗/非税
-    private void medicalTreatmentConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
+    //非税收入
+    private void nonTaxRevenueReceiptsConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
         if (ObjectUtil.isEmpty(baseEntity)){
-            log.error("医疗/非税查验转换后结果为空");
+            log.error("非税收入查验转换后结果为空");
             return;
         }
-        log.info("修改查验转换后的医疗/非税信息：{}", baseEntity);
-        DataMedicalTreatment medicalTreatment=BeanUtil.toBean(baseEntity, DataMedicalTreatment.class);
-        List<DataMedicalTreatmentDetail> list = new ArrayList<>();
-        List<DataMedicalTreatmentDetail> detailList = medicalTreatment.getMedicalTreatmentDetails();
+        log.info("修改查验转换后的非税收入信息：{}", baseEntity);
+        DataNonTax nonTax=BeanUtil.toBean(baseEntity, DataNonTax.class);
+        List<DataOcrDetails> list = new ArrayList<>();
+        List<DataOcrDetails> detailList = nonTax.getDetails();
         if (CollectionUtil.isNotEmpty(detailList)){
-            for (DataMedicalTreatmentDetail detail : detailList) {
-                DataMedicalTreatmentDetail flightsItineraryDetail=BeanUtil.toBean(detail, DataMedicalTreatmentDetail.class);
+            for (DataOcrDetails detail : detailList) {
+                DataOcrDetails flightsItineraryDetail=BeanUtil.toBean(detail, DataOcrDetails.class);
+                detail.setFileId(filesInfo.getFileId());
+                list.add(flightsItineraryDetail);
+            }
+        }
+        dataNonTaxMapper.update(nonTax, new LambdaUpdateWrapper<DataNonTax>().eq(DataNonTax::getFileId, filesInfo.getFileId()));
+        //修改详情表
+        for (DataOcrDetails flightsItineraryDetail : list) {
+            detailsMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()));
+        }
+    }
+
+    //医疗
+    private void medicalTreatmentConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
+        if (ObjectUtil.isEmpty(baseEntity)){
+            log.error("医疗票查验转换后结果为空");
+            return;
+        }
+        log.info("修改查验转换后的医疗信息：{}", baseEntity);
+        DataMedicalTreatment medicalTreatment=BeanUtil.toBean(baseEntity, DataMedicalTreatment.class);
+        List<DataOcrDetails> list = new ArrayList<>();
+        List<DataOcrDetails> detailList = medicalTreatment.getDetails();
+        if (CollectionUtil.isNotEmpty(detailList)){
+            for (DataOcrDetails detail : detailList) {
+                DataOcrDetails flightsItineraryDetail=BeanUtil.toBean(detail, DataOcrDetails.class);
                 detail.setFileId(filesInfo.getFileId());
                 list.add(flightsItineraryDetail);
             }
         }
         medicalTreatmentMapper.update(medicalTreatment, new LambdaUpdateWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, filesInfo.getFileId()));
         //修改详情表
-        for (DataMedicalTreatmentDetail flightsItineraryDetail : list) {
-            medicalTreatmentDetailMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, filesInfo.getFileId()));
+        for (DataOcrDetails flightsItineraryDetail : list) {
+            detailsMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()));
         }
     }
    //航空电子信息客运

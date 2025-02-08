@@ -38,8 +38,7 @@ import java.util.function.Supplier;
 @Slf4j
 @Service
 public class CheckServiceImpl implements ICheckService {
-    private static final int EXPECTED_CPU_UTILIZATION = 1;
-    private static final int WAIT_TO_COMPUTE_RATIO = 9;
+    private final DataNonTaxMapper dataNonTaxMapper;
     private final CheckInvoice checkInvoice;
     private final DataImageFilesInfoMapper filesInfoMapper;
     private final DataMotorVehicleSaleMapper motorVehicleSaleMapper;
@@ -67,7 +66,8 @@ public class CheckServiceImpl implements ICheckService {
     private final DataElectronicTransportationGoodsMapper paymentMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
     private final DataOcrDetailsMapper ocrDetailsMapper;
-    public CheckServiceImpl(CheckInvoice checkInvoice, DataImageFilesInfoMapper filesInfoMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataSteamerTicketMapper steamerTicketMapper, DataMedicalTreatmentMapper dataMedicalTreatmentMapper, DataMedicalTreatmentDetailMapper dataMedicalTreatmentDetailMapper, DataQuotaInvoiceMapper quotaInvoiceMapper, DataTaxiTicketsMapper taxiTicketsMapper, DataRailwayTicketMapper railwayTicketMapper, DataPassengerCarMapper passengerCarMapper, DataTollRoadsMapper tollRoadsMapper, DataReceiptMapper dataReceiptMapper, DataDidiItineraryMapper didiItineraryMapper, DataDidiItineraryDetailsMapper didiItineraryDetailsMapper, DataDutyPaidProofMapper paidProofMapper, DataDutyPaidProofDetailsMapper paidProofDetailsMapper, DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper, DataCustomsImxportGoodsMapper customsImportGoodsMapper, DataCustomsExportGoodsMapper customsExportGoodsMapper, DataCustomsExportGoodsDetailMapper customsExportGoodsDetailMapper, DataCustomsSpecialPaymentMapper customsSpecialPaymentMapper, DataElectronicTransportationGoodsMapper paymentMapper, DataOcrInfoMapper ocrInfoMapper, DataOcrDetailsMapper ocrDetailsMapper) {
+    public CheckServiceImpl(DataNonTaxMapper dataNonTaxMapper, CheckInvoice checkInvoice, DataImageFilesInfoMapper filesInfoMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataSteamerTicketMapper steamerTicketMapper, DataMedicalTreatmentMapper dataMedicalTreatmentMapper, DataMedicalTreatmentDetailMapper dataMedicalTreatmentDetailMapper, DataQuotaInvoiceMapper quotaInvoiceMapper, DataTaxiTicketsMapper taxiTicketsMapper, DataRailwayTicketMapper railwayTicketMapper, DataPassengerCarMapper passengerCarMapper, DataTollRoadsMapper tollRoadsMapper, DataReceiptMapper dataReceiptMapper, DataDidiItineraryMapper didiItineraryMapper, DataDidiItineraryDetailsMapper didiItineraryDetailsMapper, DataDutyPaidProofMapper paidProofMapper, DataDutyPaidProofDetailsMapper paidProofDetailsMapper, DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper, DataCustomsImxportGoodsMapper customsImportGoodsMapper, DataCustomsExportGoodsMapper customsExportGoodsMapper, DataCustomsExportGoodsDetailMapper customsExportGoodsDetailMapper, DataCustomsSpecialPaymentMapper customsSpecialPaymentMapper, DataElectronicTransportationGoodsMapper paymentMapper, DataOcrInfoMapper ocrInfoMapper, DataOcrDetailsMapper ocrDetailsMapper) {
+        this.dataNonTaxMapper = dataNonTaxMapper;
         this.checkInvoice = checkInvoice;
         this.filesInfoMapper = filesInfoMapper;
         this.motorVehicleSaleMapper = motorVehicleSaleMapper;
@@ -131,11 +131,14 @@ public class CheckServiceImpl implements ICheckService {
                 case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
                      removeSteamerTicket(filesInfo);
                      break;
-                //医疗票明细票 非税收入类发票
+                //医疗票明细票
                 case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
                 case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
-                case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
                      removeMedicalTicket(filesInfo);
+                     break;
+                //非税发票
+                case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                     removeNonTaxInvoice(filesInfo);
                      break;
                 //定额发票
                 case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
@@ -207,22 +210,33 @@ public class CheckServiceImpl implements ICheckService {
         }
         return 1;
     }
+    private void removeOcrDetail(DataImageFilesInfo filesInfo) {
+        ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).set(DataOcrDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+    }
+    //删除非税发票
+    private void removeNonTaxInvoice(DataImageFilesInfo filesInfo) {
+        dataNonTaxMapper.update(new LambdaUpdateWrapper<DataNonTax>().eq(DataNonTax::getFileId, filesInfo.getFileId()).set(DataNonTax::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        removeOcrDetail(filesInfo);
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+    }
 
     //删除ocr发票
     private void removeOcrInvoice(DataImageFilesInfo filesInfo) {
        ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()).set(DataOcrInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).set(DataOcrDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        removeOcrDetail(filesInfo);
        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
     }
     //删除货物运输电子收款凭证发票
     private void removeElectronicPaymentGoodsTransportation(DataImageFilesInfo filesInfo) {
        paymentMapper.update(new LambdaUpdateWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, filesInfo.getFileId()).set(DataElectronicTransportationGoods::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       removeOcrDetail(filesInfo);
        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除海关专用缴款书发票
     private void removeCustomsSpecialPayment(DataImageFilesInfo filesInfo) {
       customsSpecialPaymentMapper.update(new LambdaUpdateWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, filesInfo.getFileId()).set(DataCustomsSpecialPayment::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+      removeOcrDetail(filesInfo);
       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     //删除海关出口货物报关单发票
@@ -290,7 +304,7 @@ public class CheckServiceImpl implements ICheckService {
     //删除医疗发票
     private void removeMedicalTicket(DataImageFilesInfo filesInfo) {
        dataMedicalTreatmentMapper.update(new LambdaUpdateWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, filesInfo.getFileId()).set(DataMedicalTreatment::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
-       dataMedicalTreatmentDetailMapper.update(new LambdaUpdateWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, filesInfo.getFileId()).set(DataMedicalTreatmentDetail::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       removeOcrDetail(filesInfo);
        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     //船票
@@ -364,11 +378,13 @@ public class CheckServiceImpl implements ICheckService {
             //船票
             case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
                 return updateSteamerTicket(generalInfo);
-            //医疗票明细票/医疗票/非税票
+            //医疗票明细票/医疗票
             case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
             case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
-            case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
                 return updateMedicalTicket(generalInfo, details);
+            //非税收入单据
+            case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                return updateNonTaxRevenueReceipts(generalInfo,details);
             //定额发票
             case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
                 return updateQuotaInvoice(generalInfo);
@@ -401,39 +417,50 @@ public class CheckServiceImpl implements ICheckService {
                 return updateCustomsExportGoods(generalInfo, details);
             //海关专用缴款书发票
             case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
-                return updateCustomsSpecialPayment(generalInfo);
+                return updateCustomsSpecialPayment(generalInfo,details);
             //货物运输电子收款凭证发票
             case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
-                return updateElectronicPaymentGoodsTransportation(generalInfo);
+                return updateElectronicPaymentGoodsTransportation(generalInfo, details);
         }
         return 0;
     }
+    //修改非税收入单据
+    private int updateNonTaxRevenueReceipts(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+        DataNonTax dataNonTax = BeanUtil.toBean(generalInfo, DataNonTax.class);
+        int updateResult = dataNonTaxMapper.updateById(dataNonTax);
+        if (updateResult <= 0) {
+            return 0;
+        }
+        for (Map<String, Object> item : details) {
+            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
+            int i = ocrDetailsMapper.updateById(ocrDetails);
+            if (i <= 0) {
+                return 0;
+            }
+        }
+        return 1;
+    }
 
     //修改海关专用缴款书发票
-    private int updateCustomsSpecialPayment(Map<String, Object> generalInfo) {
+    private int updateCustomsSpecialPayment(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
         DataCustomsSpecialPayment customsSpecialPayment = BeanUtil.toBean(generalInfo, DataCustomsSpecialPayment.class);
-        int updateResult = customsSpecialPaymentMapper.updateById(customsSpecialPayment);
-        if (updateResult <= 0) {
-           return 0;
+        customsSpecialPaymentMapper.updateById(customsSpecialPayment);
+        for (Map<String, Object> item : details) {
+            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
+            ocrDetailsMapper.updateById(ocrDetails);
         }
         return 1;
     }
     //修改海关出口货物报关单发票
     private int updateCustomsExportGoods(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
         DataCustomsExportGoods customsExportGoods = BeanUtil.toBean(generalInfo, DataCustomsExportGoods.class);
-        int updateResult = customsExportGoodsMapper.updateById(customsExportGoods);
-        if (updateResult <= 0) {
-            return 0;
-        }
+        customsExportGoodsMapper.updateById(customsExportGoods);
         // 将细节数据转换为实体对象
         List<DataCustomsExportGoodsDetail> customsExportGoodsDetails = details.stream()
             .map(item -> BeanUtil.toBean(item, DataCustomsExportGoodsDetail.class))
             .toList();
         for (DataCustomsExportGoodsDetail item : customsExportGoodsDetails) {
-            int i = customsExportGoodsDetailMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
+            customsExportGoodsDetailMapper.updateById(item);
         }
         return 1;
     }
@@ -443,36 +470,25 @@ public class CheckServiceImpl implements ICheckService {
         // 将主表数据转换为实体对象
         DataCustomsImxportGoods customsImxportGoods = BeanUtil.toBean(generalInfo, DataCustomsImxportGoods.class);
         // 更新主表信息，并检查是否成功
-        int updateResult = customsImportGoodsMapper.updateById(customsImxportGoods);
-        if (updateResult <= 0) {
-            return 0;
-        }
+       customsImportGoodsMapper.updateById(customsImxportGoods);
         List<DataCustomsImportGoodsDetail> customsImportGoodsDetails = details.stream()
             .map(item -> BeanUtil.toBean(item, DataCustomsImportGoodsDetail.class))
             .toList();
         for (DataCustomsImportGoodsDetail item : customsImportGoodsDetails) {
-            int i = customsImportGoodsDetailMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
+            customsImportGoodsDetailMapper.updateById(item);
+
         }
         return 1;
     }
     //修改出行发票/滴滴
     private int updateDidiItinerary(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
         DataDidiItinerary didiItinerary = BeanUtil.toBean(generalInfo, DataDidiItinerary.class);
-        int updateResult = didiItineraryMapper.updateById(didiItinerary);
-        if (updateResult <= 0) {
-            return 0;
-        }
+        didiItineraryMapper.updateById(didiItinerary);
         List<DataDidiItineraryDetails> didiItineraryDetails = details.stream()
             .map(item -> BeanUtil.toBean(item, DataDidiItineraryDetails.class))
             .toList();
         for (DataDidiItineraryDetails item : didiItineraryDetails) {
-            int i = didiItineraryDetailsMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
+           didiItineraryDetailsMapper.updateById(item);
         }
         return 1;
     }
@@ -483,11 +499,11 @@ public class CheckServiceImpl implements ICheckService {
         if (updateResult <= 0) {
             return 0;
         }
-        List<DataMedicalTreatmentDetail> medicalTreatmentDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataMedicalTreatmentDetail.class))
+        List<DataOcrDetails> ocrDetails = details.stream()
+            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
             .toList();
-        for (DataMedicalTreatmentDetail item : medicalTreatmentDetails) {
-            int i = dataMedicalTreatmentDetailMapper.updateById(item);
+        for (DataOcrDetails item : ocrDetails) {
+            int i = ocrDetailsMapper.updateById(item);
             if (i <= 0) {
                 return 0;
             }
@@ -535,11 +551,17 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //货物运输电子收款凭证发票发票修改
-    private int updateElectronicPaymentGoodsTransportation(Map<String, Object> generalInfo) {
+    private int updateElectronicPaymentGoodsTransportation(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
         DataElectronicTransportationGoods transportationGoods = BeanUtil.toBean(generalInfo, DataElectronicTransportationGoods.class);
         int updateResult =paymentMapper.updateById(transportationGoods);
         if (updateResult <= 0){
             return 0;
+        }
+        List<DataOcrDetails> ocrDetails = details.stream()
+            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+            .toList();
+        for (DataOcrDetails item : ocrDetails) {
+            ocrDetailsMapper.updateById(item);
         }
         return 1;
     }
@@ -801,23 +823,24 @@ public class CheckServiceImpl implements ICheckService {
             TimeUnit.SECONDS,
             workQueue);
         List<Callable<List<InvoiceVo>>> tasks = new ArrayList<>();
-        tasks.add(() -> posttingOcrinfo(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingSecondCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingAirTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingShipTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingMedicalTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingQuotaInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingTaxiTickets(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingRailwayTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingPassengerCar(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingTollRoads(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingReceipt(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingTravelInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingDutyPaidProof(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingCustomsSpecialPayment(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> posttingCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionOcrInfo(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionSecondCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionAirTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionShipTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionMedicalTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionQuotaInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionTaxiTickets(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionRailwayTicket(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionPassengerCar(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionTollRoads(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionReceipt(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionTravelInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionDutyPaidProof(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionCustomsSpecialPayment(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionCustomsImportGoods(dataImageFilesInfos, pageQuery.getUserId()));
         CompletableFuture<List<InvoiceVo>>[] futures;
         futures = new CompletableFuture[tasks.size()];
         for (int i = 0; i < tasks.size(); i++) {
@@ -833,11 +856,9 @@ public class CheckServiceImpl implements ICheckService {
         }
         // 使用allOf等待所有任务完成
         CompletableFuture.allOf(futures).join();
-
         // 收集所有任务的结果
         for (CompletableFuture<List<InvoiceVo>> future : futures) {
             invoiceVosList.addAll(future.get());
-
         }
         invoiceVoPage.setRecords(invoiceVosList);
         invoiceVoPage.setTotal(invoiceVosList.size());
@@ -859,7 +880,7 @@ public class CheckServiceImpl implements ICheckService {
         return invoiceVoPage;
     }
     //查询海关进口货物组成InvoiceVo
-    private List<InvoiceVo> posttingCustomsImportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionCustomsImportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> customsImportGoodsList;
         customsImportGoodsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -881,7 +902,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询海关出口货物组成InvoiceVo
-    private List<InvoiceVo> posttingCustomsExportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionCustomsExportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> customsExportGoodsList;
         customsExportGoodsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -903,7 +924,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询货物运输电子收款凭证发票组成InvoiceVo
-    private List<InvoiceVo> posttingElectronicTransportationGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionElectronicTransportationGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> electronicTransportationGoodsList;
         electronicTransportationGoodsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -924,7 +945,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //海关专用缴款书发票组成InvoiceVo
-    private List<InvoiceVo> posttingCustomsSpecialPayment(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionCustomsSpecialPayment(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> customsSpecialPaymentList;
         customsSpecialPaymentList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -945,7 +966,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询完税证明发票组成InvoiceVo
-    private List<InvoiceVo> posttingDutyPaidProof(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionDutyPaidProof(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> dutyPaidProofList;
         dutyPaidProofList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -968,7 +989,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询出行发票滴滴组成InvoiceVo
-    private List<InvoiceVo> posttingTravelInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionTravelInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> travelInvoiceList;
         travelInvoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -989,7 +1010,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询小票组成InvoiceVo
-    private List<InvoiceVo> posttingReceipt(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionReceipt(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> receiptList;
         receiptList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1012,7 +1033,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询过路费发票组成InvoiceVo
-    private List<InvoiceVo> posttingTollRoads(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionTollRoads(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> tollRoadsList;
         tollRoadsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1035,7 +1056,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询客运车票组成InvoiceVo
-    private List<InvoiceVo> posttingPassengerCar(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionPassengerCar(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> passengerCarsList;
         passengerCarsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1058,7 +1079,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询火车票组成InvoiceVo
-    private List<InvoiceVo> posttingRailwayTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionRailwayTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> railwayTicketsList;
         railwayTicketsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1079,7 +1100,7 @@ public class CheckServiceImpl implements ICheckService {
         return railwayTicketsList;
     }
     //查询出租车票组成InvoiceVo
-    private List<InvoiceVo> posttingTaxiTickets(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionTaxiTickets(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> taxiTicketsList;
         taxiTicketsList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1100,7 +1121,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询定额发票组成InvoiceVo
-    private List<InvoiceVo> posttingQuotaInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionQuotaInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1121,7 +1142,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询医疗票/非税票组成InvoiceVo
-    private List<InvoiceVo> posttingMedicalTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionMedicalTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1142,7 +1163,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询船票并组装成InvoiceVo
-    private List<InvoiceVo> posttingShipTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionShipTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1163,7 +1184,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询航空电子客运单票信息并组装成InvoiceVo
-    private List<InvoiceVo> posttingAirTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionAirTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1183,7 +1204,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询二手车销售发票信息并组装成InvoiceVo
-    private List<InvoiceVo> posttingSecondCarSaleInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    private List<InvoiceVo> transitionSecondCarSaleInvoice(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1204,7 +1225,7 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //查询机动车销售发票信息并组装成InvoiceVo
-    public List<InvoiceVo> posttingCarSaleInvoice(List<DataImageFilesInfo> dataImageFilesInfos,Long userId) {
+    public List<InvoiceVo> transitionCarSaleInvoice(List<DataImageFilesInfo> dataImageFilesInfos,Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(
             dataImageFilesInfo -> {
@@ -1222,9 +1243,8 @@ public class CheckServiceImpl implements ICheckService {
         }).toList();
         return invoiceList;
     }
-
     //根据fileId查询ocr信息并组装成InvoiceVo
-    public List<InvoiceVo> posttingOcrinfo(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+    public List<InvoiceVo> transitionOcrInfo(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(dataImageFilesInfo -> {
             List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(new LambdaQueryWrapper<DataOcrInfo>()
@@ -1292,9 +1312,13 @@ public class CheckServiceImpl implements ICheckService {
                     //医疗票明细票
                     case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
                     case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
-                    case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
                         info=dataMedicalTreatmentMapper.selectOne(new LambdaQueryWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, fileId));
-                        detailInfo=dataMedicalTreatmentDetailMapper.selectList(new LambdaQueryWrapper<DataMedicalTreatmentDetail>().eq(DataMedicalTreatmentDetail::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    //非税收入类发票
+                    case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                        info=dataNonTaxMapper.selectOne(new LambdaQueryWrapper<DataNonTax>().eq(DataNonTax::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //定额发票
                     case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
@@ -1343,17 +1367,18 @@ public class CheckServiceImpl implements ICheckService {
                     //海关专用缴款书发票
                     case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
                         info=customsSpecialPaymentMapper.selectOne(new LambdaQueryWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, fileId));
-                        return R.ok(new DataResponseDTO(res, info, null));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //货物运输电子收款凭证发票
                     case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
                         info=paymentMapper.selectOne(new LambdaQueryWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, fileId));
-                        return R.ok(new DataResponseDTO(res, info, null));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
                     default: {
                         return R.fail();
                     }
                 }
             }
-
         return R.fail();
     }
 }
