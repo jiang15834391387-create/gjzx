@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+
+    <servers>
+        <server>
+            <id>g-pedc8196-danganxiangmu-hc</id>
+            <username>hc-1734489897038</username>
+            <password>c2ec396b7844f8c745af7f6ec53467a53a622366</password>
+        </server>
+    </servers>
+
+    <profiles>
+        <profile>
+            <id>Repository Proxy</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>g-pedc8196-danganxiangmu-hc</id>
+                    <name>hc</name>
+                    <url>https://g-pedc8196-maven.pkg.coding.net/repository/danganxiangmu/hc/</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>nexus</activeProfile>
+
+    </activeProfiles>
+</settings>

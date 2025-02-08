@@ -482,24 +482,13 @@
     </build>
 
     <repositories>
-<!--        <repository>-->
-<!--            <id>public</id>-->
-<!--            <name>huawei nexus</name>-->
-<!--            <url>https://mirrors.huaweicloud.com/repository/maven/</url>-->
-<!--            <releases>-->
-<!--                <enabled>true</enabled>-->
-<!--            </releases>-->
-<!--        </repository>-->
         <repository>
-            <id>g-pedc8196-danganxiangmu-hc</id>
-            <name>hc</name>
-            <url>https://g-pedc8196-maven.pkg.coding.net/repository/danganxiangmu/hc/</url>
+            <id>public</id>
+            <name>huawei nexus</name>
+            <url>https://mirrors.huaweicloud.com/repository/maven/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
         </repository>
     </repositories>
 
