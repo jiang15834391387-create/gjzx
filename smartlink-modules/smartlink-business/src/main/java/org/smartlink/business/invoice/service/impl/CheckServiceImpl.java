@@ -20,6 +20,7 @@ import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.doman.vo.InvoiceVo;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.enums.FileStatusEnumd;
+import org.smartlink.common.core.enums.InvoiceGlorityEnumd;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
@@ -841,6 +842,7 @@ public class CheckServiceImpl implements ICheckService {
         tasks.add(() -> transitionElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId()));
         tasks.add(() -> transitionCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId()));
         tasks.add(() -> transitionCustomsImportGoods(dataImageFilesInfos, pageQuery.getUserId()));
+        tasks.add(() -> transitionNonTaxRevenueReceipts(dataImageFilesInfos, pageQuery.getUserId()));
         CompletableFuture<List<InvoiceVo>>[] futures;
         futures = new CompletableFuture[tasks.size()];
         for (int i = 0; i < tasks.size(); i++) {
@@ -879,6 +881,32 @@ public class CheckServiceImpl implements ICheckService {
         threadPoolExecutor.shutdown();
         return invoiceVoPage;
     }
+    //查询非税发票InvoiceVo
+    private List<InvoiceVo> transitionNonTaxRevenueReceipts(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+        List<InvoiceVo> nonTaxRevenueReceiptsList;
+        nonTaxRevenueReceiptsList = dataImageFilesInfos.stream().flatMap(
+            dataImageFilesInfo -> {
+                List<DataNonTax> nonTaxRevenueReceipts = dataNonTaxMapper.selectList(new LambdaQueryWrapper<DataNonTax>()
+                    .eq(DataNonTax::getFileId, dataImageFilesInfo.getFileId()).eq(DataNonTax::getCreateBy, userId));
+                return nonTaxRevenueReceipts.stream().map(
+                   dataNonTaxRevenueReceipts -> {
+                       InvoiceVo invoiceVo = new InvoiceVo();
+                       invoiceVo.setId(dataNonTaxRevenueReceipts.getId());
+                       invoiceVo.setFileId(dataNonTaxRevenueReceipts.getFileId());
+                       invoiceVo.setBuyerName(dataNonTaxRevenueReceipts.getPayer());
+                       invoiceVo.setSellerName(dataNonTaxRevenueReceipts.getPayee());
+                       invoiceVo.setInvoiceDate(dataNonTaxRevenueReceipts.getInvoiceDate());
+                       invoiceVo.setInvoiceType(InvoiceGlorityEnumd.NON_TAX_REVENUE_RECEIPTS_CODE.getDesc());
+                       invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                       invoiceVo.setMoney(dataNonTaxRevenueReceipts.getInvoiceTotal());
+                       invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                       invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                       return invoiceVo;
+                   });
+            }).toList();
+        return nonTaxRevenueReceiptsList;
+    }
+
     //查询海关进口货物组成InvoiceVo
     private List<InvoiceVo> transitionCustomsImportGoods(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> customsImportGoodsList;
@@ -888,8 +916,13 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataCustomsImxportGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsImxportGoods::getCreateBy, userId));
                 return customsImportGoods.stream().map(
                     dataCustomsImportGoods -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(dataCustomsImportGoods, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(dataCustomsImportGoods.getId());
+                        invoiceVo.setFileId(dataCustomsImportGoods.getFileId());
+                        invoiceVo.setBuyerName(dataCustomsImportGoods.getExecutiveCompanyName());
+                        invoiceVo.setSellerName(dataCustomsImportGoods.getDepartureCountryName());
+                        invoiceVo.setInvoiceDate(dataCustomsImportGoods.getDateOfImport());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_IMPORTED_GOODS_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataCustomsImportGoods.getFreight());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -910,8 +943,13 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataCustomsExportGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsExportGoods::getCreateBy, userId));
                 return customsExportGoods.stream().map(
                     dataCustomsExportGoods -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(dataCustomsExportGoods, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(dataCustomsExportGoods.getId());
+                        invoiceVo.setFileId(dataCustomsExportGoods.getFileId());
+                        invoiceVo.setBuyerName(dataCustomsExportGoods.getExecutiveCompanyName());
+                        invoiceVo.setSellerName(dataCustomsExportGoods.getDepartureCountryName());
+                        invoiceVo.setInvoiceDate(dataCustomsExportGoods.getDateOfExport());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_EXPORT_GOODS_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataCustomsExportGoods.getFreight());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -932,8 +970,13 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataElectronicTransportationGoods::getFileId, dataImageFilesInfo.getFileId()).eq(DataElectronicTransportationGoods::getCreateBy, userId));
                 return dataElectronicTransportationGoods.stream().map(
                     dataElectronicTransportationGoods1 -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(dataElectronicTransportationGoods1, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(dataElectronicTransportationGoods1.getId());
+                        invoiceVo.setFileId(dataElectronicTransportationGoods1.getFileId());
+                        invoiceVo.setBuyerName(dataElectronicTransportationGoods1.getShipper());
+                        invoiceVo.setSellerName(dataElectronicTransportationGoods1.getTransporter());
+                        invoiceVo.setInvoiceDate(dataElectronicTransportationGoods1.getDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataElectronicTransportationGoods1.getTotalPrice());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -953,8 +996,13 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataCustomsSpecialPayment::getFileId, dataImageFilesInfo.getFileId()).eq(DataCustomsSpecialPayment::getCreateBy, userId));
                 return dataCustomsSpecialPayment.stream().map(
                     dataCustomsSpecialPayments -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(dataCustomsSpecialPayments, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(dataCustomsSpecialPayments.getId());
+                        invoiceVo.setFileId(dataCustomsSpecialPayments.getFileId());
+                        invoiceVo.setBuyerName(dataCustomsSpecialPayments.getAccount());
+                        invoiceVo.setSellerName(dataCustomsSpecialPayments.getRevenueAgency());
+                        invoiceVo.setInvoiceDate(dataCustomsSpecialPayments.getInvoiceDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataCustomsSpecialPayments.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -974,8 +1022,12 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataDutyPaidProof::getFileId, dataImageFilesInfo.getFileId()).eq(DataDutyPaidProof::getCreateBy, userId));
                 return dataDutyPaidProof.stream().map(
                     dataDutyPaidProofs -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(dataDutyPaidProofs, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(dataDutyPaidProofs.getId());
+                        invoiceVo.setFileId(dataDutyPaidProofs.getFileId());
+                        invoiceVo.setBuyerName(dataDutyPaidProofs.getBuyerName());
+                        invoiceVo.setInvoiceDate(dataDutyPaidProofs.getInvoiceDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataDutyPaidProofs.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -997,8 +1049,12 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataDidiItinerary::getFileId, dataImageFilesInfo.getFileId()).eq(DataDidiItinerary::getCreateBy, userId));
                 return dataDidiItinerary.stream().map(
                     dataDidiItinerars -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(dataDidiItinerars, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(dataDidiItinerars.getId());
+                        invoiceVo.setFileId(dataDidiItinerars.getFileId());
+                        invoiceVo.setBuyerName(dataDidiItinerars.getPhone());
+                        invoiceVo.setInvoiceDate(dataDidiItinerars.getInvoiceDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DIDI_ITINERARY_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataDidiItinerars.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1018,8 +1074,12 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataReceipt::getFileId, dataImageFilesInfo.getFileId()).eq(DataReceipt::getCreateBy, userId));
                 return receipt.stream().map(
                     receipts -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(receipts, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(receipts.getId());
+                        invoiceVo.setFileId(receipts.getFileId());
+                        invoiceVo.setBuyerName(receipts.getStoreName());
+                        invoiceVo.setInvoiceDate(receipts.getInvoiceDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(receipts.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1041,8 +1101,11 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataTollRoads::getFileId, dataImageFilesInfo.getFileId()).eq(DataTollRoads::getCreateBy, userId));
                 return tollRoads.stream().map(
                     tollRoad -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(tollRoad, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(tollRoad.getId());
+                        invoiceVo.setFileId(tollRoad.getFileId());
+                        invoiceVo.setInvoiceDate(tollRoad.getInvoiceDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(tollRoad.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1064,8 +1127,12 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataPassengerCar::getFileId, dataImageFilesInfo.getFileId()).eq(DataPassengerCar::getCreateBy, userId));
                 return passengerCars.stream().map(
                     passengerCar -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(passengerCar, InvoiceVo.class);
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(passengerCar.getId());
+                        invoiceVo.setFileId(passengerCar.getFileId());
+                        invoiceVo.setBuyerName(passengerCar.getName());
+                        invoiceVo.setInvoiceDate(passengerCar.getInvoiceDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(passengerCar.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1087,9 +1154,12 @@ public class CheckServiceImpl implements ICheckService {
                     .eq(DataRailwayTicket::getFileId, dataImageFilesInfo.getFileId()).eq(DataRailwayTicket::getCreateBy, userId));
                 return railwayTickets.stream().map(
                     railwayTicket -> {
-                        InvoiceVo invoiceVo = BeanUtil.toBean(railwayTicket, InvoiceVo.class);
+                        InvoiceVo invoiceVo = new InvoiceVo();
+                        invoiceVo.setId(railwayTicket.getId());
+                        invoiceVo.setFileId(railwayTicket.getFileId());
                         invoiceVo.setBuyerName(railwayTicket.getBuyer());
-                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                        invoiceVo.setInvoiceDate(railwayTicket.getInvoiceDate());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RAILWAY_TICKET_CODE.getDesc());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(railwayTicket.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1107,8 +1177,11 @@ public class CheckServiceImpl implements ICheckService {
                 List<DataTaxiTickets> taxiTickets = taxiTicketsMapper.selectList(new LambdaQueryWrapper<DataTaxiTickets>()
                     .eq(DataTaxiTickets::getFileId, dataImageFilesInfo.getFileId()).eq(DataTaxiTickets::getCreateBy, userId));
                 return taxiTickets.stream().map(taxiTicket -> {
-                    InvoiceVo invoiceVo = BeanUtil.toBean(taxiTicket, InvoiceVo.class);
-                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    InvoiceVo invoiceVo = new InvoiceVo();
+                    invoiceVo.setId(taxiTicket.getId());
+                    invoiceVo.setFileId(taxiTicket.getFileId());
+                    invoiceVo.setInvoiceDate(taxiTicket.getInvoiceDate());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getDesc());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(taxiTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1128,8 +1201,10 @@ public class CheckServiceImpl implements ICheckService {
                 List<DataQuotaInvoice> dataQuotaInvoices = quotaInvoiceMapper.selectList(new LambdaQueryWrapper<DataQuotaInvoice>()
                     .eq(DataQuotaInvoice::getFileId, dataImageFilesInfo.getFileId()).eq(DataQuotaInvoice::getCreateBy, userId));
                 return dataQuotaInvoices.stream().map(dataQuotaInvoice -> {
-                    InvoiceVo invoiceVo = BeanUtil.toBean(dataQuotaInvoice, InvoiceVo.class);
-                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    InvoiceVo invoiceVo = new InvoiceVo();
+                    invoiceVo.setId(dataQuotaInvoice.getId());
+                    invoiceVo.setFileId(dataQuotaInvoice.getFileId());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_QUOTA_INVOICE_CODE.getDesc());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataQuotaInvoice.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1141,7 +1216,7 @@ public class CheckServiceImpl implements ICheckService {
         return invoiceList;
     }
 
-    //查询医疗票/非税票组成InvoiceVo
+    //查询医疗票组成InvoiceVo
     private List<InvoiceVo> transitionMedicalTicket(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> invoiceList;
         invoiceList = dataImageFilesInfos.stream().flatMap(
@@ -1149,8 +1224,13 @@ public class CheckServiceImpl implements ICheckService {
                 List<DataMedicalTreatment> dataMedicalTickets = dataMedicalTreatmentMapper.selectList(new LambdaQueryWrapper<DataMedicalTreatment>()
                     .eq(DataMedicalTreatment::getFileId, dataImageFilesInfo.getFileId()).eq(DataMedicalTreatment::getCreateBy, userId));
                 return dataMedicalTickets.stream().map(dataMedicalTicket -> {
-                    InvoiceVo invoiceVo = BeanUtil.toBean(dataMedicalTicket, InvoiceVo.class);
-                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    InvoiceVo invoiceVo = new InvoiceVo();
+                    invoiceVo.setId(dataMedicalTicket.getId());
+                    invoiceVo.setFileId(dataMedicalTicket.getFileId());
+                    invoiceVo.setBuyerName(dataMedicalTicket.getPayer());
+                    invoiceVo.setSellerName(dataMedicalTicket.getPayee());
+                    invoiceVo.setInvoiceDate(dataMedicalTicket.getInvoiceDate());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.MEDICAL_TICKET_DETAILS_CODE.getDesc());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataMedicalTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1170,8 +1250,12 @@ public class CheckServiceImpl implements ICheckService {
                 List<DataSteamerTicket> dataShipTickets = steamerTicketMapper.selectList(new LambdaQueryWrapper<DataSteamerTicket>()
                     .eq(DataSteamerTicket::getFileId, dataImageFilesInfo.getFileId()).eq(DataSteamerTicket::getCreateBy, userId));
                 return dataShipTickets.stream().map(dataShipTicket -> {
-                    InvoiceVo invoiceVo = BeanUtil.toBean(dataShipTicket, InvoiceVo.class);
-                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    InvoiceVo invoiceVo = new InvoiceVo();
+                    invoiceVo.setId(dataShipTicket.getId());
+                    invoiceVo.setFileId(dataShipTicket.getFileId());
+                    invoiceVo.setBuyerName(dataShipTicket.getName());
+                    invoiceVo.setInvoiceDate(dataShipTicket.getInvoiceDate());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getDesc());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataShipTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1191,8 +1275,13 @@ public class CheckServiceImpl implements ICheckService {
                 List<DataFlightItinerary> dataAirTickets = flightItineraryMapper.selectList(new LambdaQueryWrapper<DataFlightItinerary>()
                     .eq(DataFlightItinerary::getFileId, dataImageFilesInfo.getFileId()).eq(DataFlightItinerary::getCreateBy, userId));
                 return dataAirTickets.stream().map(dataAirTicket -> {
-                    InvoiceVo invoiceVo = BeanUtil.toBean(dataAirTicket, InvoiceVo.class);
-                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    InvoiceVo invoiceVo = new InvoiceVo();
+                    invoiceVo.setId(dataAirTicket.getId());
+                    invoiceVo.setFileId(dataAirTicket.getFileId());
+                    invoiceVo.setBuyerName(dataAirTicket.getUserName());
+                    invoiceVo.setSellerName(dataAirTicket.getIssueBy());
+                    invoiceVo.setInvoiceDate(dataAirTicket.getInvoiceDate());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getDesc());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataAirTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1211,8 +1300,13 @@ public class CheckServiceImpl implements ICheckService {
                 List<DataUsedCarSales> dataSecondCarSaleInvoices = usedCarSalesMapper.selectList(new LambdaQueryWrapper<DataUsedCarSales>()
                     .eq(DataUsedCarSales::getFileId, dataImageFilesInfo.getFileId()).eq(DataUsedCarSales::getCreateBy, userId));
                 return dataSecondCarSaleInvoices.stream().map(dataSecondCarSaleInvoice -> {
-                    InvoiceVo invoiceVo = BeanUtil.toBean(dataSecondCarSaleInvoice, InvoiceVo.class);
-                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    InvoiceVo invoiceVo = new InvoiceVo();
+                    invoiceVo.setId(dataSecondCarSaleInvoice.getId());
+                    invoiceVo.setFileId(dataSecondCarSaleInvoice.getFileId());
+                    invoiceVo.setBuyerName(dataSecondCarSaleInvoice.getBuyerName());
+                    invoiceVo.setSellerName(dataSecondCarSaleInvoice.getBusinessUnit());
+                    invoiceVo.setInvoiceDate(dataSecondCarSaleInvoice.getInvoiceDate());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getDesc());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setMoney(dataSecondCarSaleInvoice.getInvoiceTotal());
@@ -1232,8 +1326,13 @@ public class CheckServiceImpl implements ICheckService {
                 List<DataMotorVehicleSale> dataCarSaleInvoices = motorVehicleSaleMapper.selectList(new LambdaQueryWrapper<DataMotorVehicleSale>()
                     .eq(DataMotorVehicleSale::getFileId, dataImageFilesInfo.getFileId()).eq(DataMotorVehicleSale::getCreateBy, userId));
                 return dataCarSaleInvoices.stream().map(dataCarSaleInvoice -> {
-                    InvoiceVo invoiceVo = BeanUtil.toBean(dataCarSaleInvoice, InvoiceVo.class);
-                    invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                    InvoiceVo invoiceVo = new InvoiceVo();
+                    invoiceVo.setId(dataCarSaleInvoice.getId());
+                    invoiceVo.setFileId(dataCarSaleInvoice.getFileId());
+                    invoiceVo.setBuyerName(dataCarSaleInvoice.getBuyerName());
+                    invoiceVo.setSellerName(dataCarSaleInvoice.getSeller());
+                    invoiceVo.setInvoiceDate(dataCarSaleInvoice.getInvoiceDate());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getDesc());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setMoney(dataCarSaleInvoice.getInvoiceTotal());
@@ -1250,8 +1349,13 @@ public class CheckServiceImpl implements ICheckService {
             List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(new LambdaQueryWrapper<DataOcrInfo>()
                 .eq(DataOcrInfo::getFileId, dataImageFilesInfo.getFileId()).eq(DataOcrInfo::getCreateBy, userId));
             return dataOcrInfos.stream().map(dataOcrInfo -> {
-                InvoiceVo invoiceVo = BeanUtil.toBean(dataOcrInfo, InvoiceVo.class);
-                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                InvoiceVo invoiceVo = new InvoiceVo();
+                invoiceVo.setId(dataOcrInfo.getId());
+                invoiceVo.setFileId(dataOcrInfo.getFileId());
+                invoiceVo.setBuyerName(dataOcrInfo.getBuyerName());
+                invoiceVo.setSellerName(dataOcrInfo.getSellerName());
+                invoiceVo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
+                invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getDesc());
                 invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                 invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                 invoiceVo.setMoney(dataOcrInfo.getTotalLowercase());
@@ -1289,88 +1393,107 @@ public class CheckServiceImpl implements ICheckService {
                     case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
                     case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                     case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getDesc());
                         info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //机动车
                     case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getDesc());
                         info=motorVehicleSaleMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //航空运输电子客票行程单
                     case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getDesc());
                         info=flightItineraryMapper.selectOne(new LambdaQueryWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, fileId));
                         detailInfo=flightsItineraryDetailMapper.selectList(new LambdaQueryWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //二手车
                     case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getDesc());
                         info=usedCarSalesMapper.selectOne(new LambdaQueryWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //船票
                     case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getDesc());
                         info=steamerTicketMapper.selectOne(new LambdaQueryWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //医疗票明细票
                     case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
                     case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.MEDICAL_TICKET_DETAILS_CODE.getDesc());
                         info=dataMedicalTreatmentMapper.selectOne(new LambdaQueryWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //非税收入类发票
                     case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.NON_TAX_REVENUE_RECEIPTS_CODE.getDesc());
                         info=dataNonTaxMapper.selectOne(new LambdaQueryWrapper<DataNonTax>().eq(DataNonTax::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //定额发票
                     case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_QUOTA_INVOICE_CODE.getDesc());
                         info=quotaInvoiceMapper.selectOne(new LambdaQueryWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //出租车发票
                     case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getDesc());
                         info=taxiTicketsMapper.selectOne(new LambdaQueryWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //火车发票
                     case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_RAILWAY_TICKET_CODE.getDesc());
                         info=railwayTicketMapper.selectOne(new LambdaQueryWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //客运车发票
                     case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getDesc());
                         info=passengerCarMapper.selectOne(new LambdaQueryWrapper<DataPassengerCar>().eq(DataPassengerCar::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //过路费发票
                     case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getDesc());
                         info=tollRoadsMapper.selectOne(new LambdaQueryWrapper<DataTollRoads>().eq(DataTollRoads::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //小票
                     case InvoiceConstants.GLORITY_RECEIPT_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getDesc());
                         info=dataReceiptMapper.selectOne(new LambdaQueryWrapper<DataReceipt>().eq(DataReceipt::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //出行发票/滴滴
                     case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_DIDI_ITINERARY_CODE.getDesc());
                         info=didiItineraryMapper.selectOne(new LambdaQueryWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getFileId, fileId));
                         detailInfo=didiItineraryDetailsMapper.selectList(new LambdaQueryWrapper<DataDidiItineraryDetails>().eq(DataDidiItineraryDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //完税证明发票
                     case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getDesc());
                         info=paidProofMapper.selectOne(new LambdaQueryWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getFileId, fileId));
                         detailInfo=paidProofDetailsMapper.selectList(new LambdaQueryWrapper<DataDutyPaidProofDetails>().eq(DataDutyPaidProofDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //海关进口货物报关单发票
                     case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_IMPORTED_GOODS_CODE.getDesc());
                         info=customsImportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getFileId, fileId));
                         detailInfo=customsExportGoodsDetailMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //海关出口货物报关单发票
                     case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_EXPORT_GOODS_CODE.getDesc());
                         info=customsExportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getFileId, fileId));
                         detailInfo=customsExportGoodsDetailMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //海关专用缴款书发票
                     case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE.getDesc());
                         info=customsSpecialPaymentMapper.selectOne(new LambdaQueryWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //货物运输电子收款凭证发票
                     case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getDesc());
                         info=paymentMapper.selectOne(new LambdaQueryWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
