@@ -585,7 +585,7 @@ public class CheckServiceImpl implements ICheckService {
             handleRegularInvoice(dto, generalInfo, invoiceType);
         }
         // 调用查验方法
-      return validateInvoice(dto, generalInfo);
+       return validateInvoice(dto, generalInfo);
 
     }
 
@@ -689,7 +689,7 @@ public class CheckServiceImpl implements ICheckService {
                return ocrConversionAlter(baseEntity, filesInfo);
             }
         }
-        return 1;
+        return 0;
     }
     //修改发票后查验成功 修改发票信息
     private int ocrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
@@ -713,6 +713,7 @@ public class CheckServiceImpl implements ICheckService {
         for (DataOcrDetails detail : arrayList) {
            ocrDetailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
         }
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
         return 1;
     }
     //修改机动车销售发票
@@ -896,7 +897,7 @@ public class CheckServiceImpl implements ICheckService {
                        invoiceVo.setBuyerName(dataNonTaxRevenueReceipts.getPayer());
                        invoiceVo.setSellerName(dataNonTaxRevenueReceipts.getPayee());
                        invoiceVo.setInvoiceDate(dataNonTaxRevenueReceipts.getInvoiceDate());
-                       invoiceVo.setInvoiceType(InvoiceGlorityEnumd.NON_TAX_REVENUE_RECEIPTS_CODE.getDesc());
+                       invoiceVo.setInvoiceType(InvoiceGlorityEnumd.NON_TAX_REVENUE_RECEIPTS_CODE.getCode());
                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                        invoiceVo.setMoney(dataNonTaxRevenueReceipts.getInvoiceTotal());
                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -922,7 +923,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setBuyerName(dataCustomsImportGoods.getExecutiveCompanyName());
                         invoiceVo.setSellerName(dataCustomsImportGoods.getDepartureCountryName());
                         invoiceVo.setInvoiceDate(dataCustomsImportGoods.getDateOfImport());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_IMPORTED_GOODS_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_IMPORTED_GOODS_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataCustomsImportGoods.getFreight());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -949,7 +950,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setBuyerName(dataCustomsExportGoods.getExecutiveCompanyName());
                         invoiceVo.setSellerName(dataCustomsExportGoods.getDepartureCountryName());
                         invoiceVo.setInvoiceDate(dataCustomsExportGoods.getDateOfExport());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_EXPORT_GOODS_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_EXPORT_GOODS_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataCustomsExportGoods.getFreight());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -976,7 +977,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setBuyerName(dataElectronicTransportationGoods1.getShipper());
                         invoiceVo.setSellerName(dataElectronicTransportationGoods1.getTransporter());
                         invoiceVo.setInvoiceDate(dataElectronicTransportationGoods1.getDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataElectronicTransportationGoods1.getTotalPrice());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1002,7 +1003,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setBuyerName(dataCustomsSpecialPayments.getAccount());
                         invoiceVo.setSellerName(dataCustomsSpecialPayments.getRevenueAgency());
                         invoiceVo.setInvoiceDate(dataCustomsSpecialPayments.getInvoiceDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataCustomsSpecialPayments.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1027,7 +1028,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setFileId(dataDutyPaidProofs.getFileId());
                         invoiceVo.setBuyerName(dataDutyPaidProofs.getBuyerName());
                         invoiceVo.setInvoiceDate(dataDutyPaidProofs.getInvoiceDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataDutyPaidProofs.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1054,7 +1055,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setFileId(dataDidiItinerars.getFileId());
                         invoiceVo.setBuyerName(dataDidiItinerars.getPhone());
                         invoiceVo.setInvoiceDate(dataDidiItinerars.getInvoiceDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DIDI_ITINERARY_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DIDI_ITINERARY_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(dataDidiItinerars.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1079,7 +1080,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setFileId(receipts.getFileId());
                         invoiceVo.setBuyerName(receipts.getStoreName());
                         invoiceVo.setInvoiceDate(receipts.getInvoiceDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(receipts.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1105,7 +1106,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setId(tollRoad.getId());
                         invoiceVo.setFileId(tollRoad.getFileId());
                         invoiceVo.setInvoiceDate(tollRoad.getInvoiceDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(tollRoad.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1132,7 +1133,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setFileId(passengerCar.getFileId());
                         invoiceVo.setBuyerName(passengerCar.getName());
                         invoiceVo.setInvoiceDate(passengerCar.getInvoiceDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(passengerCar.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1159,7 +1160,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setFileId(railwayTicket.getFileId());
                         invoiceVo.setBuyerName(railwayTicket.getBuyer());
                         invoiceVo.setInvoiceDate(railwayTicket.getInvoiceDate());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RAILWAY_TICKET_CODE.getDesc());
+                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RAILWAY_TICKET_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setMoney(railwayTicket.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1181,7 +1182,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setId(taxiTicket.getId());
                     invoiceVo.setFileId(taxiTicket.getFileId());
                     invoiceVo.setInvoiceDate(taxiTicket.getInvoiceDate());
-                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getDesc());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(taxiTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1204,7 +1205,7 @@ public class CheckServiceImpl implements ICheckService {
                     InvoiceVo invoiceVo = new InvoiceVo();
                     invoiceVo.setId(dataQuotaInvoice.getId());
                     invoiceVo.setFileId(dataQuotaInvoice.getFileId());
-                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_QUOTA_INVOICE_CODE.getDesc());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_QUOTA_INVOICE_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataQuotaInvoice.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1230,7 +1231,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setBuyerName(dataMedicalTicket.getPayer());
                     invoiceVo.setSellerName(dataMedicalTicket.getPayee());
                     invoiceVo.setInvoiceDate(dataMedicalTicket.getInvoiceDate());
-                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.MEDICAL_TICKET_DETAILS_CODE.getDesc());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.MEDICAL_TICKET_DETAILS_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataMedicalTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1255,7 +1256,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setFileId(dataShipTicket.getFileId());
                     invoiceVo.setBuyerName(dataShipTicket.getName());
                     invoiceVo.setInvoiceDate(dataShipTicket.getInvoiceDate());
-                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getDesc());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataShipTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1281,7 +1282,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setBuyerName(dataAirTicket.getUserName());
                     invoiceVo.setSellerName(dataAirTicket.getIssueBy());
                     invoiceVo.setInvoiceDate(dataAirTicket.getInvoiceDate());
-                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getDesc());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setMoney(dataAirTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
@@ -1306,7 +1307,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setBuyerName(dataSecondCarSaleInvoice.getBuyerName());
                     invoiceVo.setSellerName(dataSecondCarSaleInvoice.getBusinessUnit());
                     invoiceVo.setInvoiceDate(dataSecondCarSaleInvoice.getInvoiceDate());
-                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getDesc());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setMoney(dataSecondCarSaleInvoice.getInvoiceTotal());
@@ -1332,7 +1333,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setBuyerName(dataCarSaleInvoice.getBuyerName());
                     invoiceVo.setSellerName(dataCarSaleInvoice.getSeller());
                     invoiceVo.setInvoiceDate(dataCarSaleInvoice.getInvoiceDate());
-                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getDesc());
+                    invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setMoney(dataCarSaleInvoice.getInvoiceTotal());
@@ -1355,7 +1356,7 @@ public class CheckServiceImpl implements ICheckService {
                 invoiceVo.setBuyerName(dataOcrInfo.getBuyerName());
                 invoiceVo.setSellerName(dataOcrInfo.getSellerName());
                 invoiceVo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
-                invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getDesc());
+                invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode());
                 invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                 invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                 invoiceVo.setMoney(dataOcrInfo.getTotalLowercase());
@@ -1382,118 +1383,166 @@ public class CheckServiceImpl implements ICheckService {
                 switch (invoiceType) {
                     //增值税、机打
                     case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
-                    case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
-                    case InvoiceConstants.GLORITY_TAX_CODE:
-                    case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
-                    case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
-                    case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
-                    case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
-                    case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
-                    case InvoiceConstants.DIGITAL_INVOICE_LIST:
-                    case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-                    case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
-                    case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode());
                         info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.GLORITY_TAX_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode());
+                        DataOcrInfo dataOcrInfo = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        dataOcrInfo.setInvoiceCode("");
+                        info=dataOcrInfo;
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.DIGITAL_INVOICE_LIST:
+                        res.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode());
+                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                    case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+                        res.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode());
+                        DataOcrInfo dataOcrInfo2 = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                        dataOcrInfo2.setInvoiceCode("");
+                        info=dataOcrInfo2;
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //机动车
                     case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getCode());
                         info=motorVehicleSaleMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //航空运输电子客票行程单
                     case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode());
                         info=flightItineraryMapper.selectOne(new LambdaQueryWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, fileId));
                         detailInfo=flightsItineraryDetailMapper.selectList(new LambdaQueryWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //二手车
                     case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getCode());
                         info=usedCarSalesMapper.selectOne(new LambdaQueryWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //船票
                     case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getCode());
                         info=steamerTicketMapper.selectOne(new LambdaQueryWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //医疗票明细票
                     case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
                     case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.MEDICAL_TICKET_DETAILS_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.MEDICAL_TICKET_DETAILS_CODE.getCode());
                         info=dataMedicalTreatmentMapper.selectOne(new LambdaQueryWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //非税收入类发票
                     case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.NON_TAX_REVENUE_RECEIPTS_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.NON_TAX_REVENUE_RECEIPTS_CODE.getCode());
                         info=dataNonTaxMapper.selectOne(new LambdaQueryWrapper<DataNonTax>().eq(DataNonTax::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //定额发票
                     case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_QUOTA_INVOICE_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_QUOTA_INVOICE_CODE.getCode());
                         info=quotaInvoiceMapper.selectOne(new LambdaQueryWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //出租车发票
                     case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getCode());
                         info=taxiTicketsMapper.selectOne(new LambdaQueryWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //火车发票
                     case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_RAILWAY_TICKET_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_RAILWAY_TICKET_CODE.getCode());
                         info=railwayTicketMapper.selectOne(new LambdaQueryWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //客运车发票
                     case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getCode());
                         info=passengerCarMapper.selectOne(new LambdaQueryWrapper<DataPassengerCar>().eq(DataPassengerCar::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //过路费发票
                     case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getCode());
                         info=tollRoadsMapper.selectOne(new LambdaQueryWrapper<DataTollRoads>().eq(DataTollRoads::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //小票
                     case InvoiceConstants.GLORITY_RECEIPT_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode());
                         info=dataReceiptMapper.selectOne(new LambdaQueryWrapper<DataReceipt>().eq(DataReceipt::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, null));
                     //出行发票/滴滴
                     case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_DIDI_ITINERARY_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_DIDI_ITINERARY_CODE.getCode());
                         info=didiItineraryMapper.selectOne(new LambdaQueryWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getFileId, fileId));
                         detailInfo=didiItineraryDetailsMapper.selectList(new LambdaQueryWrapper<DataDidiItineraryDetails>().eq(DataDidiItineraryDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //完税证明发票
                     case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getCode());
                         info=paidProofMapper.selectOne(new LambdaQueryWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getFileId, fileId));
                         detailInfo=paidProofDetailsMapper.selectList(new LambdaQueryWrapper<DataDutyPaidProofDetails>().eq(DataDutyPaidProofDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //海关进口货物报关单发票
                     case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_IMPORTED_GOODS_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_IMPORTED_GOODS_CODE.getCode());
                         info=customsImportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getFileId, fileId));
                         detailInfo=customsExportGoodsDetailMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //海关出口货物报关单发票
                     case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_EXPORT_GOODS_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_EXPORT_GOODS_CODE.getCode());
                         info=customsExportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getFileId, fileId));
                         detailInfo=customsExportGoodsDetailMapper.selectList(new LambdaQueryWrapper<DataCustomsExportGoodsDetail>().eq(DataCustomsExportGoodsDetail::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //海关专用缴款书发票
                     case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE.getCode());
                         info=customsSpecialPaymentMapper.selectOne(new LambdaQueryWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     //货物运输电子收款凭证发票
                     case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
-                        res.setInvoice(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getDesc());
+                        res.setInvoice(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getCode());
                         info=paymentMapper.selectOne(new LambdaQueryWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, fileId));
                         detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
