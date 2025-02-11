@@ -47,16 +47,12 @@ public class SysRegisterService {
         // 校验用户类型是否存在
         String userType = UserType.getUserType(registerBody.getUserType()).getUserType();
 
-        boolean captchaEnabled = captchaProperties.getEnable();
-        // 验证码开关
-        if (captchaEnabled) {
-            validateCaptcha(tenantId, username, registerBody.getCode(), registerBody.getUuid());
-        }
         SysUserBo sysUser = new SysUserBo();
         sysUser.setUserName(username);
         sysUser.setNickName(username);
         sysUser.setPassword(BCrypt.hashpw(password));
         sysUser.setUserType(userType);
+        sysUser.setPhonenumber(registerBody.getPhonenumber());
 
         boolean exist = TenantHelper.dynamic(tenantId, () -> {
             return userMapper.exists(new LambdaQueryWrapper<SysUser>()

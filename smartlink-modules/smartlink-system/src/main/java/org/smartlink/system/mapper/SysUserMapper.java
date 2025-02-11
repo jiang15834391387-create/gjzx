@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 import org.smartlink.common.mybatis.annotation.DataColumn;
 import org.smartlink.common.mybatis.annotation.DataPermission;
 import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
@@ -88,4 +89,6 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
     })
     int updateById(@Param(Constants.ENTITY) SysUser user);
 
+    @Update("UPDATE sys_user SET password = #{password} WHERE user_id = #{userId}")
+    int updaUserPassword(Long userId, String password);
 }

@@ -45,4 +45,12 @@ public class LoginBody implements Serializable {
      */
     private String uuid;
 
+
+    /**
+     * 唯一标识
+     */
+    private String clientType;
+
+    //短信code
+    private String smsCode;
 }

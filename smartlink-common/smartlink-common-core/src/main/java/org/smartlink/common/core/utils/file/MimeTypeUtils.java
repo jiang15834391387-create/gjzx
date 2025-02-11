@@ -23,6 +23,16 @@ public class MimeTypeUtils {
     public static final String[] MEDIA_EXTENSION = {"swf", "flv", "mp3", "wav", "wma", "wmv", "mid", "avi", "mpg",
         "asf", "rm", "rmvb"};
 
+    /**
+     * 需要转换格式的图片类型
+     */
+    public static final String[] IMAGE_TRANS_EXTENSION={"AVIF","WMF","EMF","FPX","BMP","GIF","SVG","ICO","TIF","TIFF"};
+
+    /**
+     * 转换图片类型为jpg类型
+     */
+    public static final String[] IMAGE_EXTENSION_TRANSFORMATION={"TIF","TIFF"};
+
     public static final String[] VIDEO_EXTENSION = {"mp4", "avi", "rmvb"};
 
     public static final String[] DEFAULT_ALLOWED_EXTENSION = {

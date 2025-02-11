@@ -179,6 +179,13 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- entity模块 -->
+            <dependency>
+                <groupId>org.smartlink</groupId>
+                <artifactId>smartlink-common-entity</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

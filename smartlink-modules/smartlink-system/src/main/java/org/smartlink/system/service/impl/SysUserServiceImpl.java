@@ -33,7 +33,6 @@ import org.smartlink.system.domain.vo.SysRoleVo;
 import org.smartlink.system.domain.vo.SysUserExportVo;
 import org.smartlink.system.domain.vo.SysUserVo;
 import org.smartlink.system.mapper.*;
-import org.smartlink.system.mapper.*;
 import org.smartlink.system.service.ISysUserService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -328,6 +327,8 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
         user.setUpdateBy(0L);
         SysUser sysUser = MapstructUtils.convert(user, SysUser.class);
         sysUser.setTenantId(tenantId);
+        sysUser.setPhonenumber(user.getPhonenumber());
+        sysUser.setUserType(user.getUserType());
         return baseMapper.insert(sysUser) > 0;
     }
 

@@ -5,6 +5,8 @@ import cn.dev33.satoken.exception.NotLoginException;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,8 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
+import org.smartlink.common.core.constant.CacheConstants;
+import org.smartlink.common.core.constant.GlobalConstants;
 import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginBody;
@@ -21,6 +25,7 @@ import org.smartlink.common.core.domain.model.SocialLoginBody;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
+import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.social.config.properties.SocialLoginConfigProperties;
 import org.smartlink.common.social.config.properties.SocialProperties;
@@ -35,11 +40,12 @@ import org.smartlink.system.service.ISysClientService;
 import org.smartlink.system.service.ISysConfigService;
 import org.smartlink.system.service.ISysSocialService;
 import org.smartlink.system.service.ISysTenantService;
-import org.smartlink.web.domain.ForgetPasswordReq;
+import org.smartlink.web.domain.bo.ForgetPasswordBo;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.smartlink.web.domain.vo.TenantListVo;
 import org.smartlink.web.service.IAuthStrategy;
+import org.smartlink.web.service.ILoginService;
 import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
 import org.springframework.validation.annotation.Validated;
@@ -73,7 +79,7 @@ public class AuthController {
     private final ISysSocialService socialUserService;
     private final ISysClientService clientService;
     private final ScheduledExecutorService scheduledExecutorService;
-
+    private final ILoginService iLoginService;
 
     /**
      * 登录方法
@@ -101,7 +107,6 @@ public class AuthController {
         loginService.checkTenant(loginBody.getTenantId());
         // 登录
         LoginVo loginVo = IAuthStrategy.login(body, client, grantType);
-
         Long userId = LoginHelper.getUserId();
         scheduledExecutorService.schedule(() -> {
             SseMessageDto dto = new SseMessageDto();
@@ -186,6 +191,18 @@ public class AuthController {
         if (!configService.selectRegisterEnabled(user.getTenantId())) {
             return R.fail("当前系统没有开启注册功能！");
         }
+        String phone= user.getPhonenumber();
+        //redis获取hash里面的值
+        String regex = RedisUtils.getCacheMapValue(CacheConstants.SYS_CONFIG_KEYS , "sys.phone.regex");
+        if (!StrUtil.isBlankIfStr(phone) && ReUtil.isMatch(regex,phone)) {
+            return R.fail("手机号格式错误");
+        }
+        String key = GlobalConstants.CAPTCHA_CODE_KEY +user.getPhonenumber();
+        String smsCode = RedisUtils.getCacheObject(key);
+        if (StringUtils.isBlank(smsCode) || !smsCode.equals(user.getSmsCode())) {
+            log.info("短信验证码错误 {}", smsCode);
+            return R.fail("验证码错误");
+        }
         registerService.register(user);
         return R.ok();
     }
@@ -237,6 +254,7 @@ public class AuthController {
      * @Author: Mr.Meng
      * @Date: 2025/1/7
      */
+    @ApiEncrypt
     @PostMapping("/sms/login")
     public R<LoginVo> smsLogin(@RequestBody SmsLoginBody loginBody) {
         return loginService.smsLogin(loginBody);
@@ -247,8 +265,39 @@ public class AuthController {
      * @Date: 2025/1/7
      */
     @PostMapping("/forget/password")
-    public R<Void> forgetPassword(@RequestBody ForgetPasswordReq forgetPasswordBody) {
+    public R<Void> forgetPassword(@RequestBody ForgetPasswordBo forgetPasswordBody) {
         return loginService.forgetPassword(forgetPasswordBody);
+    }
+
+    //app账号密码登录
+    @PostMapping("/applogin")
+    public R<LoginVo> applogin(@RequestBody String body) {
+        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
+        ValidatorUtils.validate(loginBody);
+        // 授权类型和客户端id
+        String clientId = loginBody.getClientId();
+        String grantType = loginBody.getGrantType();
+        SysClientVo client = clientService.queryByClientId(clientId);
+        // 查询不到 client 或 client 内不包含 grantType
+        if (ObjectUtil.isNull(client) || !StringUtils.contains(client.getGrantType(), grantType)) {
+            log.info("客户端id: {} 认证类型：{} 异常!.", clientId, grantType);
+            return R.fail(MessageUtils.message("auth.grant.type.error"));
+        } else if (!UserConstants.NORMAL.equals(client.getStatus())) {
+            return R.fail(MessageUtils.message("auth.grant.type.blocked"));
+        }
+        // 校验租户
+        loginService.checkTenant(loginBody.getTenantId());
+        // 登录
+        LoginVo loginVo = iLoginService.applogin(body, client);
+        loginVo.setNickName(loginVo.getNickName());
+        Long userId = LoginHelper.getUserId();
+        scheduledExecutorService.schedule(() -> {
+            SseMessageDto dto = new SseMessageDto();
+            dto.setMessage("欢迎登录");
+            dto.setUserIds(List.of(userId));
+            SseMessageUtils.publishMessage(dto);
+        }, 5, TimeUnit.SECONDS);
+        return R.ok(loginVo);
     }
 
 

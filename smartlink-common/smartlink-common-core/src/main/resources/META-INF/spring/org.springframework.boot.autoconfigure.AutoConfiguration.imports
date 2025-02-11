@@ -1,6 +1,6 @@
 org.smartlink.common.core.config.ApplicationConfig
 org.smartlink.common.core.config.AsyncConfig
-org.smartlink.common.core.config.smartlinkConfig
+org.smartlink.common.core.config.SmartlinkConfig
 org.smartlink.common.core.config.ThreadPoolConfig
 org.smartlink.common.core.config.ValidatorConfig
 org.smartlink.common.core.utils.SpringUtils

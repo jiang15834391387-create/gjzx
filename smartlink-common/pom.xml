@@ -21,6 +21,7 @@
         <module>smartlink-common-mail</module>
         <module>smartlink-common-mybatis</module>
         <module>smartlink-common-oss</module>
+        <module>smartlink-common-ocr</module>
         <module>smartlink-common-ratelimiter</module>
         <module>smartlink-common-redis</module>
         <module>smartlink-common-satoken</module>
@@ -34,6 +35,8 @@
         <module>smartlink-common-tenant</module>
         <module>smartlink-common-websocket</module>
         <module>smartlink-common-sse</module>
+        <module>smartlink-common-check</module>
+        <module>smartlink-common-entity</module>
     </modules>
 
     <artifactId>smartlink-common</artifactId>

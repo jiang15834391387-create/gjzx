@@ -67,4 +67,30 @@ public class BaseEntity implements Serializable {
     @TableField(exist = false)
     private Map<String, Object> params = new HashMap<>();
 
+
+    /**
+     * 是否查验标识，（0查验失败，1查验成功）
+     */
+    //@ApiModelProperty(value = "是否查验标识，（0查验失败，1查验成功）")
+    @TableField(exist = false)
+    private String checkInvoice;
+
+    /**
+     * 查验结果
+     */
+    //@ApiModelProperty(value = "查验结果")
+    @TableField(exist = false)
+    private String checkResult;
+    /**
+     * 备注
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE, exist = false)
+    private String remark;
+
+    /**
+     * 是否删除标识 0-不删除  1-删除
+     */
+    @TableField(exist = false)
+    private String deleteFlag;
+
 }

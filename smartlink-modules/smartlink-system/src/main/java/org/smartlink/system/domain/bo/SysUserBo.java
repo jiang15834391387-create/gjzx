@@ -63,6 +63,11 @@ public class SysUserBo extends BaseEntity {
     private String email;
 
     /**
+     * 用户邮箱授权码
+     */
+    private String emailAuthorization;
+
+    /**
      * 手机号码
      */
     private String phonenumber;

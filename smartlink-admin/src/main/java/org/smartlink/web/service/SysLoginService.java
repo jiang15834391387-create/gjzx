@@ -7,16 +7,16 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.lock.annotation.Lock4j;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthUser;
 import org.smartlink.common.core.constant.*;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.dto.RoleDTO;
-import org.smartlink.common.core.domain.model.LoginBody;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.SmsLoginBody;
 import org.smartlink.common.core.enums.LoginType;
@@ -38,7 +38,7 @@ import org.smartlink.system.domain.bo.SysSocialBo;
 import org.smartlink.system.domain.vo.*;
 import org.smartlink.system.mapper.SysUserMapper;
 import org.smartlink.system.service.*;
-import org.smartlink.web.domain.ForgetPasswordReq;
+import org.smartlink.web.domain.bo.ForgetPasswordBo;
 import org.smartlink.web.domain.vo.LoginVo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 /**
  * 登录校验方法
@@ -259,7 +258,9 @@ public class SysLoginService {
      */
     public R<LoginVo> smsLogin(SmsLoginBody loginBody) {
         String phone= loginBody.getPhonenumber();
-        if (!phone.equals("") && Pattern.compile("^1[3456789]\\d{9}$").matcher(phone).matches()) {
+        //redis获取hash里面的值
+        String regex = RedisUtils.getCacheMapValue(CacheConstants.SYS_CONFIG_KEYS , "sys.phone.regex");
+        if (!StrUtil.isBlankIfStr(phone) && ReUtil.isMatch(regex,phone)) {
             // 授权类型和客户端id
             String clientId = loginBody.getClientId();
             String grantType = loginBody.getGrantType();
@@ -287,14 +288,12 @@ public class SysLoginService {
             //校验租户
             checkTenant(user.getTenantId());
             //登录
-            String string = JsonUtils.toJsonString(loginBody);
-            LoginBody loginBody1 = JsonUtils.parseObject(string, LoginBody.class);
-            LoginVo loginVo = IAuthStrategy.login(String.valueOf(loginBody1), client, grantType);
+            LoginVo loginVo = IAuthStrategy.login(JsonUtils.toJsonString(loginBody), client, grantType);
 
             Long userId = LoginHelper.getUserId();
             scheduledExecutorService.schedule(() -> {
                 SseMessageDto dto = new SseMessageDto();
-                dto.setMessage("欢迎登录smartlink后台管理系统");
+                dto.setMessage("欢迎登录");
                 dto.setUserIds(List.of(userId));
                 SseMessageUtils.publishMessage(dto);
             }, 5, TimeUnit.SECONDS);
@@ -310,9 +309,11 @@ public class SysLoginService {
      * @param forgetPasswordBody 忘记密码信息
      * @return 结果
      */
-    public R<Void> forgetPassword(ForgetPasswordReq forgetPasswordBody) {
+    public R<Void> forgetPassword(ForgetPasswordBo forgetPasswordBody) {
         String phone= forgetPasswordBody.getPhonenumber();
-        if (!phone.equals("") && Pattern.compile("^1[3456789]\\d{9}$").matcher(phone).matches()) {
+        //redis获取hash里面的值
+        String regex = RedisUtils.getCacheMapValue(CacheConstants.SYS_CONFIG_KEYS , "sys.phone.regex");
+        if (!StrUtil.isBlankIfStr(phone) && ReUtil.isMatch(regex,phone)) {
             //根据手机号查询用户信息
             LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(SysUser::getPhonenumber, phone);
@@ -327,9 +328,9 @@ public class SysLoginService {
                 return R.fail("验证码错误");
             }
             user.setPassword(BCrypt.hashpw(forgetPasswordBody.getNewPassword()));
-            LambdaUpdateWrapper<SysUser> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(SysUser::getUserId, user.getUserId()).set(SysUser::getPassword,user.getPassword());
-            int update = userMapper.update(null, updateWrapper);
+            SysUser users = BeanUtil.toBean(user, SysUser.class);
+            int update=userMapper.updaUserPassword(users.getUserId(),users.getPassword());
+            //使用自定义sql语句
             if (update > 0) {
                 return R.ok();
             } else {
