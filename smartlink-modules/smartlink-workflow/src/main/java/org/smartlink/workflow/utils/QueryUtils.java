@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.smartlink.common.core.utils.SpringUtils;
 import org.smartlink.common.tenant.helper.TenantHelper;
+import org.smartlink.workflow.domain.TestFormConfig;
 import org.smartlink.workflow.domain.vo.TaskVo;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.history.HistoricActivityInstanceQuery;
@@ -165,5 +166,28 @@ public class QueryUtils {
         String businessStatus = WorkflowUtils.getBusinessStatus(taskVo.getBusinessKey());
         taskVo.setBusinessStatus(businessStatus);
         return taskVo;
+    }
+
+
+
+    public static StringBuilder parseValue(List<TestFormConfig> list) {
+
+        StringBuilder formBuilder = new StringBuilder();
+        formBuilder.append("<form>\n");
+        for (TestFormConfig field : list) {
+            formBuilder.append("<label>")
+                .append(field.getFieldName())
+                .append("</label>\n");
+            formBuilder.append(" <input type=\"")
+                .append(field.getFieldType())
+                .append("\" name=\"")
+                .append(field.getFieldName()).append("\"");
+            if (field.getFieldRequired() != null) {
+                formBuilder.append(" required");
+            }
+            formBuilder.append("/>\n");
+            formBuilder.append("</form>");
+        }
+        return formBuilder;
     }
 }
