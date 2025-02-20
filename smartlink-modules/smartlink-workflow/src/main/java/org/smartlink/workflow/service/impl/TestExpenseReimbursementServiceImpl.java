@@ -75,9 +75,9 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         lqw.eq(StringUtils.isNotBlank(bo.getProjectType()), TestExpenseReimbursement::getProjectType, bo.getProjectType());
         lqw.orderByDesc(BaseEntity::getCreateTime);
         String deviceType = bo.getDeviceType();
-        if(deviceType.equals("APP")){
+        //if(deviceType.equals("APP")){
             lqw.eq(TestExpenseReimbursement::getCreateBy,LoginHelper.getUserId());
-        }
+        //}
         Page<TestExpenseReimbursementVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
