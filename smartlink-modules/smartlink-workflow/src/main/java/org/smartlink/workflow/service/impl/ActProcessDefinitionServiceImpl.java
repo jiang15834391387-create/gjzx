@@ -160,6 +160,8 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
         return CollUtil.reverse(processDefinitionVoList);
     }
 
+
+
     /**
      * 查看流程定义图片
      *
@@ -396,6 +398,22 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
         }
         return "";
     }
+
+    @Override
+    public String definitionXmlByType(String Type) {
+        List<WfDefinitionConfigVo> wfDefinitionConfigVos = wfDefinitionConfigMapper.selectVoList(
+            new LambdaQueryWrapper<WfDefinitionConfig>().eq(WfDefinitionConfig::getProcessKey, Type).orderByDesc(WfDefinitionConfig::getVersion));
+        if (CollUtil.isNotEmpty(wfDefinitionConfigVos)) {
+            String processDefinitionId = wfDefinitionConfigVos.get(0).getDefinitionId();
+            StringBuilder xml = new StringBuilder();
+            ProcessDefinition processDefinition = repositoryService.getProcessDefinition(processDefinitionId);
+            InputStream inputStream = repositoryService.getResourceAsStream(processDefinition.getDeploymentId(), processDefinition.getResourceName());
+            xml.append(IoUtil.read(inputStream, StandardCharsets.UTF_8));
+            return xml.toString();
+        }
+        return "";
+    }
+
 
     /**
      * 初始化配置数据（demo使用，不用可删除）

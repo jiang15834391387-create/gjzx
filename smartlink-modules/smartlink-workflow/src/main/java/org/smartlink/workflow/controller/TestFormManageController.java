@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.smartlink.workflow.domain.TestFormConfig;
 import org.smartlink.workflow.domain.vo.HtmlVo;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
@@ -100,7 +101,7 @@ public class TestFormManageController extends BaseController {
      */
     @SaCheckPermission("system:formManage:selectBy")
     @GetMapping("/selectBy/{type}")
-    public R<List<HtmlVo>> selectBy(@NotNull(message = "值不能为空")
+    public R<List<TestFormManageVo>> selectBy(@NotNull(message = "值不能为空")
                                        @PathVariable String type) {
         return R.ok(testFormManageService.selectBy(type));
     }

@@ -63,8 +63,8 @@ public class TestExpenseReimbursementController extends BaseController {
     @Log(title = "费用报销申请", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
-    public R<Void> add(@Validated(AddGroup.class) @RequestBody TestExpenseReimbursementBo bo) {
-        return toAjax(testExpenseReimbursementService.insertByBo(bo));
+    public R<TestExpenseReimbursementVo> add(@Validated(AddGroup.class) @RequestBody TestExpenseReimbursementBo bo) {
+        return R.ok(testExpenseReimbursementService.insertByBo(bo));
     }
 
     /**
@@ -74,8 +74,8 @@ public class TestExpenseReimbursementController extends BaseController {
     @Log(title = "费用报销申请", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
-    public R<Void> edit(@Validated(EditGroup.class) @RequestBody TestExpenseReimbursementBo bo) {
-        return toAjax(testExpenseReimbursementService.updateByBo(bo));
+    public R<TestExpenseReimbursementVo> edit(@Validated(EditGroup.class) @RequestBody TestExpenseReimbursementBo bo) {
+        return R.ok(testExpenseReimbursementService.updateByBo(bo));
     }
 
     /**

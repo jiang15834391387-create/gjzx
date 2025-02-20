@@ -40,7 +40,12 @@ public class TestFormConfigVo implements Serializable {
     @ExcelProperty(value = "表单id")
     private Long formId;
 
+    private String fieldTypeData;
 
+    /**
+     * 字段英文名称
+     */
+    private String fieldValue;
     /**
      * 字段名称
      */

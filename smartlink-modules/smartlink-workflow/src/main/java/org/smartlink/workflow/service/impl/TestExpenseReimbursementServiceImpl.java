@@ -35,7 +35,7 @@ import java.util.*;
 /**
  * 费用报销申请Service业务层处理
  *
- * @author Lion Li
+ * @author lili
  * @date 2025-01-07
  */
 @RequiredArgsConstructor
@@ -116,8 +116,8 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean insertByBo(TestExpenseReimbursementBo bo) {
-        boolean flag = false;
+    public TestExpenseReimbursementVo insertByBo(TestExpenseReimbursementBo bo) {
+
         try {
             TestExpenseReimbursement add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
             validEntityBeforeSave(add);
@@ -125,12 +125,16 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
             }
             add.setCreateDept(LoginHelper.getDeptId());
-            flag = baseMapper.insert(add) > 0;
+            boolean  flag = baseMapper.insert(add) > 0;
+            if (flag) {
+                bo.setId(add.getId());
+            }
+            return MapstructUtils.convert(add, TestExpenseReimbursementVo.class);
         } catch (Exception e) {
             log.error("新增费用报销申请失败{}",e);
             throw new RuntimeException("失败");
         }
-        return flag;
+
     }
 
     /**
@@ -141,12 +145,12 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateByBo(TestExpenseReimbursementBo bo) {
+    public TestExpenseReimbursementVo updateByBo(TestExpenseReimbursementBo bo) {
         TestExpenseReimbursement update = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
         updValidEntityBeforeSave(update);
         try {
             int i = baseMapper.updateById(update);
-            return true;
+            return MapstructUtils.convert(update, TestExpenseReimbursementVo.class);
         } catch (Exception e) {
             log.error("修改失败，执行回滚{}",e);
             throw new RuntimeException("失败");
@@ -191,7 +195,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
 
-    @EventListener(condition = "#processEvent.key.startsWith('reimbursement')")
+    @EventListener(condition = "#processEvent.key.startsWith('bxd')")
     public void processHandler(ProcessEvent processEvent) {
         log.info("当前任务执行了{}", processEvent.toString());
         TestExpenseReimbursement testExpenseReimbursement = baseMapper.selectById(Long.valueOf(processEvent.getBusinessKey()));
@@ -203,7 +207,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
 
-    @EventListener(condition = "#processTaskEvent.key.startsWith('reimbursement')")
+    @EventListener(condition = "#processTaskEvent.key.startsWith('bxd')")
     public void processTaskHandler(ProcessTaskEvent processTaskEvent) {
         // 所有demo案例的申请人节点id
         List<String> list = sysDictDataMapper.selectDictList();

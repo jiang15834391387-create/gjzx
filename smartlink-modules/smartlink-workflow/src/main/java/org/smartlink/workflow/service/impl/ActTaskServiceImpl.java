@@ -18,6 +18,7 @@ import org.flowable.engine.impl.bpmn.behavior.ParallelMultiInstanceBehavior;
 import org.flowable.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.engine.runtime.ProcessInstanceQuery;
 import org.flowable.identitylink.api.history.HistoricIdentityLink;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
@@ -186,6 +187,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 taskService.complete(newTask.getId());
                 return true;
             }
+
             //附件上传
             AttachmentCmd attachmentCmd = new AttachmentCmd(completeTaskBo.getFileId(), task.getId(), task.getProcessInstanceId(), ossService);
             managementService.executeCommand(attachmentCmd);
@@ -194,10 +196,12 @@ public class ActTaskServiceImpl implements IActTaskService {
             if (BusinessStatusEnum.DRAFT.getStatus().equals(businessStatus) || BusinessStatusEnum.BACK.getStatus().equals(businessStatus) || BusinessStatusEnum.CANCEL.getStatus().equals(businessStatus)) {
                 flowProcessEventHandler.processHandler(processInstance.getProcessDefinitionKey(), processInstance.getBusinessKey(), businessStatus, true);
             }
+
             runtimeService.updateBusinessStatus(task.getProcessInstanceId(), BusinessStatusEnum.WAITING.getStatus());
             //办理监听
             flowProcessEventHandler.processTaskHandler(processInstance.getProcessDefinitionKey(), task.getTaskDefinitionKey(),
                 task.getId(), processInstance.getBusinessKey());
+
             //办理意见
             taskService.addComment(completeTaskBo.getTaskId(), task.getProcessInstanceId(), TaskStatusEnum.PASS.getStatus(), StringUtils.isBlank(completeTaskBo.getMessage()) ? "同意" : completeTaskBo.getMessage());
             //办理任务
@@ -207,9 +211,13 @@ public class ActTaskServiceImpl implements IActTaskService {
             } else {
                 taskService.complete(completeTaskBo.getTaskId());
             }
+
             //记录执行过的流程任务节点
             wfTaskBackNodeService.recordExecuteNode(task);
-            ProcessInstance pi = QueryUtils.instanceQuery(task.getProcessInstanceId()).singleResult();
+            String processInstanceId = task.getProcessInstanceId();
+            ProcessInstanceQuery processInstanceQuery = QueryUtils.instanceQuery(processInstanceId);
+            ProcessInstance pi = processInstanceQuery.singleResult();
+            //ProcessInstance pi = QueryUtils.instanceQuery(processInstanceId).singleResult();
             if (pi == null) {
                 UpdateBusinessStatusCmd updateBusinessStatusCmd = new UpdateBusinessStatusCmd(task.getProcessInstanceId(), BusinessStatusEnum.FINISH.getStatus());
                 managementService.executeCommand(updateBusinessStatusCmd);

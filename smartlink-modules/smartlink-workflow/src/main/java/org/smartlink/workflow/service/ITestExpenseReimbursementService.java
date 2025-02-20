@@ -48,7 +48,7 @@ public interface ITestExpenseReimbursementService {
      * @param bo 费用报销申请
      * @return 是否新增成功
      */
-    Boolean insertByBo(TestExpenseReimbursementBo bo);
+    TestExpenseReimbursementVo insertByBo(TestExpenseReimbursementBo bo);
 
     /**
      * 修改费用报销申请
@@ -56,7 +56,7 @@ public interface ITestExpenseReimbursementService {
      * @param bo 费用报销申请
      * @return 是否修改成功
      */
-    Boolean updateByBo(TestExpenseReimbursementBo bo);
+    TestExpenseReimbursementVo updateByBo(TestExpenseReimbursementBo bo);
 
     /**
      * 校验并批量删除费用报销申请信息

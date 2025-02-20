@@ -96,4 +96,6 @@ public interface IActProcessDefinitionService {
      * @return
      */
     String definitionXmlByTableName( String tableName);
+
+    String definitionXmlByType( String type);
 }

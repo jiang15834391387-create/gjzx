@@ -9,6 +9,7 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.TestFormConfig;
+import org.smartlink.workflow.domain.TestFormManage;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -41,6 +42,12 @@ public class TestExpenseReimbursementVo implements Serializable {
      */
     @ExcelProperty(value = "项目名称")
     private String projectName;
+
+    /**
+     * 项目名称
+     */
+    @ExcelProperty(value = "项目名称")
+    private String projectNameValue;
 
     /**
      * 报销类型
@@ -77,7 +84,11 @@ public class TestExpenseReimbursementVo implements Serializable {
      */
     @ExcelProperty(value = "消费明细")
     private String consumptionDetails;
-
+    /**
+     * 配置
+     */
+    @ExcelProperty(value = "配置")
+    private String detailsValue;
     /**
      * 状态
      */
@@ -89,6 +100,4 @@ public class TestExpenseReimbursementVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
-    private List<TestFormConfig> formConfigList;
 }

@@ -31,6 +31,12 @@ public class TestFormConfigBo  {
     @NotBlank(message = "字段名称不能为空", groups = { AddGroup.class, EditGroup.class })
     private String fieldName;
 
+    private String fieldTypeData;
+
+    /**
+     * 字段英文名称
+     */
+    private String fieldValue;
     /**
      * 字段名称
      */

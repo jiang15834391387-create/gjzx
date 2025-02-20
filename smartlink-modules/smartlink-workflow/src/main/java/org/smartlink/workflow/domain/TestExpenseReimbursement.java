@@ -34,9 +34,13 @@ public class TestExpenseReimbursement extends TenantEntity {
      * 项目名称
      */
     private String projectName;
-
     /**
-     * 申请类型(1.费用报销，2.通用报销)
+     * 项目名称
+     */
+    @ExcelProperty(value = "项目名称")
+    private String projectNameValue;
+    /**
+     * 报销类型
      */
     private String projectType;
 
@@ -64,7 +68,7 @@ public class TestExpenseReimbursement extends TenantEntity {
      * 消费明细
      */
     private String consumptionDetails;
-
+    private String detailsValue;
     /**
      * 状态
      */
