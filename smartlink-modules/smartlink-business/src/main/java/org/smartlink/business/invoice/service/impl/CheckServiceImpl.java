@@ -13,7 +13,6 @@ import org.apache.shiro.util.StringUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.invoice.service.ICheckService;
-import org.smartlink.common.check.doman.BillRequest;
 import org.smartlink.common.check.doman.InvoicePageQuery;
 import org.smartlink.common.check.doman.InvoiceRequest;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
@@ -335,20 +334,20 @@ public class CheckServiceImpl implements ICheckService {
      * 发票修改
      */
     @Override
-    public int invoiceAlter(InvoiceRequest request) throws Exception {
+    public R<Void> invoiceAlter(InvoiceRequest request) throws Exception {
         String invoiceType = request.getInvoiceType();
         if (StrUtil.isEmpty(invoiceType)) {
-            return 0;
+            return R.fail(500, "发票类型不能为空");
         }
         log.info("修改发票类型：{}", invoiceType);
         Map<String, Object> generalInfo = request.getGeneralInfo();
         log.info("修改传入的基本发票信息：{}", generalInfo);
-        BillRequest billRequest = request.getBillRequest();
-        if (ObjUtil.isEmpty(billRequest)){
-            return 0;
-        }
-        List<Map<String, Object>> details = billRequest.getDetails();
-        log.info("修改传入的发票明细信息：{}", details);
+       // BillRequest billRequest = request.getBillRequest();
+//        if (ObjUtil.isEmpty(billRequest)){
+//            return R.fail(500, "发票明细对象不能为空");
+//        }
+//        List<Map<String, Object>> details = billRequest.getDetails();
+//        log.info("修改传入的发票明细信息：{}", details);
         // 根据发票类型处理逻辑
         switch (invoiceType) {
             case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
@@ -360,13 +359,13 @@ public class CheckServiceImpl implements ICheckService {
             case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 // 处理增值税发票
-                 return handleVatInvoice(generalInfo, request.getInvoiceType());
+                return updateOcrInvoice(generalInfo,request.getInvoiceType());
             // 数电票普通发票/机打发票
             case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
             case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
-                return updateOrdinaryInvoice(generalInfo, details);
+                return updateOrdinaryInvoice(generalInfo);
             //机动车销售发票
             case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
                 return updateVehicleSaleInvoice(generalInfo);
@@ -375,17 +374,17 @@ public class CheckServiceImpl implements ICheckService {
                 return updateCarSaleInvoice(generalInfo);
             //航空电子客运单
             case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
-                return updateFilghtItinerary(generalInfo, details);
+                return updateFilghtItinerary(generalInfo);
             //船票
             case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
                 return updateSteamerTicket(generalInfo);
             //医疗票明细票/医疗票
             case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
             case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
-                return updateMedicalTicket(generalInfo, details);
+                return updateMedicalTicket(generalInfo);
             //非税收入单据
             case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
-                return updateNonTaxRevenueReceipts(generalInfo,details);
+                return updateNonTaxRevenueReceipts(generalInfo);
             //定额发票
             case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
                 return updateQuotaInvoice(generalInfo);
@@ -406,169 +405,257 @@ public class CheckServiceImpl implements ICheckService {
                 return updateReceipt(generalInfo);
             //出行发票/滴滴
             case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
-                return updateDidiItinerary(generalInfo, details);
+                return updateDidiItinerary(generalInfo);
             //完税证明发票
             case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
-                return updateDutyPaidProof(generalInfo,details);
+                return updateDutyPaidProof(generalInfo);
             //海关进口货物报关单发票
             case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
-                return updateCustomsImportGoods(generalInfo, details);
+                return updateCustomsImportGoods(generalInfo);
             //海关出口货物报关单发票
             case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
-                return updateCustomsExportGoods(generalInfo, details);
+                return updateCustomsExportGoods(generalInfo);
             //海关专用缴款书发票
             case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
-                return updateCustomsSpecialPayment(generalInfo,details);
+                return updateCustomsSpecialPayment(generalInfo);
             //货物运输电子收款凭证发票
             case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
-                return updateElectronicPaymentGoodsTransportation(generalInfo, details);
+                return updateElectronicPaymentGoodsTransportation(generalInfo);
         }
-        return 0;
+        return R.fail(500,"发票类型错误");
     }
     //修改非税收入单据
-    private int updateNonTaxRevenueReceipts(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateNonTaxRevenueReceipts(Map<String, Object> generalInfo) {
         DataNonTax dataNonTax = BeanUtil.toBean(generalInfo, DataNonTax.class);
         int updateResult = dataNonTaxMapper.updateById(dataNonTax);
         if (updateResult <= 0) {
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        for (Map<String, Object> item : details) {
-            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
-            int i = ocrDetailsMapper.updateById(ocrDetails);
-            if (i <= 0) {
-                return 0;
-            }
+//        for (Map<String, Object> item : details) {
+//            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
+//            int i = ocrDetailsMapper.updateById(ocrDetails);
+//            if (i <= 0) {
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dataNonTax.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
     }
 
     //修改海关专用缴款书发票
-    private int updateCustomsSpecialPayment(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateCustomsSpecialPayment(Map<String, Object> generalInfo) {
         DataCustomsSpecialPayment customsSpecialPayment = BeanUtil.toBean(generalInfo, DataCustomsSpecialPayment.class);
-        customsSpecialPaymentMapper.updateById(customsSpecialPayment);
-        for (Map<String, Object> item : details) {
-            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
-            ocrDetailsMapper.updateById(ocrDetails);
+        int counts=customsSpecialPaymentMapper.updateById(customsSpecialPayment);
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+//        for (Map<String, Object> item : details) {
+//            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
+//            int cc=ocrDetailsMapper.updateById(ocrDetails);
+//            if (cc<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsSpecialPayment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改海关出口货物报关单发票
-    private int updateCustomsExportGoods(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateCustomsExportGoods(Map<String, Object> generalInfo) {
         DataCustomsExportGoods customsExportGoods = BeanUtil.toBean(generalInfo, DataCustomsExportGoods.class);
-        customsExportGoodsMapper.updateById(customsExportGoods);
-        // 将细节数据转换为实体对象
-        List<DataCustomsExportGoodsDetail> customsExportGoodsDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataCustomsExportGoodsDetail.class))
-            .toList();
-        for (DataCustomsExportGoodsDetail item : customsExportGoodsDetails) {
-            customsExportGoodsDetailMapper.updateById(item);
+        int b=customsExportGoodsMapper.updateById(customsExportGoods);
+        if (b<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        // 将细节数据转换为实体对象
+//        List<DataCustomsExportGoodsDetail> customsExportGoodsDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataCustomsExportGoodsDetail.class))
+//            .toList();
+//        for (DataCustomsExportGoodsDetail item : customsExportGoodsDetails) {
+//            int num=customsExportGoodsDetailMapper.updateById(item);
+//            if (num<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsExportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
 
     //修改海关进口货物报关单发票
-    private int updateCustomsImportGoods(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateCustomsImportGoods(Map<String, Object> generalInfo) {
         // 将主表数据转换为实体对象
         DataCustomsImxportGoods customsImxportGoods = BeanUtil.toBean(generalInfo, DataCustomsImxportGoods.class);
         // 更新主表信息，并检查是否成功
-       customsImportGoodsMapper.updateById(customsImxportGoods);
-        List<DataCustomsImportGoodsDetail> customsImportGoodsDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataCustomsImportGoodsDetail.class))
-            .toList();
-        for (DataCustomsImportGoodsDetail item : customsImportGoodsDetails) {
-            customsImportGoodsDetailMapper.updateById(item);
-
+        int a=customsImportGoodsMapper.updateById(customsImxportGoods);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+//        List<DataCustomsImportGoodsDetail> customsImportGoodsDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataCustomsImportGoodsDetail.class))
+//            .toList();
+//        for (DataCustomsImportGoodsDetail item : customsImportGoodsDetails) {
+//            int num=customsImportGoodsDetailMapper.updateById(item);
+//            if (num<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsImxportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改出行发票/滴滴
-    private int updateDidiItinerary(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateDidiItinerary(Map<String, Object> generalInfo) {
         DataDidiItinerary didiItinerary = BeanUtil.toBean(generalInfo, DataDidiItinerary.class);
-        didiItineraryMapper.updateById(didiItinerary);
-        List<DataDidiItineraryDetails> didiItineraryDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataDidiItineraryDetails.class))
-            .toList();
-        for (DataDidiItineraryDetails item : didiItineraryDetails) {
-           didiItineraryDetailsMapper.updateById(item);
+        int c=didiItineraryMapper.updateById(didiItinerary);
+        if (c<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+//        List<DataDidiItineraryDetails> didiItineraryDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataDidiItineraryDetails.class))
+//            .toList();
+//        for (DataDidiItineraryDetails item : didiItineraryDetails) {
+//           int count=didiItineraryDetailsMapper.updateById(item);
+//           if (count<=0){
+//               return R.fail(500,"修改发票失败");
+//           }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, didiItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改医疗票
-    private int updateMedicalTicket(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateMedicalTicket(Map<String, Object> generalInfo) {
         DataMedicalTreatment medicalTreatment = BeanUtil.toBean(generalInfo, DataMedicalTreatment.class);
         int updateResult = dataMedicalTreatmentMapper.updateById(medicalTreatment);
         if (updateResult <= 0) {
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        List<DataOcrDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
-            .toList();
-        for (DataOcrDetails item : ocrDetails) {
-            int i = ocrDetailsMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//        for (DataOcrDetails item : ocrDetails) {
+//            int i = ocrDetailsMapper.updateById(item);
+//            if (i <= 0) {
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, medicalTreatment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
     }
 
     //修改航空电子客运发票
-    private int updateFilghtItinerary(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateFilghtItinerary(Map<String, Object> generalInfo) {
         DataFlightItinerary flightItinerary = BeanUtil.toBean(generalInfo, DataFlightItinerary.class);
         int updateResult = flightItineraryMapper.updateById(flightItinerary);
         if (updateResult <= 0) {
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        List<DataFlightsItineraryDetail> flightItineraryDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataFlightsItineraryDetail.class))
-            .toList();
-        for (DataFlightsItineraryDetail item : flightItineraryDetails) {
-            int i = flightsItineraryDetailMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
-        }
+//        List<DataFlightsItineraryDetail> flightItineraryDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataFlightsItineraryDetail.class))
+//            .toList();
+//        for (DataFlightsItineraryDetail item : flightItineraryDetails) {
+//            int i = flightsItineraryDetailMapper.updateById(item);
+//            if (i <= 0) {
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
         int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, flightItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES));
         if (count<=0){
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
+    }
+    //修改增值税发票
+    private R<Void> updateOcrInvoice(Map<String, Object> generalInfo,String invoiceType) throws Exception {
+        DataOcrInfo ocrInfo = BeanUtil.toBean(generalInfo, DataOcrInfo.class);
+        int updateResult =ocrInfoMapper.updateById(ocrInfo);
+        if (updateResult<=0){
+            return R.fail(500,"发票修改失败");
+        }
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//
+//        for (DataOcrDetails item : ocrDetails) {
+//            int i =ocrDetailsMapper.updateById(item);
+//            if (i<=0){
+//                return R.fail(500,"发票修改失败");
+//            }
+//        }
+        //根据file_id修改图片表信息
+        int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (count<=0){
+            return R.fail(500,"发票修改失败");
+        }
+        //处理调用查验方法
+        return handleVatInvoice(generalInfo,invoiceType);
     }
 
     //处理数电票/普通发票修改
-    private int updateOrdinaryInvoice(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateOrdinaryInvoice(Map<String, Object> generalInfo) {
         DataOcrInfo ocrInfo = BeanUtil.toBean(generalInfo, DataOcrInfo.class);
-        ocrInfoMapper.updateById(ocrInfo);
-        List<DataOcrDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
-            .toList();
-
-        for (DataOcrDetails item : ocrDetails) {
-            ocrDetailsMapper.updateById(item);
+        int updateResult =ocrInfoMapper.updateById(ocrInfo);
+        if (updateResult<=0){
+            return R.fail(500,"发票修改失败");
         }
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//
+//        for (DataOcrDetails item : ocrDetails) {
+//            int i =ocrDetailsMapper.updateById(item);
+//            if (i<=0){
+//                return R.fail(500,"发票修改失败");
+//            }
+//        }
         //根据file_id修改图片表信息
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+       int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (count<=0){
+            return R.fail(500,"发票修改失败");
+        }
+        return R.ok();
     }
 
     //货物运输电子收款凭证发票发票修改
-    private int updateElectronicPaymentGoodsTransportation(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateElectronicPaymentGoodsTransportation(Map<String, Object> generalInfo) {
         DataElectronicTransportationGoods transportationGoods = BeanUtil.toBean(generalInfo, DataElectronicTransportationGoods.class);
         int updateResult =paymentMapper.updateById(transportationGoods);
         if (updateResult <= 0){
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        List<DataOcrDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
-            .toList();
-        for (DataOcrDetails item : ocrDetails) {
-            ocrDetailsMapper.updateById(item);
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//        for (DataOcrDetails item : ocrDetails) {
+//            int a=ocrDetailsMapper.updateById(item);
+//            if (a<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, transportationGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
     }
 
     //处理增值税发票修改
-    private int handleVatInvoice(Map<String, Object> generalInfo, String invoiceType) throws Exception {
+    private R<Void> handleVatInvoice(Map<String, Object> generalInfo, String invoiceType) throws Exception {
         // DTO 初始化
         InvoiceCheckParamDTO dto = new InvoiceCheckParamDTO();
         // 处理区块链标记及通用信息
@@ -659,19 +746,19 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //发票查验
-    private int validateInvoice(InvoiceCheckParamDTO dto, Map<String, Object> generalInfo) throws Exception {
+    private R<Void> validateInvoice(InvoiceCheckParamDTO dto, Map<String, Object> generalInfo) throws Exception {
         // 获取 fileId
         String fileId = (String) generalInfo.get("fileId");
         if (StrUtil.isEmpty(fileId)) {
             log.error("fileId 为空");
-           return 0;
+           return R.fail(500,"查验失败,fileId 为空");
         }
         DataImageFilesInfo filesInfo = filesInfoMapper.selectOne(
             new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId)
         );
         if (ObjUtil.isEmpty(filesInfo)) {
             log.error("根据 fileId 查询图片信息为空");
-            return 0;
+            return R.fail(500,"查验失败,查询图片信息为空");
         }
         // 调用查验方法
         BaseEntity baseEntity = checkInvoice.checkInvoice(filesInfo, dto);
@@ -686,16 +773,17 @@ public class CheckServiceImpl implements ICheckService {
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)) {
                 //转换后增值税发票进行修改
-               return ocrConversionAlter(baseEntity, filesInfo);
+               //return ocrConversionAlter(baseEntity, filesInfo);
+                return R.ok();
             }
         }
-        return 0;
+        return R.fail(500,"发票查验失败,"+filesInfo.getMessage());
     }
     //修改发票后查验成功 修改发票信息
-    private int ocrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
+    private R<Void> ocrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
         if (ObjectUtil.isEmpty(baseEntity)){
             log.error("ocr查验转换后结果为空");
-            return 0;
+            return R.fail(500,"发票修改失败");
         }
         DataOcrInfo dataOcrInfo = BeanUtil.toBean(baseEntity, DataOcrInfo.class);
         log.info("修改查验转换后的OCR信息：{}", dataOcrInfo);
@@ -714,84 +802,147 @@ public class CheckServiceImpl implements ICheckService {
            ocrDetailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
         }
         filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        return R.ok();
     }
     //修改机动车销售发票
-    private int updateVehicleSaleInvoice (Map < String, Object > generalInfo){
+    private R<Void> updateVehicleSaleInvoice (Map < String, Object > generalInfo){
         DataMotorVehicleSale motorVehicleSale = BeanUtil.toBean(generalInfo, DataMotorVehicleSale.class);
-        motorVehicleSaleMapper.updateById(motorVehicleSale);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, motorVehicleSale.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int count=motorVehicleSaleMapper.updateById(motorVehicleSale);
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, motorVehicleSale.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改二手车销售发票
-    private int updateCarSaleInvoice (Map < String, Object > generalInfo){
+    private R<Void> updateCarSaleInvoice (Map < String, Object > generalInfo){
         DataUsedCarSales usedCarSales = BeanUtil.toBean(generalInfo, DataUsedCarSales.class);
-        usedCarSalesMapper.updateById(usedCarSales);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, usedCarSales.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int one=usedCarSalesMapper.updateById(usedCarSales);
+        if (one<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, usedCarSales.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (nums<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改船票
-    private int updateSteamerTicket (Map < String, Object > generalInfo){
+    private R<Void> updateSteamerTicket (Map < String, Object > generalInfo){
         DataSteamerTicket steamerTicket = BeanUtil.toBean(generalInfo, DataSteamerTicket.class);
-        steamerTicketMapper.updateById(steamerTicket);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, steamerTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=steamerTicketMapper.updateById(steamerTicket);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, steamerTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (nums<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改定额发票
-    private int updateQuotaInvoice (Map < String, Object > generalInfo){
+    private R<Void> updateQuotaInvoice (Map < String, Object > generalInfo){
         DataQuotaInvoice quotaInvoice = BeanUtil.toBean(generalInfo, DataQuotaInvoice.class);
-        quotaInvoiceMapper.updateById(quotaInvoice);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, quotaInvoice.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int counts=quotaInvoiceMapper.updateById(quotaInvoice);
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, quotaInvoice.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改出租车票
-    private int updateTaxiTickets (Map < String, Object > generalInfo){
+    private R<Void> updateTaxiTickets (Map < String, Object > generalInfo){
         DataTaxiTickets taxiTickets = BeanUtil.toBean(generalInfo, DataTaxiTickets.class);
-        taxiTicketsMapper.updateById(taxiTickets);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, taxiTickets.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=taxiTicketsMapper.updateById(taxiTickets);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, taxiTickets.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (nums<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改火车票
-    private int updateRailwayTicket (Map < String, Object > generalInfo){
+    private R<Void> updateRailwayTicket (Map < String, Object > generalInfo){
         DataRailwayTicket railwayTicket = BeanUtil.toBean(generalInfo, DataRailwayTicket.class);
-        railwayTicketMapper.updateById(railwayTicket);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, railwayTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=railwayTicketMapper.updateById(railwayTicket);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, railwayTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改汽车票
-    private int updatePassengerCar (Map < String, Object > generalInfo){
+    private R<Void> updatePassengerCar (Map < String, Object > generalInfo){
         DataPassengerCar passengerCar = BeanUtil.toBean(generalInfo, DataPassengerCar.class);
-        passengerCarMapper.updateById(passengerCar);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, passengerCar.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int num=passengerCarMapper.updateById(passengerCar);
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, passengerCar.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改过路费
-    private int updateTollRoads (Map < String, Object > generalInfo){
+    private R<Void> updateTollRoads (Map < String, Object > generalInfo){
         DataTollRoads tollRoads = BeanUtil.toBean(generalInfo, DataTollRoads.class);
-        tollRoadsMapper.updateById(tollRoads);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, tollRoads.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int c=tollRoadsMapper.updateById(tollRoads);
+        if(c<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, tollRoads.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改小票
-    private int updateReceipt (Map < String, Object > generalInfo){
+    private R<Void> updateReceipt (Map < String, Object > generalInfo){
         DataReceipt receipt = BeanUtil.toBean(generalInfo, DataReceipt.class);
-        dataReceiptMapper.updateById(receipt);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, receipt.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=dataReceiptMapper.updateById(receipt);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, receipt.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改完税证明
-    private int updateDutyPaidProof (Map < String, Object > generalInfo, List<Map<String, Object>> details){
+    private R<Void> updateDutyPaidProof (Map < String, Object > generalInfo){
         DataDutyPaidProof dutyPaidProof = BeanUtil.toBean(generalInfo, DataDutyPaidProof.class);
-        paidProofMapper.updateById(dutyPaidProof);
-        List<DataDutyPaidProofDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataDutyPaidProofDetails.class))
-            .toList();
-
-        for (DataDutyPaidProofDetails item : ocrDetails) {
-            paidProofDetailsMapper.updateById(item);
+        int count=paidProofMapper.updateById(dutyPaidProof);
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
         }
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+//        List<DataDutyPaidProofDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataDutyPaidProofDetails.class))
+//            .toList();
+//
+//        for (DataDutyPaidProofDetails item : ocrDetails) {
+//            int a=paidProofDetailsMapper.updateById(item);
+//            if (a<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
 
     /**
