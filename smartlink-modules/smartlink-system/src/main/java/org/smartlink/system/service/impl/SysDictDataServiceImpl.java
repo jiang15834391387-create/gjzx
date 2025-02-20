@@ -129,7 +129,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
     @Override
     public List<SysDictDataVo> updateDictData(SysDictDataBo bo) {
         SysDictData data = MapstructUtils.convert(bo, SysDictData.class);
-        int row = baseMapper.updateById(data);
+            int row = baseMapper.updateById(data);
         if (row > 0) {
             return baseMapper.selectDictDataByType(data.getDictType());
         }

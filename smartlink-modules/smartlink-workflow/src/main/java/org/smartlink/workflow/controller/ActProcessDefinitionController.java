@@ -82,6 +82,35 @@ public class ActProcessDefinitionController extends BaseController {
     }
 
     /**
+     *  根据表值类型进行查询xml文件
+     * @param tableName
+     * @return
+     */
+    @GetMapping("/definitionXmlByTableName/{tableName}")
+    public R<Map<String, Object>> definitionXmlByTableName(@NotBlank(message = "表key值不能为空") @PathVariable String tableName) {
+        Map<String, Object> map = new HashMap<>();
+        String xmlStr = actProcessDefinitionService.definitionXmlByTableName(tableName);
+        map.put("xml", Arrays.asList(xmlStr.split("\n")));
+        map.put("xmlStr", xmlStr);
+        return R.ok(map);
+    }
+
+    /**
+     * 查询
+     * @param type
+     * @return
+     */
+    @GetMapping("/definitionXmlByType/{type}")
+    public R<Map<String, Object>> definitionXmlByType(@NotBlank(message = "类型不能为空") @PathVariable String type) {
+
+        Map<String, Object> map = new HashMap<>();
+        String xmlStr = actProcessDefinitionService.definitionXmlByType(type);
+        map.put("xml", Arrays.asList(xmlStr.split("\n")));
+        map.put("xmlStr", xmlStr);
+        return R.ok(map);
+    }
+
+    /**
      * 删除流程定义
      *
      * @param deploymentIds        部署id

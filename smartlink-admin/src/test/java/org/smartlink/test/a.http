@@ -1,0 +1,228 @@
+//-------token汇总--------
+//admin
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJKMnhBRUYyQVF5UERMbmI1UERPUFVsb2xxSjlJUm9vUCIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.HEvkU0XpMAaIbH5pa7lWocp_fV-GqEPYgpJp-ARustU
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+//004 深圳负责人
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODc3MzIxOTUxOTE1NzMyOTk0Iiwicm5TdHIiOiIyTHAzRnBjUDhyQWZrdUZIVU5NQWxZcnBDNVAzQ29qTyIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg3NzMyMTk1MTkxNTczMjk5NCwidXNlck5hbWUiOiIwMDQiLCJkZXB0SWQiOjEwMSwiZGVwdE5hbWUiOiLmt7HlnLPmgLvlhazlj7giLCJkZXB0Q2F0ZWdvcnkiOiIifQ.OawdLyYnAsCtMgkhdc6A9DRH1BtomrTxOaIFuUBIbBA
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+//001 深圳财务总监
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODc3MzE5OTIxNzQ2NzY3ODc0Iiwicm5TdHIiOiJZcHh0NjBha3hmUEFmcmtmcXhzVHVkRTZWZWdEV2hLRiIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg3NzMxOTkyMTc0Njc2Nzg3NCwidXNlck5hbWUiOiIwMDEiLCJkZXB0SWQiOjEwNiwiZGVwdE5hbWUiOiLotKLliqHpg6jpl6giLCJkZXB0Q2F0ZWdvcnkiOiIifQ.27-3dsS08ij7O0dwYbdZcG_w8j2jOA_43sthmY6aAYU
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+//002 深圳财务专员A
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODc3MzIxMTUxMzgyNDgyOTQ1Iiwicm5TdHIiOiJTelpZb2pmTnJMTU9NUktiUkJsckxucWJEd2R6eEN2YiIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg3NzMyMTE1MTM4MjQ4Mjk0NSwidXNlck5hbWUiOiIwMDIiLCJkZXB0SWQiOjEwNiwiZGVwdE5hbWUiOiLotKLliqHpg6jpl6giLCJkZXB0Q2F0ZWdvcnkiOiIifQ.KNzM72S4iRFnAE6nZZHinHy6KiczU_TFWjBjanxIPqQ
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+//003 深圳财务专员B
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODc3MzIxNDk0MDE1MTc2NzA2Iiwicm5TdHIiOiI5ZGxSVEdBbkt2MVhjQzV0WUVHZGFWdkgyRzhIdERUZCIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg3NzMyMTQ5NDAxNTE3NjcwNiwidXNlck5hbWUiOiIwMDMiLCJkZXB0SWQiOjEwNiwiZGVwdE5hbWUiOiLotKLliqHpg6jpl6giLCJkZXB0Q2F0ZWdvcnkiOiIifQ.masvco17p5jT8Fnrn7VavlfTHk2UMaXqbCPnReqHMxE
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+//005 深圳普通员工
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODc3NjQwNTUxMjg5NTAzNzQ1Iiwicm5TdHIiOiJWS1Z4ZTFEcHE5ZzdLMldtWWxHQW0xaWtORDRBS1lRbCIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg3NzY0MDU1MTI4OTUwMzc0NSwidXNlck5hbWUiOiIwMDUiLCJkZXB0SWQiOjEwMSwiZGVwdE5hbWUiOiLmt7HlnLPmgLvlhazlj7giLCJkZXB0Q2F0ZWdvcnkiOiIifQ.AE5kDVCce2QiX169iy_qkIurpzlBWEMBJIyfyAi8GuU
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+#####
+
+
+### 添加报销单
+POST http://127.0.0.1:8080/system/expenseReimbursement
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODc3NjQwNTUxMjg5NTAzNzQ1Iiwicm5TdHIiOiJxZHIyN1NNS2NuM1B2MkhDZFFkalRnVXlwYWE1clN0cyIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg3NzY0MDU1MTI4OTUwMzc0NSwidXNlck5hbWUiOiIwMDUiLCJkZXB0SWQiOjEwMSwiZGVwdE5hbWUiOiLmt7HlnLPmgLvlhazlj7giLCJkZXB0Q2F0ZWdvcnkiOiIifQ.V2l_wFsOrNlWO9J2U4-UCJFqjW6NhR9FD2RNnl9KHgk
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+{
+  "projectName":"财务报销单",
+  "projectType":"bxd_clbx",
+  "reimbursementReason":"报销我的柠檬茶",
+  "reimbursementUser":"张三",
+  "submitTime":"2025-01-11 11:00:00.00",
+  "collectionInformation":"中国农业银行陕西分行",
+  "consumptionDetails":[{
+      "consumptionAmount": "100",
+      "reimbursementType": "cf",
+      "consumptionDescribe": "报销差旅费用",
+      "invoiceInformation": "http:baidu1.com"
+  },{
+      "consumptionAmount": "200",
+      "reimbursementType": "zsf",
+      "consumptionDescribe": "报销差旅费用",
+      "invoiceInformation": "http:baidu2.com"
+  }]
+}
+
+### 报销单列表
+GET http://127.0.0.1:8080/system/expenseReimbursement/list?pageNum=1&pageSize=10
+content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODc3NjQwNTUxMjg5NTAzNzQ1Iiwicm5TdHIiOiJxZHIyN1NNS2NuM1B2MkhDZFFkalRnVXlwYWE1clN0cyIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg3NzY0MDU1MTI4OTUwMzc0NSwidXNlck5hbWUiOiIwMDUiLCJkZXB0SWQiOjEwMSwiZGVwdE5hbWUiOiLmt7HlnLPmgLvlhazlj7giLCJkZXB0Q2F0ZWdvcnkiOiIifQ.V2l_wFsOrNlWO9J2U4-UCJFqjW6NhR9FD2RNnl9KHgk
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+
+### 修改报销单
+PUT http://127.0.0.1:8080/system/expenseReimbursement
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJZVnVKZ3lNYXJSWDExNDJBd0luUUpQdkZ0a2hGU1RGVSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.ZA8kw9ovIYbqoylwFvmVcz2z9D6LCRVMzcQ_a9IH4us
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+{
+    "id": "1877238828280471553",
+    "projectName":"报销单测试2",
+    "projectType":"bxd_qj",
+    "reimbursementReason":"测试原因2",
+    "reimbursementUser":"张三",
+    "submitTime":"2025-02-04 17:00:00.00",
+    "collectionInformation":"测试银行2",
+    "consumptionDetails":[{
+        "consumptionAmount": "200.22",
+        "reimbursementType": "cailv2",
+        "consumptionDescribe": "正常报销22",
+        "invoiceInformation": "http:baidu1.com"
+    },{
+        "consumptionAmount": "300.33",
+        "reimbursementType": "cailv3",
+        "consumptionDescribe": "正常报销33",
+        "invoiceInformation": "http:baidu2.com"
+    }]
+}
+
+### 报销单列表
+DELETE http://127.0.0.1:8080/system/expenseReimbursement/1877238828280471553
+content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJZVnVKZ3lNYXJSWDExNDJBd0luUUpQdkZ0a2hGU1RGVSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.ZA8kw9ovIYbqoylwFvmVcz2z9D6LCRVMzcQ_a9IH4us
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+
+### 根据类型查询工作流页面
+GET http://127.0.0.1:8080/workflow/processDefinition/definitionXmlByType/bxd_clbx
+content-Type: application/x-www-form-urlencoded
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxODkxMzc5MDI2MjMyNzQ1OTg2Iiwicm5TdHIiOiJGRnBMSmNodGdNZEg4MjlCeDlhQVZpZEg0aVlVTUl0TCIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MTg5MTM3OTAyNjIzMjc0NTk4NiwidXNlck5hbWUiOiIwMDEiLCJkZXB0SWQiOjEwMCwiZGVwdE5hbWUiOiJYWFjnp5HmioAiLCJkZXB0Q2F0ZWdvcnkiOiIifQ.x-5_Mk0XOwgUyc5UxI571ah3a-5abmXC411DivdduXE
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+
+### 启动任务
+POST http://127.0.0.1:8080/workflow/task/startWorkFlow
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJZVnVKZ3lNYXJSWDExNDJBd0luUUpQdkZ0a2hGU1RGVSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.ZA8kw9ovIYbqoylwFvmVcz2z9D6LCRVMzcQ_a9IH4us
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+{
+    "businessKey": "1877915920835985410",
+    "tableName": "bxd_qj",
+    "variables": {
+        "entity": {
+            "id":"1877915920835985410",
+            "projectName":"财务报销单",
+            "projectType":"bxd_clbx",
+            "reimbursementReason":"报销我的柠檬茶",
+            "reimbursementUser":"张三",
+            "submitTime":"2025-01-11 11:00:00.00",
+            "collectionInformation":"中国农业银行陕西分行",
+            "consumptionDetails":[{
+
+                "consumptionAmount": "100",
+                "reimbursementType": "cf",
+                "consumptionDescribe": "报销差旅费用",
+                "invoiceInformation": "http:baidu1.com"
+            },{
+                "consumptionAmount": "200",
+                "reimbursementType": "zsf",
+                "consumptionDescribe": "报销差旅费用",
+                "invoiceInformation": "http:baidu2.com"
+            }]
+        },
+        "leaveDays": 29,
+        "userList": [1, 3],
+        "userList2": [1, 3]
+    }
+}
+
+### 办理任务（第一次）
+POST http://127.0.0.1:8080/workflow/task/completeTask
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJZVnVKZ3lNYXJSWDExNDJBd0luUUpQdkZ0a2hGU1RGVSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.ZA8kw9ovIYbqoylwFvmVcz2z9D6LCRVMzcQ_a9IH4us
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+{
+    "taskId": "1877259554341449748",
+    "variables": {},
+    "messageType": ["1", "3"],
+    "wfCopyList": [],
+    "taskVariables": {
+        "entity": {
+            "id": "1877238828280471553",
+            "projectName":"报销单测试2",
+            "projectType":"bxd_qj",
+            "reimbursementReason":"测试原因2",
+            "reimbursementUser":"张三",
+            "submitTime":"2025-02-04 17:00:00.00",
+            "collectionInformation":"测试银行2",
+            "consumptionDetails":[{
+                "consumptionAmount": "200.22",
+                "reimbursementType": "cailv2",
+                "consumptionDescribe": "正常报销22",
+                "invoiceInformation": "http:baidu1.com"
+            },{
+                "consumptionAmount": "300.33",
+                "reimbursementType": "cailv3",
+                "consumptionDescribe": "正常报销33",
+                "invoiceInformation": "http:baidu2.com"
+            }]
+        },
+        "leaveDays": 29,
+        "userList": [1, 3],
+        "userList2": [1, 3]
+    }
+}
+
+### 办理任务（第二次）
+POST http://127.0.0.1:8080/workflow/task/completeTask
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJZVnVKZ3lNYXJSWDExNDJBd0luUUpQdkZ0a2hGU1RGVSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.ZA8kw9ovIYbqoylwFvmVcz2z9D6LCRVMzcQ_a9IH4us
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+{
+    "taskId": "1877267080604741637",
+    "variables": {},
+    "messageType": ["1", "3"],
+    "wfCopyList": [{
+        "userId": 1,
+        "userName": "疯狂的狮子Li"
+    }],
+    "taskVariables": {}
+}
+
+
+### 查询html
+GET http://127.0.0.1:8080/system/formManage/selectBy/ceshi
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJjVkdXam1keUR3a21WM3F4eENnUU1DRENFSE9Mb0luTyIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.Mlb1KiluRp-LALThZX3jS8A73lTSovV0NcL3Tmy64hU
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+
+###
+GET http://127.0.0.1:8080/system/formManage/list?pageNum=1&pageSize=10
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiI1WjM5NXRvbDN3UTVEQkRyZzFuSVhHUnZqa2VPOWpOOSIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.a0lFSAeG_kMcyIJ67aIjL-bfLBg7UGiNKQxjORwpuhU
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+###
+GET http://127.0.0.1:8080/system/formManage/1
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJ1Q01Vcm8waldsVDB2dzBMWHZRQUJjakpNTnREODU3bCIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.MFOTw7dzSV6rSUXLOpePS8EmHCEWtyDfHrBTrSXlp-I
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+
+###
+GET http://127.0.0.1:8080/system/formManage/1
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJ1Q01Vcm8waldsVDB2dzBMWHZRQUJjakpNTnREODU3bCIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.MFOTw7dzSV6rSUXLOpePS8EmHCEWtyDfHrBTrSXlp-I
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+
+
+###
+DELETE http://127.0.0.1:8080/system/formManage/13,11
+content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJ1Q01Vcm8waldsVDB2dzBMWHZRQUJjakpNTnREODU3bCIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.MFOTw7dzSV6rSUXLOpePS8EmHCEWtyDfHrBTrSXlp-I
+clientid: e5cd7e4891bf95d1d19206ce24a7b32e
+###
