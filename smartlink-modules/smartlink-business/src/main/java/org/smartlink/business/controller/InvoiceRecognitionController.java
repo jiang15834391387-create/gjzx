@@ -51,8 +51,12 @@ public class InvoiceRecognitionController {
                     }
                 }
             } else {
-                for (MultipartFile file:files) {
-                    res = scanImageService.uploadImage(file, uploadType);
+                if (files != null && files.length > 0) {
+                    for (MultipartFile file : files) {
+                        res = scanImageService.uploadImage(file, uploadType);
+                    }
+                } else {
+                    return R.fail("请上传文件!");
                 }
             }
 

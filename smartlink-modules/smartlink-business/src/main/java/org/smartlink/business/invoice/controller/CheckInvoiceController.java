@@ -29,7 +29,7 @@ public class CheckInvoiceController extends BaseController {
      */
     @PostMapping("/updateInvoice")
     public R<Void> updateInvoice(@RequestBody InvoiceRequest request) throws Exception {
-        return toAjax(service.invoiceAlter(request));
+        return service.invoiceAlter(request);
     }
     /**
      *

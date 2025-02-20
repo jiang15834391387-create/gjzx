@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutionException;
 public interface ICheckService {
     int deleteWithValidByIds(Collection<String> ids);
 
-    int invoiceAlter(InvoiceRequest request) throws Exception;
+    R<Void> invoiceAlter(InvoiceRequest request) throws Exception;
 
     Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException;
 
