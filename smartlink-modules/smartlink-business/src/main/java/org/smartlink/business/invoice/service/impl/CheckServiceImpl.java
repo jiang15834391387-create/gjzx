@@ -28,10 +28,7 @@ import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
@@ -354,13 +351,12 @@ public class CheckServiceImpl implements ICheckService {
             case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
             case InvoiceConstants.GLORITY_TAX_CODE:
             case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
-            case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
             case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
             case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 // 处理增值税发票
                 return updateOcrInvoice(generalInfo,request.getInvoiceType());
-            // 数电票普通发票/机打发票
+            // 数电票普通发票/机打发票/增值税发票清单/可报销其他发票
             case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
             case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
@@ -438,7 +434,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dataNonTax.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dataNonTax.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -459,7 +455,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsSpecialPayment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsSpecialPayment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (count<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -482,7 +478,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsExportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsExportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -507,7 +503,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsImxportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsImxportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -529,7 +525,7 @@ public class CheckServiceImpl implements ICheckService {
 //               return R.fail(500,"修改发票失败");
 //           }
 //        }
-        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, didiItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, didiItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -551,7 +547,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, medicalTreatment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, medicalTreatment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -574,7 +570,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, flightItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES));
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, flightItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (count<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -598,7 +594,7 @@ public class CheckServiceImpl implements ICheckService {
 //            }
 //        }
         //根据file_id修改图片表信息
-        int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (count<=0){
             return R.fail(500,"发票修改失败");
         }
@@ -624,7 +620,7 @@ public class CheckServiceImpl implements ICheckService {
 //            }
 //        }
         //根据file_id修改图片表信息
-       int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+       int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (count<=0){
             return R.fail(500,"发票修改失败");
         }
@@ -647,7 +643,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, transportationGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, transportationGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -658,9 +654,17 @@ public class CheckServiceImpl implements ICheckService {
     private R<Void> handleVatInvoice(Map<String, Object> generalInfo, String invoiceType) throws Exception {
         // DTO 初始化
         InvoiceCheckParamDTO dto = new InvoiceCheckParamDTO();
-        // 处理区块链标记及通用信息
-        handleGeneralInfo(dto, generalInfo, invoiceType);
-        // 根据发票类型分类处理
+        // 增值税电子普通区块链
+        if (StrUtil.isNotBlank((String) generalInfo.get("blockChain"))) {
+            String blockChain = (String) generalInfo.get("blockChain");
+            if (InvoiceConstants.ONE.equals(blockChain)) {
+                handleGeneralInfo(dto, generalInfo, invoiceType);
+                // 调用查验方法
+                return validateInvoice(dto, generalInfo);
+            }
+
+        }
+        // 数电票(增值税专用)
         if (isDigitalInvoice(invoiceType)) {
             // 数电票处理
             handleDigitalInvoice(dto, generalInfo, invoiceType);
@@ -688,7 +692,7 @@ public class CheckServiceImpl implements ICheckService {
         dto.setPretax_amount((String) generalInfo.get("pretaxAmount"));
     }
 
-    // 处理区块链标记及通用信息
+    // 增值税电子普通区块链
     private void handleGeneralInfo(InvoiceCheckParamDTO dto, Map<String, Object> generalInfo,String invoiceType) {
         // 区块链标记
         if (StrUtil.isNotBlank((String) generalInfo.get("blockChain"))) {
@@ -703,18 +707,22 @@ public class CheckServiceImpl implements ICheckService {
         }
         // 地区信息
         if (StrUtil.isNotBlank((String) generalInfo.get("province"))) {
-            dto.setArea((String) generalInfo.get("province"));
+            dto.setArea((String) generalInfo.get("area"));
         }
         dto.setCode((String) generalInfo.get("invoiceCode"));
         dto.setNumber((String) generalInfo.get("invoiceNumber"));
         dto.setDate((String) generalInfo.get("invoiceDate"));
         dto.setType(invoiceType);
+        // 校验码截取（后 6 位）
+        String checkCodes = (String) generalInfo.get("checkCode");
+        if (StringUtils.hasText(checkCodes) && checkCodes.length() > 5) {
+            checkCodes = checkCodes.substring(checkCodes.length() - 6);
+        }
     }
 
-    // 判断是否为数电票
+    // 判断是否为数电票(增值税专用)
     private boolean isDigitalInvoice(String invoiceType) {
-        return InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE.equals(invoiceType) ||
-            InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.equals(invoiceType);
+        return InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE.equals(invoiceType);
     }
 
     // 判断是否为增值税专用发票
@@ -762,22 +770,27 @@ public class CheckServiceImpl implements ICheckService {
         }
         // 调用查验方法
         BaseEntity baseEntity = checkInvoice.checkInvoice(filesInfo, dto);
+        DataImageFilesInfo filesInfos = filesInfoMapper.selectOne(
+            new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId)
+        );
+        log.info("getFileStatus：{}", filesInfos.getFileStatus());
+        log.info("getCheckStatus：{}", filesInfos.getCheckStatus());
         //查验成功
-        if (filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode()) && filesInfo.getCheckStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
+        if (filesInfos.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
             //如果是增值税（专用/普通/电子专用）或增值税电子普通发票 或区块链电子发票  或机打发票 或增值税普通发票(卷票)或数电票(增值税专用发票/普通发票)
-            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_SPECIAL_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRONIC_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ROLL_TICKET_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)) {
+//            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_SPECIAL_CODE)
+//                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE)
+//                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_CODE)
+//                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRONIC_CODE)
+//                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ROLL_TICKET_CODE)
+//                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
+//                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)) {
                 //转换后增值税发票进行修改
                //return ocrConversionAlter(baseEntity, filesInfo);
                 return R.ok();
-            }
+
         }
-        return R.fail(500,"发票查验失败,"+filesInfo.getMessage());
+        return R.fail(500,"发票查验失败,"+filesInfos.getMessage());
     }
     //修改发票后查验成功 修改发票信息
     private R<Void> ocrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
@@ -801,7 +814,7 @@ public class CheckServiceImpl implements ICheckService {
         for (DataOcrDetails detail : arrayList) {
            ocrDetailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
         }
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         return R.ok();
     }
     //修改机动车销售发票
@@ -811,7 +824,7 @@ public class CheckServiceImpl implements ICheckService {
         if (count<=0){
             return R.fail(500,"修改发票失败");
         }
-        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, motorVehicleSale.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, motorVehicleSale.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (num<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -824,7 +837,7 @@ public class CheckServiceImpl implements ICheckService {
         if (one<=0){
             return R.fail(500,"修改发票失败");
         }
-        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, usedCarSales.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, usedCarSales.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (nums<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -837,7 +850,7 @@ public class CheckServiceImpl implements ICheckService {
         if (a<=0){
             return R.fail(500,"修改发票失败");
         }
-        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, steamerTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, steamerTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (nums<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -850,7 +863,7 @@ public class CheckServiceImpl implements ICheckService {
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
-        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, quotaInvoice.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, quotaInvoice.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (num<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -863,7 +876,7 @@ public class CheckServiceImpl implements ICheckService {
         if (a<=0){
             return R.fail(500,"修改发票失败");
         }
-        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, taxiTickets.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, taxiTickets.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (nums<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -876,7 +889,7 @@ public class CheckServiceImpl implements ICheckService {
         if (a<=0){
             return R.fail(500,"修改发票失败");
         }
-        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, railwayTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, railwayTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (num<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -889,7 +902,7 @@ public class CheckServiceImpl implements ICheckService {
         if (num<=0){
             return R.fail(500,"修改发票失败");
         }
-        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, passengerCar.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, passengerCar.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (count<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -902,7 +915,7 @@ public class CheckServiceImpl implements ICheckService {
         if(c<=0){
             return R.fail(500,"修改发票失败");
         }
-        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, tollRoads.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, tollRoads.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (num<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -915,7 +928,7 @@ public class CheckServiceImpl implements ICheckService {
         if (a<=0){
             return R.fail(500,"修改发票失败");
         }
-        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, receipt.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, receipt.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (counts<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -938,7 +951,7 @@ public class CheckServiceImpl implements ICheckService {
 //                return R.fail(500,"修改发票失败");
 //            }
 //        }
-        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (num<=0){
             return R.fail(500,"修改发票失败");
         }
@@ -1024,12 +1037,26 @@ public class CheckServiceImpl implements ICheckService {
         String totalAmountStr = totalAmount.toString();
         invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
         // 进行分页处理
-        int startIndex =((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int endIndex = Math.min(startIndex +pageQuery.getPageSize(), invoiceVosList.size());
+        int pageNum = pageQuery.getPageNum();
+        int pageSize = pageQuery.getPageSize();
+        if (pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
+        int startIndex = (pageNum - 1) * pageSize;
+        if (startIndex >= invoiceVosList.size()) {
+            // 请求的页码超出范围，返回空的分页数据
+            invoiceVoPage.setRecords(Collections.emptyList());
+            invoiceVoPage.setTotal(invoiceVosList.size());
+            threadPoolExecutor.shutdown();
+            return invoiceVoPage;
+        }
+        int endIndex = Math.min(startIndex + pageSize, invoiceVosList.size());
         List<InvoiceVo> pageData = invoiceVosList.subList(startIndex, endIndex);
         invoiceVoPage.setRecords(pageData);
         invoiceVoPage.setTotal(invoiceVosList.size());
-        // 关闭线程池
         threadPoolExecutor.shutdown();
         return invoiceVoPage;
     }

@@ -3,7 +3,9 @@ package org.smartlink.business.invoice.conversion;
 import cn.hutool.json.JSONObject;
 import org.smartlink.common.entity.domain.business.domain.DataRailwayTicket;
 import org.springframework.stereotype.Component;
-
+/**
+ *火车票
+ */
 @Component
 public class RegenaiChangeRailwayTicket{
     public void changeRailwayTicket(JSONObject jsonObject, DataRailwayTicket dataRailwayTicket) {
