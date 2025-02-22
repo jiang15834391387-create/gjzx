@@ -64,6 +64,7 @@ public class ActModelController extends BaseController {
         return toAjax(actModelService.saveNewModel(modelBo));
     }
 
+
     /**
      * 查询模型
      *
@@ -135,6 +136,7 @@ public class ActModelController extends BaseController {
                           HttpServletResponse response) {
         actModelService.exportZip(modelIds, response);
     }
+
 
     /**
      * 复制模型

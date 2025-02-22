@@ -26,39 +26,35 @@ public class TestFormManage extends TenantEntity {
      */
     @TableId(value = "id")
     private Long id;
-
-    /**
-     * 表单名称
-     */
     private String formName;
+    private String formLogo;
+    private String formType;
 
-/*    *//**
-     * 表单用途名称
-     *//*
-    private String formPurposeName;
 
-    *//**
-     * 表单用途类型
-     *//*
-    private String formPurposeType;*/
-
-    /**
-     * 单据绑定名称
-     */
+    private Long formBindId;
     private String formBindName;
 
-    /**
-     * 单据绑定类型
-     */
-    private String formBindType;
-
+    private Long categoryId;
+    private String categoryName;
+    private String categoryType;
 
     private String remark;
-
     /**
      * 是否删除（0否，1是）
      */
-    private Long isDeleted;
+    private Integer isDeleted;
 
+
+    /**
+     * 是否绑定工作流程（0否，1是）
+     */
+    private Integer isBindModel;
+
+    private String modelId;
+
+    /**
+     * 排序
+     */
+    private Long sort;
 
 }

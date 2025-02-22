@@ -8,7 +8,6 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
-import org.smartlink.workflow.domain.TestFormConfig;
 import org.smartlink.workflow.domain.TestFormManage;
 
 import java.util.List;
@@ -36,25 +35,34 @@ public class TestFormManageBo extends BaseEntity {
     @NotBlank(message = "单据名称不能为空", groups = { AddGroup.class, EditGroup.class })
     private String formName;
 
+    /**
+     * 单据logo
+     */
+    private String formLogo;
+
+    /**
+     * 单据绑定id
+     */
+    private Long formBindId;
     private String remark;
+    private Long categoryId;
+    private String categoryName;
+    private String categoryType;
+    /**
+     * 是否绑定工作流程（0否，1是）
+     */
+    private Integer isBindModel;
 
-/*    *//**
-     * 表单用途名称
-     *//*
-    //@NotBlank(message = "表单用途不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String formPurposeName;
-
-    *//**
-     * 表单用途名称
-     *//*
-    //@NotBlank(message = "表单用途不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String formPurposeType;*/
-
+    private String modelId;
+    /**
+     * 排序
+     */
+    private Long sort;
     /**
      * 是否删除（0否，1是）
      */
     //@NotNull(message = "是否删除（0否，1是）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long isDeleted;
+    private Integer isDeleted;
 
 
     /**
@@ -62,11 +70,5 @@ public class TestFormManageBo extends BaseEntity {
      */
     @NotBlank(message = "单据绑定名称不能为空", groups = { AddGroup.class, EditGroup.class })
     private String formBindName;
-    /**
-     * 单据绑定类型
-     */
-    @NotBlank(message = "单据绑定类型不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String formBindType;
-
-    private List<TestFormConfig> formConfigList;
+    private String formType;
 }

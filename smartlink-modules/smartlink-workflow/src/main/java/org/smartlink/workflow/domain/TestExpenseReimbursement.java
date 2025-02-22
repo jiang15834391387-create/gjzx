@@ -30,45 +30,16 @@ public class TestExpenseReimbursement extends TenantEntity {
     @TableId(value = "id")
     private Long id;
 
-    /**
-     * 项目名称
-     */
-    private String projectName;
-    /**
-     * 项目名称
-     */
-    @ExcelProperty(value = "项目名称")
-    private String projectNameValue;
-    /**
-     * 报销类型
-     */
-    private String projectType;
-
-    /**
-     * 报销原因
-     */
-    private String reimbursementReason;
-
-    /**
-     * 报销人
-     */
-    private String reimbursementUser;
-
-    /**
-     * 提交时间
-     */
-    private Date submitTime;
-
-    /**
-     * 收款信息
-     */
-    private String collectionInformation;
-
+    private Long fromId;
+    private String fromName;
+    private String fromType;
+    private Long categoryId;
+    private String categoryName;
+    private String categoryType;
     /**
      * 消费明细
      */
     private String consumptionDetails;
-    private String detailsValue;
     /**
      * 状态
      */

@@ -5,8 +5,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import org.smartlink.workflow.domain.TestFormConfig;
-import org.smartlink.workflow.domain.vo.HtmlVo;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.smartlink.common.idempotent.annotation.RepeatSubmit;
@@ -45,6 +43,17 @@ public class TestFormManageController extends BaseController {
     public TableDataInfo<TestFormManageVo> list(TestFormManageBo bo, PageQuery pageQuery) {
         return testFormManageService.queryPageList(bo, pageQuery);
     }
+
+
+    /**
+     * 查询报销单分组
+     */
+    @SaCheckPermission("system:formManage:list")
+    @GetMapping("/listByGroup")
+    public R<List<TestFormManageVo>> listByGroup() {
+        return R.ok(testFormManageService.queryPageListGroup());
+    }
+
 
 
     /**

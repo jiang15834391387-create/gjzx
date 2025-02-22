@@ -41,7 +41,7 @@ public class WfCategoryVo implements Serializable {
      */
     @ExcelProperty(value = "分类编码")
     private String categoryCode;
-
+    private String categoryType;
     /**
      * 父级id
      */

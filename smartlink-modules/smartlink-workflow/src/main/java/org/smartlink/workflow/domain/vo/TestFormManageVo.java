@@ -6,8 +6,8 @@ import org.smartlink.common.excel.annotation.ExcelDictFormat;
 import org.smartlink.common.excel.convert.ExcelDictConvert;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
-import org.smartlink.workflow.domain.TestFormConfig;
 import org.smartlink.workflow.domain.TestFormManage;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -40,30 +40,45 @@ public class TestFormManageVo implements Serializable {
      */
     @ExcelProperty(value = "单据名称")
     private String formName;
+    /**
+     * 单据logo
+     */
+    private String formLogo;
+    private String formType;
 
+
+
+    /**
+     * 单据绑定id
+     */
+    private Long formBindId;
     /**
      * 单据绑定名称
      */
     @ExcelProperty(value = "单据绑定名称")
     private String formBindName;
-
     /**
-     * 单据绑定类型
+     * 是否绑定工作流程（0否，1是）
      */
-    @ExcelProperty(value = "单据绑定类型")
-    private String formBindType;
+    private Integer isBindModel;
+
+    private String modelId;
     /**
      *
      */
     @ExcelProperty(value = "")
     private String remark;
-
+    /**
+     * 排序
+     */
+    private Long sort;
     /**
      * 是否删除（0否，1是）
      */
     @ExcelProperty(value = "是否删除", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "0=否，1是")
-    private Long isDeleted;
-
-    private List<TestFormConfig> formConfigList;
+    private Integer isDeleted;
+    private Long categoryId;
+    private String categoryName;
+    private String categoryType;
 }

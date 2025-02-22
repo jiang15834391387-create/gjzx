@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.smartlink.common.core.utils.SpringUtils;
 import org.smartlink.common.tenant.helper.TenantHelper;
-import org.smartlink.workflow.domain.TestFormConfig;
 import org.smartlink.workflow.domain.vo.TaskVo;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.history.HistoricActivityInstanceQuery;
@@ -170,7 +169,7 @@ public class QueryUtils {
 
 
 
-    public static StringBuilder parseValue(List<TestFormConfig> list) {
+   /* public static StringBuilder parseValue(List<TestFormConfig> list) {
 
         StringBuilder formBuilder = new StringBuilder();
         formBuilder.append("<form>\n");
@@ -189,5 +188,5 @@ public class QueryUtils {
             formBuilder.append("</form>");
         }
         return formBuilder;
-    }
+    }*/
 }

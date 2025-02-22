@@ -1,12 +1,8 @@
 package org.smartlink.workflow.service.impl;
 
-import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import kotlin.collections.LongIterator;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.smartlink.common.core.domain.R;
-import org.smartlink.common.core.service.ConfigService;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
@@ -16,14 +12,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.system.domain.SysDictData;
-import org.smartlink.system.domain.vo.SysDictDataVo;
-import org.smartlink.system.mapper.SysDictDataMapper;
-import org.smartlink.workflow.domain.TestFormConfig;
-import org.smartlink.workflow.domain.vo.HtmlVo;
-import org.smartlink.workflow.domain.vo.TestFormConfigVo;
-import org.smartlink.workflow.mapper.TestFormConfigMapper;
-import org.smartlink.workflow.utils.QueryUtils;
+import org.smartlink.workflow.domain.BpmFormDO;
+import org.smartlink.workflow.domain.WfCategory;
+import org.smartlink.workflow.mapper.BpmFormMapper;
+import org.smartlink.workflow.mapper.WfCategoryMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.smartlink.workflow.domain.bo.TestFormManageBo;
@@ -50,9 +42,8 @@ import java.util.Collection;
 public class TestFormManageServiceImpl implements ITestFormManageService {
 
     private final TestFormManageMapper baseMapper;
-    private final SysDictDataMapper dictDataMapper;
-    private final TestFormConfigMapper formConfigMapper;
-    private final ConfigService configService;
+    private final WfCategoryMapper wfCategoryMapper;
+    private final BpmFormMapper bpmFormMapper;
 
     /**
      * 查询单管理
@@ -63,12 +54,6 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
     @Override
     public TestFormManageVo queryById(Long id){
         TestFormManageVo testFormManageVo = baseMapper.selectVoById(id);
-        if(testFormManageVo!=null){
-                List<TestFormConfig> list = formConfigMapper.selectList(new QueryWrapper<TestFormConfig>().eq("form_id", id));
-                if(list!=null&&list.size()>0){
-                    testFormManageVo.setFormConfigList(list);
-                }
-        }
         return testFormManageVo;
     }
 
@@ -82,7 +67,6 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
     @Override
     public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<TestFormManage> lqw = buildQueryWrapper(bo);
-
         Page<TestFormManageVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
@@ -104,7 +88,9 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
         LambdaQueryWrapper<TestFormManage> lqw = Wrappers.lambdaQuery();
         lqw.like(StringUtils.isNotBlank(bo.getFormName()), TestFormManage::getFormName, bo.getFormName());
         lqw.like(StringUtils.isNotBlank(bo.getFormBindName()), TestFormManage::getFormBindName, bo.getFormBindName());
-        lqw.eq(StringUtils.isNotBlank(bo.getFormBindType()), TestFormManage::getFormBindType, bo.getFormBindType());
+        lqw.like(StringUtils.isNotBlank(bo.getCategoryName()), TestFormManage::getCategoryName, bo.getCategoryName());
+        lqw.eq(StringUtils.isNotBlank(bo.getFormType()), TestFormManage::getFormType, bo.getFormType());
+        lqw.eq(StringUtils.isNotBlank(bo.getCategoryType()), TestFormManage::getCategoryType, bo.getCategoryType());
         lqw.eq(TestFormManage::getIsDeleted, 0);
         return lqw;
     }
@@ -131,7 +117,6 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
             if (flag) {
                 bo.setId(add.getId());
             }
-            synConfigList(bo);
         } catch (Exception e) {
             log.info("添加失败{}",e);
             throw new RuntimeException("失败");
@@ -139,14 +124,6 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
         return R.ok();
     }
 
-    private void synConfigList(TestFormManageBo bo) {
-        List<TestFormConfig> formConfigList = bo.getFormConfigList();
-        if(formConfigList!=null && formConfigList.size()>0){
-            formConfigList.forEach(formConfig->{formConfig.setFormId(bo.getId());formConfig.setTenantId(LoginHelper.getTenantId());});
-            formConfigMapper.delete(new QueryWrapper<TestFormConfig>().eq("form_id", bo.getId()));
-            formConfigMapper.insertBatch(formConfigList);
-        }
-    }
 
     /**
      * 修改单管理
@@ -164,7 +141,6 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
                 return R.fail(s);
             }
             baseMapper.updateById(update);
-            synConfigList(bo);
         } catch (Exception e) {
             log.info("修改失败{}",e);
             throw new RuntimeException("失败");
@@ -176,11 +152,18 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
      * 保存前的数据校验
      */
     private String validEntityBeforeSave(TestFormManage entity){
-        String bindType = entity.getFormBindType();
-        if(!StringUtils.isEmpty(bindType)){
-            List<SysDictData> sysDictDataVos = dictDataMapper.selectList(new QueryWrapper<SysDictData>().eq("dict_value",bindType));
-            if(sysDictDataVos==null || sysDictDataVos.size()==0){
-                return "绑定类型不存在";
+        String categoryType = entity.getCategoryType();
+        String formType = entity.getFormType();
+        if(!StringUtils.isEmpty(categoryType)){
+            List<WfCategory> wfCategories = wfCategoryMapper.selectList(new QueryWrapper<WfCategory>().eq("category_type",categoryType).eq("is_deleted", 0));
+            if(wfCategories==null || wfCategories.size()==0){
+                return "绑定流程分类类型不存在";
+            }
+        }
+        if(!StringUtils.isEmpty(formType)){
+            List<BpmFormDO> bpmFormDOS = bpmFormMapper.selectList(new QueryWrapper<BpmFormDO>().eq("form_type",formType).eq("is_deleted", 0));
+            if(bpmFormDOS==null || bpmFormDOS.size()==0){
+                return "绑定表单类型不存在";
             }
         }
         return null;
@@ -198,7 +181,6 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
 
         try {
             baseMapper.deletedFromManage(ids,LoginHelper.getUserId(),LoginHelper.getTenantId());
-            formConfigMapper.deletedFromConfig(ids);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -207,28 +189,25 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
 
     @Override
     public List<TestFormManageVo> selectBy(String type) {
-        List<TestFormManage> formPurposeType = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_bind_type", type));
+        List<TestFormManage> formPurposeType = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type", type));
         if(formPurposeType!=null&&formPurposeType.size()>0){
             List<TestFormManageVo> objects = new ArrayList<>(formPurposeType.size());
             formPurposeType.forEach(formManage->{
                 TestFormManageVo testFormManageVo = new TestFormManageVo();
                 BeanUtils.copyProperties(formManage,testFormManageVo);
-                List<TestFormConfig> list = formConfigMapper.selectList(new QueryWrapper<TestFormConfig>().eq("form_id", formManage.getId()));
-                if(list!=null&&list.size()>0){
-                    /*StringBuilder stringBuilder = QueryUtils.parseValue(list);
-                    if(stringBuilder!=null){
-                        HtmlVo htmlVo = new HtmlVo();
-                        htmlVo.setFormManage(formManage);
-                        htmlVo.setHtmlContent(stringBuilder.toString());
-                        objects.add(htmlVo);
-                    }*/
-                    testFormManageVo.setFormConfigList(list);
-                }
                 objects.add(testFormManageVo);
             });
-
             return objects;
         }
         return null;
+    }
+
+    @Override
+    public List<TestFormManageVo> queryPageListGroup() {
+        LambdaQueryWrapper<TestFormManage> lqw = Wrappers.lambdaQuery();
+        lqw.groupBy(TestFormManage::getCategoryType);
+        lqw.eq(TestFormManage::getIsDeleted, 0);
+        List<TestFormManageVo> testFormManageVos = baseMapper.selectVoList(lqw);
+        return testFormManageVos;
     }
 }

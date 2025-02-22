@@ -21,9 +21,11 @@ import org.smartlink.system.domain.vo.SysDictDataVo;
 import org.smartlink.system.mapper.SysDictDataMapper;
 import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.TestLeave;
+import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
+import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
 import org.smartlink.workflow.service.ITestExpenseReimbursementService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -45,7 +47,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
 
     private final TestExpenseReimbursementMapper baseMapper;
     private final SysDictDataMapper sysDictDataMapper;
-
+    private final WfDefinitionConfigMapper wfDefinitionConfigMapper;
     /**
      * 查询费用报销申请
      *
@@ -69,15 +71,14 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     public TableDataInfo<TestExpenseReimbursementVo> queryPageList(TestExpenseReimbursementBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<TestExpenseReimbursement> lqw = buildQueryWrapper(bo);
         lqw.eq( TestExpenseReimbursement::getIsDeleted, 0);
-        lqw.like(StringUtils.isNotBlank(bo.getProjectName()), TestExpenseReimbursement::getProjectName, bo.getProjectName());
-        lqw.like(StringUtils.isNotBlank(bo.getReimbursementUser()), TestExpenseReimbursement::getReimbursementUser, bo.getReimbursementUser());
         lqw.eq(StringUtils.isNotBlank(bo.getStatus()), TestExpenseReimbursement::getStatus, bo.getStatus());
-        lqw.eq(StringUtils.isNotBlank(bo.getProjectType()), TestExpenseReimbursement::getProjectType, bo.getProjectType());
+        lqw.eq(StringUtils.isNotBlank(bo.getCategoryType()), TestExpenseReimbursement::getCategoryType, bo.getCategoryType());
+        lqw.eq(StringUtils.isNotBlank(bo.getFromType()), TestExpenseReimbursement::getFromType, bo.getFromType());
         lqw.orderByDesc(BaseEntity::getCreateTime);
         String deviceType = bo.getDeviceType();
-        //if(deviceType.equals("APP")){
+        if(deviceType.equals("APP")){
             lqw.eq(TestExpenseReimbursement::getCreateBy,LoginHelper.getUserId());
-        //}
+        }
         Page<TestExpenseReimbursementVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
@@ -98,13 +99,12 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private LambdaQueryWrapper<TestExpenseReimbursement> buildQueryWrapper(TestExpenseReimbursementBo bo) {
         Map<String, Object> params = bo.getParams();
         LambdaQueryWrapper<TestExpenseReimbursement> lqw = Wrappers.lambdaQuery();
-        lqw.like(StringUtils.isNotBlank(bo.getProjectName()), TestExpenseReimbursement::getProjectName, bo.getProjectName());
-        lqw.eq(StringUtils.isNotBlank(bo.getProjectType()), TestExpenseReimbursement::getProjectType, bo.getProjectType());
-        lqw.eq(StringUtils.isNotBlank(bo.getReimbursementReason()), TestExpenseReimbursement::getReimbursementReason, bo.getReimbursementReason());
-        lqw.eq(StringUtils.isNotBlank(bo.getReimbursementUser()), TestExpenseReimbursement::getReimbursementUser, bo.getReimbursementUser());
-        lqw.eq(bo.getSubmitTime() != null, TestExpenseReimbursement::getSubmitTime, bo.getSubmitTime());
-        lqw.eq(StringUtils.isNotBlank(bo.getCollectionInformation()), TestExpenseReimbursement::getCollectionInformation, bo.getCollectionInformation());
+        lqw.eq(StringUtils.isNotBlank(bo.getFromType()), TestExpenseReimbursement::getFromType, bo.getFromType());
+        lqw.eq(StringUtils.isNotBlank(bo.getCategoryType()), TestExpenseReimbursement::getCategoryType, bo.getCategoryType());
         lqw.eq(StringUtils.isNotBlank(bo.getStatus()), TestExpenseReimbursement::getStatus, bo.getStatus());
+        lqw.like(StringUtils.isNotBlank(bo.getCategoryName()), TestExpenseReimbursement::getCategoryName, bo.getCategoryName());
+        lqw.eq(bo.getCreateTime() != null, TestExpenseReimbursement::getCreateTime, bo.getCreateTime());
+        lqw.like(StringUtils.isNotBlank(bo.getFromName()), TestExpenseReimbursement::getFromName, bo.getFromName());
         return lqw;
     }
 
@@ -121,6 +121,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         try {
             TestExpenseReimbursement add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
             validEntityBeforeSave(add);
+            validFormType(add);
             if (StringUtils.isBlank(add.getStatus())) {
                 add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
             }
@@ -166,6 +167,16 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         entity.setUpdateBy(LoginHelper.getUserId());
         entity.setTenantId(LoginHelper.getTenantId());
     }
+
+    private void validFormType(TestExpenseReimbursement entity){
+        String fromType = entity.getFromType();
+        if(StringUtils.isEmpty(fromType)){
+            throw new RuntimeException("请先配置对应的工作流程");
+        }
+        List<WfDefinitionConfig> wfDefinitionConfigs = wfDefinitionConfigMapper.selectList();
+
+    }
+
     /**
      * 修改前的数据校验
      */

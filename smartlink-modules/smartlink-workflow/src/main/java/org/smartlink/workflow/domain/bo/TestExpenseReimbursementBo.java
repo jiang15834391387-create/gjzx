@@ -28,45 +28,12 @@ public class TestExpenseReimbursementBo extends BaseEntity {
     //@NotNull(message = "主键不能为空", groups = { EditGroup.class })
     private Long id;
 
-    /**
-     * 项目名称
-     */
-    @NotBlank(message = "项目名称不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String projectName;
-    /**
-     * 项目名称
-     */
-    @ExcelProperty(value = "项目名称")
-    private String projectNameValue;
-    /**
-     * 报销类型
-     */
-    @NotBlank(message = "报销类型不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String projectType;
-
-    /**
-     * 报销原因
-     */
-    @NotBlank(message = "报销原因不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String reimbursementReason;
-
-    /**
-     * 报销人
-     */
-    @NotBlank(message = "报销人不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String reimbursementUser;
-
-    /**
-     * 提交时间
-     */
-    @NotNull(message = "提交时间不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Date submitTime;
-
-    /**
-     * 收款信息
-     */
-    @NotBlank(message = "收款信息不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String collectionInformation;
+    private Long fromId;
+    private String fromName;
+    private String fromType;
+    private Long categoryId;
+    private String categoryName;
+    private String categoryType;
 
     /**
      * 状态
@@ -88,5 +55,4 @@ public class TestExpenseReimbursementBo extends BaseEntity {
     private String deviceType;
 
     private String consumptionDetails;
-    private String detailsValue;
 }

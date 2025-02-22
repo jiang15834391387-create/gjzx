@@ -1,12 +1,15 @@
 package org.smartlink.workflow.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.smartlink.common.core.utils.MapstructUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.bo.WfDefinitionConfigBo;
 import org.smartlink.workflow.domain.vo.WfDefinitionConfigVo;
+import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.service.IWfDefinitionConfigService;
 import org.springframework.stereotype.Service;
 import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
@@ -26,6 +29,7 @@ import java.util.Collection;
 public class WfDefinitionConfigServiceImpl implements IWfDefinitionConfigService {
 
     private final WfDefinitionConfigMapper baseMapper;
+    private final TestFormManageMapper formManageMapper;
 
     /**
      * 查询流程定义配置
@@ -99,6 +103,13 @@ public class WfDefinitionConfigServiceImpl implements IWfDefinitionConfigService
         if (flag) {
             bo.setId(add.getId());
         }
+
+        TestFormManage formType = formManageMapper.selectOne(new QueryWrapper<TestFormManage>().eq("form_type", bo.getTableName()));
+        if(formType != null){
+            formType.setIsBindModel(1);
+            formManageMapper.updateById(formType);
+        }
+
         return flag;
     }
 
