@@ -33,7 +33,11 @@ public class TestExpenseReimbursementBo extends BaseEntity {
      */
     @NotBlank(message = "项目名称不能为空", groups = { AddGroup.class, EditGroup.class })
     private String projectName;
-
+    /**
+     * 项目名称
+     */
+    @ExcelProperty(value = "项目名称")
+    private String projectNameValue;
     /**
      * 报销类型
      */
@@ -84,5 +88,5 @@ public class TestExpenseReimbursementBo extends BaseEntity {
     private String deviceType;
 
     private String consumptionDetails;
-
+    private String detailsValue;
 }

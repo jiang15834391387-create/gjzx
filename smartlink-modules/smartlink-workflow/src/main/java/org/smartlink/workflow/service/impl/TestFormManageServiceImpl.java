@@ -1,8 +1,10 @@
 package org.smartlink.workflow.service.impl;
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import kotlin.collections.LongIterator;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.service.ConfigService;
 import org.smartlink.common.core.utils.MapstructUtils;
@@ -19,8 +21,10 @@ import org.smartlink.system.domain.vo.SysDictDataVo;
 import org.smartlink.system.mapper.SysDictDataMapper;
 import org.smartlink.workflow.domain.TestFormConfig;
 import org.smartlink.workflow.domain.vo.HtmlVo;
+import org.smartlink.workflow.domain.vo.TestFormConfigVo;
 import org.smartlink.workflow.mapper.TestFormConfigMapper;
 import org.smartlink.workflow.utils.QueryUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.smartlink.workflow.domain.bo.TestFormManageBo;
 import org.smartlink.workflow.domain.vo.TestFormManageVo;
@@ -58,7 +62,14 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
      */
     @Override
     public TestFormManageVo queryById(Long id){
-        return baseMapper.selectVoById(id);
+        TestFormManageVo testFormManageVo = baseMapper.selectVoById(id);
+        if(testFormManageVo!=null){
+                List<TestFormConfig> list = formConfigMapper.selectList(new QueryWrapper<TestFormConfig>().eq("form_id", id));
+                if(list!=null&&list.size()>0){
+                    testFormManageVo.setFormConfigList(list);
+                }
+        }
+        return testFormManageVo;
     }
 
     /**
@@ -71,6 +82,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
     @Override
     public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<TestFormManage> lqw = buildQueryWrapper(bo);
+
         Page<TestFormManageVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
@@ -93,8 +105,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
         lqw.like(StringUtils.isNotBlank(bo.getFormName()), TestFormManage::getFormName, bo.getFormName());
         lqw.like(StringUtils.isNotBlank(bo.getFormBindName()), TestFormManage::getFormBindName, bo.getFormBindName());
         lqw.eq(StringUtils.isNotBlank(bo.getFormBindType()), TestFormManage::getFormBindType, bo.getFormBindType());
-        lqw.eq(StringUtils.isNotBlank(bo.getFormStatus()), TestFormManage::getFormStatus, bo.getFormStatus());
-        lqw.eq(bo.getIsDeleted() != null, TestFormManage::getIsDeleted, bo.getIsDeleted());
+        lqw.eq(TestFormManage::getIsDeleted, 0);
         return lqw;
     }
 
@@ -105,6 +116,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
      * @return 是否新增成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public R<Void> insertByBo(TestFormManageBo bo) {
         try {
         TestFormManage add = MapstructUtils.convert(bo, TestFormManage.class);
@@ -143,6 +155,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
      * @return 是否修改成功
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public R<Void> updateByBo(TestFormManageBo bo) {
         try {
             TestFormManage update = MapstructUtils.convert(bo, TestFormManage.class);
@@ -193,22 +206,25 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
     }
 
     @Override
-    public List<HtmlVo> selectBy(String type) {
+    public List<TestFormManageVo> selectBy(String type) {
         List<TestFormManage> formPurposeType = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_bind_type", type));
         if(formPurposeType!=null&&formPurposeType.size()>0){
-            List<HtmlVo> objects = new ArrayList<>(formPurposeType.size());
+            List<TestFormManageVo> objects = new ArrayList<>(formPurposeType.size());
             formPurposeType.forEach(formManage->{
+                TestFormManageVo testFormManageVo = new TestFormManageVo();
+                BeanUtils.copyProperties(formManage,testFormManageVo);
                 List<TestFormConfig> list = formConfigMapper.selectList(new QueryWrapper<TestFormConfig>().eq("form_id", formManage.getId()));
                 if(list!=null&&list.size()>0){
-                    StringBuilder stringBuilder = QueryUtils.parseValue(list);
+                    /*StringBuilder stringBuilder = QueryUtils.parseValue(list);
                     if(stringBuilder!=null){
                         HtmlVo htmlVo = new HtmlVo();
                         htmlVo.setFormManage(formManage);
                         htmlVo.setHtmlContent(stringBuilder.toString());
                         objects.add(htmlVo);
-                    }
+                    }*/
+                    testFormManageVo.setFormConfigList(list);
                 }
-
+                objects.add(testFormManageVo);
             });
 
             return objects;

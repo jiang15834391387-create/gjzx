@@ -18,6 +18,7 @@ import org.smartlink.business.invoice.conversion.*;
 import org.smartlink.business.invoice.service.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
+import org.smartlink.common.check.enumd.ResponseCodeEnum;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.check.properties.RuiZhenCheckProperties;
 import org.smartlink.common.check.utils.RuiZhenRequestUtil;
@@ -94,7 +95,7 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
                 if (StrUtil.isEmpty(response)) {
                     log.error("睿真查验失败，失败原因：查验服务返回缺少体：{}", response);
                     filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-                    filesInfo.setMessage(response);
+                    filesInfo.setMessage("查验失败，失败原因：查验服务返回缺少体response");
                     filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                     baseEntity=new BaseEntity();
                     baseEntity.setCheckResult(response);
@@ -108,12 +109,12 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         log.info("睿真查验返回结果：{}", response);
         // 解析 JSON 响应
         JSONObject responseResult = JSONUtil.parseObj(response);
-        // 检查顶层 code 是否等于 1 表示成功
+        // 检查顶层 result 是否等于 1 表示成功
         if (responseResult.getInt("result") != 1) {
             String message = responseResult.getStr("message");
             log.error("睿真查验失败：" + message);
             filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-            filesInfo.setMessage(message);
+            filesInfo.setMessage("查验失败"+message);
             filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
             baseEntity=new BaseEntity();
             baseEntity.setCheckResult(message);
@@ -138,19 +139,16 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             this.dataImageFilesInfoMapper.updateById(filesInfo);
             return baseEntity;
         }
-        // 遍历 identify_results 验证 validation.code 和 items 是否符合要求
+        // 遍历 identify_results 验证 validation.code 和 details 是否符合要求
         for (Object results : identifyResults) {
             JSONObject identifyResult = (JSONObject) results;
             JSONObject validation = identifyResult.getJSONObject("validation");
             // 检查 validation.code 是否为 10000
             if (validation.getInt("code") != 10000) {
-                String message = validation.getStr("message");
-                log.error("睿真查验失败：" + message);
+                setMessages(validation.getInt("code"), filesInfo);
                 filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-                filesInfo.setMessage(message);
                 filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
                 baseEntity=new BaseEntity();
-                baseEntity.setCheckResult(message);
                 baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
                 //修改文件状态
                 this.dataImageFilesInfoMapper.updateById(filesInfo);
@@ -166,24 +164,29 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             details = results.getJSONObject("details");
             // 判断 details 是否为空
             if (details == null) {
-                String message = "校验失败：明细details 为空";
-                log.error(message);
-                filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-                filesInfo.setMessage(message);
-                filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-                baseEntity=new BaseEntity();
-                baseEntity.setCheckResult(message);
-                baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
-                //修改文件状态
-                this.dataImageFilesInfoMapper.updateById(filesInfo);
-                return baseEntity;
+                for (Object back : identifyResults) {
+                    JSONObject identifyResult = (JSONObject) back;
+                    JSONObject validation = identifyResult.getJSONObject("validation");
+                    // 检查 validation.code 是否为 10000
+                    if (validation.getInt("code") != 10000) {
+                        setMessages(validation.getInt("code"), filesInfo);
+                        filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+                        filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+                        baseEntity=new BaseEntity();
+                        baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
+                        //修改文件状态
+                        this.dataImageFilesInfoMapper.updateById(filesInfo);
+                        return baseEntity;
+                    }
+
+                }
             }
         }
         // 如果所有校验都通过
         log.info("睿真发票接口查验成功");
         filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
         filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
-        filesInfo.setMessage("发票查验成功！");
+        filesInfo.setMessage("查验成功！");
         baseEntity=new BaseEntity();
         baseEntity.setCheckResult("查验成功");
         baseEntity.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
@@ -195,7 +198,6 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         return baseEntity;
 
     }
-
     public BaseEntity updateInvoicesInfo(DataImageFilesInfo filesInfo, JSONObject jsonObject) {
         String invoiceType = filesInfo.getInvoice();
         if (StrUtil.equals(InvoiceConstants.GLORITY_USED_CAR_SALES_CODE, invoiceType)) {
@@ -256,4 +258,31 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         }
 
     }
+    private void setMessages(Integer code, DataImageFilesInfo filesInfo) {
+        String message ="";
+        switch (code){
+            case 10001:
+                message= ResponseCodeEnum.NO_SUCH_TICKET.getMessage();
+                break;
+            case 10002:
+                message = ResponseCodeEnum.INCONSISTENT_INFO.getMessage();
+                break;
+            case 10003:
+                message = ResponseCodeEnum.VERIFICATION_LIMIT_EXCEEDED.getMessage();
+                break;
+            case 10004:
+                message = ResponseCodeEnum.UNSUPPORTED_TICKET_TYPE.getMessage();
+                break;
+            case 10005:
+                message = ResponseCodeEnum.INVALID_PARAMETERS.getMessage();
+                break;
+            case 10006:
+                message = ResponseCodeEnum.OTHER_ERRORS.getMessage();
+                break;
+        }
+        filesInfo.setMessage("查验失败:"+message);
+        log.error("查验失败：" + message);
+
+    }
+
 }

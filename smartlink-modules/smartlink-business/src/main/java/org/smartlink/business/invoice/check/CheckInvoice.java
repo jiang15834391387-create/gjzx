@@ -73,26 +73,23 @@ public class CheckInvoice {
         InvoiceCheckParamDTO invoiceCheckParamDTO = new InvoiceCheckParamDTO();
             switch (invoiceType){
                 case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
-                    final DataUsedCarSales dataUsedCarSales =dataUsedCarSalesService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
+                    final DataMotorVehicleSale dataUsedCarSales =dataMotorVehicleSaleService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO.setCode(dataUsedCarSales.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(dataUsedCarSales.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(dataUsedCarSales.getInvoiceDate());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    invoiceCheckParamDTO.setPretax_amount(dataUsedCarSales.getTotalUppercase());
+                    invoiceCheckParamDTO.setPretax_amount(dataUsedCarSales.getPreTaxAmount());
                     break;
                 case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
-                    final DataMotorVehicleSale dataMotorVehicleSale =dataMotorVehicleSaleService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
+                    final DataUsedCarSales dataMotorVehicleSale =dataUsedCarSalesService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO.setCode(dataMotorVehicleSale.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(dataMotorVehicleSale.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(dataMotorVehicleSale.getInvoiceDate());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getPreTaxAmount());
+                    invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getInvoiceTotal());
                     break;
                 case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
                     final DataRailwayTicket railwayTicket =dataRailwayTicketService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setNumber(railwayTicket.getInvoiceNumber());
                     invoiceCheckParamDTO.setTotal(railwayTicket.getInvoiceTotal());
                     invoiceCheckParamDTO.setDate_of_issue(railwayTicket.getInvoiceDate());
@@ -100,7 +97,6 @@ public class CheckInvoice {
                     break;
                 case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
                     final DataFlightItinerary dataFlightItinerary = dataFlightItineraryService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setReceipt_numbe(dataFlightItinerary.getInvoiceNumber());
                     invoiceCheckParamDTO.setTotal(dataFlightItinerary.getInvoiceTotal());
                     invoiceCheckParamDTO.setDate(dataFlightItinerary.getInvoiceDate());
@@ -108,7 +104,6 @@ public class CheckInvoice {
                     break;
                 case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
                     final DataOcrInfo ocrInfoss = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(ocrInfoss.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(ocrInfoss.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(ocrInfoss.getInvoiceDate());
@@ -119,7 +114,6 @@ public class CheckInvoice {
                     break;
                 case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
                     final DataMedicalTreatment medicalTreatment = this.dataMedicalTreatmentDetailService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(medicalTreatment.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(medicalTreatment.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(medicalTreatment.getInvoiceDate());
@@ -133,7 +127,6 @@ public class CheckInvoice {
                     break;
                 case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
                     final DataOcrInfo ocrInfo = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(ocrInfo.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(ocrInfo.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(ocrInfo.getInvoiceDate());
@@ -150,23 +143,23 @@ public class CheckInvoice {
                     if (StrUtil.isNotBlank(ocrInfos.getBlockChain())){
                         if (ocrInfos.getBlockChain().equals(InvoiceConstants.ONE)){
                             invoiceCheckParamDTO.setBlock_chain(Integer.valueOf(ocrInfos.getBlockChain()));
-                        }
-                        if (StrUtil.isNotBlank(ocrInfos.getSellerNo())){
-                            invoiceCheckParamDTO.setSeller_tax_id(ocrInfos.getSellerNo());
-                        }
-                        if (StrUtil.isNotBlank(ocrInfos.getProvince())){
-                            invoiceCheckParamDTO.setArea(ocrInfos.getProvince());
+                            if (StrUtil.isNotBlank(ocrInfos.getSellerNo())){
+                                invoiceCheckParamDTO.setSeller_tax_id(ocrInfos.getSellerNo());
+                            }
+                            if (StrUtil.isNotBlank(ocrInfos.getProvince())){
+                                invoiceCheckParamDTO.setArea(ocrInfos.getProvince());
+                            }
                         }
                     }
+                    //数电票处理
                     if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
-                        invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                         invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
                         invoiceCheckParamDTO.setTotal(ocrInfos.getTotalUppercase());
                         invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
                         invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                         break;
                     }
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
+                    //增值税普通发票/普卷/电子普通
                     invoiceCheckParamDTO.setCode(ocrInfos.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
@@ -177,7 +170,10 @@ public class CheckInvoice {
                     }
                     invoiceCheckParamDTO.setCheck_code(checkCodes);
                     break;
+                    default:
+                        return;
             }
+
             this.checkInvoice(filesInfo,invoiceCheckParamDTO);
 
  }

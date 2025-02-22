@@ -32,8 +32,15 @@ public class RegenaiChangeInvoiceDetails {
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject detail = jsonArray.getJSONObject(i);
             DataOcrDetails ocrDetails = new DataOcrDetails();
-            //详情表id
-            ocrDetails.setId(details.get(i).getId());
+            //详情表id 检查details列表的索引是否越界
+            if (i < details.size()) {
+                ocrDetails.setId(details.get(i).getId());
+            } else {
+                // 如果索引越界，使用details.get(0)的id
+                if (!details.isEmpty()) {
+                    ocrDetails.setId(details.get(0).getId());
+                }
+            }
             //fileId
             ocrDetails.setFileId(fileId);
            //详细名称

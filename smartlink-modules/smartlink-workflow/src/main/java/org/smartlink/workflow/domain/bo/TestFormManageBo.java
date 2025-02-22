@@ -36,47 +36,37 @@ public class TestFormManageBo extends BaseEntity {
     @NotBlank(message = "单据名称不能为空", groups = { AddGroup.class, EditGroup.class })
     private String formName;
 
-    /**
-     * 单据绑定名称
-     */
-    @NotBlank(message = "单据绑定名称不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String formBindName;
-
-    /**
-     * 单据绑定类型
-     */
-    @NotBlank(message = "单据绑定类型不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String formBindType;
-
-    /**
-     * 状态
-     */
-    //@NotBlank(message = "状态不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String formStatus;
-
-    /**
-     *
-     */
-    //@NotBlank(message = "不能为空", groups = { AddGroup.class, EditGroup.class })
     private String remark;
 
-    /**
+/*    *//**
      * 表单用途名称
-     */
+     *//*
     //@NotBlank(message = "表单用途不能为空", groups = { AddGroup.class, EditGroup.class })
     private String formPurposeName;
 
-    /**
+    *//**
      * 表单用途名称
-     */
+     *//*
     //@NotBlank(message = "表单用途不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String formPurposeType;
+    private String formPurposeType;*/
 
     /**
      * 是否删除（0否，1是）
      */
     //@NotNull(message = "是否删除（0否，1是）不能为空", groups = { AddGroup.class, EditGroup.class })
     private Long isDeleted;
+
+
+    /**
+     * 单据绑定名称
+     */
+    @NotBlank(message = "单据绑定名称不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String formBindName;
+    /**
+     * 单据绑定类型
+     */
+    @NotBlank(message = "单据绑定类型不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String formBindType;
 
     private List<TestFormConfig> formConfigList;
 }

@@ -42,18 +42,6 @@ public class TestFormManageVo implements Serializable {
     private String formName;
 
     /**
-     * 表单用途名称
-     */
-    @ExcelProperty(value = "表单用途名称")
-    private String formPurposeName;
-
-    /**
-     * 表单用途类型
-     */
-    @ExcelProperty(value = "表单用途类型")
-    private String formPurposeType;
-
-    /**
      * 单据绑定名称
      */
     @ExcelProperty(value = "单据绑定名称")
@@ -64,13 +52,6 @@ public class TestFormManageVo implements Serializable {
      */
     @ExcelProperty(value = "单据绑定类型")
     private String formBindType;
-
-    /**
-     * 状态
-     */
-    @ExcelProperty(value = "状态")
-    private String formStatus;
-
     /**
      *
      */

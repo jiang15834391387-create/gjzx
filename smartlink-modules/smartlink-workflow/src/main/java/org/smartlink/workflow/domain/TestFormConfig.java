@@ -27,14 +27,18 @@ public class TestFormConfig  {
     private Long id;
 
     /**
-     * 字段名称
+     * 字段英文名称
      */
-    private String fieldName;
+    private String fieldValue;
 
     /**
      * 字段名称
      */
+    private String fieldName;
+
     private String fieldType;
+
+    private String fieldTypeData;
 
     /**
      * 是否必填（0否 1是）

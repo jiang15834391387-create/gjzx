@@ -2,6 +2,7 @@ package org.smartlink.workflow.service;
 
 import jakarta.validation.constraints.NotNull;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.workflow.domain.TestFormConfig;
 import org.smartlink.workflow.domain.vo.HtmlVo;
 import org.smartlink.workflow.domain.vo.TestFormManageVo;
 import org.smartlink.workflow.domain.bo.TestFormManageBo;
@@ -68,5 +69,5 @@ public interface ITestFormManageService {
      */
     R<Void> deleteWithValidByIds(Collection<Long> ids);
 
-    List<HtmlVo> selectBy(String type);
+    List<TestFormManageVo> selectBy(String type);
 }
