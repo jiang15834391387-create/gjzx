@@ -41,7 +41,11 @@ public enum FileStatusEnumd {
     /**
      * 已删除
      */
-    DELETED("7","已删除");
+    DELETED("7","已删除"),
+    /**
+     * OCR识别为空
+     */
+    OCR_IDENTIFICATION_NULL("8","OCR识别为空");
 
     FileStatusEnumd(String code, String desc) {
         this.code = code;

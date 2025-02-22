@@ -54,6 +54,9 @@ public class InvoiceRecognitionController {
                 if (files != null && files.length > 0) {
                     for (MultipartFile file : files) {
                         res = scanImageService.uploadImage(file, uploadType);
+                        if (res.getMsg().equals("OCR识别为空")) {
+                            continue;  // 跳过当前文件，继续处理下一个
+                        }
                     }
                 } else {
                     return R.fail("请上传文件!");

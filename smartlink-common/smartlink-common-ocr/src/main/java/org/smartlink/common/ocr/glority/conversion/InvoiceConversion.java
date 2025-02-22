@@ -97,6 +97,10 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setRemark(jsonObject.getStr("remark"));
             invoice.setItemNames(jsonObject.getStr("item_names"));
             invoice.setKind(jsonObject.getStr("kind"));
+            invoice.setElectronicMark(jsonObject.getStr("electronic_mark"));
+            invoice.setBlockChain(jsonObject.getStr("block_chain"));
+            invoice.setTransitMark(jsonObject.getStr("transit_mark"));
+            invoice.setArea(jsonObject.getStr("area"));
             //发票类型
             String invoiceCode = identifyResults.getType();
             if (identifyResults.getRegion() != null && identifyResults.getRegion().length > 0) {

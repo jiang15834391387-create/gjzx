@@ -29,16 +29,14 @@ import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,7 +91,15 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 .retrieve()
                 .bodyToMono(GlorityResult.class)
 //                .map(OcrConversionException::checkGlorityResult)
-                .flatMap(e -> Mono.just(e.getResponse().getData().getIdentify_results())).block();
+//                .flatMap(e -> Mono.just(e.getResponse().getData().getIdentify_results())).block();
+            .defaultIfEmpty(new GlorityResult()) // 避免 bodyToMono() 为空
+            .flatMap(e -> {
+                if (e == null || e.getResponse() == null || e.getResponse().getData() == null) {
+                    return Mono.just(Collections.<IdentifyResults>emptyList()); // 显式指定泛型
+                }
+                return Mono.justOrEmpty(e.getResponse().getData().getIdentify_results());
+            })
+            .block();
         if (CollUtil.isEmpty(responseData)) {
             log.info("票小秘返回 NULL ");
             return null;

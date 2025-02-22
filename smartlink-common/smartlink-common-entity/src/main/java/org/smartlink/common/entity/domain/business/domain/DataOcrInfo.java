@@ -87,6 +87,11 @@ public class DataOcrInfo extends TenantEntity {
     private String city;
 
     /**
+     * 地区
+     */
+    private String area;
+
+    /**
      * 图片表id
      */
     private String fileId;

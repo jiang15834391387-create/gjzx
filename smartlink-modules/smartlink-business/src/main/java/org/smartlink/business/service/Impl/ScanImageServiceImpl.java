@@ -24,6 +24,7 @@ import org.smartlink.business.service.IDataOcrService;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
+import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.factory.OcrFactory;
 import org.smartlink.business.service.ScanImageService;
@@ -106,12 +107,12 @@ public class ScanImageServiceImpl implements ScanImageService {
         if (isFileTypeAllowed(fileSuffix)) {
             //ocr识别
             List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfo, Base64.getEncoder().encodeToString(multipartFile.getBytes()), fileSuffix);
-            if (identificationData.size() == 0) {
-                return R.fail(dataImageFilesInfo.getMessage());
-            }
+
             //ocr识别
             if (fileSuffix.equals("ofd")) {
-
+                if (identificationData == null) {
+                    return handleOcrFailure(multipartFile);  // 返回 null，表示跳过
+                }
                 for (IdentificationData identificationDaOfd : identificationData) {
                     DataImageFilesInfo dataImageFilesInfoOfd = new DataImageFilesInfo();
                     dataImageFilesInfoOfd.setFileId(IdUtil.simpleUUID());
@@ -140,7 +141,9 @@ public class ScanImageServiceImpl implements ScanImageService {
                 }
 
             } else if (fileSuffix.equals("xml")) {
-
+                if (identificationData == null) {
+                    return handleOcrFailure(multipartFile);  // 返回 null，表示跳过
+                }
                 for (IdentificationData identificationDaXml : identificationData) {
                     DataImageFilesInfo dataImageFilesInfoXml = new DataImageFilesInfo();
                     dataImageFilesInfoXml.setFileId(IdUtil.simpleUUID());
@@ -159,7 +162,9 @@ public class ScanImageServiceImpl implements ScanImageService {
                 }
 
             } else if (fileSuffix.equals("pdf")) {//pdf类型
-
+                if (identificationData == null) {
+                    return handleOcrFailure(multipartFile);  // 返回 null，表示跳过
+                }
                 SysOssVo pdfUpload = iSysOssService.upload(multipartFile);
                 // 读取 PDF 文件并转换为字节数组
                 List<byte[]> images = pdfToImg(multipartFile.getBytes());
@@ -205,7 +210,9 @@ public class ScanImageServiceImpl implements ScanImageService {
                 }
 
             } else {//图片相关类型
-
+                if (identificationData == null) {
+                    return handleOcrFailure(multipartFile);  // 返回 null，表示跳过
+                }
                 //压缩图片
                 ByteArrayOutputStream byteArrayOutputStream = FileUtils.thumbnailImage(multipartFile, fileSuffix);
                 //缩略图
@@ -587,5 +594,17 @@ public class ScanImageServiceImpl implements ScanImageService {
         return props;
     }
 
+    public R<T> handleOcrFailure(MultipartFile multipartFile) {
+        SysOssVo pdfUpload = iSysOssService.upload(multipartFile);
+        // 创建 OCR 失败的记录
+        DataImageFilesInfo dataImageFilesInfo = new DataImageFilesInfo();
+        dataImageFilesInfo.setFileId(IdUtil.simpleUUID());
+        dataImageFilesInfo.setIurl(pdfUpload.getUrl());
+        dataImageFilesInfo.setFileStatus(FileStatusEnumd.OCR_IDENTIFICATION_NULL.getCode());
+        dataImageFilesInfo.setMessage(FileStatusEnumd.OCR_IDENTIFICATION_NULL.getDesc());
+        // 插入记录
+        iDataImageFilesInfoService.insert(dataImageFilesInfo);
+        return R.fail("OCR识别为空");
+    }
 
 }

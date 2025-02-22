@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.TableField;
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
@@ -86,6 +87,12 @@ public class DataOcrInfoBo extends BaseEntity {
      */
     @NotBlank(message = "省不能为空", groups = { AddGroup.class, EditGroup.class })
     private String province;
+
+    /**
+     * 地区
+     */
+    @NotBlank(message = "地区不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String area;
 
     /**
      * 市
