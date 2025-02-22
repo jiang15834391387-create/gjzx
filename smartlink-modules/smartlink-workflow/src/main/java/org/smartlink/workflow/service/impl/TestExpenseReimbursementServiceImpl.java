@@ -2,6 +2,7 @@ package org.smartlink.workflow.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.smartlink.common.core.domain.event.ProcessEvent;
 import org.smartlink.common.core.domain.event.ProcessTaskEvent;
 import org.smartlink.common.core.enums.BusinessStatusEnum;
@@ -210,11 +211,13 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     public void processHandler(ProcessEvent processEvent) {
         log.info("当前任务执行了{}", processEvent.toString());
         TestExpenseReimbursement testExpenseReimbursement = baseMapper.selectById(Long.valueOf(processEvent.getBusinessKey()));
-        testExpenseReimbursement.setStatus(processEvent.getStatus());
-        if (processEvent.isSubmit()) {
-            testExpenseReimbursement.setStatus(BusinessStatusEnum.WAITING.getStatus());
+        if(testExpenseReimbursement!=null){
+            testExpenseReimbursement.setStatus(processEvent.getStatus());
+            if (processEvent.isSubmit()) {
+                testExpenseReimbursement.setStatus(BusinessStatusEnum.WAITING.getStatus());
+            }
+            baseMapper.updateById(testExpenseReimbursement);
         }
-        baseMapper.updateById(testExpenseReimbursement);
     }
 
 
@@ -232,4 +235,48 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             }
         }
     }
+
+
+
+
+
+
+    //@EventListener(ProcessEvent.class)
+    public void processHandler2(ProcessEvent processEvent) {
+        log.info("当前任务执行了{}", processEvent.toString());
+        List<WfDefinitionConfig> list = getWfDefinitionConfigById(processEvent.getKey());
+        if(!CollectionUtils.isEmpty(list)){
+            TestExpenseReimbursement testExpenseReimbursement = baseMapper.selectById(Long.valueOf(processEvent.getBusinessKey()));
+            if(testExpenseReimbursement!=null){
+                testExpenseReimbursement.setStatus(processEvent.getStatus());
+                if (processEvent.isSubmit()) {
+                    testExpenseReimbursement.setStatus(BusinessStatusEnum.WAITING.getStatus());
+                }
+                baseMapper.updateById(testExpenseReimbursement);
+            }
+        }
+    }
+
+
+    //@EventListener(ProcessTaskEvent.class)
+    public void processTaskHandler2(ProcessTaskEvent processTaskEvent) {
+        List<WfDefinitionConfig> list = getWfDefinitionConfigById(processTaskEvent.getKey());
+        if(!CollectionUtils.isEmpty(list)){
+           log.info("当前任务执行了{}", processTaskEvent.toString());
+           TestExpenseReimbursement testExpenseReimbursement = baseMapper.selectById(Long.valueOf(processTaskEvent.getBusinessKey()));
+           if(testExpenseReimbursement!=null){
+               testExpenseReimbursement.setStatus(BusinessStatusEnum.WAITING.getStatus());
+               baseMapper.updateById(testExpenseReimbursement);
+           }
+
+        }
+    }
+
+    public List<WfDefinitionConfig> getWfDefinitionConfigById(String key) {
+        List<WfDefinitionConfig> wfDefinitionConfigs = wfDefinitionConfigMapper.selectList(new QueryWrapper<WfDefinitionConfig>().eq("process_key", key));
+        return wfDefinitionConfigs;
+    }
+
+
+
 }
