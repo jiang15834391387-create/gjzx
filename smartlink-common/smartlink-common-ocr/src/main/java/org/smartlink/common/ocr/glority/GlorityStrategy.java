@@ -99,9 +99,13 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 }
                 return Mono.justOrEmpty(e.getResponse().getData().getIdentify_results());
             })
+            .onErrorResume(ex -> {
+                log.error("OCR 识别请求失败: {}", ex.getMessage(), ex); //记录异常详细信息
+                return Mono.just(null); //捕获异常并返回 null
+            })
             .block();
         if (CollUtil.isEmpty(responseData)) {
-            log.info("票小秘返回 NULL ");
+            log.info("OCR 识别为 NULL ");
             return null;
         }
 //        log.info("票小秘识别结果:" + JSONObject.toJSONString(responseData));
@@ -123,11 +127,8 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
             switch (identifyResult.getType()) {
                 //增值税、机打
                 case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
-                case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
                 case InvoiceConstants.GLORITY_TAX_CODE:
                 case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
-                case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
-                case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_LIST:
@@ -138,7 +139,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 //机动车
                 case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
                     return MotorVehicleSaleConversion.getInstance();
-                //机票
+                //航空运输电子客票行程单
                 case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
                     return FlightItineraryConversion.getInstance();
                 //二手车

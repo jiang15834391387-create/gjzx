@@ -43,9 +43,9 @@ public enum FileStatusEnumd {
      */
     DELETED("7","已删除"),
     /**
-     * OCR识别为空
+     * 已删除
      */
-    OCR_IDENTIFICATION_NULL("8","OCR识别为空");
+    OCR_FAILED("8","OCR识别失败！");
 
     FileStatusEnumd(String code, String desc) {
         this.code = code;

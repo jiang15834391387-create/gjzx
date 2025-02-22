@@ -123,6 +123,9 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             } else if (InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode().equals(invoiceCode)) {
                 //增值税普通发票(卷票)
                 dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode());
+            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode)) {
+                //增值税电子普通发票
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode());
             } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode().equals(invoiceCode)) {
                 //增值税发票清单
                 dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode());
@@ -135,6 +138,15 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             } else if (InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode().equals(invoiceCode)) {
                 //机打发票
                 dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode());
+            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode().equals(invoiceCode)) {
+                //数电票(普通发票)
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode());
+            } else if (InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode().equals(invoiceCode)) {
+                //可报销其他发票
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode());
+            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode().equals(invoiceCode)) {
+                //数电票(增值税专用发票)
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode());
             }
             JSONArray list = jsonObject.getJSONArray("items");
             JSONArray list_transports = jsonObject.getJSONArray("transports");
