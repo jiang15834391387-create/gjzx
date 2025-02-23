@@ -109,7 +109,6 @@ public class ScanImageServiceImpl implements ScanImageService {
             if (isFileTypeAllowed(fileSuffix)) {
                 //ocr识别
                 List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfo, Base64.getEncoder().encodeToString(multipartFile.getBytes()), fileSuffix);
-                identificationData = null;
                 if (identificationData == null) {
                     return handleOcrFailure(multipartFile, fileSuffix,"", FileStatusEnumd.OCR_FAILED.getCode(), FileStatusEnumd.OCR_FAILED.getDesc());
                 }
@@ -346,13 +345,16 @@ public class ScanImageServiceImpl implements ScanImageService {
      * @throws Exception 如果反射操作失败
      */
     public static void updateFileId(Object entity, String fileId) throws Exception {
+
         if (entity == null || fileId == null) {
             throw new IllegalArgumentException("参数 entity 和 fileId 不能为空");
         }
-        // 更新主对象的 fileId 字段
-        Field fileIdField = entity.getClass().getDeclaredField("fileId");
-        fileIdField.setAccessible(true);
-        fileIdField.set(entity, fileId);
+        // 直接更新主对象的 fileId 字段（如果存在）
+        Field fileIdField = getFieldIfExists(entity.getClass(), "fileId");
+        if (fileIdField != null) {
+            fileIdField.setAccessible(true);
+            fileIdField.set(entity, fileId);
+        }
 
         // 检查是否有名为 'details' 的字段
         Field[] fields = entity.getClass().getDeclaredFields();
@@ -365,18 +367,32 @@ public class ScanImageServiceImpl implements ScanImageService {
         }
         if (hasDetailsField) {
             // 获取 details 字段并处理子对象
-            Field detailsField = entity.getClass().getDeclaredField("details");
-            detailsField.setAccessible(true);
-            List<?> detailsList = (List<?>) detailsField.get(entity);
-
-            if (detailsList != null) {
-                for (Object detail : detailsList) {
-                    // 更新子对象的 fileId 字段
-                    Field detailFileIdField = detail.getClass().getDeclaredField("fileId");
-                    detailFileIdField.setAccessible(true);
-                    detailFileIdField.set(detail, fileId);
+            Field detailsField = getFieldIfExists(entity.getClass(), "details");
+            if (detailsField != null) {
+                detailsField.setAccessible(true);
+                List<?> detailsList = (List<?>) detailsField.get(entity);
+                if (detailsList != null) {
+                    for (Object detail : detailsList) {
+                        // 更新子对象的 fileId 字段
+                        Field detailFileIdField = getFieldIfExists(detail.getClass(), "fileId");
+                        if (detailFileIdField != null) {
+                            detailFileIdField.setAccessible(true);
+                            detailFileIdField.set(detail, fileId);
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    /**
+     * 检查类是否有指定字段
+     */
+    private static Field getFieldIfExists(Class<?> clazz, String fieldName) {
+        try {
+            return clazz.getDeclaredField(fieldName);
+        } catch (NoSuchFieldException e) {
+            return null; // 不抛异常，直接返回 null
         }
     }
 

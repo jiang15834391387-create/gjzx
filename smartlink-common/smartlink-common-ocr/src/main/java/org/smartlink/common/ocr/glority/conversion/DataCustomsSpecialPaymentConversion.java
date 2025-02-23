@@ -1,6 +1,7 @@
 package org.smartlink.common.ocr.glority.conversion;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -82,22 +83,23 @@ public class DataCustomsSpecialPaymentConversion implements ChangeIdentifyInfo<L
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataOcrDetails e = new DataOcrDetails();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setPrice(fJson.containsKey("dutiable_price") ? fJson.get("dutiable_price") : null);
-                e.setName(fJson.containsKey("name_of_goods") ? fJson.get("name_of_goods") : null);
-                e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
-                e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
-                e.setTaxNumber(fJson.containsKey("tax_number") ? fJson.get("tax_number") : null);
-                e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
-                e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
+            if (ObjectUtil.isNotNull(list)) {
+                for (Object invoiceDetails : list) {
+                    DataOcrDetails e = new DataOcrDetails();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setPrice(fJson.containsKey("dutiable_price") ? fJson.get("dutiable_price") : null);
+                    e.setName(fJson.containsKey("name_of_goods") ? fJson.get("name_of_goods") : null);
+                    e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
+                    e.setTaxNumber(fJson.containsKey("tax_number") ? fJson.get("tax_number") : null);
+                    e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
+                    e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
 
-                ocrDetailsList.add(e);
+                    ocrDetailsList.add(e);
+                }
             }
-
             invoice.setDetails(ocrDetailsList);
 
             invoice.setOrientation(identifyResults.getOrientation());

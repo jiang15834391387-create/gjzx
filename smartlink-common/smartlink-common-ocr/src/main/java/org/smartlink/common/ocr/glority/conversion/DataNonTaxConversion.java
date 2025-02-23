@@ -1,6 +1,7 @@
 package org.smartlink.common.ocr.glority.conversion;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -76,20 +77,21 @@ public class DataNonTaxConversion implements ChangeIdentifyInfo<List<IdentifyRes
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataOcrDetails e = new DataOcrDetails();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setDetailAmount(fJson.containsKey("amount") ? fJson.get("amount") : null);
-                e.setRemark(fJson.containsKey("comment") ? fJson.get("comment") : null);
-                e.setProjectName(fJson.containsKey("project_name") ? fJson.get("project_name") : null);
-                e.setProjectCode(fJson.containsKey("project_code") ? fJson.get("project_code") : null);
-                e.setStandardOfCharge(fJson.containsKey("standard_of_charge") ? fJson.get("standard_of_charge") : null);
-                e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
-                ocrDetailsList.add(e);
+            if (ObjectUtil.isNotNull(list)) {
+                for (Object invoiceDetails : list) {
+                    DataOcrDetails e = new DataOcrDetails();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setDetailAmount(fJson.containsKey("amount") ? fJson.get("amount") : null);
+                    e.setRemark(fJson.containsKey("comment") ? fJson.get("comment") : null);
+                    e.setProjectName(fJson.containsKey("project_name") ? fJson.get("project_name") : null);
+                    e.setProjectCode(fJson.containsKey("project_code") ? fJson.get("project_code") : null);
+                    e.setStandardOfCharge(fJson.containsKey("standard_of_charge") ? fJson.get("standard_of_charge") : null);
+                    e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    ocrDetailsList.add(e);
+                }
             }
-
             invoice.setDetails(ocrDetailsList);
 
             invoice.setOrientation(identifyResults.getOrientation());

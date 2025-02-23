@@ -2,6 +2,7 @@ package org.smartlink.common.ocr.glority.conversion;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
@@ -68,26 +69,28 @@ public class DutyPaidProofConversion implements ChangeIdentifyInfo<List<Identify
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataDutyPaidProofDetails> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataDutyPaidProofDetails e = new DataDutyPaidProofDetails();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setName(fJson.containsKey("name") ? fJson.get("name") : null);
-                e.setActualPaidAmount(fJson.containsKey("actual_paid_amount") ? fJson.get("actual_paid_amount") : null);
-                e.setAmountPaid(fJson.containsKey("amount_paid") ? fJson.get("amount_paid") : null);
-                e.setEntryDate(fJson.containsKey("entry_date") ? fJson.get("entry_date") : null);
-                e.setTaxAgency(fJson.containsKey("tax_agency") ? fJson.get("tax_agency") : null);
-                e.setTaxPeriod(fJson.containsKey("tax_period") ? fJson.get("tax_period") : null);
-                e.setTaxType(fJson.containsKey("tax_type") ? fJson.get("tax_type") : null);
-                e.setBudgetAccountCode(fJson.containsKey("budget_account_code") ? fJson.get("budget_account_code") : null);
-                e.setBudgetAccountName(fJson.containsKey("budget_account_name") ? fJson.get("budget_account_name") : null);
-                e.setBudgetAccountLevel(fJson.containsKey("budget_account_level") ? fJson.get("budget_account_level") : null);
-                e.setOriginalNumber(fJson.containsKey("original_number") ? fJson.get("original_number") : null);
-                e.setQuantity(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
-                e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
-                e.setTotal(fJson.containsKey("total") ? fJson.get("total") : null);
-                ocrDetailsList.add(e);
+            if (ObjectUtil.isNotNull(list)){
+                for (Object invoiceDetails : list) {
+                    DataDutyPaidProofDetails e = new DataDutyPaidProofDetails();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setName(fJson.containsKey("name") ? fJson.get("name") : null);
+                    e.setActualPaidAmount(fJson.containsKey("actual_paid_amount") ? fJson.get("actual_paid_amount") : null);
+                    e.setAmountPaid(fJson.containsKey("amount_paid") ? fJson.get("amount_paid") : null);
+                    e.setEntryDate(fJson.containsKey("entry_date") ? fJson.get("entry_date") : null);
+                    e.setTaxAgency(fJson.containsKey("tax_agency") ? fJson.get("tax_agency") : null);
+                    e.setTaxPeriod(fJson.containsKey("tax_period") ? fJson.get("tax_period") : null);
+                    e.setTaxType(fJson.containsKey("tax_type") ? fJson.get("tax_type") : null);
+                    e.setBudgetAccountCode(fJson.containsKey("budget_account_code") ? fJson.get("budget_account_code") : null);
+                    e.setBudgetAccountName(fJson.containsKey("budget_account_name") ? fJson.get("budget_account_name") : null);
+                    e.setBudgetAccountLevel(fJson.containsKey("budget_account_level") ? fJson.get("budget_account_level") : null);
+                    e.setOriginalNumber(fJson.containsKey("original_number") ? fJson.get("original_number") : null);
+                    e.setQuantity(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
+                    e.setTotal(fJson.containsKey("total") ? fJson.get("total") : null);
+                    ocrDetailsList.add(e);
+                }
             }
             dutyPaidProof.setDetails(ocrDetailsList);
 

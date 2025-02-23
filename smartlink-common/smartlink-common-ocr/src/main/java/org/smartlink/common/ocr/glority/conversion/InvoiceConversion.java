@@ -189,7 +189,7 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             if (list_transports != null && !list_transports.isEmpty()) {
                 for (Object listTransports : list_transports) {
                     DataOcrDetails e = new DataOcrDetails();
-                    LinkedHashMap<String, String> fJson = (LinkedHashMap) listTransports;
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) listTransports).toBean(LinkedHashMap.class);
                     e.setId(IdUtil.fastSimpleUUID());
                     e.setFileId(dataImageFilesInfo.getFileId());
                     e.setTransportType(fJson.containsKey("transport_type") ? fJson.get("transport_type") : null);

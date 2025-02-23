@@ -1,6 +1,7 @@
 package org.smartlink.common.ocr.glority.conversion;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -92,28 +93,29 @@ public class DataCustomsExportGoodsConversion implements ChangeIdentifyInfo<List
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataCustomsExportGoodsDetail> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataCustomsExportGoodsDetail e = new DataCustomsExportGoodsDetail();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setCommodityNumber(fJson.containsKey("commodity_number") ? fJson.get("commodity_number") : null);
-                e.setCurrency(fJson.containsKey("currency") ? fJson.get("currency") : null);
-                e.setDescriptionOfCommodity(fJson.containsKey("description_of_commodity") ? fJson.get("description_of_commodity") : null);
-                e.setFinalDestinationCountry(fJson.containsKey("final_destination_country") ? fJson.get("final_destination_country") : null);
-                e.setItemNumber(fJson.containsKey("item_number") ? fJson.get("item_number") : null);
-                e.setKindOfTax(fJson.containsKey("kind_of_tax") ? fJson.get("kind_of_tax") : null);
-                e.setOriginalCountry(fJson.containsKey("original_country") ? fJson.get("original_country") : null);
-                e.setOriginalPlaceOfDeliveredGoods(fJson.containsKey("original_place_of_delivered_goods") ? fJson.get("original_place_of_delivered_goods") : null);
-                e.setQuantityOf2Uom(fJson.containsKey("quantity_of_2_uom") ? fJson.get("quantity_of_2_uom") : null);
-                e.setQuantityOfUom(fJson.containsKey("quantity_of_uom") ? fJson.get("quantity_of_uom") : null);
-                e.setSpecification(fJson.containsKey("specification") ? fJson.get("specification") : null);
-                e.setTotalPrice(fJson.containsKey("total_price") ? fJson.get("total_price") : null);
-                e.setTransactionUomAndQuantity(fJson.containsKey("transaction_uom_and_quantity") ? fJson.get("transaction_uom_and_quantity") : null);
-                e.setUnitPrice(fJson.containsKey("unit_price") ? fJson.get("unit_price") : null);
-                ocrDetailsList.add(e);
+            if (ObjectUtil.isNotNull(list)) {
+                for (Object invoiceDetails : list) {
+                    DataCustomsExportGoodsDetail e = new DataCustomsExportGoodsDetail();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setCommodityNumber(fJson.containsKey("commodity_number") ? fJson.get("commodity_number") : null);
+                    e.setCurrency(fJson.containsKey("currency") ? fJson.get("currency") : null);
+                    e.setDescriptionOfCommodity(fJson.containsKey("description_of_commodity") ? fJson.get("description_of_commodity") : null);
+                    e.setFinalDestinationCountry(fJson.containsKey("final_destination_country") ? fJson.get("final_destination_country") : null);
+                    e.setItemNumber(fJson.containsKey("item_number") ? fJson.get("item_number") : null);
+                    e.setKindOfTax(fJson.containsKey("kind_of_tax") ? fJson.get("kind_of_tax") : null);
+                    e.setOriginalCountry(fJson.containsKey("original_country") ? fJson.get("original_country") : null);
+                    e.setOriginalPlaceOfDeliveredGoods(fJson.containsKey("original_place_of_delivered_goods") ? fJson.get("original_place_of_delivered_goods") : null);
+                    e.setQuantityOf2Uom(fJson.containsKey("quantity_of_2_uom") ? fJson.get("quantity_of_2_uom") : null);
+                    e.setQuantityOfUom(fJson.containsKey("quantity_of_uom") ? fJson.get("quantity_of_uom") : null);
+                    e.setSpecification(fJson.containsKey("specification") ? fJson.get("specification") : null);
+                    e.setTotalPrice(fJson.containsKey("total_price") ? fJson.get("total_price") : null);
+                    e.setTransactionUomAndQuantity(fJson.containsKey("transaction_uom_and_quantity") ? fJson.get("transaction_uom_and_quantity") : null);
+                    e.setUnitPrice(fJson.containsKey("unit_price") ? fJson.get("unit_price") : null);
+                    ocrDetailsList.add(e);
+                }
             }
-
             invoice.setDetails(ocrDetailsList);
 
             invoice.setOrientation(identifyResults.getOrientation());

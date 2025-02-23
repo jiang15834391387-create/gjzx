@@ -101,7 +101,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
             })
             .onErrorResume(ex -> {
                 log.error("OCR 识别请求失败: {}", ex.getMessage(), ex); //记录异常详细信息
-                return Mono.just(null); //捕获异常并返回 null
+                return Mono.just(Collections.emptyList()); //捕获异常并返回 空列表
             })
             .block();
         if (CollUtil.isEmpty(responseData)) {

@@ -61,21 +61,23 @@ public class DidiItineraryConversion implements ChangeIdentifyInfo<List<Identify
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataDidiItineraryDetails> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataDidiItineraryDetails e = new DataDidiItineraryDetails();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setCarType(fJson.containsKey("car_type") ? fJson.get("car_type") : null);
-                e.setTimeGetOn(fJson.containsKey("time_geton") ? fJson.get("time_geton") : null);
-                e.setTimeGetOff(fJson.containsKey("time_getoff") ? fJson.get("time_getoff") : null);
-                e.setCity(fJson.containsKey("city") ? fJson.get("city") : null);
-                e.setStationGetOn(fJson.containsKey("station_geton") ? fJson.get("station_geton") : null);
-                e.setStationGetOff(fJson.containsKey("station_getoff") ? fJson.get("station_getoff") : null);
-                e.setMileage(fJson.containsKey("mileage") ? fJson.get("mileage") : null);
-                e.setProducer(fJson.containsKey("producer") ? fJson.get("producer") : null);
-                e.setTimeOrder(fJson.containsKey("time_order") ? fJson.get("time_order") : null);
-                ocrDetailsList.add(e);
+            if (ObjectUtil.isNotNull(list)) {
+                for (Object invoiceDetails : list) {
+                    DataDidiItineraryDetails e = new DataDidiItineraryDetails();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setCarType(fJson.containsKey("car_type") ? fJson.get("car_type") : null);
+                    e.setTimeGetOn(fJson.containsKey("time_geton") ? fJson.get("time_geton") : null);
+                    e.setTimeGetOff(fJson.containsKey("time_getoff") ? fJson.get("time_getoff") : null);
+                    e.setCity(fJson.containsKey("city") ? fJson.get("city") : null);
+                    e.setStationGetOn(fJson.containsKey("station_geton") ? fJson.get("station_geton") : null);
+                    e.setStationGetOff(fJson.containsKey("station_getoff") ? fJson.get("station_getoff") : null);
+                    e.setMileage(fJson.containsKey("mileage") ? fJson.get("mileage") : null);
+                    e.setProducer(fJson.containsKey("producer") ? fJson.get("producer") : null);
+                    e.setTimeOrder(fJson.containsKey("time_order") ? fJson.get("time_order") : null);
+                    ocrDetailsList.add(e);
+                }
             }
             didiItinerary.setDetails(ocrDetailsList);
 
