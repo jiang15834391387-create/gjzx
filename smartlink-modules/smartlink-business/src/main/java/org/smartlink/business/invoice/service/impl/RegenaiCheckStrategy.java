@@ -43,22 +43,12 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
     private final RegenaiChangeInvoiceDetails changeInvoiceDetails;
     private final RegenaiChangeUsedCarSales changeUsedCarSales;
     private final RegenaiMotorVehicleSale motorVehicleSale;
-    private final RegenaiChangeRailwayTicket railwayTicket;
-    private final RegenaiChangeFlightItinerary changeFlightItinerary;
-    private final RegenaiChangeFlightItineraryDetails changeFlightItineraryDetails;
-    private final RegenaiMedicalTreatment medicalTreatment;
-    private final RegenaichangeMedicalTreatmentDetails changeMedicalTreatmentDetails;
-    public RegenaiCheckStrategy(DataImageFilesInfoMapper dataImageFilesInfoMapper, RegenaiBasicOcrInfo basicOcrInfo, RegenaiChangeInvoiceDetails changeInvoiceDetails, RegenaiChangeUsedCarSales changeUsedCarSales, RegenaiMotorVehicleSale motorVehicleSale, RegenaiChangeRailwayTicket railwayTicket, RegenaiChangeFlightItinerary changeFlightItinerary, RegenaiChangeFlightItineraryDetails changeFlightItineraryDetails, RegenaiMedicalTreatment medicalTreatment, RegenaichangeMedicalTreatmentDetails changeMedicalTreatmentDetails) {
+    public RegenaiCheckStrategy(DataImageFilesInfoMapper dataImageFilesInfoMapper, RegenaiBasicOcrInfo basicOcrInfo, RegenaiChangeInvoiceDetails changeInvoiceDetails, RegenaiChangeUsedCarSales changeUsedCarSales, RegenaiMotorVehicleSale motorVehicleSale) {
         this.dataImageFilesInfoMapper = dataImageFilesInfoMapper;
         this.basicOcrInfo = basicOcrInfo;
         this.changeInvoiceDetails = changeInvoiceDetails;
         this.changeUsedCarSales = changeUsedCarSales;
         this.motorVehicleSale = motorVehicleSale;
-        this.railwayTicket = railwayTicket;
-        this.changeFlightItinerary = changeFlightItinerary;
-        this.changeFlightItineraryDetails = changeFlightItineraryDetails;
-        this.medicalTreatment = medicalTreatment;
-        this.changeMedicalTreatmentDetails = changeMedicalTreatmentDetails;
     }
 
 
@@ -186,7 +176,7 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         log.info("睿真发票接口查验成功");
         filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
         filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
-        filesInfo.setMessage("查验成功！");
+        filesInfo.setMessage("查验成功");
         baseEntity=new BaseEntity();
         baseEntity.setCheckResult("查验成功");
         baseEntity.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
@@ -218,33 +208,7 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
             dataMotorVehicleSale.setFileId(filesInfo.getFileId());
             dataMotorVehicleSale.setCheckInvoice(CheckConstant.SUCCESS_CHECK);
             return dataMotorVehicleSale;
-        }else if(StrUtil.equals(InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE, invoiceType)){
-             //火车票
-            DataRailwayTicket dataRailwayTicket = new DataRailwayTicket();
-            this.railwayTicket.changeRailwayTicket(jsonObject, dataRailwayTicket);
-            dataRailwayTicket.setId(IdUtil.simpleUUID());
-            dataRailwayTicket.setFileId(filesInfo.getFileId());
-            return dataRailwayTicket;
-        }else if (StrUtil.equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE, invoiceType)){
-            //航空运输电子客运行程单基本信息
-            DataFlightItinerary dataFlightItinerary = new DataFlightItinerary();
-            this.changeFlightItinerary.changeFlightItinerary(jsonObject, dataFlightItinerary);
-            // 填充详情信息
-            dataFlightItinerary.setFlightItineraryDetails(this.changeFlightItineraryDetails.changeFlightItineraryDetails(jsonObject,filesInfo.getFileId()));
-            dataFlightItinerary.setId(IdUtil.simpleUUID());
-            dataFlightItinerary.setFileId(filesInfo.getFileId());
-            return dataFlightItinerary;
-
-        }else if (StrUtil.equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE, invoiceType)){
-            //非税收入类发票基本信息
-            DataMedicalTreatment medicalTreatment = new DataMedicalTreatment();
-            this.medicalTreatment.changeMedicalTreatment(jsonObject, medicalTreatment);
-            // 填充详情信息
-            medicalTreatment.setDetails(this.changeMedicalTreatmentDetails.changeMedicalTreatmentDetails(jsonObject,filesInfo.getFileId()));
-            medicalTreatment.setId(IdUtil.simpleUUID());
-            medicalTreatment.setFileId(filesInfo.getFileId());
-            return medicalTreatment;
-        }else {
+        } else {
             //增值税
             DataOcrInfo dataOcrInfo = new DataOcrInfo();
             //填充OCR基本信息
@@ -282,7 +246,5 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         }
         filesInfo.setMessage("查验失败:"+message);
         log.error("查验失败：" + message);
-
     }
-
 }

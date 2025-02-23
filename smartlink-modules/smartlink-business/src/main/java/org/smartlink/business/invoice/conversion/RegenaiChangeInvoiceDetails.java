@@ -1,5 +1,6 @@
 package org.smartlink.business.invoice.conversion;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -39,6 +40,8 @@ public class RegenaiChangeInvoiceDetails {
                 // 如果索引越界，使用details.get(0)的id
                 if (!details.isEmpty()) {
                     ocrDetails.setId(details.get(0).getId());
+                }else {
+                    ocrDetails.setId(IdUtil.simpleUUID());
                 }
             }
             //fileId
