@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 
-//非税收入类票据
+//海关出口货物报关单发票
 public class DataCustomsExportGoodsConversion implements ChangeIdentifyInfo<List<IdentifyResults>> {
 
     private static class LazyHolder {

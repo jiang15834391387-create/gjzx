@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 
-
+//海关专用缴款书发票
 public class DataCustomsSpecialPaymentConversion implements ChangeIdentifyInfo<List<IdentifyResults>> {
 
     private static class LazyHolder {

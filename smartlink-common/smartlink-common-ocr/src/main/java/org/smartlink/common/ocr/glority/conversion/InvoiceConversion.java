@@ -103,6 +103,7 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setArea(jsonObject.getStr("area"));
             //发票类型
             String invoiceCode = identifyResults.getType();
+//            String invoiceCodes = "";
             if (identifyResults.getRegion() != null && identifyResults.getRegion().length > 0) {
                 invoice.setRegion(String.join(",", identifyResults.getRegion()));
             } else {
@@ -110,44 +111,57 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             }
             invoice.setOrientation(identifyResults.getOrientation());
             dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
+            dataImageFilesInfo.setInvoice(invoiceCode);
             //发票类型判断
-            if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("electronic_mark"))) {
-                //增值税电子专用发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("block_chain"))) {
-                //区块链电子发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("transit_mark"))) {
-                //收费公路通行费增值税电子普通发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode().equals(invoiceCode)) {
-                //增值税普通发票(卷票)
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode)) {
-                //增值税电子普通发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode().equals(invoiceCode)) {
-                //增值税发票清单
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode)) {
-                //增值税专用发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_TAX_CODE.getCode().equals(invoiceCode)) {
-                //增值税普通发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode().equals(invoiceCode)) {
-                //机打发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode().equals(invoiceCode)) {
-                //数电票(普通发票)
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode().equals(invoiceCode)) {
-                //可报销其他发票
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode());
-            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode().equals(invoiceCode)) {
-                //数电票(增值税专用发票)
-                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode());
-            }
+//            if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("electronic_mark"))) {
+//                //增值税电子专用发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("block_chain"))) {
+//                //区块链电子发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("transit_mark"))) {
+//                //收费公路通行费增值税电子普通发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode().equals(invoiceCode)) {
+//                //增值税普通发票(卷票)
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode)) {
+//                //增值税电子普通发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode().equals(invoiceCode)) {
+//                //增值税发票清单
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.DIGITAL_INVOICE_LIST.getCode();
+//            } else if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode)) {
+//                //增值税专用发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.GLORITY_TAX_CODE.getCode().equals(invoiceCode)) {
+//                //增值税普通发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_TAX_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_TAX_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode().equals(invoiceCode)) {
+//                //机打发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_AIRCRAFT_INVOICE_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode().equals(invoiceCode)) {
+//                //数电票(普通发票)
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode().equals(invoiceCode)) {
+//                //可报销其他发票
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode();
+//            } else if (InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode().equals(invoiceCode)) {
+//                //数电票(增值税专用发票)
+//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode());
+////                invoiceCodes = InvoiceGlorityEnumd.DIGITAL_INVOICE_VAT_SPECIAL_CODE.getCode();
+//            }
             JSONArray list = jsonObject.getJSONArray("items");
             JSONArray list_transports = jsonObject.getJSONArray("transports");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();

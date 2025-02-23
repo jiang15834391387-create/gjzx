@@ -20,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 
-
+//货物运输电子收款凭证发票
 public class DataElectronicTransportationGoodsConversion implements ChangeIdentifyInfo<List<IdentifyResults>> {
 
     private static class LazyHolder {
