@@ -719,6 +719,11 @@ public class CheckServiceImpl implements ICheckService {
             checkCodes = checkCodes.substring(checkCodes.length() - 6);
             dto.setCheck_code(checkCodes);
         }
+        String checkCodess = (String) generalInfo.get("checkCode");
+        //如果长度小于6就不截取
+        if (StringUtils.hasText(checkCodess) && checkCodess.length() < 6) {
+            dto.setCheck_code(checkCodess);
+        }
 
     }
 

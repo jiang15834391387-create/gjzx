@@ -30,6 +30,10 @@ public class RegenaiChangeInvoiceDetails {
         List<DataOcrDetails> details = ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
         JSONArray jsonArray = jsonObject.getJSONArray("items");
         List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
+        if (jsonArray == null) {
+            ocrDetailsList.addAll(details);
+            return ocrDetailsList;
+        }
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject detail = jsonArray.getJSONObject(i);
             DataOcrDetails ocrDetails = new DataOcrDetails();
