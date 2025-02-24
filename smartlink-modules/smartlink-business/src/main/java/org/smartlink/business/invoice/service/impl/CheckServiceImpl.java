@@ -686,8 +686,12 @@ public class CheckServiceImpl implements ICheckService {
         dto.setNumber((String) generalInfo.get("invoiceNumber"));
         dto.setDate((String) generalInfo.get("invoiceDate"));
         dto.setType(invoiceType);
-        //电子票标识
-        dto.setElectron_mark(Integer.valueOf((String) generalInfo.get("electronicMark")));
+        Object value = generalInfo.get("electronicMark");
+        String electronicMarkStr = value.toString();
+        // 将字符串转换为 Integer 类型
+        Integer electronMark = Integer.valueOf(electronicMarkStr);
+        // 设置电子票标识
+        dto.setElectron_mark(electronMark);
         //金额
         dto.setPretax_amount((String) generalInfo.get("pretaxAmount"));
     }

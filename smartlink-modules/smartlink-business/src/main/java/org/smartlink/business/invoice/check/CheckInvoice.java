@@ -129,9 +129,7 @@ public class CheckInvoice {
                     String checkCodes = ocrInfos.getCheckCode();
                     if (StringUtils.hasText(checkCodes) && checkCodes.length() > 5) {
                         checkCodes = checkCodes.substring(checkCodes.length() - 6);
-                    }
-                    if (StringUtils.hasText(checkCodes) && checkCodes.length() > 5) {
-                        checkCodes = checkCodes.substring(checkCodes.length() - 6);
+                        invoiceCheckParamDTO.setCheck_code(checkCodes);
                     }
                     String checkCodess = ocrInfos.getCheckCode();
                     //如果长度小于6就不截取
