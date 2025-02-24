@@ -1731,7 +1731,7 @@ public class CheckServiceImpl implements ICheckService {
         //判断fileId是否为空
         Object fileIdObj = generalInfo.get("fileId");
         if (fileIdObj != null && StrUtil.isEmpty((CharSequence) fileIdObj)) {
-            return R.fail("查询文件为空");
+            return R.fail("文件id不能为空");
         }
         switch (invoiceType) {
             case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
@@ -1973,22 +1973,7 @@ public class CheckServiceImpl implements ICheckService {
         if (res<=0){
             return R.fail("新增发票失败");
         }
-        //根据file_id查询图片信息
-        DataImageFilesInfo imageFiles = filesInfoMapper
-            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
-                .eq(DataImageFilesInfo::getFileId, dataUsedCarSales.getFileId()));
-        if (ObjectUtil.isEmpty(imageFiles)){
-            return R.fail("文件信息为空");
-        }
-        //修改图片信息
-        imageFiles.setInvoice(invoiceType);
-        imageFiles.setFileStatus("");
-        imageFiles.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-        int image =filesInfoMapper.updateById(imageFiles);
-        if (image<=0){
-            return R.fail("修改图片信息失败");
-        }
-        return R.ok();
+        return updateImages(dataUsedCarSales.getFileId(),invoiceType);
     }
 
     //添加机动车销售发票
@@ -1998,22 +1983,7 @@ public class CheckServiceImpl implements ICheckService {
         if (res<=0) {
             return R.fail("新增发票失败");
         }
-        //根据file_id查询图片信息
-        DataImageFilesInfo imageFiles = filesInfoMapper
-            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
-                .eq(DataImageFilesInfo::getFileId, dataMotorVehicleSale.getFileId()));
-        if (ObjectUtil.isEmpty(imageFiles)){
-            return R.fail("文件信息为空");
-        }
-        //修改图片信息
-        imageFiles.setInvoice(invoiceType);
-        imageFiles.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-        imageFiles.setFileStatus("");
-        int image =filesInfoMapper.updateById(imageFiles);
-        if (image<=0){
-            return R.fail("修改图片信息失败");
-        }
-        return R.ok();
+        return updateImages(dataMotorVehicleSale.getFileId(),invoiceType);
     }
 
     //添加数电票普通发票/机打发票/增值税发票清单/可报销其他发票
@@ -2042,13 +2012,12 @@ public class CheckServiceImpl implements ICheckService {
         }
         //修改图片信息
         imageFiles.setInvoice(invoiceType);
-        imageFiles.setFileStatus("");
-        imageFiles.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
         int image =filesInfoMapper.updateById(imageFiles);
         if (image<=0){
             return R.fail("修改图片信息失败");
         }
-       return R.ok();
+        //查验
+        return handleVatInvoice(generalInfo,invoiceType);
     }
 
     private R<Void> updateImages(String fileId,String invoiceType){
@@ -2061,7 +2030,6 @@ public class CheckServiceImpl implements ICheckService {
         }
         //修改图片信息
         imageFiles.setInvoice(invoiceType);
-        imageFiles.setFileStatus("");
         int image =filesInfoMapper.updateById(imageFiles);
         if (image<=0){
             return R.fail("修改图片信息失败");
