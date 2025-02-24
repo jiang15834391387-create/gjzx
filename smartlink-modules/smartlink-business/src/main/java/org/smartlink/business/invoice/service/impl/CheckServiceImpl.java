@@ -23,7 +23,6 @@ import org.smartlink.common.core.enums.InvoiceGlorityEnumd;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
-import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Service;
 
@@ -354,10 +353,10 @@ public class CheckServiceImpl implements ICheckService {
             case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
             case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                 // 处理增值税发票
                 return updateOcrInvoice(generalInfo,request.getInvoiceType());
-            // 数电票普通发票/机打发票/增值税发票清单/可报销其他发票
-            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+            //机打发票/增值税发票清单/可报销其他发票
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
             case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
@@ -579,6 +578,9 @@ public class CheckServiceImpl implements ICheckService {
     //修改增值税发票
     private R<Void> updateOcrInvoice(Map<String, Object> generalInfo,String invoiceType) throws Exception {
         DataOcrInfo ocrInfo = BeanUtil.toBean(generalInfo, DataOcrInfo.class);
+        //根据file_id查询ocr信息
+        DataOcrInfo ocrInfos = ocrInfoMapper.selectOne(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, ocrInfo.getFileId()));
+        ocrInfo.setVersion(ocrInfos.getVersion());
         int updateResult =ocrInfoMapper.updateById(ocrInfo);
         if (updateResult<=0){
             return R.fail(500,"发票修改失败");
@@ -782,8 +784,7 @@ public class CheckServiceImpl implements ICheckService {
             return R.fail(500,"查验失败,查询图片信息为空");
         }
         // 调用查验方法
-        BaseEntity baseEntity = checkInvoice.checkInvoice(filesInfo, dto);
-        log.info("添加(修改)后返回查验结果：{}", baseEntity);
+        checkInvoice.checkInvoice(filesInfo, dto);
         DataImageFilesInfo filesInfos = filesInfoMapper.selectOne(
             new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId)
         );
@@ -1536,6 +1537,9 @@ public class CheckServiceImpl implements ICheckService {
      */
     @Override
     public R<DataResponseDTO> selectInvoiceDetail(String fileId) {
+        if (StrUtil.isEmpty(fileId)){
+            return R.fail(500,"文件id不能为空");
+        }
         //根据fileId查询发票信息
         DataImageFilesInfo res = filesInfoMapper.selectOne(new LambdaQueryWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId));
         if (ObjectUtil.isEmpty(res)){
@@ -1741,10 +1745,10 @@ public class CheckServiceImpl implements ICheckService {
             case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
             case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                 // 处理增值税发票
                 return addOcrInvoice(generalInfo,invoiceType);
-            // 数电票普通发票/机打发票/增值税发票清单/可报销其他发票
-            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+            //机打发票/增值税发票清单/可报销其他发票
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
             case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:

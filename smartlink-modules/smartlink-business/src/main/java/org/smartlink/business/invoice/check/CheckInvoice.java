@@ -11,6 +11,7 @@ import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.factory.CheckFactory;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.service.*;
@@ -28,6 +29,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class CheckInvoice {
+    private final DataImageFilesInfoMapper imageFilesInfoMapper;
     private final IDataOcrInfoServices dataOcrInfoService;
     private final DataOcrDetailsMapper detailsMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
@@ -44,7 +46,8 @@ public class CheckInvoice {
     private final IDataMotorVehicleSaleService dataMotorVehicleSaleService;
     private final IDataUsedCarSalesService dataUsedCarSalesService;
     private final DataNonTaxMapper dataNonTaxMapper;
-    public CheckInvoice(IDataOcrInfoServices dataOcrInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataMedicalTreatmentMapper medicalTreatmentMapper, DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService, DataNonTaxMapper dataNonTaxMapper) {
+    public CheckInvoice(DataImageFilesInfoMapper imageFilesInfoMapper, IDataOcrInfoServices dataOcrInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataMedicalTreatmentMapper medicalTreatmentMapper, DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService, DataNonTaxMapper dataNonTaxMapper) {
+        this.imageFilesInfoMapper = imageFilesInfoMapper;
         this.dataOcrInfoService = dataOcrInfoService;
         this.detailsMapper = detailsMapper;
         this.ocrInfoMapper = ocrInfoMapper;
@@ -63,10 +66,10 @@ public class CheckInvoice {
         this.dataNonTaxMapper = dataNonTaxMapper;
     }
     //查验方法
-    public void check(boolean checkOff,DataImageFilesInfo filesInfo) throws Exception {
+    public R<Void> check(boolean checkOff, DataImageFilesInfo filesInfo) throws Exception {
             //判断是否开启查验
             if(!checkOff){
-                return;
+                return R.ok("查验功能未开启!");
             }
             //获取发票类型
             String invoiceType = filesInfo.getInvoice();
@@ -101,6 +104,7 @@ public class CheckInvoice {
                 case InvoiceConstants.GLORITY_TAX_CODE:
                 case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+                case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                     final DataOcrInfo ocrInfos = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
                     if (StrUtil.isNotBlank(ocrInfos.getBlockChain())){
                         if (ocrInfos.getBlockChain().equals(InvoiceConstants.ONE)){
@@ -113,8 +117,8 @@ public class CheckInvoice {
                             }
                         }
                     }
-                    //数电票(增值税)处理
-                    if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)){
+                    //数电票(增值税)/普通发票处理
+                    if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
                         invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
                         invoiceCheckParamDTO.setTotal(ocrInfos.getTotalUppercase());
                         invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
@@ -138,14 +142,14 @@ public class CheckInvoice {
                     }
                     break;
                     default:
-                        return;
+                        return R.fail("该类型暂时不支持查验");
             }
 
-            this.checkInvoice(filesInfo,invoiceCheckParamDTO);
+          return this.checkInvoice(filesInfo,invoiceCheckParamDTO);
 
  }
     //传递查验参数调用查验工厂
-    public BaseEntity checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
+    public R<Void> checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
         BaseEntity baseEntity= CheckFactory.instance().checkInvoke(filesInfo, invoiceCheckParamDTO);
         if (filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())&&filesInfo.getCheckStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
            //如果是增值税（专用/普通/电子专用）或增值税电子普通发票 或区块链电子发票  或机打发票 或增值税普通发票(卷票)或数电票(增值税专用发票/普通发票)
@@ -153,26 +157,29 @@ public class CheckInvoice {
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRONIC_CODE)
+                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ROLL_TICKET_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)) {
                 //转换后增值税发票
                 ocrConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
+                return R.ok();
             }
             if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_USED_CAR_SALES_CODE)){
                 //转换后二手车销售统一发票
                 usedCsrConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
+                return R.ok();
             }
             if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE)){
                 //转换后机动车销售统一发票
                 motorVehicleSaleConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
+                return R.ok();
             }
         }
         log.info("查验发票查验失败结果：{}", baseEntity);
-        return baseEntity;
+        //根据file_id查询错误信息
+        DataImageFilesInfo filesInfos =imageFilesInfoMapper.selectOne(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()));
+        return R.fail(500,"查验失败:"+filesInfos.getMessage());
     }
 
     // 转换后机动车销售统一发票
