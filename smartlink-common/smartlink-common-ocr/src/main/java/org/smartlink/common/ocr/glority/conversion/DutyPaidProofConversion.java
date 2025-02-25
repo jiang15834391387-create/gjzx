@@ -104,8 +104,8 @@ public class DutyPaidProofConversion implements ChangeIdentifyInfo<List<Identify
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getCode(), dutyPaidProof, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getCode(), dutyPaidProof, identifyResults.getExtra(), identifyResults.getMessage()));
 
         }
         return resultsList;

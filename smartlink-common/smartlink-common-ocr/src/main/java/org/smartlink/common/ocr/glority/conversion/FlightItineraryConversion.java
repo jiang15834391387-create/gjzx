@@ -103,10 +103,10 @@ public class FlightItineraryConversion implements ChangeIdentifyInfo<List<Identi
             flightItinerary.setDetails(ocrDetailsList);
 
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode(), flightItinerary, identifyResults.getExtra()));
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode(), flightItinerary, identifyResults.getExtra(), identifyResults.getMessage()));
         }
         return resultsList;
 

@@ -71,8 +71,8 @@ public class TollRoadsConversion implements ChangeIdentifyInfo<List<IdentifyResu
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getCode(), tollRoads, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getCode(), tollRoads, identifyResults.getExtra(), identifyResults.getMessage()));
 
         }
         return resultsList;

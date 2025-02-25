@@ -93,7 +93,6 @@ public class ScanImageServiceImpl implements ScanImageService {
         }
         //是否OCR
         boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_OFF));
-//        ocrOff =false;
         if (ocrOff){
             //是否查验
             boolean checkOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_CHECK_OFF));
@@ -117,7 +116,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                     for (IdentificationData identificationDaOfd : identificationData) {
                         DataImageFilesInfo dataImageFilesInfoOfd = new DataImageFilesInfo();
                         dataImageFilesInfoOfd.setFileId(IdUtil.simpleUUID());
-                        dataImageFilesInfoOfd.setMessage(dataImageFilesInfo.getMessage());
+                        dataImageFilesInfoOfd.setMessage(identificationDaOfd.m);
                         dataImageFilesInfoOfd.setInvoice(identificationDaOfd.k);
                         ByteArrayOutputStream outputStream = exportOfdToStream(multipartFile.getBytes(), "PNG", 20d);
                         //切割图片压缩
@@ -149,7 +148,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                         //源文件存储
                         UploadResult multigraphOriginalXml = OssFactory.instance().upload(multipartFile.getInputStream(), dataImageFilesInfoXml.getFileId() + "." + "xml", multipartFile.getSize(), multipartFile.getContentType());
                         Object entity = identificationDaXml.t;
-                        dataImageFilesInfoXml.setMessage(dataImageFilesInfo.getMessage());
+                        dataImageFilesInfoXml.setMessage(identificationDaXml.m);
                         dataImageFilesInfoXml.setInvoice(identificationDaXml.k);
                         dataImageFilesInfoXml.setFileName(multigraphOriginalXml.getFilename());
                         dataImageFilesInfoXml.setIurl(multigraphOriginalXml.getUrl());
@@ -171,7 +170,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                         InputStream inputStream = new ByteArrayInputStream(images.get(identificationDatum));
                         DataImageFilesInfo dataImageFilesInfoSm = new DataImageFilesInfo();
                         dataImageFilesInfoSm.setFileId(IdUtil.simpleUUID());
-                        dataImageFilesInfoSm.setMessage(dataImageFilesInfo.getMessage());
+                        dataImageFilesInfoSm.setMessage(identificationData.get(identificationDatum).m);
                         dataImageFilesInfoSm.setInvoice(identificationData.get(identificationDatum).k);
 
                         //取旋转角度和坐标
@@ -264,7 +263,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                             DataImageFilesInfo dataImageFilesInfoSm = new DataImageFilesInfo();
                             dataImageFilesInfoSm.setParentFileId(dataImageFilesInfo.getFileId());
                             dataImageFilesInfoSm.setFileId(IdUtil.simpleUUID());
-                            dataImageFilesInfoSm.setMessage(dataImageFilesInfo.getMessage());
+                            dataImageFilesInfoSm.setMessage(identificationDatum.m);
                             dataImageFilesInfoSm.setInvoice(identificationDatum.k);
                             //切图
                             byte[] bytes = FileUtils.imageCut(multipartFile.getBytes(), jsonObject.getStr("region") != null ? jsonObject.getStr("region").split(",") : null, Base64.getEncoder().encodeToString(multipartFile.getBytes()), "false",

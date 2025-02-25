@@ -99,8 +99,8 @@ public class UsedCarSalesConversion implements ChangeIdentifyInfo<List<IdentifyR
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getCode(), dataUsedCarSales, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getCode(), dataUsedCarSales, identifyResults.getExtra(), identifyResults.getMessage()));
 
         }
         return resultsList;

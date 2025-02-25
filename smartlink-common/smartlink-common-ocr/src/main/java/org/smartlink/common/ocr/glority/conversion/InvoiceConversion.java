@@ -110,7 +110,7 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
                 invoice.setRegion(null);
             }
             invoice.setOrientation(identifyResults.getOrientation());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
             dataImageFilesInfo.setInvoice(invoiceCode);
             //发票类型判断
 //            if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("electronic_mark"))) {
@@ -221,7 +221,7 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setDetails(ocrDetailsList);
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-            resultsList.add(new IdentificationData<>(invoiceCode, invoice, identifyResults.getExtra()));
+            resultsList.add(new IdentificationData<>(invoiceCode, invoice, identifyResults.getExtra(), identifyResults.getMessage()));
         }
         return resultsList;
     }
