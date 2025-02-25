@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.shiro.util.StringUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.factory.CheckFactory;
@@ -66,7 +67,7 @@ public class CheckInvoice {
         this.dataNonTaxMapper = dataNonTaxMapper;
     }
     //查验方法
-    public R<Void> check(boolean checkOff, DataImageFilesInfo filesInfo) throws Exception {
+    public R<T> check(boolean checkOff, DataImageFilesInfo filesInfo) throws Exception {
             //判断是否开启查验
             if(!checkOff){
                 return R.ok("查验功能未开启!");
@@ -142,14 +143,14 @@ public class CheckInvoice {
                     }
                     break;
                     default:
-                        return R.fail("该类型暂时不支持查验");
+                        return R.ok();
             }
 
           return this.checkInvoice(filesInfo,invoiceCheckParamDTO);
 
  }
     //传递查验参数调用查验工厂
-    public R<Void> checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
+    public R<T> checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
         BaseEntity baseEntity= CheckFactory.instance().checkInvoke(filesInfo, invoiceCheckParamDTO);
         if (filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())&&filesInfo.getCheckStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
            //如果是增值税（专用/普通/电子专用）或增值税电子普通发票 或区块链电子发票  或机打发票 或增值税普通发票(卷票)或数电票(增值税专用发票/普通发票)

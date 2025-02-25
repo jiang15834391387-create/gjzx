@@ -309,7 +309,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                         String CheckFileId = jsonObject.getStr("fileId");
                         dataImageFilesInfoCheck.setInvoice(identificationDatum.k);
                         dataImageFilesInfoCheck.setFileId(CheckFileId);
-                        checkInvoice.check(checkOff, dataImageFilesInfoCheck);
+                        return checkInvoice.check(checkOff, dataImageFilesInfoCheck);
                     }
                 }
 
