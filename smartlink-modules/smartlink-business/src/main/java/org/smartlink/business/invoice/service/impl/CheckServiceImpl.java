@@ -107,7 +107,14 @@ public class CheckServiceImpl implements ICheckService {
             }
             String invoiceType = filesInfo.getInvoice();
             if (StrUtil.isEmpty(invoiceType)){
-                return R.fail(500, "发票类型为空");
+                if (filesInfo.getFileStatus().equals(FileStatusEnumd.OCR_FAILED.getCode())){
+                    //修改文件状态为已删除
+                    int a= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileStatus,""));
+                    if (a<=0){
+                        return R.fail(500, "删除失败");
+                    }
+                    return R.ok();
+                }
             }
             //根据发票类型判断,调用不同的发票删除方法,使用switch
             switch (invoiceType) {
@@ -697,7 +704,7 @@ public class CheckServiceImpl implements ICheckService {
         // 设置电子票标识
         dto.setElectron_mark(electronMark);
         //金额
-        dto.setPretax_amount((String) generalInfo.get("pretaxAmount"));
+        dto.setPretax_amount((String) generalInfo.get("totalLowercase"));
     }
 
     // 增值税电子普通区块链
@@ -737,7 +744,7 @@ public class CheckServiceImpl implements ICheckService {
 
     // 判断是否为数电票(增值税专用)
     private boolean isDigitalInvoice(String invoiceType) {
-        return InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE.equals(invoiceType);
+        return InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE.equals(invoiceType)||InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.equals(invoiceType);
     }
 
     // 判断是否为增值税专用发票

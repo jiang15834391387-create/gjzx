@@ -117,17 +117,22 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         JSONObject data = responseResult.getJSONObject("response").getJSONObject("data");
         JSONArray identifyResults = data.getJSONArray("identify_results");
         if (identifyResults == null || identifyResults.isEmpty()) {
-            String message = "未找到查验结果";
-            log.error("睿真查验失败：" + message);
-            filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-            filesInfo.setMessage(message);
-            filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
-            baseEntity=new BaseEntity();
-            baseEntity.setCheckResult(message);
-            baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
-            //修改文件状态
-            this.dataImageFilesInfoMapper.updateById(filesInfo);
-            return baseEntity;
+            for (Object results : identifyResults) {
+                JSONObject identifyResult = (JSONObject) results;
+                JSONObject validation = identifyResult.getJSONObject("validation");
+                // 检查 validation.code 是否为 10000
+                if (validation.getInt("code") != 10000) {
+                    setMessages(validation.getInt("code"), filesInfo);
+                    filesInfo.setFileStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+                    filesInfo.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+                    baseEntity=new BaseEntity();
+                    baseEntity.setCheckInvoice(CheckConstant.ERROE_CHECK);
+                    //修改文件状态
+                    this.dataImageFilesInfoMapper.updateById(filesInfo);
+                    return baseEntity;
+                }
+
+            }
         }
         // 遍历 identify_results 验证 validation.code 和 details 是否符合要求
         for (Object results : identifyResults) {
@@ -247,4 +252,5 @@ public class RegenaiCheckStrategy extends AbstractCheckStrategy {
         filesInfo.setMessage("查验失败:"+message);
         log.error("查验失败：" + message);
     }
+
 }

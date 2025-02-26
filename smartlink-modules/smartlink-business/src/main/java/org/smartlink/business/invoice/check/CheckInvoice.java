@@ -99,7 +99,7 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setDate(ocrInfo.getInvoiceDate());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                     invoiceCheckParamDTO.setElectron_mark(Integer.valueOf(ocrInfo.getElectronicMark()));
-                    invoiceCheckParamDTO.setPretax_amount(ocrInfo.getPretaxAmount());
+                    invoiceCheckParamDTO.setPretax_amount(ocrInfo.getTotalLowercase());
                     break;
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 case InvoiceConstants.GLORITY_TAX_CODE:
@@ -121,7 +121,7 @@ public class CheckInvoice {
                     //数电票(增值税)/普通发票处理
                     if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
                         invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
-                        invoiceCheckParamDTO.setTotal(ocrInfos.getTotalUppercase());
+                        invoiceCheckParamDTO.setTotal(ocrInfos.getTotalLowercase());
                         invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
                         invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                         break;
