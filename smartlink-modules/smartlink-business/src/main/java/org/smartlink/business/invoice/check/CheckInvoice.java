@@ -99,7 +99,7 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setDate(ocrInfo.getInvoiceDate());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                     invoiceCheckParamDTO.setElectron_mark(Integer.valueOf(ocrInfo.getElectronicMark()));
-                    invoiceCheckParamDTO.setPretax_amount(ocrInfo.getTotalLowercase());
+                    invoiceCheckParamDTO.setPretax_amount(ocrInfo.getPretaxAmount());
                     break;
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 case InvoiceConstants.GLORITY_TAX_CODE:
