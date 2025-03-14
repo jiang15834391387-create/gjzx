@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * 单管理Service业务层处理
@@ -65,7 +66,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
      * @return 单管理分页列表
      */
     @Override
-    public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQuery pageQuery) {
+public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<TestFormManage> lqw = buildQueryWrapper(bo);
         Page<TestFormManageVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -108,7 +109,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
         TestFormManage add = MapstructUtils.convert(bo, TestFormManage.class);
         boolean flag = false;
             String s = validEntityBeforeSave(add);
-            if(s!=null){
+            if(!StringUtils.isEmpty(s)){
                 return R.fail(s);
             }
             add.setCreateDept(LoginHelper.getDeptId());
@@ -137,7 +138,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
         try {
             TestFormManage update = MapstructUtils.convert(bo, TestFormManage.class);
             String s = validEntityBeforeSave(update);
-            if(s!=null){
+            if(!StringUtils.isEmpty(s)){
                 return R.fail(s);
             }
             baseMapper.updateById(update);
@@ -152,16 +153,16 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
      * 保存前的数据校验
      */
     private String validEntityBeforeSave(TestFormManage entity){
-        String categoryType = entity.getCategoryType();
-        String formType = entity.getFormType();
-        if(!StringUtils.isEmpty(categoryType)){
-            List<WfCategory> wfCategories = wfCategoryMapper.selectList(new QueryWrapper<WfCategory>().eq("category_type",categoryType).eq("is_deleted", 0));
+        Long categoryId = entity.getCategoryId();
+        Long formBindId = entity.getFormBindId();
+        if(categoryId!=null){
+            List<WfCategory> wfCategories = wfCategoryMapper.selectList(new QueryWrapper<WfCategory>().eq("id",categoryId));
             if(wfCategories==null || wfCategories.size()==0){
                 return "绑定流程分类类型不存在";
             }
         }
-        if(!StringUtils.isEmpty(formType)){
-            List<BpmFormDO> bpmFormDOS = bpmFormMapper.selectList(new QueryWrapper<BpmFormDO>().eq("form_type",formType).eq("is_deleted", 0));
+        if(formBindId!=null){
+            List<BpmFormDO> bpmFormDOS = bpmFormMapper.selectList(new QueryWrapper<BpmFormDO>().eq("id",formBindId).eq("is_deleted", 0));
             if(bpmFormDOS==null || bpmFormDOS.size()==0){
                 return "绑定表单类型不存在";
             }
@@ -209,5 +210,41 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
         lqw.eq(TestFormManage::getIsDeleted, 0);
         List<TestFormManageVo> testFormManageVos = baseMapper.selectVoList(lqw);
         return testFormManageVos;
+    }
+
+    @Override
+    public List<TestFormManageVo> selectFrom(Long categoryId) {
+        if(categoryId!=null){
+            LambdaQueryWrapper<TestFormManage> lqw = Wrappers.lambdaQuery();
+            lqw.eq(TestFormManage::getCategoryId, categoryId);
+            lqw.eq(TestFormManage::getIsBindModel, 1);
+            lqw.eq(TestFormManage::getIsDeleted, 0);
+            lqw.orderByDesc(TestFormManage::getSort);
+            List<TestFormManageVo> testFormManageVos = baseMapper.selectVoList(lqw);
+            return testFormManageVos;
+        }
+        return List.of();
+    }
+
+    @Override
+    public List<TestFormManageVo> selectCategory() {
+        LambdaQueryWrapper<TestFormManage> lqw = Wrappers.lambdaQuery();
+        lqw.eq(TestFormManage::getIsBindModel, 1);
+        lqw.eq(TestFormManage::getIsDeleted, 0);
+
+        List<TestFormManageVo> testFormManageVos = baseMapper.selectVoList(lqw);
+        if(testFormManageVos!=null&&testFormManageVos.size()>0){
+            List<TestFormManageVo> uniqueUsersByGender = testFormManageVos.stream()
+                .collect(Collectors.collectingAndThen(
+                    Collectors.groupingBy(TestFormManageVo::getCategoryId),
+                    map -> map.values().stream()
+                        .map(list -> list.get(0))
+                        .toList()
+                ));
+            return uniqueUsersByGender;
+        }
+
+
+        return null;
     }
 }

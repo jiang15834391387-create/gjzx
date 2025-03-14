@@ -18,4 +18,6 @@ public interface TestFormManageMapper extends BaseMapperPlus<TestFormManage, Tes
 
     void deletedFromManage(@Param("list")Collection<Long> list, @Param("userId")Long userId ,@Param("tenantId")String tenantId);
     List<Long> selectBy(@Param("type")String type ,@Param("tenantId")Long tenantId);
+
+    List<TestFormManage> selectCategory();
 }

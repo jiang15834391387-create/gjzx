@@ -1,27 +1,21 @@
 package org.smartlink.workflow.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Assert;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.hutool.json.JSONString;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
-import org.smartlink.common.core.utils.MapstructUtils;
-import org.smartlink.common.core.utils.StringUtils;
+import jodd.bean.BeanUtil;
+import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.workflow.domain.BpmFormDO;
-import org.smartlink.workflow.domain.TestFormManage;
-import org.smartlink.workflow.domain.bo.TestFormManageBo;
-import org.smartlink.workflow.domain.vo.TestFormManageVo;
-import org.smartlink.workflow.domain.vo.form.BpmFormFieldRespDTO;
-import org.smartlink.workflow.domain.vo.form.BpmFormPageReqVO;
-import org.smartlink.workflow.domain.vo.form.BpmFormRespVO;
-import org.smartlink.workflow.domain.vo.form.BpmFormSaveReqVO;
+import org.smartlink.workflow.domain.vo.form.BpmFormVo;
 import org.smartlink.workflow.mapper.BpmFormMapper;
 import org.smartlink.workflow.service.BpmFormService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
@@ -39,63 +33,98 @@ public class BpmFormServiceImpl implements BpmFormService {
     private BpmFormMapper formMapper;
 
     @Override
-    public Long createForm(BpmFormSaveReqVO createReqVO) {
+    public Long createForm(BpmFormVo createReqVO) {
         // 插入
-        BpmFormDO form = MapstructUtils.convert(createReqVO, BpmFormDO.class);
-        formMapper.insert(form);
+        BpmFormDO bpmFormDO = new BpmFormDO();
+        BeanUtils.copyProperties(createReqVO, bpmFormDO);
+        List<String> fields = createReqVO.getFields();
+        bpmFormDO.setFields(JsonUtils.toJsonString(fields));
+        formMapper.insert(bpmFormDO);
         // 返回
-        return form.getId();
+        return createReqVO.getId();
     }
 
     @Override
-    public void updateForm(BpmFormSaveReqVO updateReqVO) {
+    public void updateForm(BpmFormVo updateReqVO) {
         // 校验存在
-        validateFormExists(updateReqVO.getId());
-        // 更新
-        BpmFormDO updateObj = MapstructUtils.convert(updateReqVO, BpmFormDO.class);
-        formMapper.updateById(updateObj);
+        BpmFormDO bpmFormDO = new BpmFormDO();
+        BeanUtils.copyProperties(updateReqVO, bpmFormDO);
+        List<String> fields = updateReqVO.getFields();
+        bpmFormDO.setFields(JsonUtils.toJsonString(fields));
+        formMapper.updateById(bpmFormDO);
     }
 
     @Override
     public void deleteForm(Long id) {
         // 校验存在
-        this.validateFormExists(id);
+        BpmFormDO bpmFormDO = this.validateFormExists(id);
         // 删除
        // formMapper.deleteById(id);
-        BpmFormDO bpmFormDO = formMapper.selectById(id);
+        bpmFormDO.setIsDeleted(1);
+        formMapper.updateById(bpmFormDO);
 
     }
 
-    private void validateFormExists(Long id) {
-        if (formMapper.selectById(id) == null) {
+    private BpmFormDO validateFormExists(Long id) {
+        BpmFormDO bpmFormDO = formMapper.selectById(id);
+        if (bpmFormDO == null) {
             throw new RuntimeException("动态表单不存在");
         }
+        return bpmFormDO;
     }
 
     @Override
-    public BpmFormDO getForm(Long id) {
-        return formMapper.selectById(id);
-    }
-
-    @Override
-    public List<BpmFormDO> getFormList() {
-        return formMapper.selectList();
-    }
-
-    @Override
-    public List<BpmFormDO> getFormList(Collection<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return Collections.emptyList();
+    public BpmFormVo getForm(Long id) {
+        BpmFormDO bpmFormDO = formMapper.selectById(id);
+        BpmFormVo vo = new BpmFormVo();
+        if (bpmFormDO.getFields() != null) {
+            List<String> fields = JsonUtils.parseArray(bpmFormDO.getFields(), String.class);
+            vo.setFields(fields);
         }
-        return formMapper.selectBatchIds(ids);
+        BeanUtils.copyProperties(bpmFormDO, vo);
+        return vo;
     }
 
     @Override
-    public TableDataInfo<BpmFormRespVO> getFormPage(BpmFormRespVO pageReqVO, PageQuery pageQuery) {
-        LambdaQueryWrapper<BpmFormDO> lqw = Wrappers.lambdaQuery();
-        lqw.like(StringUtils.isNotBlank(pageReqVO.getName()), BpmFormDO::getName, pageReqVO.getName());
-        Page<BpmFormRespVO> result = formMapper.selectVoPage(pageQuery.build(), lqw);
-        return TableDataInfo.build(result);
+    public List<BpmFormVo> getFormList() {
+        QueryWrapper<BpmFormDO> objectQueryWrapper = new QueryWrapper<>();
+        objectQueryWrapper.orderByDesc("create_time");
+        objectQueryWrapper.eq("is_deleted",0);
+        List<BpmFormDO> bpmFormDOS = formMapper.selectList(objectQueryWrapper);
+        List<BpmFormVo> bpmFormVos = new ArrayList<>();
+        if(bpmFormDOS!=null&&bpmFormDOS.size()>0){
+            bpmFormDOS.forEach(bpmFormDO -> {
+                if (bpmFormDO.getFields() != null) {
+                    BpmFormVo vo = new BpmFormVo();
+                    if (bpmFormDO.getFields() != null) {
+                        List<String> fields = JsonUtils.parseArray(bpmFormDO.getFields(), String.class);
+                        vo.setFields(fields);
+                    }
+                    BeanUtils.copyProperties(bpmFormDO, vo);
+                    bpmFormVos.add(vo);
+                }
+            });
+        }
+
+        return bpmFormVos;
+    }
+
+    @Override
+    public Page<BpmFormDO> getFormPage(BpmFormDO pageReqVO, PageQuery pageQuery) {
+        Page<BpmFormDO> pageParam = new Page<>(pageQuery.getPageNo(), pageQuery.getPageSize());
+        QueryWrapper<BpmFormDO> queryWrapper=new QueryWrapper<>();
+        queryWrapper.orderByDesc("create_time");
+        if(!StringUtils.isEmpty(pageReqVO.getName())){
+            queryWrapper.like("name",pageReqVO.getName());
+
+        }
+        queryWrapper.eq("is_deleted",0);
+        if (!StringUtils.isEmpty(pageReqVO.getIsDeleted())){
+            queryWrapper.eq("is_deleted",pageReqVO.getIsDeleted());
+        }
+        formMapper.selectPage(pageParam, queryWrapper);
+
+        return pageParam;
 
 
     }

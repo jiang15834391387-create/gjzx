@@ -207,7 +207,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
 
-    @EventListener(condition = "#processEvent.key.startsWith('bxd')")
+    //@EventListener(condition = "#processEvent.key.startsWith('bxd')")
     public void processHandler(ProcessEvent processEvent) {
         log.info("当前任务执行了{}", processEvent.toString());
         TestExpenseReimbursement testExpenseReimbursement = baseMapper.selectById(Long.valueOf(processEvent.getBusinessKey()));
@@ -221,7 +221,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
 
-    @EventListener(condition = "#processTaskEvent.key.startsWith('bxd')")
+    //@EventListener(condition = "#processTaskEvent.key.startsWith('bxd')")
     public void processTaskHandler(ProcessTaskEvent processTaskEvent) {
         // 所有demo案例的申请人节点id
         List<String> list = sysDictDataMapper.selectDictList();
@@ -241,7 +241,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
 
 
 
-    //@EventListener(ProcessEvent.class)
+    @EventListener(ProcessEvent.class)
     public void processHandler2(ProcessEvent processEvent) {
         log.info("当前任务执行了{}", processEvent.toString());
         List<WfDefinitionConfig> list = getWfDefinitionConfigById(processEvent.getKey());
@@ -258,7 +258,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
 
-    //@EventListener(ProcessTaskEvent.class)
+    @EventListener(ProcessTaskEvent.class)
     public void processTaskHandler2(ProcessTaskEvent processTaskEvent) {
         List<WfDefinitionConfig> list = getWfDefinitionConfigById(processTaskEvent.getKey());
         if(!CollectionUtils.isEmpty(list)){

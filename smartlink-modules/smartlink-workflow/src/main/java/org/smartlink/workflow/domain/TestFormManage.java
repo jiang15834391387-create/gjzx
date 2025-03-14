@@ -43,15 +43,12 @@ public class TestFormManage extends TenantEntity {
      * 是否删除（0否，1是）
      */
     private Integer isDeleted;
-
-
     /**
      * 是否绑定工作流程（0否，1是）
      */
     private Integer isBindModel;
 
     private String modelId;
-
     /**
      * 排序
      */

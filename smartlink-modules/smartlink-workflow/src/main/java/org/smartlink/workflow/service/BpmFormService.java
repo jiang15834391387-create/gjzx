@@ -1,13 +1,12 @@
 package org.smartlink.workflow.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.Valid;
 import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
+
 import org.smartlink.workflow.domain.BpmFormDO;
-import org.smartlink.workflow.domain.vo.TestFormManageVo;
-import org.smartlink.workflow.domain.vo.form.BpmFormPageReqVO;
-import org.smartlink.workflow.domain.vo.form.BpmFormRespVO;
-import org.smartlink.workflow.domain.vo.form.BpmFormSaveReqVO;
+import org.smartlink.workflow.domain.vo.form.BpmFormVo;
+
 
 import java.util.Collection;
 import java.util.List;
@@ -27,14 +26,14 @@ public interface BpmFormService {
      * @param createReqVO 创建信息
      * @return 编号
      */
-    Long createForm(@Valid BpmFormSaveReqVO createReqVO);
+    Long createForm(@Valid BpmFormVo createReqVO);
 
     /**
      * 更新动态表单
      *
      * @param updateReqVO 更新信息
      */
-    void updateForm(@Valid BpmFormSaveReqVO updateReqVO);
+    void updateForm(@Valid BpmFormVo updateReqVO);
 
     /**
      * 删除动态表单
@@ -49,22 +48,15 @@ public interface BpmFormService {
      * @param id 编号
      * @return 动态表单
      */
-    BpmFormDO getForm(Long id);
+    BpmFormVo getForm(Long id);
 
     /**
      * 获得动态表单列表
      *
      * @return 动态表单列表
      */
-    List<BpmFormDO> getFormList();
+    List<BpmFormVo> getFormList();
 
-    /**
-     * 获得动态表单列表
-     *
-     * @param ids 编号
-     * @return 动态表单列表
-     */
-    List<BpmFormDO> getFormList(Collection<Long> ids);
 
 
     /**
@@ -73,6 +65,6 @@ public interface BpmFormService {
      * @param pageReqVO 分页查询
      * @return 动态表单分页
      */
-    TableDataInfo<BpmFormRespVO> getFormPage(BpmFormRespVO pageReqVO,PageQuery pageQuery);
+    Page<BpmFormDO> getFormPage(BpmFormDO pageReqVO, PageQuery pageQuery);
 
 }

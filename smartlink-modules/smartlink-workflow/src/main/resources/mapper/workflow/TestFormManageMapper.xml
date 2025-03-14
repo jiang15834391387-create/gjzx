@@ -14,4 +14,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectBy" parameterType="java.lang.String" resultType="java.lang.Long">
         select id from test_form_manage where form_purpose_type=#{type} and tenant_id=#{tenantId}
     </select>
+
+    <select id="selectCategory" resultType="org.smartlink.workflow.domain.TestFormManage">
+        SELECT id, form_name, form_logo, form_type, form_bind_id, form_bind_name, category_id, category_name, category_type, remark, is_deleted, is_bind_model, model_id, sort, tenant_id, create_dept, create_by, create_time, update_by, update_time
+        FROM test_form_manage
+        WHERE is_deleted = 0
+        AND is_bind_model = 1
+        AND tenant_id = '000000'
+
+    </select>
 </mapper>

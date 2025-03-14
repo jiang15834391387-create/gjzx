@@ -34,6 +34,7 @@ public class PageQuery implements Serializable {
      * 当前页数
      */
     private Integer pageNum;
+    private Integer pageNo;
 
     /**
      * 排序列

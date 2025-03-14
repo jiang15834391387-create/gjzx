@@ -2,10 +2,10 @@ package org.smartlink.workflow.mapper;
 
 
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
 import org.smartlink.workflow.domain.BpmFormDO;
-import org.smartlink.workflow.domain.vo.TestFormManageVo;
 import org.smartlink.workflow.domain.vo.form.BpmFormRespVO;
 
 /**
@@ -14,6 +14,6 @@ import org.smartlink.workflow.domain.vo.form.BpmFormRespVO;
  * @author 风里雾里
  */
 @Mapper
-public interface BpmFormMapper extends BaseMapperPlus<BpmFormDO, BpmFormRespVO> {
+public interface BpmFormMapper extends BaseMapper<BpmFormDO> {
 
 }

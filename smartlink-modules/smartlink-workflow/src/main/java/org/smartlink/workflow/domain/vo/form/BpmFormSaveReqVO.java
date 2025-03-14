@@ -1,12 +1,15 @@
 package org.smartlink.workflow.domain.vo.form;
 
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import io.github.linpeilie.annotations.AutoMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.smartlink.workflow.domain.BpmFormDO;
+import org.smartlink.workflow.domain.TestExpenseReimbursement;
 
 import java.util.List;
 
-@Schema(description = "管理后台 - 动态表单创建/更新 Request VO")
 @Data
 public class BpmFormSaveReqVO {
 
@@ -25,9 +28,6 @@ public class BpmFormSaveReqVO {
     @NotNull(message = "表单项的数组不能为空")
     private List<String> fields;
 
-    @Schema(description = "表单状态-参见 CommonStatusEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "表单状态不能为空")
-    private Integer status;
 
     @Schema(description = "备注", example = "我是备注")
     private String remark;

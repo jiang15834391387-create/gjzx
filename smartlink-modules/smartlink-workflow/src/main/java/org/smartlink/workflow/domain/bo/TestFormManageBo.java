@@ -29,46 +29,53 @@ public class TestFormManageBo extends BaseEntity {
     @NotNull(message = "主键不能为空", groups = { EditGroup.class })
     private Long id;
 
-    /**
-     * 单据名称
-     */
-    @NotBlank(message = "单据名称不能为空", groups = { AddGroup.class, EditGroup.class })
+    //单据名称
     private String formName;
 
-    /**
-     * 单据logo
-     */
+    //单据logo
     private String formLogo;
+
+    //单据类型手动填写
+    private String formType;
+
+    //备注
+    private String remark;
+
+    //排序
+    private Long sort;
+
+    /**
+     * 是否绑定工作流程（0否，1是）
+     */
+    private Integer isBindModel;
+    /**
+     * 是否删除（0否，1是）
+     */
+    private Integer isDeleted;
+/*-------------------------------------------------------------*/
+    /*分组信息*/
+    private Long categoryId;
+    private String categoryName;
+    private String categoryType;
+
 
     /**
      * 单据绑定id
      */
     private Long formBindId;
-    private String remark;
-    private Long categoryId;
-    private String categoryName;
-    private String categoryType;
-    /**
-     * 是否绑定工作流程（0否，1是）
-     */
-    private Integer isBindModel;
-
-    private String modelId;
-    /**
-     * 排序
-     */
-    private Long sort;
-    /**
-     * 是否删除（0否，1是）
-     */
-    //@NotNull(message = "是否删除（0否，1是）不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Integer isDeleted;
-
-
     /**
      * 单据绑定名称
      */
     @NotBlank(message = "单据绑定名称不能为空", groups = { AddGroup.class, EditGroup.class })
     private String formBindName;
-    private String formType;
+
+
+
+
+    private String modelId;
+
+
+
+
+
 }

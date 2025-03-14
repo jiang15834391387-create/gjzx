@@ -1,6 +1,7 @@
 package org.smartlink.workflow.service;
 
 import org.smartlink.common.core.domain.R;
+import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.vo.TestFormManageVo;
 import org.smartlink.workflow.domain.bo.TestFormManageBo;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
@@ -69,4 +70,8 @@ public interface ITestFormManageService {
     List<TestFormManageVo> selectBy(String type);
 
     List<TestFormManageVo> queryPageListGroup();
+
+    List<TestFormManageVo> selectFrom(Long categoryId);
+
+    List<TestFormManageVo> selectCategory();
 }

@@ -5,6 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.smartlink.workflow.domain.TestFormManage;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.smartlink.common.idempotent.annotation.RepeatSubmit;
@@ -113,6 +115,26 @@ public class TestFormManageController extends BaseController {
     public R<List<TestFormManageVo>> selectBy(@NotNull(message = "值不能为空")
                                        @PathVariable String type) {
         return R.ok(testFormManageService.selectBy(type));
+    }
+
+
+    /**
+     * 表单
+     * @return
+     */
+    @GetMapping("/selectCategory")
+    public R<List<TestFormManageVo>> selectCategory() {
+        return R.ok(testFormManageService.selectCategory());
+    }
+
+    /**
+     * 表单
+     * @param categoryId
+     * @return
+     */
+    @GetMapping("/selectFrom")
+    public R<List<TestFormManageVo>> selectFrom(@Param("categoryId") Long categoryId) {
+        return R.ok(testFormManageService.selectFrom(categoryId));
     }
 
 }

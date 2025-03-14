@@ -33,9 +33,11 @@ public class TestExpenseReimbursement extends TenantEntity {
     private Long fromId;
     private String fromName;
     private String fromType;
+
     private Long categoryId;
     private String categoryName;
     private String categoryType;
+
     /**
      * 消费明细
      */
