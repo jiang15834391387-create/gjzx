@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import org.smartlink.workflow.domain.TestFormManage;
+import org.smartlink.workflow.domain.vo.WfCategoryVo;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
@@ -123,7 +124,7 @@ public class TestFormManageController extends BaseController {
      * @return
      */
     @GetMapping("/selectCategory")
-    public R<List<TestFormManageVo>> selectCategory() {
+    public R<List<WfCategoryVo>> selectCategory() {
         return R.ok(testFormManageService.selectCategory());
     }
 
@@ -135,6 +136,17 @@ public class TestFormManageController extends BaseController {
     @GetMapping("/selectFrom")
     public R<List<TestFormManageVo>> selectFrom(@Param("categoryId") Long categoryId) {
         return R.ok(testFormManageService.selectFrom(categoryId));
+    }
+
+
+    /**
+     * 表单
+     * @param
+     * @return
+     */
+    @GetMapping("/selectAllFrom")
+    public R<List<TestFormManageVo>> selectAllFrom() {
+        return R.ok(testFormManageService.selectAllFrom());
     }
 
 }

@@ -7,11 +7,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import jodd.bean.BeanUtil;
+import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.workflow.domain.BpmFormDO;
+import org.smartlink.workflow.domain.TestExpenseReimbursement;
+import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.vo.form.BpmFormVo;
 import org.smartlink.workflow.mapper.BpmFormMapper;
+import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
+import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.service.BpmFormService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -31,6 +36,10 @@ public class BpmFormServiceImpl implements BpmFormService {
 
     @Resource
     private BpmFormMapper formMapper;
+    @Resource
+    private TestFormManageMapper formManageMapper;
+    @Resource
+    private TestExpenseReimbursementMapper expenseReimbursementMapper;
 
     @Override
     public Long createForm(BpmFormVo createReqVO) {
@@ -58,6 +67,15 @@ public class BpmFormServiceImpl implements BpmFormService {
     public void deleteForm(Long id) {
         // 校验存在
         BpmFormDO bpmFormDO = this.validateFormExists(id);
+
+        List<TestExpenseReimbursement> fromId = expenseReimbursementMapper.selectList(
+            new QueryWrapper<TestExpenseReimbursement>()
+                .eq("from_id", id));
+        if(fromId!=null&&fromId.size()>0){
+            throw new ServiceException("该表单已被使用无法删除");
+        }
+
+
         // 删除
        // formMapper.deleteById(id);
         bpmFormDO.setIsDeleted(1);
@@ -76,13 +94,16 @@ public class BpmFormServiceImpl implements BpmFormService {
     @Override
     public BpmFormVo getForm(Long id) {
         BpmFormDO bpmFormDO = formMapper.selectById(id);
-        BpmFormVo vo = new BpmFormVo();
-        if (bpmFormDO.getFields() != null) {
-            List<String> fields = JsonUtils.parseArray(bpmFormDO.getFields(), String.class);
-            vo.setFields(fields);
+        if(bpmFormDO!=null){
+            BpmFormVo vo = new BpmFormVo();
+            if (!StringUtils.isEmpty(bpmFormDO.getFields())) {
+                List<String> fields = JsonUtils.parseArray(bpmFormDO.getFields(), String.class);
+                vo.setFields(fields);
+            }
+            BeanUtils.copyProperties(bpmFormDO, vo);
+            return vo;
         }
-        BeanUtils.copyProperties(bpmFormDO, vo);
-        return vo;
+       return null;
     }
 
     @Override
@@ -94,9 +115,9 @@ public class BpmFormServiceImpl implements BpmFormService {
         List<BpmFormVo> bpmFormVos = new ArrayList<>();
         if(bpmFormDOS!=null&&bpmFormDOS.size()>0){
             bpmFormDOS.forEach(bpmFormDO -> {
-                if (bpmFormDO.getFields() != null) {
+                if (!StringUtils.isEmpty(bpmFormDO.getFields())) {
                     BpmFormVo vo = new BpmFormVo();
-                    if (bpmFormDO.getFields() != null) {
+                    if (!StringUtils.isEmpty(bpmFormDO.getFields())) {
                         List<String> fields = JsonUtils.parseArray(bpmFormDO.getFields(), String.class);
                         vo.setFields(fields);
                     }

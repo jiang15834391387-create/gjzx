@@ -2,6 +2,8 @@ package org.smartlink.workflow.domain.vo;
 
 import java.util.Date;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -36,6 +38,7 @@ public class TestExpenseReimbursementVo implements Serializable {
     private Long id;
 
     private Long fromId;
+    private Long fromManageId;
     private String fromName;
     private String fromType;
 
@@ -58,4 +61,33 @@ public class TestExpenseReimbursementVo implements Serializable {
      */
     @ExcelProperty(value = "备注")
     private String remark;
+    /**
+     * 创建部门
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createDept;
+
+    /**
+     * 创建者
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createBy;
+
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
+
+    /**
+     * 更新者
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateBy;
+
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateTime;
 }

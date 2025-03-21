@@ -8,6 +8,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -25,6 +26,7 @@ import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.tenant.helper.TenantHelper;
 import org.smartlink.workflow.common.constant.FlowConstant;
+import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.WfCategory;
 import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.WfNodeConfig;
@@ -32,6 +34,7 @@ import org.smartlink.workflow.domain.bo.ProcessDefinitionBo;
 import org.smartlink.workflow.domain.bo.WfDefinitionConfigBo;
 import org.smartlink.workflow.domain.vo.ProcessDefinitionVo;
 import org.smartlink.workflow.domain.vo.WfDefinitionConfigVo;
+import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
 import org.smartlink.workflow.service.IActProcessDefinitionService;
 import org.smartlink.workflow.service.IWfCategoryService;
@@ -72,7 +75,7 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
     private final IWfDefinitionConfigService wfDefinitionConfigService;
     private final WfDefinitionConfigMapper wfDefinitionConfigMapper;
     private final IWfNodeConfigService wfNodeConfigService;
-
+    private final TestFormManageMapper formManageMapper;
     /**
      * 分页查询
      *
@@ -211,10 +214,28 @@ public class ActProcessDefinitionServiceImpl implements IActProcessDefinitionSer
             for (String deploymentId : deploymentIds) {
                 repositoryService.deleteDeployment(deploymentId);
             }
+
+            if (CollUtil.isNotEmpty(processDefinitionIds)) {
+                processDefinitionIds.forEach(e -> {
+                    WfDefinitionConfigVo byDefId = wfDefinitionConfigService.getByDefId(e);
+                    if (byDefId != null) {
+                        TestFormManage formType = formManageMapper.selectOne(new QueryWrapper<TestFormManage>().eq("form_type", byDefId.getTableName()));
+                        if(formType != null){
+                            formType.setIsBindModel(0);
+                            formManageMapper.updateById(formType);
+                        }
+                    }
+                });
+
+            }
+
             //删除流程定义配置
             wfDefinitionConfigService.deleteByDefIds(processDefinitionIds);
             //删除节点配置
             wfNodeConfigService.deleteByDefIds(processDefinitionIds);
+
+
+
             return true;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

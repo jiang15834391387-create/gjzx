@@ -6,6 +6,7 @@ import org.smartlink.workflow.domain.vo.TestFormManageVo;
 import org.smartlink.workflow.domain.bo.TestFormManageBo;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
+import org.smartlink.workflow.domain.vo.WfCategoryVo;
 
 import java.util.Collection;
 import java.util.List;
@@ -73,5 +74,7 @@ public interface ITestFormManageService {
 
     List<TestFormManageVo> selectFrom(Long categoryId);
 
-    List<TestFormManageVo> selectCategory();
+    List<WfCategoryVo> selectCategory();
+
+    List<TestFormManageVo> selectAllFrom();
 }

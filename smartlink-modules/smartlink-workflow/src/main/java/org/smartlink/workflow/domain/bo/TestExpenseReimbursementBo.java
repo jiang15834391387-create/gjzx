@@ -1,6 +1,8 @@
 package org.smartlink.workflow.domain.bo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
@@ -27,7 +29,7 @@ public class TestExpenseReimbursementBo extends BaseEntity {
      */
     //@NotNull(message = "主键不能为空", groups = { EditGroup.class })
     private Long id;
-
+    private Long fromManageId;
     private Long fromId;
     private String fromName;
     private String fromType;
@@ -55,4 +57,33 @@ public class TestExpenseReimbursementBo extends BaseEntity {
     private String deviceType;
 
     private String consumptionDetails;
+    /**
+     * 创建部门
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createDept;
+
+    /**
+     * 创建者
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Long createBy;
+
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
+
+    /**
+     * 更新者
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateBy;
+
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateTime;
 }

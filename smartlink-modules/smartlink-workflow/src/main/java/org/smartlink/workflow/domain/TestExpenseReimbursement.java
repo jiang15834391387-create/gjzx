@@ -30,7 +30,7 @@ public class TestExpenseReimbursement extends TenantEntity {
     @TableId(value = "id")
     private Long id;
 
-    private Long fromId;
+    private Long fromManageId;
     private String fromName;
     private String fromType;
 
@@ -38,6 +38,7 @@ public class TestExpenseReimbursement extends TenantEntity {
     private String categoryName;
     private String categoryType;
 
+    private Long fromId;
     /**
      * 消费明细
      */

@@ -6,6 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.smartlink.common.core.domain.event.ProcessEvent;
 import org.smartlink.common.core.domain.event.ProcessTaskEvent;
 import org.smartlink.common.core.enums.BusinessStatusEnum;
+import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.service.DictService;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
@@ -21,11 +22,13 @@ import org.smartlink.system.domain.SysDictData;
 import org.smartlink.system.domain.vo.SysDictDataVo;
 import org.smartlink.system.mapper.SysDictDataMapper;
 import org.smartlink.workflow.domain.TestExpenseReimbursement;
+import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.TestLeave;
 import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
+import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
 import org.smartlink.workflow.service.ITestExpenseReimbursementService;
 import org.springframework.context.event.EventListener;
@@ -49,6 +52,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final TestExpenseReimbursementMapper baseMapper;
     private final SysDictDataMapper sysDictDataMapper;
     private final WfDefinitionConfigMapper wfDefinitionConfigMapper;
+    private final TestFormManageMapper testFormManageMapper;
     /**
      * 查询费用报销申请
      *
@@ -126,7 +130,12 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             if (StringUtils.isBlank(add.getStatus())) {
                 add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
             }
+            TestFormManage byType = getByType(bo.getFromType());
+            if(byType==null){
+                new ServiceException("该表单不存在");
+            }
             add.setCreateDept(LoginHelper.getDeptId());
+            add.setFromManageId(byType.getId());
             boolean  flag = baseMapper.insert(add) > 0;
             if (flag) {
                 bo.setId(add.getId());
@@ -150,6 +159,11 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     public TestExpenseReimbursementVo updateByBo(TestExpenseReimbursementBo bo) {
         TestExpenseReimbursement update = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
         updValidEntityBeforeSave(update);
+        TestFormManage byType = getByType(bo.getFromType());
+        if(byType==null){
+            new ServiceException("该表单不存在");
+        }
+        update.setFromManageId(byType.getId());
         try {
             int i = baseMapper.updateById(update);
             return MapstructUtils.convert(update, TestExpenseReimbursementVo.class);
@@ -169,10 +183,18 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         entity.setTenantId(LoginHelper.getTenantId());
     }
 
+    private TestFormManage getByType(String type){
+        TestFormManage testFormManage = testFormManageMapper.selectById(new QueryWrapper<TestFormManage>().eq("form_type",type).eq("is_deleted",0));
+        if(testFormManage!=null){
+            return testFormManage;
+        }
+        return null;
+    }
+
     private void validFormType(TestExpenseReimbursement entity){
         String fromType = entity.getFromType();
         if(StringUtils.isEmpty(fromType)){
-            throw new RuntimeException("请先配置对应的工作流程");
+            throw new ServiceException("请先配置对应的工作流程");
         }
         List<WfDefinitionConfig> wfDefinitionConfigs = wfDefinitionConfigMapper.selectList();
 
