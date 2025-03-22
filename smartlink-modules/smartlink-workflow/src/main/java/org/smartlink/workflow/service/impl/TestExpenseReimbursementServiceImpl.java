@@ -81,7 +81,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         lqw.eq(StringUtils.isNotBlank(bo.getFromType()), TestExpenseReimbursement::getFromType, bo.getFromType());
         lqw.orderByDesc(BaseEntity::getCreateTime);
         String deviceType = bo.getDeviceType();
-        if(deviceType.equals("APP")){
+        if(deviceType.equals("app")){
             lqw.eq(TestExpenseReimbursement::getCreateBy,LoginHelper.getUserId());
         }
         Page<TestExpenseReimbursementVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
@@ -124,9 +124,12 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     public TestExpenseReimbursementVo insertByBo(TestExpenseReimbursementBo bo) {
 
         try {
+            if(StringUtils.isEmpty(bo.getDataChannel())){
+                bo.setDataChannel("pc");
+            }
             TestExpenseReimbursement add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
             validEntityBeforeSave(add);
-            validFormType(add);
+            //validFormType(add);
             if (StringUtils.isBlank(add.getStatus())) {
                 add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
             }
@@ -184,7 +187,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
     private TestFormManage getByType(String type){
-        TestFormManage testFormManage = testFormManageMapper.selectById(new QueryWrapper<TestFormManage>().eq("form_type",type).eq("is_deleted",0));
+        TestFormManage testFormManage = testFormManageMapper.selectOne(new QueryWrapper<TestFormManage>().eq("form_type",type).eq("is_deleted",0));
         if(testFormManage!=null){
             return testFormManage;
         }

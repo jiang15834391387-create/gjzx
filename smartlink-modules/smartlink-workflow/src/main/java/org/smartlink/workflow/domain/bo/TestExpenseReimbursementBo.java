@@ -36,7 +36,7 @@ public class TestExpenseReimbursementBo extends BaseEntity {
     private Long categoryId;
     private String categoryName;
     private String categoryType;
-
+    private String dataChannel;
     /**
      * 状态
      */

@@ -162,11 +162,11 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
             if(StringUtils.isEmpty(formName) || StringUtils.isEmpty(formType)){
                 return R.fail("参数错误");
             }
-            List<TestFormManage> nameList = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_name", formName));
+            List<TestFormManage> nameList = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_name", formName).ne("id",bo.getId()));
             if(nameList!=null && nameList.size()>0){
                 return R.fail("表单名称重复");
             }
-            List<TestFormManage> testFormManages = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type", formType));
+            List<TestFormManage> testFormManages = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type", formType).ne("id",bo.getId()));
             if(testFormManages!=null && testFormManages.size()>0){
                 return R.fail("表单类型重复");
             }
@@ -217,7 +217,7 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
         ids.forEach(aLong -> {
             List<TestExpenseReimbursement> fromId = expenseReimbursementMapper.selectList(
                 new QueryWrapper<TestExpenseReimbursement>()
-                    .eq("form_manage_id", aLong));
+                    .eq("from_manage_id", aLong));
             if(fromId!=null&&fromId.size()>0){
                 throw new ServiceException("该表单已被使用无法删除");
             }

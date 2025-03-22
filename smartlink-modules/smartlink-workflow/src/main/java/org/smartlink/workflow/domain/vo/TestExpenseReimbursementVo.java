@@ -41,7 +41,7 @@ public class TestExpenseReimbursementVo implements Serializable {
     private Long fromManageId;
     private String fromName;
     private String fromType;
-
+    private String dataChannel;
     private Long categoryId;
     private String categoryName;
     private String categoryType;
