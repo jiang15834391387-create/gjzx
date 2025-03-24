@@ -1,20 +1,17 @@
 package org.smartlink.common.ocr.factory;
 
 
-
-
 import lombok.extern.slf4j.Slf4j;
+import org.smartlink.common.core.utils.SpringUtils;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.core.utils.file.Constants;
-import org.smartlink.common.core.utils.file.ParamConstants;
+import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.ocr.abstractd.AbstractOcrStrategy;
 import org.smartlink.common.ocr.constant.OcrConstant;
 import org.smartlink.common.ocr.core.IOcrStrategy;
 import org.smartlink.common.ocr.enumd.OcrEnumd;
 import org.smartlink.common.ocr.exception.OcrException;
 import org.smartlink.common.ocr.properties.OcrProperties;
-import org.smartlink.common.core.utils.SpringUtils;
-import org.smartlink.common.core.utils.StringUtils;
-import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.redis.utils.RedisUtils;
 
 /**
@@ -45,7 +42,7 @@ public class OcrFactory {
      */
     public static IOcrStrategy instance() {
         // 获取redis 默认厂商
-        String type = RedisUtils.getCacheObject(OcrConstant.CACHE_CONFIG_KEY);
+        String type = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, OcrConstant.CACHE_CONFIG_KEY);
         log.info("默认识别厂商为:{}", type);
         if (StringUtils.isEmpty(type)) {
             throw new OcrException("识别服务类型无法找到!");
