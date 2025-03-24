@@ -1540,7 +1540,7 @@ public class CheckServiceImpl implements ICheckService {
                 invoiceVo.setBuyerName(dataOcrInfo.getBuyerName());
                 invoiceVo.setSellerName(dataOcrInfo.getSellerName());
                 invoiceVo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
-                invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode());
+                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
                 invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                 invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                 invoiceVo.setInvoiceTotal(dataOcrInfo.getTotalLowercase());
