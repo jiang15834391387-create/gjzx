@@ -3,11 +3,12 @@ package org.smartlink.workflow.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.smartlink.common.core.domain.dto.RoleDTO;
 import org.smartlink.common.core.domain.event.ProcessEvent;
 import org.smartlink.common.core.domain.event.ProcessTaskEvent;
+import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.BusinessStatusEnum;
 import org.smartlink.common.core.exception.ServiceException;
-import org.smartlink.common.core.service.DictService;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
@@ -18,12 +19,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.system.domain.SysDictData;
-import org.smartlink.system.domain.vo.SysDictDataVo;
+import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.mapper.SysDictDataMapper;
+import org.smartlink.system.mapper.SysUserMapper;
 import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.TestFormManage;
-import org.smartlink.workflow.domain.TestLeave;
 import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 费用报销申请Service业务层处理
@@ -53,6 +54,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final SysDictDataMapper sysDictDataMapper;
     private final WfDefinitionConfigMapper wfDefinitionConfigMapper;
     private final TestFormManageMapper testFormManageMapper;
+    private final SysUserMapper userMapper;
     /**
      * 查询费用报销申请
      *
@@ -81,11 +83,49 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         lqw.eq(StringUtils.isNotBlank(bo.getFromType()), TestExpenseReimbursement::getFromType, bo.getFromType());
         lqw.orderByDesc(BaseEntity::getCreateTime);
         String deviceType = bo.getDeviceType();
-        if(deviceType.equals("app")){
+        /*if(deviceType.equals("app")){
             lqw.eq(TestExpenseReimbursement::getCreateBy,LoginHelper.getUserId());
+        }*/
+        List<Long> loginUser = getLoginUser(LoginHelper.getLoginUser());
+        if(loginUser!=null&&loginUser.size()>0){
+            lqw.in(TestExpenseReimbursement::getCreateBy,loginUser);
         }
         Page<TestExpenseReimbursementVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+
+    public List<Long> getLoginUser(LoginUser user){
+        ArrayList<Long> list = new ArrayList<>();
+        List<RoleDTO> roles = user.getRoles();
+        if(CollectionUtils.isNotEmpty(roles)){
+            AtomicReference<Integer> dataScope= new AtomicReference<>(5);
+            roles.forEach(a->{
+                String scope = a.getDataScope();
+                if (!StringUtils.isEmpty(scope)){
+                    Integer l = Integer.valueOf(scope);
+                    if(l< dataScope.get()){
+                        dataScope.set(l);
+                    }
+                }
+            });
+            Integer scope = dataScope.get();
+            if(scope==1||scope==4){
+                return null;
+            }else if (scope==3){
+                Long deptId = user.getDeptId();
+                List<SysUser> deptId1 = userMapper.selectList(new QueryWrapper<SysUser>().eq("dept_id", deptId));
+                if(deptId1!=null&&deptId1.size()>0){
+                    for (SysUser sysUser : deptId1) {
+                        list.add(sysUser.getUserId());
+                    }
+                }
+            }else {
+                list.add(user.getUserId());
+            }
+
+        }
+        return list;
     }
 
     /**

@@ -41,7 +41,7 @@ public class TestFormManageController extends BaseController {
     /**
      * 查询单管理列表
      */
-    @SaCheckPermission("system:formManage:list")
+    //@SaCheckPermission("system:formManage:list")
     @GetMapping("/list")
     public TableDataInfo<TestFormManageVo> list(TestFormManageBo bo, PageQuery pageQuery) {
         return testFormManageService.queryPageList(bo, pageQuery);
@@ -51,7 +51,7 @@ public class TestFormManageController extends BaseController {
     /**
      * 查询报销单分组
      */
-    @SaCheckPermission("system:formManage:list")
+    //@SaCheckPermission("system:formManage:list")
     @GetMapping("/listByGroup")
     public R<List<TestFormManageVo>> listByGroup() {
         return R.ok(testFormManageService.queryPageListGroup());
@@ -64,7 +64,7 @@ public class TestFormManageController extends BaseController {
      *
      * @param id 主键
      */
-    @SaCheckPermission("system:formManage:query")
+    //@SaCheckPermission("system:formManage:query")
     @GetMapping("/{id}")
     public R<TestFormManageVo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
@@ -74,7 +74,7 @@ public class TestFormManageController extends BaseController {
     /**
      * 新增单管理
      */
-    @SaCheckPermission("system:formManage:add")
+    //@SaCheckPermission("system:formManage:add")
     @Log(title = "单管理", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -85,7 +85,7 @@ public class TestFormManageController extends BaseController {
     /**
      * 修改单管理
      */
-    @SaCheckPermission("system:formManage:edit")
+    //@SaCheckPermission("system:formManage:edit")
     @Log(title = "单管理", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -98,7 +98,7 @@ public class TestFormManageController extends BaseController {
      *
      * @param ids 主键串
      */
-    @SaCheckPermission("system:formManage:remove")
+    //@SaCheckPermission("system:formManage:remove")
     @Log(title = "单管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

@@ -33,14 +33,14 @@ public class BpmFormController {
 
     @PostMapping("/create")
     @Operation(summary = "创建动态表单")
-    @SaCheckPermission("bpm:form:create")
+    //@SaCheckPermission("bpm:form:create")
     public R<Long> createForm(@Valid @RequestBody BpmFormVo createReqVO) {
         return R.ok(formService.createForm(createReqVO));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新动态表单")
-    @SaCheckPermission("bpm:form:update")
+    //@SaCheckPermission("bpm:form:update")
     public R<Boolean> updateForm(@Valid @RequestBody BpmFormVo updateReqVO) {
         formService.updateForm(updateReqVO);
         return R.ok(true);
@@ -49,7 +49,7 @@ public class BpmFormController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除动态表单")
     @Parameter(name = "id", description = "编号", required = true)
-    @SaCheckPermission("bpm:form:delete")
+    // @SaCheckPermission("bpm:form:delete")
     public R<Boolean> deleteForm(@RequestParam("id") Long id) {
         formService.deleteForm(id);
         return R.ok(true);
@@ -58,7 +58,7 @@ public class BpmFormController {
     @GetMapping("/get")
     @Operation(summary = "获得动态表单")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @SaCheckPermission("bpm:form:query")
+    // @SaCheckPermission("bpm:form:query")
     public R<BpmFormVo> getForm(@RequestParam("id") Long id) {
         BpmFormVo form = formService.getForm(id);
         return R.ok(form);
