@@ -74,8 +74,8 @@ public class ReceiptConversion implements ChangeIdentifyInfo<List<IdentifyResult
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode(), receipt, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode(), receipt, identifyResults.getExtra(), identifyResults.getMessage()));
 
         }
         return resultsList;

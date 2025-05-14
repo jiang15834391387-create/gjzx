@@ -1,6 +1,7 @@
 package org.smartlink.common.ocr.glority.conversion;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -19,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 
-
+//货物运输电子收款凭证发票
 public class DataElectronicTransportationGoodsConversion implements ChangeIdentifyInfo<List<IdentifyResults>> {
 
     private static class LazyHolder {
@@ -60,20 +61,22 @@ public class DataElectronicTransportationGoodsConversion implements ChangeIdenti
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataOcrDetails e = new DataOcrDetails();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setPrice(fJson.containsKey("dutiable_price") ? fJson.get("dutiable_price") : null);
-                e.setName(fJson.containsKey("name_of_goods") ? fJson.get("name_of_goods") : null);
-                e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
-                e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
-                e.setTaxNumber(fJson.containsKey("tax_number") ? fJson.get("tax_number") : null);
-                e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
-                e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
+            if (ObjectUtil.isNotNull(list)) {
+                for (Object invoiceDetails : list) {
+                    DataOcrDetails e = new DataOcrDetails();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setPrice(fJson.containsKey("dutiable_price") ? fJson.get("dutiable_price") : null);
+                    e.setName(fJson.containsKey("name_of_goods") ? fJson.get("name_of_goods") : null);
+                    e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
+                    e.setTaxNumber(fJson.containsKey("tax_number") ? fJson.get("tax_number") : null);
+                    e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
+                    e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
 
-                ocrDetailsList.add(e);
+                    ocrDetailsList.add(e);
+                }
             }
 
             invoice.setDetails(ocrDetailsList);
@@ -88,8 +91,8 @@ public class DataElectronicTransportationGoodsConversion implements ChangeIdenti
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getCode(), invoice, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getCode(), invoice, identifyResults.getExtra(), identifyResults.getMessage()));
         }
         return resultsList;
     }

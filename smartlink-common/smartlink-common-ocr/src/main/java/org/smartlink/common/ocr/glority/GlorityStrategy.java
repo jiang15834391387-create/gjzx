@@ -29,16 +29,14 @@ import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,9 +91,21 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 .retrieve()
                 .bodyToMono(GlorityResult.class)
 //                .map(OcrConversionException::checkGlorityResult)
-                .flatMap(e -> Mono.just(e.getResponse().getData().getIdentify_results())).block();
+//                .flatMap(e -> Mono.just(e.getResponse().getData().getIdentify_results())).block();
+            .defaultIfEmpty(new GlorityResult()) // 避免 bodyToMono() 为空
+            .flatMap(e -> {
+                if (e == null || e.getResponse() == null || e.getResponse().getData() == null) {
+                    return Mono.just(Collections.<IdentifyResults>emptyList()); // 显式指定泛型
+                }
+                return Mono.justOrEmpty(e.getResponse().getData().getIdentify_results());
+            })
+            .onErrorResume(ex -> {
+                log.error("OCR 识别请求失败: {}", ex.getMessage(), ex); //记录异常详细信息
+                return Mono.just(Collections.emptyList()); //捕获异常并返回 空列表
+            })
+            .block();
         if (CollUtil.isEmpty(responseData)) {
-            log.info("票小秘返回 NULL ");
+            log.info("OCR 识别为 NULL ");
             return null;
         }
 //        log.info("票小秘识别结果:" + JSONObject.toJSONString(responseData));
@@ -117,11 +127,8 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
             switch (identifyResult.getType()) {
                 //增值税、机打
                 case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
-                case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
                 case InvoiceConstants.GLORITY_TAX_CODE:
                 case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
-                case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
-                case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_LIST:
@@ -132,7 +139,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 //机动车
                 case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
                     return MotorVehicleSaleConversion.getInstance();
-                //机票
+                //航空运输电子客票行程单
                 case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
                     return FlightItineraryConversion.getInstance();
                 //二手车

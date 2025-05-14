@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.formula.functions.T;
 import org.smartlink.business.service.ScanImageService;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.log.annotation.Log;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,18 +44,25 @@ public class InvoiceRecognitionController {
     public R<T> upload(@RequestParam(value = "files", required = false) MultipartFile[] files,
                        @RequestParam(value = "uploadType") String uploadType) throws Exception {
         R<T> res = null;
-            if (uploadType.equals("0")){
-                List<MultipartFile> fetchFilesFromEmail = scanImageService.fetchFilesFromEmail();
-                if (fetchFilesFromEmail.size()!= 0){
-                    for (MultipartFile multipart : fetchFilesFromEmail) {
-                        res = scanImageService.uploadImage(multipart, uploadType);
+        if (uploadType.equals("0")){
+            List<MultipartFile> fetchFilesFromEmail = scanImageService.fetchFilesFromEmail();
+            if (fetchFilesFromEmail.size()!= 0){
+                for (MultipartFile multipart : fetchFilesFromEmail) {
+                    res = scanImageService.uploadImage(multipart, uploadType);
+                }
+            }
+        } else {
+            if (files != null && files.length > 0) {
+                for (MultipartFile file : files) {
+                    res = scanImageService.uploadImage(file, uploadType);
+                    if (res.getMsg().equals(FileStatusEnumd.OCR_FAILED.getDesc())) {
+                        continue;  // 跳过当前文件，继续处理下一个
                     }
                 }
             } else {
-                for (MultipartFile file:files) {
-                    res = scanImageService.uploadImage(file, uploadType);
-                }
+                return R.fail("请上传文件!");
             }
+        }
 
         return res;
     }

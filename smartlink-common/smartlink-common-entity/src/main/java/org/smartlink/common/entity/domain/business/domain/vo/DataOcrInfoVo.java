@@ -100,6 +100,13 @@ public class DataOcrInfoVo implements Serializable {
     private String city;
 
     /**
+     * 地区
+     */
+    @ExcelProperty(value = "地区")
+    private String area;
+
+
+    /**
      * 图片表id
      */
     @ExcelProperty(value = "图片表id")

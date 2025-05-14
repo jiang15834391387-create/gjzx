@@ -1,6 +1,7 @@
 package org.smartlink.common.ocr.glority.conversion;
 
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -87,20 +88,21 @@ public class DataMedicalTreatmentConversion implements ChangeIdentifyInfo<List<I
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
-            for (Object invoiceDetails : list) {
-                DataOcrDetails e = new DataOcrDetails();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
-                e.setId(IdUtil.fastSimpleUUID());
-                e.setFileId(dataImageFilesInfo.getFileId());
-                e.setRemark(fJson.containsKey("comment") ? fJson.get("comment") : null);
-                e.setProjectCode(fJson.containsKey("project_code") ? fJson.get("project_code") : null);
-                e.setProjectName(fJson.containsKey("project_name") ? fJson.get("project_name") : null);
-                e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
-                e.setDetailAmount(fJson.containsKey("amount") ? fJson.get("amount") : null);
-                e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
-                ocrDetailsList.add(e);
+            if (ObjectUtil.isNotNull(list)) {
+                for (Object invoiceDetails : list) {
+                    DataOcrDetails e = new DataOcrDetails();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+                    e.setId(IdUtil.fastSimpleUUID());
+                    e.setFileId(dataImageFilesInfo.getFileId());
+                    e.setRemark(fJson.containsKey("comment") ? fJson.get("comment") : null);
+                    e.setProjectCode(fJson.containsKey("project_code") ? fJson.get("project_code") : null);
+                    e.setProjectName(fJson.containsKey("project_name") ? fJson.get("project_name") : null);
+                    e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
+                    e.setDetailAmount(fJson.containsKey("amount") ? fJson.get("amount") : null);
+                    e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    ocrDetailsList.add(e);
+                }
             }
-
             invoice.setDetails(ocrDetailsList);
 
             invoice.setOrientation(identifyResults.getOrientation());
@@ -113,8 +115,8 @@ public class DataMedicalTreatmentConversion implements ChangeIdentifyInfo<List<I
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.MEDICAL_RECEIPTS_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.MEDICAL_RECEIPTS_CODE.getCode(), invoice, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.MEDICAL_RECEIPTS_CODE.getCode(), invoice, identifyResults.getExtra(), identifyResults.getMessage()));
         }
         return resultsList;
     }

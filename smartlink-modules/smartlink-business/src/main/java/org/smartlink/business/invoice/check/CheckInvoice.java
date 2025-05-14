@@ -6,11 +6,13 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.shiro.util.StringUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.factory.CheckFactory;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.service.*;
@@ -28,6 +30,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class CheckInvoice {
+    private final DataImageFilesInfoMapper imageFilesInfoMapper;
     private final IDataOcrInfoServices dataOcrInfoService;
     private final DataOcrDetailsMapper detailsMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
@@ -44,7 +47,8 @@ public class CheckInvoice {
     private final IDataMotorVehicleSaleService dataMotorVehicleSaleService;
     private final IDataUsedCarSalesService dataUsedCarSalesService;
     private final DataNonTaxMapper dataNonTaxMapper;
-    public CheckInvoice(IDataOcrInfoServices dataOcrInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataMedicalTreatmentMapper medicalTreatmentMapper, DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService, DataNonTaxMapper dataNonTaxMapper) {
+    public CheckInvoice(DataImageFilesInfoMapper imageFilesInfoMapper, IDataOcrInfoServices dataOcrInfoService, DataOcrDetailsMapper detailsMapper, DataOcrInfoMapper ocrInfoMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataRailwayTicketMapper railwayTicketMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataMedicalTreatmentMapper medicalTreatmentMapper, DataMedicalTreatmentDetailMapper medicalTreatmentDetailMapper, IDataRailwayTicketService dataRailwayTicketService, IDataFlightItineraryService dataFlightItineraryService, IDataMedicalTreatmentService dataMedicalTreatmentDetailService, IDataMotorVehicleSaleService dataMotorVehicleSaleService, IDataUsedCarSalesService dataUsedCarSalesService, DataNonTaxMapper dataNonTaxMapper) {
+        this.imageFilesInfoMapper = imageFilesInfoMapper;
         this.dataOcrInfoService = dataOcrInfoService;
         this.detailsMapper = detailsMapper;
         this.ocrInfoMapper = ocrInfoMapper;
@@ -63,77 +67,33 @@ public class CheckInvoice {
         this.dataNonTaxMapper = dataNonTaxMapper;
     }
     //查验方法
-    public void check(boolean checkOff,DataImageFilesInfo filesInfo) throws Exception {
+    public R<T> check(boolean checkOff, DataImageFilesInfo filesInfo) throws Exception {
             //判断是否开启查验
             if(!checkOff){
-                return;
+                return R.ok("查验功能未开启!");
             }
             //获取发票类型
             String invoiceType = filesInfo.getInvoice();
         InvoiceCheckParamDTO invoiceCheckParamDTO = new InvoiceCheckParamDTO();
             switch (invoiceType){
                 case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
-                    final DataUsedCarSales dataUsedCarSales =dataUsedCarSalesService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
+                    final DataMotorVehicleSale dataUsedCarSales =dataMotorVehicleSaleService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO.setCode(dataUsedCarSales.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(dataUsedCarSales.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(dataUsedCarSales.getInvoiceDate());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    invoiceCheckParamDTO.setPretax_amount(dataUsedCarSales.getTotalUppercase());
+                    invoiceCheckParamDTO.setPretax_amount(dataUsedCarSales.getPreTaxAmount());
                     break;
                 case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
-                    final DataMotorVehicleSale dataMotorVehicleSale =dataMotorVehicleSaleService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
+                    final DataUsedCarSales dataMotorVehicleSale =dataUsedCarSalesService.getByFileId(filesInfo.getFileId());
                     invoiceCheckParamDTO.setCode(dataMotorVehicleSale.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(dataMotorVehicleSale.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(dataMotorVehicleSale.getInvoiceDate());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getPreTaxAmount());
-                    break;
-                case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
-                    final DataRailwayTicket railwayTicket =dataRailwayTicketService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
-                    invoiceCheckParamDTO.setNumber(railwayTicket.getInvoiceNumber());
-                    invoiceCheckParamDTO.setTotal(railwayTicket.getInvoiceTotal());
-                    invoiceCheckParamDTO.setDate_of_issue(railwayTicket.getInvoiceDate());
-                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    break;
-                case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
-                    final DataFlightItinerary dataFlightItinerary = dataFlightItineraryService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
-                    invoiceCheckParamDTO.setReceipt_numbe(dataFlightItinerary.getInvoiceNumber());
-                    invoiceCheckParamDTO.setTotal(dataFlightItinerary.getInvoiceTotal());
-                    invoiceCheckParamDTO.setDate(dataFlightItinerary.getInvoiceDate());
-                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    break;
-                case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-                    final DataOcrInfo ocrInfoss = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
-                    invoiceCheckParamDTO.setCode(ocrInfoss.getInvoiceCode());
-                    invoiceCheckParamDTO.setNumber(ocrInfoss.getInvoiceNumber());
-                    invoiceCheckParamDTO.setDate(ocrInfoss.getInvoiceDate());
-                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    invoiceCheckParamDTO.setTotal(ocrInfoss.getTotalUppercase());
-                    invoiceCheckParamDTO.setSeller_tax_id(ocrInfoss.getSellerNo());
-                    invoiceCheckParamDTO.setArea(ocrInfoss.getProvince());
-                    break;
-                case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
-                    final DataMedicalTreatment medicalTreatment = this.dataMedicalTreatmentDetailService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
-                    invoiceCheckParamDTO.setCode(medicalTreatment.getInvoiceCode());
-                    invoiceCheckParamDTO.setNumber(medicalTreatment.getInvoiceNumber());
-                    invoiceCheckParamDTO.setDate(medicalTreatment.getInvoiceDate());
-                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    invoiceCheckParamDTO.setPretax_amount(medicalTreatment.getInvoiceTotal());
-                    String checkCodess = medicalTreatment.getCheckCode();
-                    if (StringUtils.hasText(checkCodess) && checkCodess.length() > 5) {
-                        checkCodess = checkCodess.substring(checkCodess.length() - 6);
-                    }
-                    invoiceCheckParamDTO.setCheck_code(checkCodess);
+                    invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getInvoiceTotal());
                     break;
                 case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
                     final DataOcrInfo ocrInfo = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                     invoiceCheckParamDTO.setCode(ocrInfo.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(ocrInfo.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(ocrInfo.getInvoiceDate());
@@ -142,31 +102,31 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setPretax_amount(ocrInfo.getPretaxAmount());
                     break;
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
-                case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                 case InvoiceConstants.GLORITY_TAX_CODE:
                 case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+                case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                     final DataOcrInfo ocrInfos = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
                     if (StrUtil.isNotBlank(ocrInfos.getBlockChain())){
                         if (ocrInfos.getBlockChain().equals(InvoiceConstants.ONE)){
                             invoiceCheckParamDTO.setBlock_chain(Integer.valueOf(ocrInfos.getBlockChain()));
-                        }
-                        if (StrUtil.isNotBlank(ocrInfos.getSellerNo())){
-                            invoiceCheckParamDTO.setSeller_tax_id(ocrInfos.getSellerNo());
-                        }
-                        if (StrUtil.isNotBlank(ocrInfos.getProvince())){
-                            invoiceCheckParamDTO.setArea(ocrInfos.getProvince());
+                            if (StrUtil.isNotBlank(ocrInfos.getSellerNo())){
+                                invoiceCheckParamDTO.setSeller_tax_id(ocrInfos.getSellerNo());
+                            }
+                            if (StrUtil.isNotBlank(ocrInfos.getProvince())){
+                                invoiceCheckParamDTO.setArea(ocrInfos.getArea());
+                            }
                         }
                     }
+                    //数电票(增值税)/普通发票处理
                     if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
-                        invoiceCheckParamDTO = new InvoiceCheckParamDTO();
                         invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
-                        invoiceCheckParamDTO.setTotal(ocrInfos.getTotalUppercase());
+                        invoiceCheckParamDTO.setTotal(ocrInfos.getTotalLowercase());
                         invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
                         invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                         break;
                     }
-                    invoiceCheckParamDTO = new InvoiceCheckParamDTO();
+                    //增值税普通发票/普卷/电子普通
                     invoiceCheckParamDTO.setCode(ocrInfos.getInvoiceCode());
                     invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
@@ -174,15 +134,23 @@ public class CheckInvoice {
                     String checkCodes = ocrInfos.getCheckCode();
                     if (StringUtils.hasText(checkCodes) && checkCodes.length() > 5) {
                         checkCodes = checkCodes.substring(checkCodes.length() - 6);
+                        invoiceCheckParamDTO.setCheck_code(checkCodes);
                     }
-                    invoiceCheckParamDTO.setCheck_code(checkCodes);
+                    String checkCodess = ocrInfos.getCheckCode();
+                    //如果长度小于6就不截取
+                    if (StringUtils.hasText(checkCodess) && checkCodess.length() < 6) {
+                        invoiceCheckParamDTO.setCheck_code(checkCodess);
+                    }
                     break;
+                    default:
+                        return R.ok();
             }
-            this.checkInvoice(filesInfo,invoiceCheckParamDTO);
+
+          return this.checkInvoice(filesInfo,invoiceCheckParamDTO);
 
  }
     //传递查验参数调用查验工厂
-    public BaseEntity checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
+    public R<T> checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
         BaseEntity baseEntity= CheckFactory.instance().checkInvoke(filesInfo, invoiceCheckParamDTO);
         if (filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())&&filesInfo.getCheckStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
            //如果是增值税（专用/普通/电子专用）或增值税电子普通发票 或区块链电子发票  或机打发票 或增值税普通发票(卷票)或数电票(增值税专用发票/普通发票)
@@ -190,132 +158,29 @@ public class CheckInvoice {
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRONIC_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE)
+                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ROLL_TICKET_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
                 || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)) {
                 //转换后增值税发票
                 ocrConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
+                return R.ok();
             }
             if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_USED_CAR_SALES_CODE)){
                 //转换后二手车销售统一发票
                 usedCsrConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
+                return R.ok();
             }
             if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE)){
                 //转换后机动车销售统一发票
                 motorVehicleSaleConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
-            }
-            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE)){
-                //转换后火车票
-                railwayTicketConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
-            }
-            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE)){
-                //转换后航空运输电子客运行程单基本信息
-                flightItineraryConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
-            }
-            if (filesInfo.getInvoice().equals(InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE)){
-                //转换后医疗票
-                medicalTreatmentConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
-            }
-            //非税收入
-            if (filesInfo.getInvoice().equals(InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE)){
-                //转换后非税收入
-                nonTaxRevenueReceiptsConversionAlter(baseEntity,filesInfo);
-                return baseEntity;
+                return R.ok();
             }
         }
         log.info("查验发票查验失败结果：{}", baseEntity);
-        return baseEntity;
-    }
-    //非税收入
-    private void nonTaxRevenueReceiptsConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
-        if (ObjectUtil.isEmpty(baseEntity)){
-            log.error("非税收入查验转换后结果为空");
-            return;
-        }
-        log.info("修改查验转换后的非税收入信息：{}", baseEntity);
-        DataNonTax nonTax=BeanUtil.toBean(baseEntity, DataNonTax.class);
-        List<DataOcrDetails> list = new ArrayList<>();
-        List<DataOcrDetails> detailList = nonTax.getDetails();
-        if (CollectionUtil.isNotEmpty(detailList)){
-            for (DataOcrDetails detail : detailList) {
-                DataOcrDetails flightsItineraryDetail=BeanUtil.toBean(detail, DataOcrDetails.class);
-                detail.setFileId(filesInfo.getFileId());
-                list.add(flightsItineraryDetail);
-            }
-        }
-        dataNonTaxMapper.update(nonTax, new LambdaUpdateWrapper<DataNonTax>().eq(DataNonTax::getFileId, filesInfo.getFileId()));
-        //修改详情表
-        for (DataOcrDetails flightsItineraryDetail : list) {
-            detailsMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()));
-        }
-    }
-
-    //医疗
-    private void medicalTreatmentConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
-        if (ObjectUtil.isEmpty(baseEntity)){
-            log.error("医疗票查验转换后结果为空");
-            return;
-        }
-        log.info("修改查验转换后的医疗信息：{}", baseEntity);
-        DataMedicalTreatment medicalTreatment=BeanUtil.toBean(baseEntity, DataMedicalTreatment.class);
-        List<DataOcrDetails> list = new ArrayList<>();
-        List<DataOcrDetails> detailList = medicalTreatment.getDetails();
-        if (CollectionUtil.isNotEmpty(detailList)){
-            for (DataOcrDetails detail : detailList) {
-                DataOcrDetails flightsItineraryDetail=BeanUtil.toBean(detail, DataOcrDetails.class);
-                detail.setFileId(filesInfo.getFileId());
-                list.add(flightsItineraryDetail);
-            }
-        }
-        medicalTreatmentMapper.update(medicalTreatment, new LambdaUpdateWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, filesInfo.getFileId()));
-        //修改详情表
-        for (DataOcrDetails flightsItineraryDetail : list) {
-            detailsMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()));
-        }
-    }
-   //航空电子信息客运
-    public void flightItineraryConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
-        if (ObjectUtil.isEmpty(baseEntity)){
-            log.error("航空运输电子客运行程单基本信息查验转换后结果为空");
-            return;
-        }
-        log.info("修改查验转换后的航空运输电子客运行程单基本信息信息：{}", baseEntity);
-        //创建航空运输电子客运行程单基本信息
-        DataFlightItinerary dataFlightItinerary=BeanUtil.toBean(baseEntity, DataFlightItinerary.class);
-        List<DataFlightsItineraryDetail> list = new ArrayList<>();
-        List<DataFlightsItineraryDetail> detailList = dataFlightItinerary.getFlightItineraryDetails();
-        if (CollectionUtil.isNotEmpty(detailList)){
-            for (DataFlightsItineraryDetail dataFlightsItineraryDetail : detailList) {
-                DataFlightsItineraryDetail flightsItineraryDetail=BeanUtil.toBean(dataFlightsItineraryDetail, DataFlightsItineraryDetail.class);
-                flightsItineraryDetail.setFileId(filesInfo.getFileId());
-                list.add(flightsItineraryDetail);
-            }
-        }
-        //根据fileId进行修改航空电子单基本信息
-        flightItineraryMapper.update(dataFlightItinerary, new LambdaUpdateWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, filesInfo.getFileId()));
-        for (DataFlightsItineraryDetail flightsItineraryDetail : list) {
-            flightsItineraryDetailMapper.update(flightsItineraryDetail, new LambdaUpdateWrapper<DataFlightsItineraryDetail>().eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId()).eq(DataFlightsItineraryDetail::getId, flightsItineraryDetail.getId()));
-        }
-
-    }
-
-    // 转换后火车票
-    private void railwayTicketConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
-        if (ObjectUtil.isEmpty(baseEntity)){
-            log.error("火车票查验转换后结果为空");
-            return;
-        }
-        log.info("修改查验转换后的火车票信息：{}", baseEntity);
-        DataRailwayTicket dataRailwayTicket=BeanUtil.toBean(baseEntity, DataRailwayTicket.class);
-        //根据fileId进行修改
-        railwayTicketMapper.update(dataRailwayTicket,new LambdaUpdateWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, filesInfo.getFileId()));
+        //根据file_id查询错误信息
+        DataImageFilesInfo filesInfos =imageFilesInfoMapper.selectOne(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()));
+        return R.fail(500,"查验失败:"+filesInfos.getMessage());
     }
 
     // 转换后机动车销售统一发票

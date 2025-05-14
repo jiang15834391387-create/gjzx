@@ -72,8 +72,8 @@ public class SteamerTicketConversion implements ChangeIdentifyInfo<List<Identify
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getCode(), steamerTicket, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getCode(), steamerTicket, identifyResults.getExtra(), identifyResults.getMessage()));
 
         }
         return resultsList;

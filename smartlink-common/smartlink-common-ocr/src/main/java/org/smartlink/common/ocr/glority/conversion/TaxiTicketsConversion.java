@@ -72,8 +72,8 @@ public class TaxiTicketsConversion implements ChangeIdentifyInfo<List<IdentifyRe
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getCode(), taxiTickets, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getCode(), taxiTickets, identifyResults.getExtra(), identifyResults.getMessage()));
 
         }
         return resultsList;

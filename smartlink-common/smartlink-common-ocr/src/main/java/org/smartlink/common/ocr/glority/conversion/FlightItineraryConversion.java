@@ -81,9 +81,10 @@ public class FlightItineraryConversion implements ChangeIdentifyInfo<List<Identi
 
             List<DataFlightsItineraryDetail> ocrDetailsList = new ArrayList<>();
             JSONArray list = jsonObject.getJSONArray("flights");
-            for (Object invoiceDetails : list) {
-                DataFlightsItineraryDetail e = new DataFlightsItineraryDetail();
-                LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
+            if (ObjectUtil.isNotNull(list)) {
+                for (Object invoiceDetails : list) {
+                    DataFlightsItineraryDetail e = new DataFlightsItineraryDetail();
+                    LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
                     e.setStationGetOff(fJson.containsKey("to") ? fJson.get("to") : null);
                     e.setStationGetOn(fJson.containsKey("from") ? fJson.get("from") : null);
                     e.setSpaceLevel(fJson.containsKey("class_name") ? fJson.get("class_name") : null);
@@ -96,15 +97,16 @@ public class FlightItineraryConversion implements ChangeIdentifyInfo<List<Identi
                     e.setEffectiveDate(fJson.containsKey("not_valid_before") ? fJson.get("not_valid_before") : null);
                     e.setExpiryDate(fJson.containsKey("not_valid_after") ? fJson.get("not_valid_after") : null);
                     e.setFlightSegment(fJson.containsKey("flight_segment") ? fJson.get("flight_segment") : null);
-                ocrDetailsList.add(e);
+                    ocrDetailsList.add(e);
+                }
             }
             flightItinerary.setDetails(ocrDetailsList);
 
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getCode(), flightItinerary, identifyResults.getExtra()));
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode(), flightItinerary, identifyResults.getExtra(), identifyResults.getMessage()));
         }
         return resultsList;
 

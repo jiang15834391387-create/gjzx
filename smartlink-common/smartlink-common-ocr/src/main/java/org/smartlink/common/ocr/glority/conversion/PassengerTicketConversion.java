@@ -72,8 +72,8 @@ public class PassengerTicketConversion implements ChangeIdentifyInfo<List<Identi
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getCode());
-            dataImageFilesInfo.setMessage(jsonObject.getStr("message"));
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getCode(), passengerTicket, identifyResults.getExtra()));
+            dataImageFilesInfo.setMessage(identifyResults.getMessage());
+            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getCode(), passengerTicket, identifyResults.getExtra(), identifyResults.getMessage()));
 
 
         }

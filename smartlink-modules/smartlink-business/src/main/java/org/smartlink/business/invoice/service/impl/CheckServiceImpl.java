@@ -10,29 +10,24 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.util.StringUtils;
+import org.smartlink.business.doman.vo.InvoiceVo;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.invoice.service.ICheckService;
-import org.smartlink.common.check.doman.BillRequest;
 import org.smartlink.common.check.doman.InvoicePageQuery;
 import org.smartlink.common.check.doman.InvoiceRequest;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
-import org.smartlink.common.check.doman.vo.InvoiceVo;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.core.enums.InvoiceGlorityEnumd;
 import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
-import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
 
@@ -100,19 +95,26 @@ public class CheckServiceImpl implements ICheckService {
 
     //批量删除
     @Override
-    public int deleteWithValidByIds(Collection<String> ids) {
+    public R<Void> deleteWithValidByIds(Collection<String> ids) {
         if (CollectionUtil.isEmpty(ids)) {
-            return 0;
+            return R.fail(500, "请选择需要删除的数据");
         }
         //循环遍历查询图片表信息数据
         for (String id : ids) {
             DataImageFilesInfo filesInfo = filesInfoMapper.selectOne(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, id));
             if (ObjUtil.isEmpty(filesInfo)) {
-                return 0;
+                return R.fail(500, "图片表信息不存在");
             }
             String invoiceType = filesInfo.getInvoice();
             if (StrUtil.isEmpty(invoiceType)){
-                return 0;
+                if (filesInfo.getFileStatus().equals(FileStatusEnumd.OCR_FAILED.getCode())){
+                    //修改文件状态为已删除
+                    int a= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileStatus,""));
+                    if (a<=0){
+                        return R.fail(500, "删除失败");
+                    }
+                    return R.ok();
+                }
             }
             //根据发票类型判断,调用不同的发票删除方法,使用switch
             switch (invoiceType) {
@@ -205,11 +207,11 @@ public class CheckServiceImpl implements ICheckService {
                      removeOcrInvoice(filesInfo);
                      break;
                 default: {
-                    return 0;
+                    return R.fail(500, "发票类型错误");
                 }
             }
         }
-        return 1;
+        return R.ok();
     }
     private void removeOcrDetail(DataImageFilesInfo filesInfo) {
         ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).set(DataOcrDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
@@ -218,14 +220,14 @@ public class CheckServiceImpl implements ICheckService {
     private void removeNonTaxInvoice(DataImageFilesInfo filesInfo) {
         dataNonTaxMapper.update(new LambdaUpdateWrapper<DataNonTax>().eq(DataNonTax::getFileId, filesInfo.getFileId()).set(DataNonTax::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         removeOcrDetail(filesInfo);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
 
     //删除ocr发票
     private void removeOcrInvoice(DataImageFilesInfo filesInfo) {
        ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()).set(DataOcrInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         removeOcrDetail(filesInfo);
-       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
+       filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()).set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode()));
     }
     //删除货物运输电子收款凭证发票
     private void removeElectronicPaymentGoodsTransportation(DataImageFilesInfo filesInfo) {
@@ -335,38 +337,37 @@ public class CheckServiceImpl implements ICheckService {
      * 发票修改
      */
     @Override
-    public int invoiceAlter(InvoiceRequest request) throws Exception {
+    public R<Void> invoiceAlter(InvoiceRequest request) throws Exception {
         String invoiceType = request.getInvoiceType();
         if (StrUtil.isEmpty(invoiceType)) {
-            return 0;
+            return R.fail(500, "发票类型不能为空");
         }
         log.info("修改发票类型：{}", invoiceType);
         Map<String, Object> generalInfo = request.getGeneralInfo();
         log.info("修改传入的基本发票信息：{}", generalInfo);
-        BillRequest billRequest = request.getBillRequest();
-        if (ObjUtil.isEmpty(billRequest)){
-            return 0;
-        }
-        List<Map<String, Object>> details = billRequest.getDetails();
-        log.info("修改传入的发票明细信息：{}", details);
+       // BillRequest billRequest = request.getBillRequest();
+//        if (ObjUtil.isEmpty(billRequest)){
+//            return R.fail(500, "发票明细对象不能为空");
+//        }
+//        List<Map<String, Object>> details = billRequest.getDetails();
+//        log.info("修改传入的发票明细信息：{}", details);
         // 根据发票类型处理逻辑
         switch (invoiceType) {
             case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
             case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
             case InvoiceConstants.GLORITY_TAX_CODE:
             case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
-            case InvoiceConstants.GLORITY_ELECTRONIC_QUKUAILIAN_CODE:
             case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
             case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
-                // 处理增值税发票
-                 return handleVatInvoice(generalInfo, request.getInvoiceType());
-            // 数电票普通发票/机打发票
             case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+                // 处理增值税发票
+                return updateOcrInvoice(generalInfo,request.getInvoiceType());
+            //机打发票/增值税发票清单/可报销其他发票
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
             case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
-                return updateOrdinaryInvoice(generalInfo, details);
+                return updateOrdinaryInvoice(generalInfo);
             //机动车销售发票
             case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
                 return updateVehicleSaleInvoice(generalInfo);
@@ -375,17 +376,17 @@ public class CheckServiceImpl implements ICheckService {
                 return updateCarSaleInvoice(generalInfo);
             //航空电子客运单
             case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
-                return updateFilghtItinerary(generalInfo, details);
+                return updateFilghtItinerary(generalInfo);
             //船票
             case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
                 return updateSteamerTicket(generalInfo);
             //医疗票明细票/医疗票
             case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
             case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
-                return updateMedicalTicket(generalInfo, details);
+                return updateMedicalTicket(generalInfo);
             //非税收入单据
             case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
-                return updateNonTaxRevenueReceipts(generalInfo,details);
+                return updateNonTaxRevenueReceipts(generalInfo);
             //定额发票
             case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
                 return updateQuotaInvoice(generalInfo);
@@ -406,174 +407,273 @@ public class CheckServiceImpl implements ICheckService {
                 return updateReceipt(generalInfo);
             //出行发票/滴滴
             case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
-                return updateDidiItinerary(generalInfo, details);
+                return updateDidiItinerary(generalInfo);
             //完税证明发票
             case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
-                return updateDutyPaidProof(generalInfo,details);
+                return updateDutyPaidProof(generalInfo);
             //海关进口货物报关单发票
             case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
-                return updateCustomsImportGoods(generalInfo, details);
+                return updateCustomsImportGoods(generalInfo);
             //海关出口货物报关单发票
             case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
-                return updateCustomsExportGoods(generalInfo, details);
+                return updateCustomsExportGoods(generalInfo);
             //海关专用缴款书发票
             case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
-                return updateCustomsSpecialPayment(generalInfo,details);
+                return updateCustomsSpecialPayment(generalInfo);
             //货物运输电子收款凭证发票
             case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
-                return updateElectronicPaymentGoodsTransportation(generalInfo, details);
+                return updateElectronicPaymentGoodsTransportation(generalInfo);
         }
-        return 0;
+        return R.fail(500,"发票类型错误");
     }
     //修改非税收入单据
-    private int updateNonTaxRevenueReceipts(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateNonTaxRevenueReceipts(Map<String, Object> generalInfo) {
         DataNonTax dataNonTax = BeanUtil.toBean(generalInfo, DataNonTax.class);
         int updateResult = dataNonTaxMapper.updateById(dataNonTax);
         if (updateResult <= 0) {
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        for (Map<String, Object> item : details) {
-            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
-            int i = ocrDetailsMapper.updateById(ocrDetails);
-            if (i <= 0) {
-                return 0;
-            }
+//        for (Map<String, Object> item : details) {
+//            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
+//            int i = ocrDetailsMapper.updateById(ocrDetails);
+//            if (i <= 0) {
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dataNonTax.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
     }
 
     //修改海关专用缴款书发票
-    private int updateCustomsSpecialPayment(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateCustomsSpecialPayment(Map<String, Object> generalInfo) {
         DataCustomsSpecialPayment customsSpecialPayment = BeanUtil.toBean(generalInfo, DataCustomsSpecialPayment.class);
-        customsSpecialPaymentMapper.updateById(customsSpecialPayment);
-        for (Map<String, Object> item : details) {
-            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
-            ocrDetailsMapper.updateById(ocrDetails);
+        int counts=customsSpecialPaymentMapper.updateById(customsSpecialPayment);
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+//        for (Map<String, Object> item : details) {
+//            DataOcrDetails ocrDetails = BeanUtil.toBean(item, DataOcrDetails.class);
+//            int cc=ocrDetailsMapper.updateById(ocrDetails);
+//            if (cc<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsSpecialPayment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改海关出口货物报关单发票
-    private int updateCustomsExportGoods(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateCustomsExportGoods(Map<String, Object> generalInfo) {
         DataCustomsExportGoods customsExportGoods = BeanUtil.toBean(generalInfo, DataCustomsExportGoods.class);
-        customsExportGoodsMapper.updateById(customsExportGoods);
-        // 将细节数据转换为实体对象
-        List<DataCustomsExportGoodsDetail> customsExportGoodsDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataCustomsExportGoodsDetail.class))
-            .toList();
-        for (DataCustomsExportGoodsDetail item : customsExportGoodsDetails) {
-            customsExportGoodsDetailMapper.updateById(item);
+        int b=customsExportGoodsMapper.updateById(customsExportGoods);
+        if (b<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        // 将细节数据转换为实体对象
+//        List<DataCustomsExportGoodsDetail> customsExportGoodsDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataCustomsExportGoodsDetail.class))
+//            .toList();
+//        for (DataCustomsExportGoodsDetail item : customsExportGoodsDetails) {
+//            int num=customsExportGoodsDetailMapper.updateById(item);
+//            if (num<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsExportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
 
     //修改海关进口货物报关单发票
-    private int updateCustomsImportGoods(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateCustomsImportGoods(Map<String, Object> generalInfo) {
         // 将主表数据转换为实体对象
         DataCustomsImxportGoods customsImxportGoods = BeanUtil.toBean(generalInfo, DataCustomsImxportGoods.class);
         // 更新主表信息，并检查是否成功
-       customsImportGoodsMapper.updateById(customsImxportGoods);
-        List<DataCustomsImportGoodsDetail> customsImportGoodsDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataCustomsImportGoodsDetail.class))
-            .toList();
-        for (DataCustomsImportGoodsDetail item : customsImportGoodsDetails) {
-            customsImportGoodsDetailMapper.updateById(item);
-
+        int a=customsImportGoodsMapper.updateById(customsImxportGoods);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+//        List<DataCustomsImportGoodsDetail> customsImportGoodsDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataCustomsImportGoodsDetail.class))
+//            .toList();
+//        for (DataCustomsImportGoodsDetail item : customsImportGoodsDetails) {
+//            int num=customsImportGoodsDetailMapper.updateById(item);
+//            if (num<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, customsImxportGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改出行发票/滴滴
-    private int updateDidiItinerary(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateDidiItinerary(Map<String, Object> generalInfo) {
         DataDidiItinerary didiItinerary = BeanUtil.toBean(generalInfo, DataDidiItinerary.class);
-        didiItineraryMapper.updateById(didiItinerary);
-        List<DataDidiItineraryDetails> didiItineraryDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataDidiItineraryDetails.class))
-            .toList();
-        for (DataDidiItineraryDetails item : didiItineraryDetails) {
-           didiItineraryDetailsMapper.updateById(item);
+        int c=didiItineraryMapper.updateById(didiItinerary);
+        if (c<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+//        List<DataDidiItineraryDetails> didiItineraryDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataDidiItineraryDetails.class))
+//            .toList();
+//        for (DataDidiItineraryDetails item : didiItineraryDetails) {
+//           int count=didiItineraryDetailsMapper.updateById(item);
+//           if (count<=0){
+//               return R.fail(500,"修改发票失败");
+//           }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, didiItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改医疗票
-    private int updateMedicalTicket(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateMedicalTicket(Map<String, Object> generalInfo) {
         DataMedicalTreatment medicalTreatment = BeanUtil.toBean(generalInfo, DataMedicalTreatment.class);
         int updateResult = dataMedicalTreatmentMapper.updateById(medicalTreatment);
         if (updateResult <= 0) {
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        List<DataOcrDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
-            .toList();
-        for (DataOcrDetails item : ocrDetails) {
-            int i = ocrDetailsMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//        for (DataOcrDetails item : ocrDetails) {
+//            int i = ocrDetailsMapper.updateById(item);
+//            if (i <= 0) {
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, medicalTreatment.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
     }
 
     //修改航空电子客运发票
-    private int updateFilghtItinerary(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateFilghtItinerary(Map<String, Object> generalInfo) {
         DataFlightItinerary flightItinerary = BeanUtil.toBean(generalInfo, DataFlightItinerary.class);
         int updateResult = flightItineraryMapper.updateById(flightItinerary);
         if (updateResult <= 0) {
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        List<DataFlightsItineraryDetail> flightItineraryDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataFlightsItineraryDetail.class))
-            .toList();
-        for (DataFlightsItineraryDetail item : flightItineraryDetails) {
-            int i = flightsItineraryDetailMapper.updateById(item);
-            if (i <= 0) {
-                return 0;
-            }
-        }
-        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, flightItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES));
+//        List<DataFlightsItineraryDetail> flightItineraryDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataFlightsItineraryDetail.class))
+//            .toList();
+//        for (DataFlightsItineraryDetail item : flightItineraryDetails) {
+//            int i = flightsItineraryDetailMapper.updateById(item);
+//            if (i <= 0) {
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, flightItinerary.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
         if (count<=0){
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
+    }
+    //修改增值税发票
+    private R<Void> updateOcrInvoice(Map<String, Object> generalInfo,String invoiceType) throws Exception {
+        DataOcrInfo ocrInfo = BeanUtil.toBean(generalInfo, DataOcrInfo.class);
+        //根据file_id查询ocr信息
+        DataOcrInfo ocrInfos = ocrInfoMapper.selectOne(new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, ocrInfo.getFileId()));
+        ocrInfo.setVersion(ocrInfos.getVersion());
+        int updateResult =ocrInfoMapper.updateById(ocrInfo);
+        if (updateResult<=0){
+            return R.fail(500,"发票修改失败");
+        }
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//
+//        for (DataOcrDetails item : ocrDetails) {
+//            int i =ocrDetailsMapper.updateById(item);
+//            if (i<=0){
+//                return R.fail(500,"发票修改失败");
+//            }
+//        }
+        //根据file_id修改图片表信息
+        int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (count<=0){
+            return R.fail(500,"发票修改失败");
+        }
+        //处理调用查验方法
+        return handleVatInvoice(generalInfo,invoiceType);
     }
 
     //处理数电票/普通发票修改
-    private int updateOrdinaryInvoice(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateOrdinaryInvoice(Map<String, Object> generalInfo) {
         DataOcrInfo ocrInfo = BeanUtil.toBean(generalInfo, DataOcrInfo.class);
-        ocrInfoMapper.updateById(ocrInfo);
-        List<DataOcrDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
-            .toList();
-
-        for (DataOcrDetails item : ocrDetails) {
-            ocrDetailsMapper.updateById(item);
+        int updateResult =ocrInfoMapper.updateById(ocrInfo);
+        if (updateResult<=0){
+            return R.fail(500,"发票修改失败");
         }
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//
+//        for (DataOcrDetails item : ocrDetails) {
+//            int i =ocrDetailsMapper.updateById(item);
+//            if (i<=0){
+//                return R.fail(500,"发票修改失败");
+//            }
+//        }
         //根据file_id修改图片表信息
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+       int count= filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, ocrInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (count<=0){
+            return R.fail(500,"发票修改失败");
+        }
+        return R.ok();
     }
 
     //货物运输电子收款凭证发票发票修改
-    private int updateElectronicPaymentGoodsTransportation(Map<String, Object> generalInfo, List<Map<String, Object>> details) {
+    private R<Void> updateElectronicPaymentGoodsTransportation(Map<String, Object> generalInfo) {
         DataElectronicTransportationGoods transportationGoods = BeanUtil.toBean(generalInfo, DataElectronicTransportationGoods.class);
         int updateResult =paymentMapper.updateById(transportationGoods);
         if (updateResult <= 0){
-            return 0;
+            return R.fail(500,"修改发票失败");
         }
-        List<DataOcrDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
-            .toList();
-        for (DataOcrDetails item : ocrDetails) {
-            ocrDetailsMapper.updateById(item);
+//        List<DataOcrDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataOcrDetails.class))
+//            .toList();
+//        for (DataOcrDetails item : ocrDetails) {
+//            int a=ocrDetailsMapper.updateById(item);
+//            if (a<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, transportationGoods.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
         }
-        return 1;
+        return R.ok();
     }
 
     //处理增值税发票修改
-    private int handleVatInvoice(Map<String, Object> generalInfo, String invoiceType) throws Exception {
+    private R<Void> handleVatInvoice(Map<String, Object> generalInfo, String invoiceType) throws Exception {
         // DTO 初始化
         InvoiceCheckParamDTO dto = new InvoiceCheckParamDTO();
-        // 处理区块链标记及通用信息
-        handleGeneralInfo(dto, generalInfo, invoiceType);
-        // 根据发票类型分类处理
+        // 增值税电子普通区块链
+        if (StrUtil.isNotBlank((String) generalInfo.get("blockChain"))) {
+            String blockChain = (String) generalInfo.get("blockChain");
+            if (InvoiceConstants.ONE.equals(blockChain)) {
+                handleGeneralInfo(dto, generalInfo, invoiceType);
+                // 调用查验方法
+                return validateInvoice(dto, generalInfo);
+            }
+
+        }
+        // 数电票(增值税专用)
         if (isDigitalInvoice(invoiceType)) {
             // 数电票处理
             handleDigitalInvoice(dto, generalInfo, invoiceType);
@@ -596,12 +696,18 @@ public class CheckServiceImpl implements ICheckService {
         dto.setDate((String) generalInfo.get("invoiceDate"));
         dto.setType(invoiceType);
         //电子票标识
-        dto.setElectron_mark(Integer.valueOf((String) generalInfo.get("electronicMark")));
+        //dto.setElectron_mark(Integer.valueOf((String) generalInfo.get("electronicMark")));
+        Object value = generalInfo.get("electronicMark");
+        String electronicMarkStr = value.toString();
+        // 将字符串转换为 Integer 类型
+        Integer electronMark = Integer.valueOf(electronicMarkStr);
+        // 设置电子票标识
+        dto.setElectron_mark(electronMark);
         //金额
         dto.setPretax_amount((String) generalInfo.get("pretaxAmount"));
     }
 
-    // 处理区块链标记及通用信息
+    // 增值税电子普通区块链
     private void handleGeneralInfo(InvoiceCheckParamDTO dto, Map<String, Object> generalInfo,String invoiceType) {
         // 区块链标记
         if (StrUtil.isNotBlank((String) generalInfo.get("blockChain"))) {
@@ -615,19 +721,30 @@ public class CheckServiceImpl implements ICheckService {
             dto.setSeller_tax_id((String) generalInfo.get("sellerNo"));
         }
         // 地区信息
-        if (StrUtil.isNotBlank((String) generalInfo.get("province"))) {
-            dto.setArea((String) generalInfo.get("province"));
+        if (StrUtil.isNotBlank((String) generalInfo.get("area"))) {
+            dto.setArea((String) generalInfo.get("area"));
         }
         dto.setCode((String) generalInfo.get("invoiceCode"));
         dto.setNumber((String) generalInfo.get("invoiceNumber"));
         dto.setDate((String) generalInfo.get("invoiceDate"));
         dto.setType(invoiceType);
+        // 校验码截取（后 6 位）
+        String checkCodes = (String) generalInfo.get("checkCode");
+        if (StringUtils.hasText(checkCodes) && checkCodes.length() > 5) {
+            checkCodes = checkCodes.substring(checkCodes.length() - 6);
+            dto.setCheck_code(checkCodes);
+        }
+        String checkCodess = (String) generalInfo.get("checkCode");
+        //如果长度小于6就不截取
+        if (StringUtils.hasText(checkCodess) && checkCodess.length() < 6) {
+            dto.setCheck_code(checkCodess);
+        }
+
     }
 
-    // 判断是否为数电票
+    // 判断是否为数电票(增值税专用)
     private boolean isDigitalInvoice(String invoiceType) {
-        return InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE.equals(invoiceType) ||
-            InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.equals(invoiceType);
+        return InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE.equals(invoiceType)||InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.equals(invoiceType);
     }
 
     // 判断是否为增值税专用发票
@@ -659,139 +776,170 @@ public class CheckServiceImpl implements ICheckService {
     }
 
     //发票查验
-    private int validateInvoice(InvoiceCheckParamDTO dto, Map<String, Object> generalInfo) throws Exception {
+    private R<Void> validateInvoice(InvoiceCheckParamDTO dto, Map<String, Object> generalInfo) throws Exception {
         // 获取 fileId
         String fileId = (String) generalInfo.get("fileId");
         if (StrUtil.isEmpty(fileId)) {
             log.error("fileId 为空");
-           return 0;
+           return R.fail(500,"查验失败,fileId 为空");
         }
         DataImageFilesInfo filesInfo = filesInfoMapper.selectOne(
             new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId)
         );
         if (ObjUtil.isEmpty(filesInfo)) {
             log.error("根据 fileId 查询图片信息为空");
-            return 0;
+            return R.fail(500,"查验失败,查询图片信息为空");
         }
         // 调用查验方法
-        BaseEntity baseEntity = checkInvoice.checkInvoice(filesInfo, dto);
+        checkInvoice.checkInvoice(filesInfo, dto);
+        DataImageFilesInfo filesInfos = filesInfoMapper.selectOne(
+            new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId)
+        );
         //查验成功
-        if (filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode()) && filesInfo.getCheckStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
-            //如果是增值税（专用/普通/电子专用）或增值税电子普通发票 或区块链电子发票  或机打发票 或增值税普通发票(卷票)或数电票(增值税专用发票/普通发票)
-            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_SPECIAL_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ELECTRONIC_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_ROLL_TICKET_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)
-                || filesInfo.getInvoice().equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)) {
-                //转换后增值税发票进行修改
-               return ocrConversionAlter(baseEntity, filesInfo);
-            }
+        if (filesInfos.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
+                return R.ok();
         }
-        return 0;
-    }
-    //修改发票后查验成功 修改发票信息
-    private int ocrConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) {
-        if (ObjectUtil.isEmpty(baseEntity)){
-            log.error("ocr查验转换后结果为空");
-            return 0;
-        }
-        DataOcrInfo dataOcrInfo = BeanUtil.toBean(baseEntity, DataOcrInfo.class);
-        log.info("修改查验转换后的OCR信息：{}", dataOcrInfo);
-        List<DataOcrDetails> arrayList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(dataOcrInfo.getDetails())) {
-            List<DataOcrDetails> details = dataOcrInfo.getDetails();
-            for (DataOcrDetails ocrDetails : details) {
-                DataOcrDetails ocrDetail = BeanUtil.toBean(ocrDetails, DataOcrDetails.class);
-                ocrDetail.setFileId(filesInfo.getFileId());
-                arrayList.add(ocrDetail);
-            }
-        }
-        //根据file_id修改ocr基本信息
-        ocrInfoMapper.update(dataOcrInfo, new LambdaUpdateWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, filesInfo.getFileId()));
-        for (DataOcrDetails detail : arrayList) {
-           ocrDetailsMapper.update(detail, new LambdaUpdateWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, filesInfo.getFileId()).eq(DataOcrDetails::getId, detail.getId()));
-        }
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, filesInfo.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        return R.fail(500,"发票查验失败,"+filesInfos.getMessage());
     }
     //修改机动车销售发票
-    private int updateVehicleSaleInvoice (Map < String, Object > generalInfo){
+    private R<Void> updateVehicleSaleInvoice (Map < String, Object > generalInfo){
         DataMotorVehicleSale motorVehicleSale = BeanUtil.toBean(generalInfo, DataMotorVehicleSale.class);
-        motorVehicleSaleMapper.updateById(motorVehicleSale);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, motorVehicleSale.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int count=motorVehicleSaleMapper.updateById(motorVehicleSale);
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, motorVehicleSale.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改二手车销售发票
-    private int updateCarSaleInvoice (Map < String, Object > generalInfo){
+    private R<Void> updateCarSaleInvoice (Map < String, Object > generalInfo){
         DataUsedCarSales usedCarSales = BeanUtil.toBean(generalInfo, DataUsedCarSales.class);
-        usedCarSalesMapper.updateById(usedCarSales);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, usedCarSales.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int one=usedCarSalesMapper.updateById(usedCarSales);
+        if (one<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, usedCarSales.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (nums<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改船票
-    private int updateSteamerTicket (Map < String, Object > generalInfo){
+    private R<Void> updateSteamerTicket (Map < String, Object > generalInfo){
         DataSteamerTicket steamerTicket = BeanUtil.toBean(generalInfo, DataSteamerTicket.class);
-        steamerTicketMapper.updateById(steamerTicket);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, steamerTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=steamerTicketMapper.updateById(steamerTicket);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, steamerTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (nums<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改定额发票
-    private int updateQuotaInvoice (Map < String, Object > generalInfo){
+    private R<Void> updateQuotaInvoice (Map < String, Object > generalInfo){
         DataQuotaInvoice quotaInvoice = BeanUtil.toBean(generalInfo, DataQuotaInvoice.class);
-        quotaInvoiceMapper.updateById(quotaInvoice);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, quotaInvoice.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int counts=quotaInvoiceMapper.updateById(quotaInvoice);
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, quotaInvoice.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改出租车票
-    private int updateTaxiTickets (Map < String, Object > generalInfo){
+    private R<Void> updateTaxiTickets (Map < String, Object > generalInfo){
         DataTaxiTickets taxiTickets = BeanUtil.toBean(generalInfo, DataTaxiTickets.class);
-        taxiTicketsMapper.updateById(taxiTickets);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, taxiTickets.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=taxiTicketsMapper.updateById(taxiTickets);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int nums=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, taxiTickets.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (nums<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改火车票
-    private int updateRailwayTicket (Map < String, Object > generalInfo){
+    private R<Void> updateRailwayTicket (Map < String, Object > generalInfo){
         DataRailwayTicket railwayTicket = BeanUtil.toBean(generalInfo, DataRailwayTicket.class);
-        railwayTicketMapper.updateById(railwayTicket);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, railwayTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=railwayTicketMapper.updateById(railwayTicket);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, railwayTicket.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改汽车票
-    private int updatePassengerCar (Map < String, Object > generalInfo){
+    private R<Void> updatePassengerCar (Map < String, Object > generalInfo){
         DataPassengerCar passengerCar = BeanUtil.toBean(generalInfo, DataPassengerCar.class);
-        passengerCarMapper.updateById(passengerCar);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, passengerCar.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int num=passengerCarMapper.updateById(passengerCar);
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int count=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, passengerCar.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改过路费
-    private int updateTollRoads (Map < String, Object > generalInfo){
+    private R<Void> updateTollRoads (Map < String, Object > generalInfo){
         DataTollRoads tollRoads = BeanUtil.toBean(generalInfo, DataTollRoads.class);
-        tollRoadsMapper.updateById(tollRoads);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, tollRoads.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int c=tollRoadsMapper.updateById(tollRoads);
+        if(c<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, tollRoads.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改小票
-    private int updateReceipt (Map < String, Object > generalInfo){
+    private R<Void> updateReceipt (Map < String, Object > generalInfo){
         DataReceipt receipt = BeanUtil.toBean(generalInfo, DataReceipt.class);
-        dataReceiptMapper.updateById(receipt);
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, receipt.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+        int a=dataReceiptMapper.updateById(receipt);
+        if (a<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        int counts=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, receipt.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (counts<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
     //修改完税证明
-    private int updateDutyPaidProof (Map < String, Object > generalInfo, List<Map<String, Object>> details){
+    private R<Void> updateDutyPaidProof (Map < String, Object > generalInfo){
         DataDutyPaidProof dutyPaidProof = BeanUtil.toBean(generalInfo, DataDutyPaidProof.class);
-        paidProofMapper.updateById(dutyPaidProof);
-        List<DataDutyPaidProofDetails> ocrDetails = details.stream()
-            .map(item -> BeanUtil.toBean(item, DataDutyPaidProofDetails.class))
-            .toList();
-
-        for (DataDutyPaidProofDetails item : ocrDetails) {
-            paidProofDetailsMapper.updateById(item);
+        int count=paidProofMapper.updateById(dutyPaidProof);
+        if (count<=0){
+            return R.fail(500,"修改发票失败");
         }
-        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getCode()));
-        return 1;
+//        List<DataDutyPaidProofDetails> ocrDetails = details.stream()
+//            .map(item -> BeanUtil.toBean(item, DataDutyPaidProofDetails.class))
+//            .toList();
+//
+//        for (DataDutyPaidProofDetails item : ocrDetails) {
+//            int a=paidProofDetailsMapper.updateById(item);
+//            if (a<=0){
+//                return R.fail(500,"修改发票失败");
+//            }
+//        }
+        int num=filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, dutyPaidProof.getFileId()).set(DataImageFilesInfo::getMessage, FileStatusEnumd.UPDATE_YES.getDesc()));
+        if (num<=0){
+            return R.fail(500,"修改发票失败");
+        }
+        return R.ok();
     }
 
     /**
@@ -800,16 +948,27 @@ public class CheckServiceImpl implements ICheckService {
     @Override
     public Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
         Page<InvoiceVo> invoiceVoPage = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
-
+        List<InvoiceVo> invoiceVosList = new ArrayList<>();
+        //查询图片file_status为8的图片
+        LambdaQueryWrapper<DataImageFilesInfo> eqs = new LambdaQueryWrapper<DataImageFilesInfo>()
+            .eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
+            .eq(DataImageFilesInfo::getFileStatus, FileStatusEnumd.OCR_FAILED.getCode());
+        List<DataImageFilesInfo> images = filesInfoMapper.selectList(eqs);
+        if (CollectionUtil.isNotEmpty(images)){
+            images.forEach(ima->{
+                InvoiceVo invoiceVo = new InvoiceVo();
+                invoiceVo.setFilesInfo(ima);
+                invoiceVosList.add(invoiceVo);
+            });
+        }
+        //查询待报销,已报销,未报销
         LambdaQueryWrapper<DataImageFilesInfo> eq = new LambdaQueryWrapper<DataImageFilesInfo>()
             .eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
             .eq(DataImageFilesInfo::getFileFlowStatus, pageQuery.getStatus());
         List<DataImageFilesInfo> dataImageFilesInfos = filesInfoMapper.selectList(eq);
-
         if (CollectionUtil.isEmpty(dataImageFilesInfos)) {
             return invoiceVoPage;
         }
-        List<InvoiceVo> invoiceVosList = new ArrayList<>();
         int coreCount = Runtime.getRuntime().availableProcessors();
         // 核心线程数设置为 CPU 核心数的 2 倍
         int corePoolSize = coreCount * 2;
@@ -873,12 +1032,26 @@ public class CheckServiceImpl implements ICheckService {
         String totalAmountStr = totalAmount.toString();
         invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
         // 进行分页处理
-        int startIndex =((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int endIndex = Math.min(startIndex +pageQuery.getPageSize(), invoiceVosList.size());
+        int pageNum = pageQuery.getPageNum();
+        int pageSize = pageQuery.getPageSize();
+        if (pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
+        int startIndex = (pageNum - 1) * pageSize;
+        if (startIndex >= invoiceVosList.size()) {
+            // 请求的页码超出范围，返回空的分页数据
+            invoiceVoPage.setRecords(Collections.emptyList());
+            invoiceVoPage.setTotal(invoiceVosList.size());
+            threadPoolExecutor.shutdown();
+            return invoiceVoPage;
+        }
+        int endIndex = Math.min(startIndex + pageSize, invoiceVosList.size());
         List<InvoiceVo> pageData = invoiceVosList.subList(startIndex, endIndex);
         invoiceVoPage.setRecords(pageData);
         invoiceVoPage.setTotal(invoiceVosList.size());
-        // 关闭线程池
         threadPoolExecutor.shutdown();
         return invoiceVoPage;
     }
@@ -894,12 +1067,12 @@ public class CheckServiceImpl implements ICheckService {
                        InvoiceVo invoiceVo = new InvoiceVo();
                        invoiceVo.setId(dataNonTaxRevenueReceipts.getId());
                        invoiceVo.setFileId(dataNonTaxRevenueReceipts.getFileId());
-                       invoiceVo.setBuyerName(dataNonTaxRevenueReceipts.getPayer());
-                       invoiceVo.setSellerName(dataNonTaxRevenueReceipts.getPayee());
+                       invoiceVo.setPayer(dataNonTaxRevenueReceipts.getPayer());
+                       invoiceVo.setPaymentCode(dataNonTaxRevenueReceipts.getPaymentCode());
                        invoiceVo.setInvoiceDate(dataNonTaxRevenueReceipts.getInvoiceDate());
                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.NON_TAX_REVENUE_RECEIPTS_CODE.getCode());
                        invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                       invoiceVo.setMoney(dataNonTaxRevenueReceipts.getInvoiceTotal());
+                       invoiceVo.setInvoiceTotal(dataNonTaxRevenueReceipts.getInvoiceTotal());
                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                        return invoiceVo;
@@ -920,12 +1093,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(dataCustomsImportGoods.getId());
                         invoiceVo.setFileId(dataCustomsImportGoods.getFileId());
-                        invoiceVo.setBuyerName(dataCustomsImportGoods.getExecutiveCompanyName());
-                        invoiceVo.setSellerName(dataCustomsImportGoods.getDepartureCountryName());
-                        invoiceVo.setInvoiceDate(dataCustomsImportGoods.getDateOfImport());
+                        invoiceVo.setConsumptionCompanyName(dataCustomsImportGoods.getConsumptionCompanyName());
+                        invoiceVo.setContractNumber(dataCustomsImportGoods.getContractNumber());
+                        invoiceVo.setCustomsNumber(dataCustomsImportGoods.getCustomsNumber());
+                        invoiceVo.setDateOfApplication(dataCustomsImportGoods.getDateOfApplication());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_IMPORTED_GOODS_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(dataCustomsImportGoods.getFreight());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -947,12 +1120,11 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(dataCustomsExportGoods.getId());
                         invoiceVo.setFileId(dataCustomsExportGoods.getFileId());
-                        invoiceVo.setBuyerName(dataCustomsExportGoods.getExecutiveCompanyName());
-                        invoiceVo.setSellerName(dataCustomsExportGoods.getDepartureCountryName());
-                        invoiceVo.setInvoiceDate(dataCustomsExportGoods.getDateOfExport());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_EXPORT_GOODS_CODE.getCode());
+                        invoiceVo.setConsumptionCompanyName(dataCustomsExportGoods.getConsumptionCompanyName());
+                        invoiceVo.setContractNumber(dataCustomsExportGoods.getContractNumber());
+                        invoiceVo.setCustomsNumber(dataCustomsExportGoods.getCustomsNumber());
+                        invoiceVo.setDateOfApplication(dataCustomsExportGoods.getDateOfApplication());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(dataCustomsExportGoods.getFreight());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -974,12 +1146,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(dataElectronicTransportationGoods1.getId());
                         invoiceVo.setFileId(dataElectronicTransportationGoods1.getFileId());
-                        invoiceVo.setBuyerName(dataElectronicTransportationGoods1.getShipper());
-                        invoiceVo.setSellerName(dataElectronicTransportationGoods1.getTransporter());
-                        invoiceVo.setInvoiceDate(dataElectronicTransportationGoods1.getDate());
+                        invoiceVo.setShipper(dataElectronicTransportationGoods1.getShipper());
+                        invoiceVo.setElectronicReceiptNumber(dataElectronicTransportationGoods1.getElectronicReceiptNumber());
+                        invoiceVo.setDate(dataElectronicTransportationGoods1.getDate());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(dataElectronicTransportationGoods1.getTotalPrice());
+                        invoiceVo.setInvoiceTotal(dataElectronicTransportationGoods1.getTotalPrice());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1000,12 +1172,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(dataCustomsSpecialPayments.getId());
                         invoiceVo.setFileId(dataCustomsSpecialPayments.getFileId());
-                        invoiceVo.setBuyerName(dataCustomsSpecialPayments.getAccount());
-                        invoiceVo.setSellerName(dataCustomsSpecialPayments.getRevenueAgency());
+                        invoiceVo.setCompanyName(dataCustomsSpecialPayments.getCompanyName());
+                        invoiceVo.setCustomsNumber(dataCustomsSpecialPayments.getCustomsNumber());
                         invoiceVo.setInvoiceDate(dataCustomsSpecialPayments.getInvoiceDate());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(dataCustomsSpecialPayments.getInvoiceTotal());
+                        invoiceVo.setInvoiceTotal(dataCustomsSpecialPayments.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1030,7 +1202,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceDate(dataDutyPaidProofs.getInvoiceDate());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DUTY_PAID_PROOF_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(dataDutyPaidProofs.getInvoiceTotal());
+                        invoiceVo.setInvoiceTotal(dataDutyPaidProofs.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1053,11 +1225,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(dataDidiItinerars.getId());
                         invoiceVo.setFileId(dataDidiItinerars.getFileId());
-                        invoiceVo.setBuyerName(dataDidiItinerars.getPhone());
+                        invoiceVo.setPhone(dataDidiItinerars.getPhone());
                         invoiceVo.setInvoiceDate(dataDidiItinerars.getInvoiceDate());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_DIDI_ITINERARY_CODE.getCode());
+                        invoiceVo.setTimeGetOn(dataDidiItinerars.getTimeGetOn());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(dataDidiItinerars.getInvoiceTotal());
+                        invoiceVo.setInvoiceTotal(dataDidiItinerars.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1078,11 +1251,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(receipts.getId());
                         invoiceVo.setFileId(receipts.getFileId());
-                        invoiceVo.setBuyerName(receipts.getStoreName());
+                        invoiceVo.setStoreName(receipts.getStoreName());
                         invoiceVo.setInvoiceDate(receipts.getInvoiceDate());
+                        invoiceVo.setInvoiceNumber(receipts.getInvoiceNumber());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(receipts.getInvoiceTotal());
+                        invoiceVo.setInvoiceTotal(receipts.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1105,10 +1279,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(tollRoad.getId());
                         invoiceVo.setFileId(tollRoad.getFileId());
-                        invoiceVo.setInvoiceDate(tollRoad.getInvoiceDate());
+                        invoiceVo.setInvoiceTime(tollRoad.getInvoiceTime());
+                        invoiceVo.setInvoiceNumber(tollRoad.getInvoiceNumber());
+                        invoiceVo.setInvoiceCode(tollRoad.getInvoiceCode());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TOLL_ROADS_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(tollRoad.getInvoiceTotal());
+                        invoiceVo.setInvoiceTotal(tollRoad.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1131,11 +1307,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(passengerCar.getId());
                         invoiceVo.setFileId(passengerCar.getFileId());
-                        invoiceVo.setBuyerName(passengerCar.getName());
+                        invoiceVo.setName(passengerCar.getName());
                         invoiceVo.setInvoiceDate(passengerCar.getInvoiceDate());
+                        invoiceVo.setInvoiceNumber(passengerCar.getInvoiceNumber());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_PASSENGER_TICKET_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(passengerCar.getInvoiceTotal());
+                        invoiceVo.setInvoiceTotal(passengerCar.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1158,11 +1335,12 @@ public class CheckServiceImpl implements ICheckService {
                         InvoiceVo invoiceVo = new InvoiceVo();
                         invoiceVo.setId(railwayTicket.getId());
                         invoiceVo.setFileId(railwayTicket.getFileId());
-                        invoiceVo.setBuyerName(railwayTicket.getBuyer());
+                        invoiceVo.setName(railwayTicket.getName());
                         invoiceVo.setInvoiceDate(railwayTicket.getInvoiceDate());
+                        invoiceVo.setTrainNumber(railwayTicket.getTrainNumber());
                         invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RAILWAY_TICKET_CODE.getCode());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                        invoiceVo.setMoney(railwayTicket.getInvoiceTotal());
+                        invoiceVo.setInvoiceTotal(railwayTicket.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                         return invoiceVo;
@@ -1181,10 +1359,12 @@ public class CheckServiceImpl implements ICheckService {
                     InvoiceVo invoiceVo = new InvoiceVo();
                     invoiceVo.setId(taxiTicket.getId());
                     invoiceVo.setFileId(taxiTicket.getFileId());
+                    invoiceVo.setCity(taxiTicket.getCity());
                     invoiceVo.setInvoiceDate(taxiTicket.getInvoiceDate());
+                    invoiceVo.setInvoiceNumber(taxiTicket.getInvoiceNumber());
                     invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAXI_TICKETS_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                    invoiceVo.setMoney(taxiTicket.getInvoiceTotal());
+                    invoiceVo.setInvoiceTotal(taxiTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     return invoiceVo;
@@ -1205,9 +1385,12 @@ public class CheckServiceImpl implements ICheckService {
                     InvoiceVo invoiceVo = new InvoiceVo();
                     invoiceVo.setId(dataQuotaInvoice.getId());
                     invoiceVo.setFileId(dataQuotaInvoice.getFileId());
+                    invoiceVo.setInvoiceNumber(dataQuotaInvoice.getInvoiceNumber());
+                    invoiceVo.setInvoiceCode(dataQuotaInvoice.getInvoiceCode());
+                    invoiceVo.setCity(dataQuotaInvoice.getCity());
                     invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_QUOTA_INVOICE_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                    invoiceVo.setMoney(dataQuotaInvoice.getInvoiceTotal());
+                    invoiceVo.setInvoiceTotal(dataQuotaInvoice.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     return invoiceVo;
@@ -1228,12 +1411,12 @@ public class CheckServiceImpl implements ICheckService {
                     InvoiceVo invoiceVo = new InvoiceVo();
                     invoiceVo.setId(dataMedicalTicket.getId());
                     invoiceVo.setFileId(dataMedicalTicket.getFileId());
-                    invoiceVo.setBuyerName(dataMedicalTicket.getPayer());
-                    invoiceVo.setSellerName(dataMedicalTicket.getPayee());
-                    invoiceVo.setInvoiceDate(dataMedicalTicket.getInvoiceDate());
+                    invoiceVo.setInvoiceNumber(dataMedicalTicket.getInvoiceNumber());
+                    invoiceVo.setPayer(dataMedicalTicket.getPayer());
+                    invoiceVo.setVisitDate(dataMedicalTicket.getVisitDate());
                     invoiceVo.setInvoiceType(InvoiceGlorityEnumd.MEDICAL_TICKET_DETAILS_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                    invoiceVo.setMoney(dataMedicalTicket.getInvoiceTotal());
+                    invoiceVo.setInvoiceTotal(dataMedicalTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     return invoiceVo;
@@ -1254,11 +1437,12 @@ public class CheckServiceImpl implements ICheckService {
                     InvoiceVo invoiceVo = new InvoiceVo();
                     invoiceVo.setId(dataShipTicket.getId());
                     invoiceVo.setFileId(dataShipTicket.getFileId());
-                    invoiceVo.setBuyerName(dataShipTicket.getName());
+                    invoiceVo.setName(dataShipTicket.getName());
+                    invoiceVo.setInvoiceNumber(dataShipTicket.getInvoiceNumber());
                     invoiceVo.setInvoiceDate(dataShipTicket.getInvoiceDate());
                     invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_STEAMER_TICKET_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                    invoiceVo.setMoney(dataShipTicket.getInvoiceTotal());
+                    invoiceVo.setInvoiceTotal(dataShipTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     return invoiceVo;
@@ -1279,12 +1463,12 @@ public class CheckServiceImpl implements ICheckService {
                     InvoiceVo invoiceVo = new InvoiceVo();
                     invoiceVo.setId(dataAirTicket.getId());
                     invoiceVo.setFileId(dataAirTicket.getFileId());
-                    invoiceVo.setBuyerName(dataAirTicket.getUserName());
-                    invoiceVo.setSellerName(dataAirTicket.getIssueBy());
+                    invoiceVo.setUserName(dataAirTicket.getUserName());
                     invoiceVo.setInvoiceDate(dataAirTicket.getInvoiceDate());
+                    invoiceVo.setInvoiceNumber(dataAirTicket.getInvoiceNumber());
                     invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_FLIGHT_ITINERARY_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                    invoiceVo.setMoney(dataAirTicket.getInvoiceTotal());
+                    invoiceVo.setInvoiceTotal(dataAirTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     return invoiceVo;
@@ -1305,12 +1489,12 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setId(dataSecondCarSaleInvoice.getId());
                     invoiceVo.setFileId(dataSecondCarSaleInvoice.getFileId());
                     invoiceVo.setBuyerName(dataSecondCarSaleInvoice.getBuyerName());
-                    invoiceVo.setSellerName(dataSecondCarSaleInvoice.getBusinessUnit());
+                    invoiceVo.setSellerName(dataSecondCarSaleInvoice.getSellerName());
                     invoiceVo.setInvoiceDate(dataSecondCarSaleInvoice.getInvoiceDate());
                     invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_USED_CAR_SALES_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
-                    invoiceVo.setMoney(dataSecondCarSaleInvoice.getInvoiceTotal());
+                    invoiceVo.setInvoiceTotal(dataSecondCarSaleInvoice.getInvoiceTotal());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     return invoiceVo;
                 });
@@ -1331,12 +1515,12 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setId(dataCarSaleInvoice.getId());
                     invoiceVo.setFileId(dataCarSaleInvoice.getFileId());
                     invoiceVo.setBuyerName(dataCarSaleInvoice.getBuyerName());
-                    invoiceVo.setSellerName(dataCarSaleInvoice.getSeller());
+                    invoiceVo.setInvoiceNumber(dataCarSaleInvoice.getInvoiceNumber());
                     invoiceVo.setInvoiceDate(dataCarSaleInvoice.getInvoiceDate());
                     invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_MOTOR_VEHICLE_SALE_CODE.getCode());
                     invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
-                    invoiceVo.setMoney(dataCarSaleInvoice.getInvoiceTotal());
+                    invoiceVo.setInvoiceTotal(dataCarSaleInvoice.getInvoiceTotal());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     return invoiceVo;
                 });
@@ -1356,10 +1540,10 @@ public class CheckServiceImpl implements ICheckService {
                 invoiceVo.setBuyerName(dataOcrInfo.getBuyerName());
                 invoiceVo.setSellerName(dataOcrInfo.getSellerName());
                 invoiceVo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
-                invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode());
+                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
                 invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                 invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
-                invoiceVo.setMoney(dataOcrInfo.getTotalLowercase());
+                invoiceVo.setInvoiceTotal(dataOcrInfo.getTotalLowercase());
                 invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                 return invoiceVo;
             });
@@ -1371,6 +1555,9 @@ public class CheckServiceImpl implements ICheckService {
      */
     @Override
     public R<DataResponseDTO> selectInvoiceDetail(String fileId) {
+        if (StrUtil.isEmpty(fileId)){
+            return R.fail(500,"文件id不能为空");
+        }
         //根据fileId查询发票信息
         DataImageFilesInfo res = filesInfoMapper.selectOne(new LambdaQueryWrapper<DataImageFilesInfo>().eq(DataImageFilesInfo::getFileId, fileId));
         if (ObjectUtil.isEmpty(res)){
@@ -1552,5 +1739,355 @@ public class CheckServiceImpl implements ICheckService {
                 }
             }
         return R.fail();
+    }
+    //发票新增
+    @Override
+    public R<Void> addInvoice(InvoiceRequest request) throws Exception {
+        //获取发票类型
+        String invoiceType = request.getInvoiceType();
+        if(StrUtil.isEmpty(invoiceType)){
+            return R.fail("发票类型不能为空");
+        }
+        Map<String, Object> generalInfo = request.getGeneralInfo();
+        log.info("新增传入的参数:"+generalInfo);
+        //判断fileId是否为空
+        Object fileIdObj = generalInfo.get("fileId");
+        if (fileIdObj != null && StrUtil.isEmpty((CharSequence) fileIdObj)) {
+            return R.fail("文件id不能为空");
+        }
+        switch (invoiceType) {
+            case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_TAX_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
+            case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+                // 处理增值税发票
+                return addOcrInvoice(generalInfo,invoiceType);
+            //机打发票/增值税发票清单/可报销其他发票
+            case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
+            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_LIST:
+                return addOrdinaryInvoice(generalInfo,invoiceType);
+            //机动车销售发票
+            case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
+                return addVehicleSaleInvoice(generalInfo,invoiceType);
+            //二手车发票
+            case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
+                return addCarSaleInvoice(generalInfo,invoiceType);
+            //航空电子客运单
+            case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                return addFilghtItinerary(generalInfo,invoiceType);
+            //船票
+            case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
+                return addSteamerTicket(generalInfo,invoiceType);
+            //医疗票明细票/医疗票
+            case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
+            case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
+                return addMedicalTicket(generalInfo,invoiceType);
+            //非税收入单据
+            case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                return addNonTaxRevenueReceipts(generalInfo,invoiceType);
+            //定额发票
+            case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
+                return addQuotaInvoice(generalInfo,invoiceType);
+            //出租车发票
+            case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
+                return addTaxiTickets(generalInfo,invoiceType);
+            //火车发票
+            case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                return addRailwayTicket(generalInfo,invoiceType);
+            //客运车发票
+            case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
+                return addPassengerCar(generalInfo,invoiceType);
+            //过路费发票
+            case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
+                return addTollRoads(generalInfo,invoiceType);
+            //小票
+            case InvoiceConstants.GLORITY_RECEIPT_CODE:
+                return addReceipt(generalInfo,invoiceType);
+            //出行发票/滴滴
+            case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
+                return addDidiItinerary(generalInfo,invoiceType);
+            //完税证明发票
+            case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
+                return addDutyPaidProof(generalInfo,invoiceType);
+            //海关进口货物报关单发票
+            case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
+                return addCustomsImportGoods(generalInfo,invoiceType);
+            //海关出口货物报关单发票
+            case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
+                return addCustomsExportGoods(generalInfo,invoiceType);
+            //海关专用缴款书发票
+            case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
+                return addCustomsSpecialPayment(generalInfo,invoiceType);
+            //货物运输电子收款凭证发票
+            case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
+                return addElectronicPaymentGoodsTransportation(generalInfo,invoiceType);
+        }
+        return R.fail(500,"发票类型错误");
+    }
+    //火车票新增
+    private R<Void> addRailwayTicket(Map<String, Object> generalInfo, String invoiceType) {
+        DataRailwayTicket res =BeanUtil.toBean(generalInfo, DataRailwayTicket.class);
+        int one=railwayTicketMapper.insert(res);
+        if(one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(res.getFileId(),invoiceType);
+    }
+
+    //货物运输电子收款凭证发票
+    private R<Void> addElectronicPaymentGoodsTransportation(Map<String, Object> generalInfo, String invoiceType) {
+        DataElectronicTransportationGoods res =BeanUtil.toBean(generalInfo, DataElectronicTransportationGoods.class);
+        int i=paymentMapper.insert(res);
+        if (i<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(res.getFileId(),invoiceType);
+    }
+    //海关专用缴款书发票
+
+    private R<Void> addCustomsSpecialPayment(Map<String, Object> generalInfo, String invoiceType) {
+        DataCustomsSpecialPayment customsSpecialPayment =BeanUtil.toBean(generalInfo, DataCustomsSpecialPayment.class);
+        int i=customsSpecialPaymentMapper.insert(customsSpecialPayment);
+        if (i<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(customsSpecialPayment.getFileId(),invoiceType);
+    }
+
+    //海关出口货物报关单发票
+    private R<Void> addCustomsExportGoods(Map<String, Object> generalInfo, String invoiceType) {
+        DataCustomsExportGoods customsExportGoods =BeanUtil.toBean(generalInfo, DataCustomsExportGoods.class);
+        int i=customsExportGoodsMapper.insert(customsExportGoods);
+        if (i<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(customsExportGoods.getFileId(),invoiceType);
+    }
+
+    //海关进口货物报关单发票
+    private R<Void> addCustomsImportGoods(Map<String, Object> generalInfo, String invoiceType) {
+        DataCustomsImxportGoods customsImportGoods =BeanUtil.toBean(generalInfo, DataCustomsImxportGoods.class);
+        int one=customsImportGoodsMapper.insert(customsImportGoods);
+        if(one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(customsImportGoods.getFileId(),invoiceType);
+    }
+
+    //完税证明发票新增
+    private R<Void> addDutyPaidProof(Map<String, Object> generalInfo, String invoiceType) {
+        DataDutyPaidProof dutyPaidProof =BeanUtil.toBean(generalInfo, DataDutyPaidProof.class);
+        int one=paidProofMapper.insert(dutyPaidProof);
+        if (one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(dutyPaidProof.getFileId(),invoiceType);
+    }
+
+    //出行发票/滴滴
+    private R<Void> addDidiItinerary(Map<String, Object> generalInfo, String invoiceType) {
+        DataDidiItinerary didiItinerary =BeanUtil.toBean(generalInfo, DataDidiItinerary.class);
+        int one=didiItineraryMapper.insert(didiItinerary);
+        if (one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(didiItinerary.getFileId(),invoiceType);
+    }
+
+    //小票新增
+    private R<Void> addReceipt(Map<String, Object> generalInfo, String invoiceType) {
+        DataReceipt receipt =BeanUtil.toBean(generalInfo, DataReceipt.class);
+        int one=dataReceiptMapper.insert(receipt);
+        if (one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(receipt.getFileId(),invoiceType);
+    }
+
+    //过路费发票新增
+    private R<Void> addTollRoads(Map<String, Object> generalInfo, String invoiceType) {
+        DataTollRoads tollRoads =BeanUtil.toBean(generalInfo, DataTollRoads.class);
+        int one=tollRoadsMapper.insert(tollRoads);
+        if (one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(tollRoads.getFileId(),invoiceType);
+    }
+
+    //客运发票新增
+    private R<Void> addPassengerCar(Map<String, Object> generalInfo, String invoiceType) {
+        DataPassengerCar passengerCar =BeanUtil.toBean(generalInfo, DataPassengerCar.class);
+        int one=passengerCarMapper.insert(passengerCar);
+        if (one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(passengerCar.getFileId(),invoiceType);
+    }
+
+    //出行发票新增
+    private R<Void> addTaxiTickets(Map<String, Object> generalInfo, String invoiceType) {
+        DataTaxiTickets taxiTickets =BeanUtil.toBean(generalInfo, DataTaxiTickets.class);
+        int one=taxiTicketsMapper.insert(taxiTickets);
+        if (one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(taxiTickets.getFileId(),invoiceType);
+    }
+
+    //定额发票新增
+    private R<Void> addQuotaInvoice(Map<String, Object> generalInfo, String invoiceType) {
+        DataQuotaInvoice quotaInvoice =BeanUtil.toBean(generalInfo, DataQuotaInvoice.class);
+        int one=quotaInvoiceMapper.insert(quotaInvoice);
+        if (one<=0){
+            return R.fail(500,"新增发票失败");
+        }
+        return updateImages(quotaInvoice.getFileId(),invoiceType);
+    }
+
+    //非税收入单据新增
+    private R<Void> addNonTaxRevenueReceipts(Map<String, Object> generalInfo, String invoiceType) {
+        DataNonTax dataNonTax = BeanUtil.toBean(generalInfo, DataNonTax.class);
+        int res = dataNonTaxMapper.insert(dataNonTax);
+        if (res<=0){
+            return R.fail("新增发票失败");
+        }
+        return updateImages(dataNonTax.getFileId(),invoiceType);
+    }
+
+    //添加医疗票
+    private R<Void> addMedicalTicket(Map<String, Object> generalInfo, String invoiceType) {
+        DataMedicalTreatment dataMedicalTreatment = BeanUtil.toBean(generalInfo, DataMedicalTreatment.class);
+        int res = dataMedicalTreatmentMapper.insert(dataMedicalTreatment);
+        if (res<=0){
+            return R.fail("新增发票失败");
+        }
+        return updateImages(dataMedicalTreatment.getFileId(),invoiceType);
+    }
+
+    //添加船票
+    private R<Void> addSteamerTicket(Map<String, Object> generalInfo, String invoiceType) {
+        DataSteamerTicket dataSteamerTicket = BeanUtil.toBean(generalInfo, DataSteamerTicket.class);
+        int res = steamerTicketMapper.insert(dataSteamerTicket);
+        if (res<=0){
+            return R.fail("新增发票失败");
+        }
+        return updateImages(dataSteamerTicket.getFileId(),invoiceType);
+    }
+    //添加航空电子客票
+    private R<Void> addFilghtItinerary(Map<String, Object> generalInfo, String invoiceType) {
+        DataFlightItinerary dataFlightItinerary = BeanUtil.toBean(generalInfo, DataFlightItinerary.class);
+        int res = flightItineraryMapper.insert(dataFlightItinerary);
+        if (res<=0){
+            return R.fail("新增发票失败");
+        }
+        return updateImages(dataFlightItinerary.getFileId(),invoiceType);
+    }
+
+    //添加二手车发票
+    private R<Void> addCarSaleInvoice(Map<String, Object> generalInfo, String invoiceType) {
+        DataUsedCarSales dataUsedCarSales = BeanUtil.toBean(generalInfo, DataUsedCarSales.class);
+        int res = usedCarSalesMapper.insert(dataUsedCarSales);
+        if (res<=0){
+            return R.fail("新增发票失败");
+        }
+        //根据file_id查询图片信息
+        DataImageFilesInfo imageFiles = filesInfoMapper
+            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
+                .eq(DataImageFilesInfo::getFileId, dataUsedCarSales.getFileId()));
+        if (ObjectUtil.isEmpty(imageFiles)){
+            return R.fail("文件信息为空");
+        }
+        //修改图片信息
+        imageFiles.setInvoice(invoiceType);
+        imageFiles.setFileStatus("");
+        imageFiles.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+        int image =filesInfoMapper.updateById(imageFiles);
+        if (image<=0){
+            return R.fail("修改图片信息失败");
+        }
+        return R.ok();
+    }
+
+    //添加机动车销售发票
+    private R<Void> addVehicleSaleInvoice(Map<String, Object> generalInfo, String invoiceType) {
+        DataMotorVehicleSale dataMotorVehicleSale = BeanUtil.toBean(generalInfo, DataMotorVehicleSale.class);
+        int res = motorVehicleSaleMapper.insert(dataMotorVehicleSale);
+        if (res<=0) {
+            return R.fail("新增发票失败");
+        }
+        //根据file_id查询图片信息
+        DataImageFilesInfo imageFiles = filesInfoMapper
+            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
+                .eq(DataImageFilesInfo::getFileId, dataMotorVehicleSale.getFileId()));
+        if (ObjectUtil.isEmpty(imageFiles)){
+            return R.fail("文件信息为空");
+        }
+        //修改图片信息
+        imageFiles.setInvoice(invoiceType);
+        imageFiles.setFileStatus("");
+        imageFiles.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+        int image =filesInfoMapper.updateById(imageFiles);
+        if (image<=0){
+            return R.fail("修改图片信息失败");
+        }
+        return R.ok();
+    }
+
+    //添加数电票普通发票/机打发票/增值税发票清单/可报销其他发票
+    private R<Void> addOrdinaryInvoice(Map<String, Object> generalInfo, String invoiceType) {
+        DataOcrInfo dataOcrInfo =BeanUtil.toBean(generalInfo, DataOcrInfo.class);
+        int info = ocrInfoMapper.insert(dataOcrInfo);
+        if (info<=0){
+            return R.fail("新增发票失败");
+        }
+        return updateImages(dataOcrInfo.getFileId(),invoiceType);
+    }
+
+    //增值税发票
+    private R<Void> addOcrInvoice(Map<String, Object> generalInfo, String invoiceType) throws Exception {
+        DataOcrInfo dataOcrInfo =BeanUtil.toBean(generalInfo, DataOcrInfo.class);
+        int info = ocrInfoMapper.insert(dataOcrInfo);
+        if (info<=0){
+            return R.fail("新增发票失败");
+        }
+        //根据file_id查询图片信息
+        DataImageFilesInfo imageFiles = filesInfoMapper
+            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
+                .eq(DataImageFilesInfo::getFileId, dataOcrInfo.getFileId()));
+        if (ObjectUtil.isEmpty(imageFiles)){
+            return R.fail("文件信息为空");
+        }
+        //修改图片信息
+        imageFiles.setInvoice(invoiceType);
+        imageFiles.setFileStatus("");
+        imageFiles.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_FAILED_CODE.getCode());
+        int image =filesInfoMapper.updateById(imageFiles);
+        if (image<=0){
+            return R.fail("修改图片信息失败");
+        }
+        return R.ok();
+    }
+
+    private R<Void> updateImages(String fileId,String invoiceType){
+        //根据file_id查询图片信息
+        DataImageFilesInfo imageFiles = filesInfoMapper
+            .selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
+                .eq(DataImageFilesInfo::getFileId, fileId));
+        if (ObjectUtil.isEmpty(imageFiles)){
+            return R.fail("文件信息为空");
+        }
+        //修改图片信息
+        imageFiles.setInvoice(invoiceType);
+        imageFiles.setFileStatus("");
+        int image =filesInfoMapper.updateById(imageFiles);
+        if (image<=0){
+            return R.fail("修改图片信息失败");
+        }
+        return R.ok();
     }
 }

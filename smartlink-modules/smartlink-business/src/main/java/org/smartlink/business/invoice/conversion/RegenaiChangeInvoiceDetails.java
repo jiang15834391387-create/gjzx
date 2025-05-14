@@ -1,5 +1,6 @@
 package org.smartlink.business.invoice.conversion;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -29,11 +30,24 @@ public class RegenaiChangeInvoiceDetails {
         List<DataOcrDetails> details = ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
         JSONArray jsonArray = jsonObject.getJSONArray("items");
         List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
+        if (jsonArray == null) {
+            ocrDetailsList.addAll(details);
+            return ocrDetailsList;
+        }
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject detail = jsonArray.getJSONObject(i);
             DataOcrDetails ocrDetails = new DataOcrDetails();
-            //详情表id
-            ocrDetails.setId(details.get(i).getId());
+            //详情表id 检查details列表的索引是否越界
+            if (i < details.size()) {
+                ocrDetails.setId(details.get(i).getId());
+            } else {
+                // 如果索引越界，使用details.get(0)的id
+                if (!details.isEmpty()) {
+                    ocrDetails.setId(details.get(0).getId());
+                }else {
+                    ocrDetails.setId(IdUtil.simpleUUID());
+                }
+            }
             //fileId
             ocrDetails.setFileId(fileId);
            //详细名称
