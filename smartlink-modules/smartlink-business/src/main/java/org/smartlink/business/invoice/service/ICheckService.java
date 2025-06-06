@@ -9,6 +9,7 @@ import org.smartlink.common.core.domain.R;
 import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 //发票夹业务接口
@@ -18,6 +19,8 @@ public interface ICheckService {
     R<Void> invoiceAlter(InvoiceRequest request) throws Exception;
 
     Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException;
+    Page<InvoiceVo> selectPageCheck(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException;
+    Page<InvoiceVo> selectPageCommon(InvoicePageQuery pageQuery, List<InvoiceVo> invoiceVosList) throws ExecutionException, InterruptedException;
 
     R<DataResponseDTO> selectInvoiceDetail(@NotBlank String fileId);
 

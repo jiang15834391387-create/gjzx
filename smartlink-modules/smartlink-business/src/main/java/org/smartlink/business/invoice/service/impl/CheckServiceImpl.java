@@ -947,7 +947,6 @@ public class CheckServiceImpl implements ICheckService {
      */
     @Override
     public Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
-        Page<InvoiceVo> invoiceVoPage = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
         List<InvoiceVo> invoiceVosList = new ArrayList<>();
         //查询图片file_status为8的图片
         LambdaQueryWrapper<DataImageFilesInfo> eqs = new LambdaQueryWrapper<DataImageFilesInfo>()
@@ -961,10 +960,38 @@ public class CheckServiceImpl implements ICheckService {
                 invoiceVosList.add(invoiceVo);
             });
         }
+        return this.selectPageCommon(pageQuery, invoiceVosList);
+    }
+
+    /**
+     * 查验成功列表
+     * @param pageQuery
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    @Override
+    public Page<InvoiceVo> selectPageCheck(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
+        List<InvoiceVo> invoiceVosList = new ArrayList<>();
+       return this.selectPageCommon(pageQuery, invoiceVosList);
+    }
+
+    /**
+     * 公共查询
+     * @param pageQuery
+     * @param invoiceVosList
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    @Override
+    public Page<InvoiceVo> selectPageCommon(InvoicePageQuery pageQuery, List<InvoiceVo> invoiceVosList) throws ExecutionException, InterruptedException {
+        Page<InvoiceVo> invoiceVoPage = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
         //查询待报销,已报销,未报销
         LambdaQueryWrapper<DataImageFilesInfo> eq = new LambdaQueryWrapper<DataImageFilesInfo>()
             .eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
-            .eq(DataImageFilesInfo::getFileFlowStatus, pageQuery.getStatus());
+            .eq(DataImageFilesInfo::getFileFlowStatus, pageQuery.getStatus())
+            .eq(StrUtil.isNotBlank(pageQuery.getCheckStatus()), DataImageFilesInfo::getCheckStatus, pageQuery.getCheckStatus());
         List<DataImageFilesInfo> dataImageFilesInfos = filesInfoMapper.selectList(eq);
         if (CollectionUtil.isEmpty(dataImageFilesInfos)) {
             return invoiceVoPage;
@@ -1055,6 +1082,7 @@ public class CheckServiceImpl implements ICheckService {
         threadPoolExecutor.shutdown();
         return invoiceVoPage;
     }
+
     //查询非税发票InvoiceVo
     private List<InvoiceVo> transitionNonTaxRevenueReceipts(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
         List<InvoiceVo> nonTaxRevenueReceiptsList;

@@ -15,4 +15,6 @@ public class InvoicePageQuery {
     private Long userId;
     //报销状态
     private String status;
+    //查验状态
+    private String checkStatus;
 }
