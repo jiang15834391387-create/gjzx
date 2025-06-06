@@ -11,7 +11,9 @@ import org.smartlink.common.core.domain.event.ProcessTaskEvent;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.BusinessStatusEnum;
 import org.smartlink.common.core.exception.ServiceException;
+import org.smartlink.common.core.service.WorkflowService;
 import org.smartlink.common.core.utils.MapstructUtils;
+import org.smartlink.common.core.utils.StreamUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
@@ -59,6 +61,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final TestFormManageMapper testFormManageMapper;
     private final SysUserMapper userMapper;
     private final IDataImageFilesInfoService dataImageFilesInfoService;
+    private final WorkflowService workflowService;
     /**
      * 查询费用报销申请
      *
@@ -319,6 +322,8 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                     dataImageFilesInfoService.bindAndRelieve(id.toString(), null, false);
                 }
             }
+            List<String> idList = StreamUtils.toList(ids, String::valueOf);
+            workflowService.deleteRunAndHisInstance(idList);
         } catch (Exception e) {
             log.error("删除失败，执行回滚{}",e);
             throw new RuntimeException("失败");
