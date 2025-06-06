@@ -47,6 +47,14 @@ public class CheckInvoiceController extends BaseController {
         return service.getInvoicePage(pageQuery);
     }
     /**
+     *发票列表查询查验成功
+     *
+     */
+    @PostMapping("/selectPageCheck")
+    public Page<InvoiceVo> selectPageCheck(@RequestBody InvoicePageQuery pageQuery) throws Exception {
+        return service.selectPageCheck(pageQuery);
+    }
+    /**
      *发票详情查询
      *
      */
