@@ -1,7 +1,9 @@
 package org.smartlink.common.entity.domain.business.service.Impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -199,4 +201,29 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
         }
         return R.ok();
     }
+
+    @Override
+    public R<List<DataImageFilesInfo>> getAllFiles(String workflowId, List<String> fileIds) {
+        if(StringUtils.isEmpty(workflowId)&& CollectionUtils.isEmpty(fileIds)){
+            return R.fail();
+        }
+        LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+         if (ObjectUtil.isNotEmpty(workflowId)){
+            queryWrapper.eq(DataImageFilesInfo::getWorkflowId, workflowId);
+        }else if (ObjectUtil.isNotEmpty(fileIds)){
+            queryWrapper.in(DataImageFilesInfo::getFileId, fileIds);
+        }
+        List<DataImageFilesInfo> dataImageFilesInfos = baseMapper.selectList(queryWrapper);
+
+        return R.ok(dataImageFilesInfos);
+    }
+
+    @Override
+    public Long checkFile(List<String> fileIds) {
+        LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(DataImageFilesInfo::getFileId, fileIds);
+        queryWrapper.isNotNull(DataImageFilesInfo::getWorkflowId);
+        return baseMapper.selectCount(queryWrapper);
+    }
+
 }

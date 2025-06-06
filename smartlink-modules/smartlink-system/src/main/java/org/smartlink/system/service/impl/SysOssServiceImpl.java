@@ -266,4 +266,15 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         }
         return oss;
     }
+
+    @Override
+    public SysOssVo upload(byte[] bytes, String originalFileName, String contentType) {
+        String suffix = StringUtils.substring(originalFileName, originalFileName.lastIndexOf("."), originalFileName.length());
+        OssClient storage = OssFactory.instance();
+        UploadResult uploadResult;
+        uploadResult = storage.uploadSuffix(bytes, suffix, contentType);
+        // 保存文件信息
+        return buildResultEntity(originalFileName, suffix, storage.getConfigKey(), uploadResult);
+    }
+
 }

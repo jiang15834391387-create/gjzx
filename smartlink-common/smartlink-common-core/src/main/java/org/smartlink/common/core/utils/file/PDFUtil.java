@@ -29,7 +29,7 @@ public class PDFUtil {
     /**
      * pdf校验内容  是否能提取出文字
      */
-    public static boolean verifyEInvoice(byte[] files) {
+    /*public static boolean verifyEInvoice(byte[] files) {
         boolean isCheck = false;
         try (PDDocument document = PDDocument.load(files)) {
             PDFTextStripperByArea stripper = new PDFTextStripperByArea();
@@ -41,14 +41,14 @@ public class PDFUtil {
             e.printStackTrace();
         }
         return isCheck;
-    }
+    }*/
 
     /**
      * PDF转图片
      *
      * @throws IOException imgType:转换后的图片类型 jpg,png
      */
-    public static byte[] PDFToImg(byte[] files, int dpi) throws IOException {
+    /*public static byte[] PDFToImg(byte[] files, int dpi) throws IOException {
         try (PDDocument document = PDDocument.load(files)) {
             PDFRenderer renderer = new PDFRenderer(document);
             BufferedImage bufferedImage = renderer.renderImageWithDPI(0, dpi);
@@ -56,7 +56,7 @@ public class PDFUtil {
             ImageIO.write(bufferedImage, "JPG", out);
             return out.toByteArray();
         }
-    }
+    }*/
 
     /**
      * pdf文件转换成一个整体的图片
@@ -65,7 +65,7 @@ public class PDFUtil {
      * @return 字节
      * @throws Exception 异常
      */
-    public static byte[] convertPdfImage(byte[] data, int dpi) throws Exception{
+    /*public static byte[] convertPdfImage(byte[] data, int dpi) throws Exception{
             PDDocument document = PDDocument.load(data);
             PDFRenderer pdfRenderer = new PDFRenderer(document);
             // 不知道图片的宽和高，所以先定义个null
@@ -93,7 +93,7 @@ public class PDFUtil {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ImageIO.write(pdfImage, "png", out);
             return out.toByteArray();
-    }
+    }*/
 //
 //    public static void main(String[] args) throws Exception {
 //        byte[] bytes = convertPdfImage(FileUtil.readBytes(new File("/Users/shidunkai/Downloads/发票test/电子发票/电子发票/销货清单很多.pdf")), 60);
@@ -104,9 +104,9 @@ public class PDFUtil {
     /**
      * pdf拆分转为多张图片
      */
-    public static byte[] PDFToManyImg(byte[] fileDate, int dpi) throws Exception {
+    /*public static byte[] PDFToManyImg(byte[] fileDate, int dpi) throws Exception {
         List<byte[]> listByte = new ArrayList<>(16);
-        /* dpi越大转换后越清晰，相对转换速度越慢 */
+        *//* dpi越大转换后越清晰，相对转换速度越慢 *//*
         try (PDDocument doc = PDDocument.load(fileDate)) {
             PDFRenderer renderer = new PDFRenderer(doc);
             int pages = doc.getNumberOfPages();
@@ -119,7 +119,7 @@ public class PDFUtil {
             }
         }
         return listByte.get(0);
-    }
+    }*/
 
 
     /**

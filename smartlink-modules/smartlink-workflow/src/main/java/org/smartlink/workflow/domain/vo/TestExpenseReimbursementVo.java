@@ -90,4 +90,7 @@ public class TestExpenseReimbursementVo implements Serializable {
      */
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
+
+
+    private String detailsData;
 }

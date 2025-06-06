@@ -30,4 +30,30 @@ public class TaskBo implements Serializable {
      * 流程定义key
      */
     private String processDefinitionKey;
+
+
+    /**
+     * 任务类型(1:代办  2: 已办  3:已发起   )
+     */
+    private int taskType;
+
+    /**
+     * 流程key
+     */
+    private String key;
+
+    /**
+     * 任务发起人
+     */
+    private String startUserId;
+
+    /**
+     * 业务id
+     */
+    private String businessKey;
+
+    /**
+     * 模型分类
+     */
+    private String categoryCode;
 }

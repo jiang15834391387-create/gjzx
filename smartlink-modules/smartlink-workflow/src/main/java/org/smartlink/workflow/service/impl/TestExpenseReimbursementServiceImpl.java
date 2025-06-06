@@ -3,6 +3,8 @@ package org.smartlink.workflow.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.smartlink.common.core.domain.dto.RoleDTO;
 import org.smartlink.common.core.domain.event.ProcessEvent;
 import org.smartlink.common.core.domain.event.ProcessTaskEvent;
@@ -11,6 +13,7 @@ import org.smartlink.common.core.enums.BusinessStatusEnum;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
@@ -55,6 +58,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final WfDefinitionConfigMapper wfDefinitionConfigMapper;
     private final TestFormManageMapper testFormManageMapper;
     private final SysUserMapper userMapper;
+    private final IDataImageFilesInfoService dataImageFilesInfoService;
     /**
      * 查询费用报销申请
      *
@@ -163,32 +167,79 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     @Transactional(rollbackFor = Exception.class)
     public TestExpenseReimbursementVo insertByBo(TestExpenseReimbursementBo bo) {
 
-        try {
-            if(StringUtils.isEmpty(bo.getDataChannel())){
-                bo.setDataChannel("pc");
-            }
-            TestExpenseReimbursement add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
-            validEntityBeforeSave(add);
-            //validFormType(add);
-            if (StringUtils.isBlank(add.getStatus())) {
-                add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
-            }
-            TestFormManage byType = getByType(bo.getFromType());
-            if(byType==null){
-                new ServiceException("该表单不存在");
-            }
-            add.setCreateDept(LoginHelper.getDeptId());
-            add.setFromManageId(byType.getId());
-            boolean  flag = baseMapper.insert(add) > 0;
-            if (flag) {
-                bo.setId(add.getId());
-            }
-            return MapstructUtils.convert(add, TestExpenseReimbursementVo.class);
-        } catch (Exception e) {
-            log.error("新增费用报销申请失败{}",e);
-            throw new RuntimeException("失败");
+        if(StringUtils.isEmpty(bo.getDataChannel())){
+            bo.setDataChannel("pc");
         }
+        String detailsData = bo.getDetailsData();
+        if(StringUtils.isEmpty(detailsData)){
+            new ServiceException("请求参数不全");
+        }
+        List<Map<String, String>> maps = parseJsonString(detailsData);
+        if (CollectionUtils.isEmpty(maps)){
+            new ServiceException("请求参数不全");
+        }
+        ArrayList<String> list = joinImageFile(maps);
+        validImage(list);
+        TestExpenseReimbursement add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
+        validEntityBeforeSave(add);
+        //validFormType(add);
+        if (StringUtils.isBlank(add.getStatus())) {
+            add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
+        }
+        TestFormManage byType = getByType(bo.getFromType());
+        if(byType==null){
+            new ServiceException("该表单不存在");
+        }
+        add.setCreateDept(LoginHelper.getDeptId());
+        add.setFromManageId(byType.getId());
+        boolean  flag = baseMapper.insert(add) > 0;
+        if (flag) {
+            bo.setId(add.getId());
+        }
+        if(CollectionUtils.isNotEmpty(list)){
+            dataImageFilesInfoService.bindAndRelieve(add.getId().toString(), list, true);
+        }
+        return MapstructUtils.convert(add, TestExpenseReimbursementVo.class);
 
+
+    }
+
+    private ArrayList<String> joinImageFile(List<Map<String, String>> maps) {
+        ArrayList<String> list = new ArrayList<>();
+        for (Map<String, String> map : maps) {
+            String type = map.get("type");
+            if (StringUtils.isNotBlank(type)) {
+                String s = map.get("value");
+                if(StringUtils.isEmpty(s)){
+                    String[] urls = s.split(",");
+                    list.addAll(Arrays.asList(urls));
+                }
+            }
+        }
+        return list;
+
+    }
+
+    private void validImage(List<String> list) {
+        Long l = dataImageFilesInfoService.checkFile(list);
+        if(l>0){
+            throw new ServiceException("不可重复绑定");
+        }
+    }
+
+    public static List<Map<String, String>> parseJsonString(String jsonString) {
+        List<Map<String, String>> result = new ArrayList<>();
+        JSONArray jsonArray = new JSONArray(jsonString);
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            Map<String, String> item = new HashMap<>();
+            item.put("key", jsonObject.getString("key"));
+            item.put("type", jsonObject.getString("type"));
+            item.put("value", jsonObject.getString("value"));
+            result.add(item);
+        }
+        return result;
     }
 
     /**
@@ -263,6 +314,11 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
         try {
             baseMapper.delBatchById(ids, LoginHelper.getUserId());
+            if (CollectionUtils.isNotEmpty(ids)){
+                for (Long id : ids){
+                    dataImageFilesInfoService.bindAndRelieve(id.toString(), null, false);
+                }
+            }
         } catch (Exception e) {
             log.error("删除失败，执行回滚{}",e);
             throw new RuntimeException("失败");

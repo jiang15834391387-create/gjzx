@@ -1,6 +1,7 @@
 package org.smartlink.business.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.hutool.json.JSONObject;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -9,6 +10,7 @@ import org.smartlink.business.doman.dto.BindUnbindDTO;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataImageFilesInfoBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
 import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
@@ -111,5 +113,14 @@ public class DataImageFilesInfoController extends BaseController {
     @PostMapping("/bindAndRelieve")
     public R<Void> bindAndRelieve(@RequestBody @Validated BindUnbindDTO dto) {
         return dataImageFilesInfoService.bindAndRelieve(dto.getWorkflowId(), dto.getFileIds(),dto.getIsBinding());
+    }
+
+
+    /**
+     * 获取附件
+     */
+    @PostMapping("/getAllFiles")
+    public R<List<DataImageFilesInfo>> getAllFiles(@RequestBody BindUnbindDTO jsonObject) {
+        return dataImageFilesInfoService.getAllFiles(jsonObject.getWorkflowId(),jsonObject.getFileIds());
     }
 }

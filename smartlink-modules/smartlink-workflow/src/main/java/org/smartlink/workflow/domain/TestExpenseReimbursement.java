@@ -57,6 +57,21 @@ public class TestExpenseReimbursement extends TenantEntity {
      */
     @ExcelProperty(value = "备注")
     private String remark;
-
+    /**
+     * [
+     *     {
+     *       "key": "name",
+     *       "type": "String",
+     *       "value": "大黄"
+     *     },
+     *     {
+     *       "key": "pingzheng",
+     *       "type": "uploadInvoice",
+     *       "value": "http://127.0.0.1/aaa.jpg,http://127.0.0.1/bbb.jpg"
+     *     }
+     *  ]
+     *
+     */
+    private String detailsData;
 
 }

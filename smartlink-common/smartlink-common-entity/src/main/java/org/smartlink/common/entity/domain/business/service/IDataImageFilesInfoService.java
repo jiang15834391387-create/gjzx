@@ -1,5 +1,6 @@
 package org.smartlink.common.entity.domain.business.service;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
@@ -83,4 +84,8 @@ public interface IDataImageFilesInfoService {
     List<DataImageFilesInfo> listlqw(LambdaQueryWrapper<DataImageFilesInfo> queryWrapper);
 
     R<Void> bindAndRelieve(String workflowId, List<String> fileIds, Boolean isBinding);
+
+    R<List<DataImageFilesInfo>> getAllFiles(String workflowId, List<String> fileIds);
+
+    Long checkFile(List<String> fileIds);
 }

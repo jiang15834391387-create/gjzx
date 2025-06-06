@@ -1,6 +1,8 @@
 package org.smartlink.workflow.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.constraints.*;
@@ -8,6 +10,8 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.service.ITestExpenseReimbursementService;
+import org.smartlink.workflow.utils.pdf.TemplateFieldResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.smartlink.common.idempotent.annotation.RepeatSubmit;
@@ -90,4 +94,20 @@ public class TestExpenseReimbursementController extends BaseController {
                           @PathVariable Long[] ids) {
         return toAjax(testExpenseReimbursementService.deleteWithValidByIds(List.of(ids), true));
     }
+
+    /**
+     * 测试
+     */
+    @Autowired
+    private TemplateFieldResolver resolver;
+    @PostMapping("/aaaaa")
+    public Map<String, Object> aaaaa(){
+        Map<String, Object> templateData = new HashMap<>();
+        templateData.put("field_1", "");
+
+        Map<String, Object> filledData = resolver.resolveTemplateFields("TEMPLATE_001", templateData);
+        return filledData;
+    }
+
+
 }

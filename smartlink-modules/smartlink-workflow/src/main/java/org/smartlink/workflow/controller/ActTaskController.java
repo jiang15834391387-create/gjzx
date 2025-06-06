@@ -15,9 +15,9 @@ import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.workflow.domain.WfTaskBackNode;
 import org.smartlink.workflow.domain.bo.*;
-import org.smartlink.workflow.domain.bo.*;
 import org.smartlink.workflow.domain.vo.TaskVo;
 import org.smartlink.workflow.domain.vo.VariableVo;
+import org.smartlink.workflow.service.IActProcessInstanceService;
 import org.smartlink.workflow.service.IActTaskService;
 import org.smartlink.workflow.service.IWfTaskBackNodeService;
 import org.smartlink.workflow.utils.QueryUtils;
@@ -44,7 +44,7 @@ public class ActTaskController extends BaseController {
     private TaskService taskService;
     private final IActTaskService actTaskService;
     private final IWfTaskBackNodeService wfTaskBackNodeService;
-
+    private final IActProcessInstanceService actProcessInstanceService;
 
     /**
      * 启动任务
@@ -292,5 +292,4 @@ public class ActTaskController extends BaseController {
     public R<List<TaskVo>> getListByDeleteMultiInstance(@PathVariable String taskId) {
         return R.ok(actTaskService.getListByDeleteMultiInstance(taskId));
     }
-
 }
