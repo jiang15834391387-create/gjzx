@@ -1,27 +1,28 @@
 package org.smartlink.business.controller;
 
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import org.smartlink.common.entity.domain.business.domain.bo.DataImageFilesInfoBo;
-import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
-import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.annotation.Validated;
-import org.smartlink.common.idempotent.annotation.RepeatSubmit;
-import org.smartlink.common.log.annotation.Log;
-import org.smartlink.common.web.core.BaseController;
-import org.smartlink.common.mybatis.core.page.PageQuery;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import org.smartlink.business.doman.dto.BindUnbindDTO;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
-import org.smartlink.common.log.enums.BusinessType;
+import org.smartlink.common.entity.domain.business.domain.bo.DataImageFilesInfoBo;
+import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
+import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.excel.utils.ExcelUtil;
-
+import org.smartlink.common.idempotent.annotation.RepeatSubmit;
+import org.smartlink.common.log.annotation.Log;
+import org.smartlink.common.log.enums.BusinessType;
+import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.web.core.BaseController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 图片文件
@@ -102,5 +103,13 @@ public class DataImageFilesInfoController extends BaseController {
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable String[] fileIds) {
         return toAjax(dataImageFilesInfoService.deleteWithValidByIds(List.of(fileIds), true));
+    }
+
+    /**
+     * 工作流/绑定/解绑附件
+     */
+    @PostMapping("/bindAndRelieve")
+    public R<Void> bindAndRelieve(@RequestBody @Validated BindUnbindDTO dto) {
+        return dataImageFilesInfoService.bindAndRelieve(dto.getWorkflowId(), dto.getFileIds(),dto.getIsBinding());
     }
 }

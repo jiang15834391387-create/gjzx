@@ -1,10 +1,11 @@
 package org.smartlink.common.entity.domain.business.service.Impl;
+
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
@@ -175,5 +176,27 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
     @Override
     public List<DataImageFilesInfo> listlqw(LambdaQueryWrapper<DataImageFilesInfo> queryWrapper) {
         return this.baseMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public R<Void> bindAndRelieve(String workflowId, List<String> fileIds, Boolean isBinding) {
+        for (String fileId : fileIds) {
+            LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(DataImageFilesInfo::getFileId, fileId);
+            DataImageFilesInfo filesInfo = baseMapper.selectOne(queryWrapper);
+            if (ObjectUtil.isEmpty(filesInfo)){
+                return R.fail();
+            }
+            if (isBinding){
+                if (StringUtils.isBlank(workflowId)){
+                    return R.fail();
+                }
+                filesInfo.setWorkflowId(workflowId);
+            }else {
+                filesInfo.setWorkflowId(null);
+            }
+            baseMapper.updateById(filesInfo);
+        }
+        return R.ok();
     }
 }

@@ -1,5 +1,7 @@
 package org.smartlink.common.entity.domain.business.service;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 import org.smartlink.common.entity.domain.business.domain.bo.DataImageFilesInfoBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataImageFilesInfoVo;
@@ -79,4 +81,6 @@ public interface IDataImageFilesInfoService {
     Boolean deleteWithValidByIds(Collection<String> ids, Boolean isValid);
 
     List<DataImageFilesInfo> listlqw(LambdaQueryWrapper<DataImageFilesInfo> queryWrapper);
+
+    R<Void> bindAndRelieve(String workflowId, List<String> fileIds, Boolean isBinding);
 }

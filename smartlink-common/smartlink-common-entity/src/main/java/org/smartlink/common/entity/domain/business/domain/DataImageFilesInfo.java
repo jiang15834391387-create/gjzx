@@ -1,8 +1,6 @@
 package org.smartlink.common.entity.domain.business.domain;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.Version;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.smartlink.common.tenant.core.TenantEntity;
@@ -173,6 +171,11 @@ public class DataImageFilesInfo extends TenantEntity {
      * 备注
      */
     private String remark;
+    /**
+     * 工作流ID
+     */
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
+    private String workflowId;
 
     /**
      * 版本号
