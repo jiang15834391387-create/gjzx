@@ -29,7 +29,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -1049,6 +1051,17 @@ public class CheckServiceImpl implements ICheckService {
         for (CompletableFuture<List<InvoiceVo>> future : futures) {
             invoiceVosList.addAll(future.get());
         }
+        // 设置发票的文件信息
+        Map<String, DataImageFilesInfo> filesInfoMap = dataImageFilesInfos.stream()
+            .filter(file -> StrUtil.isNotBlank(file.getFileId()))
+            .collect(Collectors.toMap(DataImageFilesInfo::getFileId, Function.identity(), (v1, v2) -> v1));
+
+        invoiceVosList.forEach(invoiceVo -> {
+            if (StrUtil.isNotBlank(invoiceVo.getFileId())) {
+                invoiceVo.setFilesInfo(filesInfoMap.get(invoiceVo.getFileId()));
+            }
+        });
+
         invoiceVoPage.setRecords(invoiceVosList);
         invoiceVoPage.setTotal(invoiceVosList.size());
         // 计算总计金额
