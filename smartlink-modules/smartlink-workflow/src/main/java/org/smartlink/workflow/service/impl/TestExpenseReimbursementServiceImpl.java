@@ -211,9 +211,9 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         ArrayList<String> list = new ArrayList<>();
         for (Map<String, String> map : maps) {
             String type = map.get("type");
-            if (StringUtils.isNotBlank(type)) {
+            if (StringUtils.isNotBlank(type)&& type.equals("uploadInvoice")) {
                 String s = map.get("value");
-                if(StringUtils.isEmpty(s)){
+                if(!StringUtils.isEmpty(s)){
                     String[] urls = s.split(",");
                     list.addAll(Arrays.asList(urls));
                 }
