@@ -315,11 +315,12 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
+        ArrayList<String> list = new ArrayList<>();
         try {
             baseMapper.delBatchById(ids, LoginHelper.getUserId());
             if (CollectionUtils.isNotEmpty(ids)){
                 for (Long id : ids){
-                    dataImageFilesInfoService.bindAndRelieve(id.toString(), null, false);
+                    dataImageFilesInfoService.bindAndRelieve(id.toString(), list, false);
                 }
             }
             List<String> idList = StreamUtils.toList(ids, String::valueOf);

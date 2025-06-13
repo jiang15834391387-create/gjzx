@@ -24,6 +24,7 @@ import org.smartlink.common.entity.domain.business.domain.*;
 import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
+import org.smartlink.common.satoken.utils.LoginHelper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -949,6 +950,8 @@ public class CheckServiceImpl implements ICheckService {
      */
     @Override
     public Page<InvoiceVo> getInvoicePage(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
+        Long userId = LoginHelper.getUserId();
+        pageQuery.setUserId(userId);
         List<InvoiceVo> invoiceVosList = new ArrayList<>();
         //查询图片file_status为8的图片
         LambdaQueryWrapper<DataImageFilesInfo> eqs = new LambdaQueryWrapper<DataImageFilesInfo>()

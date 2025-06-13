@@ -1,7 +1,6 @@
 package org.smartlink.business.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import cn.hutool.json.JSONObject;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -111,7 +110,7 @@ public class DataImageFilesInfoController extends BaseController {
      * 工作流/绑定/解绑附件
      */
     @PostMapping("/bindAndRelieve")
-    public R<Void> bindAndRelieve(@RequestBody @Validated BindUnbindDTO dto) {
+    public R<Void> bindAndRelieve(@RequestBody  BindUnbindDTO dto) {
         return dataImageFilesInfoService.bindAndRelieve(dto.getWorkflowId(), dto.getFileIds(),dto.getIsBinding());
     }
 

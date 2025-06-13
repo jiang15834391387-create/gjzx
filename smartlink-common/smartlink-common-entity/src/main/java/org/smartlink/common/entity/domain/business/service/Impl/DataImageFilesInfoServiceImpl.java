@@ -1,13 +1,13 @@
 package org.smartlink.common.entity.domain.business.service.Impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
@@ -182,22 +182,36 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
 
     @Override
     public R<Void> bindAndRelieve(String workflowId, List<String> fileIds, Boolean isBinding) {
-        for (String fileId : fileIds) {
-            LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(DataImageFilesInfo::getFileId, fileId);
-            DataImageFilesInfo filesInfo = baseMapper.selectOne(queryWrapper);
-            if (ObjectUtil.isEmpty(filesInfo)){
+        if (isBinding){
+            if (StringUtils.isBlank(workflowId)) {
                 return R.fail();
             }
-            if (isBinding){
-                if (StringUtils.isBlank(workflowId)){
-                    return R.fail();
-                }
+            for (String fileId : fileIds) {
+                LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(DataImageFilesInfo::getFileId, fileId);
+                DataImageFilesInfo filesInfo = baseMapper.selectOne(queryWrapper);
                 filesInfo.setWorkflowId(workflowId);
-            }else {
-                filesInfo.setWorkflowId(null);
+                filesInfo.setFileFlowStatus(FileStatusEnumd.REIMBURSED.getCode());
+                baseMapper.updateById(filesInfo);
             }
-            baseMapper.updateById(filesInfo);
+
+          }else {
+            return relieveWorkflow(workflowId);
+        }
+        return R.ok();
+    }
+
+    private R<Void> relieveWorkflow(String workflowId) {
+        LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DataImageFilesInfo::getWorkflowId, workflowId);
+        List<DataImageFilesInfo> filesInfoList = baseMapper.selectList(queryWrapper);
+        if (CollectionUtils.isEmpty(filesInfoList)){
+            return R.fail();
+        }
+        for (DataImageFilesInfo info : filesInfoList) {
+            info.setWorkflowId(null);
+            info.setFileFlowStatus(FileStatusEnumd.TO_BE_REIMBURSED.getCode());
+            baseMapper.updateById(info);
         }
         return R.ok();
     }
