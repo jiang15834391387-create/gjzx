@@ -47,6 +47,11 @@ public class DataFlightItinerary extends TenantEntity {
     private String userName;
 
     /**
+     * 身份证号
+     */
+    private String userId;
+
+    /**
      * 销售单位代号
      */
     private String agentCode;
