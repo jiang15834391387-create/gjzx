@@ -1411,6 +1411,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setInvoiceTotal(taxiTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    invoiceVo.setProvinces(taxiTicket.getProvince()+taxiTicket.getCity());
                     return invoiceVo;
                 });
             }
@@ -1437,6 +1438,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setInvoiceTotal(dataQuotaInvoice.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    invoiceVo.setProvinces(dataQuotaInvoice.getProvince()+dataQuotaInvoice.getCity());
                     return invoiceVo;
                 });
             }
