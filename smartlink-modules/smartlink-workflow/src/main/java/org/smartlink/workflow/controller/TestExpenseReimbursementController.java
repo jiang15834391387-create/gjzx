@@ -7,6 +7,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.service.ITestExpenseReimbursementService;
@@ -109,5 +110,17 @@ public class TestExpenseReimbursementController extends BaseController {
         return filledData;
     }
 
+
+    /**
+     * 获取费用报销申请详细信息
+     *
+     * @param id 主键
+     */
+    @SaCheckPermission("system:expenseReimbursement:query")
+    @GetMapping("/byFromId")
+    public R<List<TestFormManage>> byFromId(@NotNull(message = "表单id为空")
+                                                 @PathVariable Long id) {
+        return R.ok(testExpenseReimbursementService.byFromId(id));
+    }
 
 }

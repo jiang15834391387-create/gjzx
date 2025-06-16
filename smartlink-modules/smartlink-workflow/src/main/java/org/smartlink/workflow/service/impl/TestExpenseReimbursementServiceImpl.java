@@ -199,7 +199,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             }
             TestFormManage byType = getByType(bo.getFromType());
             if(byType==null){
-                new ServiceException("该表单不存在");
+                new RuntimeException("该表单不存在");
             }
             add.setCreateDept(LoginHelper.getDeptId());
             add.setFromManageId(byType.getId());
@@ -347,6 +347,11 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         }
 
         return isValid;
+    }
+
+    @Override
+    public List<TestFormManage> byFromId(Long id) {
+        return testFormManageMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_bind_id",id));
     }
 
 
