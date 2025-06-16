@@ -170,37 +170,48 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     @Transactional(rollbackFor = Exception.class)
     public TestExpenseReimbursementVo insertByBo(TestExpenseReimbursementBo bo) {
 
-        if(StringUtils.isEmpty(bo.getDataChannel())){
-            bo.setDataChannel("pc");
-        }
-        String detailsData = bo.getDetailsData();
-        if(StringUtils.isEmpty(detailsData)){
-            new ServiceException("请求参数不全");
-        }
-        List<Map<String, String>> maps = parseJsonString(detailsData);
-        if (CollectionUtils.isEmpty(maps)){
-            new ServiceException("请求参数不全");
-        }
-        ArrayList<String> list = joinImageFile(maps);
-        validImage(list);
-        TestExpenseReimbursement add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
-        validEntityBeforeSave(add);
-        //validFormType(add);
-        if (StringUtils.isBlank(add.getStatus())) {
-            add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
-        }
-        TestFormManage byType = getByType(bo.getFromType());
-        if(byType==null){
-            new ServiceException("该表单不存在");
-        }
-        add.setCreateDept(LoginHelper.getDeptId());
-        add.setFromManageId(byType.getId());
-        boolean  flag = baseMapper.insert(add) > 0;
-        if (flag) {
-            bo.setId(add.getId());
-        }
-        if(CollectionUtils.isNotEmpty(list)){
-            dataImageFilesInfoService.bindAndRelieve(add.getId().toString(), list, true);
+        TestExpenseReimbursement add = null;
+        try {
+            if(StringUtils.isEmpty(bo.getDataChannel())){
+                bo.setDataChannel("pc");
+            }
+
+            ArrayList<String> list=null;
+            String detailsData = bo.getDetailsData();
+            if(StringUtils.isEmpty(detailsData)){
+                log.info("为传递发票图片信息");
+            }else{
+                List<Map<String, String>> maps = parseJsonString(detailsData);
+                if (CollectionUtils.isEmpty(maps)){
+                    new ServiceException("请求参数不全");
+                }
+                list = joinImageFile(maps);
+                if(CollectionUtils.isNotEmpty(list)){
+                    validImage(list);
+                }
+            }
+
+            add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
+            validEntityBeforeSave(add);
+            //validFormType(add);
+            if (StringUtils.isBlank(add.getStatus())) {
+                add.setStatus(BusinessStatusEnum.DRAFT.getStatus());
+            }
+            TestFormManage byType = getByType(bo.getFromType());
+            if(byType==null){
+                new ServiceException("该表单不存在");
+            }
+            add.setCreateDept(LoginHelper.getDeptId());
+            add.setFromManageId(byType.getId());
+            boolean  flag = baseMapper.insert(add) > 0;
+            if (flag) {
+                bo.setId(add.getId());
+            }
+            if(CollectionUtils.isNotEmpty(list)){
+                dataImageFilesInfoService.bindAndRelieve(add.getId().toString(), list, true);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
         return MapstructUtils.convert(add, TestExpenseReimbursementVo.class);
 
@@ -237,10 +248,15 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
             Map<String, String> item = new HashMap<>();
-            item.put("key", jsonObject.getString("key"));
-            item.put("type", jsonObject.getString("type"));
-            item.put("value", jsonObject.getString("value"));
-            result.add(item);
+            String key = jsonObject.getString("key");
+            String value = jsonObject.getString("value");
+            String type = jsonObject.getString("type");
+            if(StringUtils.isNotEmpty(key)&&  StringUtils.isNotEmpty(value)&& StringUtils.isNotEmpty(type)){
+                item.put("key", jsonObject.getString("key"));
+                item.put("type", jsonObject.getString("type"));
+                item.put("value", jsonObject.getString("value"));
+                result.add(item);
+            }
         }
         return result;
     }
