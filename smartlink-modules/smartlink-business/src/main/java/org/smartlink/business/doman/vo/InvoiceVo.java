@@ -44,6 +44,7 @@ public class InvoiceVo {
     private String storeName;//店名
     private String invoiceTime;//时间
     private String companyName;//缴款单位(人)公司名称
+    private String provinces;//省/市
     private DataImageFilesInfo filesInfo;//图片对象
     @JsonIgnore
     public BigDecimal getMoneyAsBigDecimal() {
