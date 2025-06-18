@@ -69,5 +69,5 @@ public interface ITestExpenseReimbursementService {
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
-    List<TestFormManage> byFromId(@NotNull(message = "表单id为空") Long id);
+    List<TestFormManage> byFromId(@NotNull(message = "表单id为空") String id);
 }

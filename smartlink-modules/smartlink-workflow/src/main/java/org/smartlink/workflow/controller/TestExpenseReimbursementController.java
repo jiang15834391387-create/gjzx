@@ -117,9 +117,9 @@ public class TestExpenseReimbursementController extends BaseController {
      * @param id 主键
      */
     @SaCheckPermission("system:expenseReimbursement:query")
-    @GetMapping("/byFromId")
+    @GetMapping("/byFromId/{id}")
     public R<List<TestFormManage>> byFromId(@NotNull(message = "表单id为空")
-                                                 @PathVariable Long id) {
+                                                 @PathVariable String id) {
         return R.ok(testExpenseReimbursementService.byFromId(id));
     }
 

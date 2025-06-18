@@ -350,8 +350,8 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
     @Override
-    public List<TestFormManage> byFromId(Long id) {
-        return testFormManageMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_bind_id",id));
+    public List<TestFormManage> byFromId(String type) {
+        return testFormManageMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type",type).eq("is_deleted",0));
     }
 
 
