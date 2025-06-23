@@ -107,7 +107,6 @@ public class IDataOcrServiceImpl implements IDataOcrService {
             case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                 DataOcrInfo dataOcrInfo = new DataOcrInfo();
                 BeanUtils.copyProperties(obj,dataOcrInfo);
@@ -196,6 +195,8 @@ public class IDataOcrServiceImpl implements IDataOcrService {
                 log.info("过路费发票信息入库:{}", dataTollRoadsInfo);
                 break;
             //小票
+            //可报销其他发票
+            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.GLORITY_RECEIPT_CODE:
                 DataReceipt dataReceipt = new DataReceipt();
                 BeanUtils.copyProperties(obj,dataReceipt);

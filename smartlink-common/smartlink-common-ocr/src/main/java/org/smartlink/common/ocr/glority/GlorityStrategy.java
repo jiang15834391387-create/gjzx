@@ -133,7 +133,6 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-                case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                     return InvoiceConversion.getInstance();
                 //机动车
@@ -170,6 +169,7 @@ public class GlorityStrategy extends AbstractOcrStrategy implements Identificati
                 case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
                     return TollRoadsConversion.getInstance();
                 //小票
+                case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                 case InvoiceConstants.GLORITY_RECEIPT_CODE:
                     return ReceiptConversion.getInstance();
                 //出行发票
