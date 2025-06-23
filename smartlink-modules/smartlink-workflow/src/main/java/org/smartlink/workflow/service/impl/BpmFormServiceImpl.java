@@ -1,7 +1,11 @@
 package org.smartlink.workflow.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONString;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,11 +17,13 @@ import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.workflow.domain.BpmFormDO;
 import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.TestFormManage;
+import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.domain.vo.form.BpmFormVo;
 import org.smartlink.workflow.mapper.BpmFormMapper;
 import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
 import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.service.BpmFormService;
+import org.smartlink.workflow.service.ITestExpenseReimbursementService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -40,6 +46,8 @@ public class BpmFormServiceImpl implements BpmFormService {
     private TestFormManageMapper formManageMapper;
     @Resource
     private TestExpenseReimbursementMapper expenseReimbursementMapper;
+    @Resource
+    private ITestExpenseReimbursementService iTestExpenseReimbursementService;
 
     @Override
     public Long createForm(BpmFormVo createReqVO) {
@@ -71,13 +79,13 @@ public class BpmFormServiceImpl implements BpmFormService {
         List<TestExpenseReimbursement> fromId = expenseReimbursementMapper.selectList(
             new QueryWrapper<TestExpenseReimbursement>()
                 .eq("from_id", id));
-        if(fromId!=null&&fromId.size()>0){
+        if (fromId != null && fromId.size() > 0) {
             throw new ServiceException("该表单已被使用无法删除");
         }
 
 
         // 删除
-       // formMapper.deleteById(id);
+        // formMapper.deleteById(id);
         bpmFormDO.setIsDeleted(1);
         formMapper.updateById(bpmFormDO);
 
@@ -94,7 +102,7 @@ public class BpmFormServiceImpl implements BpmFormService {
     @Override
     public BpmFormVo getForm(Long id) {
         BpmFormDO bpmFormDO = formMapper.selectById(id);
-        if(bpmFormDO!=null){
+        if (bpmFormDO != null) {
             BpmFormVo vo = new BpmFormVo();
             if (!StringUtils.isEmpty(bpmFormDO.getFields())) {
                 List<String> fields = JsonUtils.parseArray(bpmFormDO.getFields(), String.class);
@@ -103,17 +111,58 @@ public class BpmFormServiceImpl implements BpmFormService {
             BeanUtils.copyProperties(bpmFormDO, vo);
             return vo;
         }
-       return null;
+        return null;
     }
+
+    @Override
+    public Map<String, String> getExpenseAccount(Long id) {
+        Map<String, String> result = new LinkedHashMap<>();
+
+        TestExpenseReimbursementVo testExpenseReimbursementVo = iTestExpenseReimbursementService.queryById(id);
+        if (ObjectUtil.isNotNull(testExpenseReimbursementVo) && ObjectUtil.isNotNull(testExpenseReimbursementVo.getFromId())) {
+            Long fromId = testExpenseReimbursementVo.getFromId();
+            BpmFormVo form = this.getForm(fromId);
+
+            if (ObjectUtil.isNotNull(form) && CollUtil.isNotEmpty(form.getFields())) {
+                // 获取表单字段定义
+                List<String> fields = form.getFields();
+
+                // 解析JSON
+                String consumptionDetailsStr = testExpenseReimbursementVo.getConsumptionDetails();
+                JSONObject consumptionDetails = JSONUtil.parseObj(consumptionDetailsStr);
+
+                for (String fieldJson : fields) {
+                    JSONObject fieldObj = JSONUtil.parseObj(fieldJson);
+                    String fieldKey = fieldObj.getStr("field");
+                    String fieldTitle = fieldObj.getStr("title");
+
+                    // 统一转换为字符串
+                    Object value = consumptionDetails.get(fieldKey);
+                    String stringValue = "";
+
+                    if (value instanceof JSONArray) {
+                        stringValue = ((JSONArray) value).join(","); // 多个用逗号连接
+                    } else if (ObjectUtil.isNotNull(value)) {
+                        stringValue = value.toString();
+                    }
+
+                    result.put(fieldTitle, stringValue);
+                }
+            }
+        }
+
+        return result;
+    }
+
 
     @Override
     public List<BpmFormVo> getFormList() {
         QueryWrapper<BpmFormDO> objectQueryWrapper = new QueryWrapper<>();
         objectQueryWrapper.orderByDesc("create_time");
-        objectQueryWrapper.eq("is_deleted",0);
+        objectQueryWrapper.eq("is_deleted", 0);
         List<BpmFormDO> bpmFormDOS = formMapper.selectList(objectQueryWrapper);
         List<BpmFormVo> bpmFormVos = new ArrayList<>();
-        if(bpmFormDOS!=null&&bpmFormDOS.size()>0){
+        if (bpmFormDOS != null && bpmFormDOS.size() > 0) {
             bpmFormDOS.forEach(bpmFormDO -> {
                 if (!StringUtils.isEmpty(bpmFormDO.getFields())) {
                     BpmFormVo vo = new BpmFormVo();
@@ -133,15 +182,15 @@ public class BpmFormServiceImpl implements BpmFormService {
     @Override
     public Page<BpmFormDO> getFormPage(BpmFormDO pageReqVO, PageQuery pageQuery) {
         Page<BpmFormDO> pageParam = new Page<>(pageQuery.getPageNo(), pageQuery.getPageSize());
-        QueryWrapper<BpmFormDO> queryWrapper=new QueryWrapper<>();
+        QueryWrapper<BpmFormDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.orderByDesc("create_time");
-        if(!StringUtils.isEmpty(pageReqVO.getName())){
-            queryWrapper.like("name",pageReqVO.getName());
+        if (!StringUtils.isEmpty(pageReqVO.getName())) {
+            queryWrapper.like("name", pageReqVO.getName());
 
         }
-        queryWrapper.eq("is_deleted",0);
-        if (!StringUtils.isEmpty(pageReqVO.getIsDeleted())){
-            queryWrapper.eq("is_deleted",pageReqVO.getIsDeleted());
+        queryWrapper.eq("is_deleted", 0);
+        if (!StringUtils.isEmpty(pageReqVO.getIsDeleted())) {
+            queryWrapper.eq("is_deleted", pageReqVO.getIsDeleted());
         }
         formMapper.selectPage(pageParam, queryWrapper);
 

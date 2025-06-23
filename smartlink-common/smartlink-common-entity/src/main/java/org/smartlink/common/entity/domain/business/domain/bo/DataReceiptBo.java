@@ -38,7 +38,7 @@ public class DataReceiptBo extends BaseEntity {
     @NotBlank(message = "日期不能为空", groups = { AddGroup.class, EditGroup.class })
     private String invoiceDate;
 
-    /**
+    /** 其他类型发票
      * 发票消费类型
      */
     @NotBlank(message = "发票消费类型不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -116,6 +116,21 @@ public class DataReceiptBo extends BaseEntity {
      */
     @NotBlank(message = "1:国际票 0:国内票不能为空", groups = { AddGroup.class, EditGroup.class })
     private String internationalMark;
+
+    /** 其他类型发票
+     * 代码
+     */
+    private String code;
+
+    /** 其他类型发票
+     * 号码
+     */
+    private String number;
+
+    /** 其他类型发票
+     * 标题
+     */
+    private String title;
 
     /**
      * 发票专用章存在性判断

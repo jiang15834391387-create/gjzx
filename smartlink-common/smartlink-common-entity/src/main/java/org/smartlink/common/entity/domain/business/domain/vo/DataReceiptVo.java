@@ -72,7 +72,7 @@ public class DataReceiptVo implements Serializable {
     @ExcelProperty(value = "小计")
     private String subTotal;
 
-    /**
+    /** 其他类型发票
      * 发票消费类型
      */
     @ExcelProperty(value = "发票消费类型")
@@ -120,6 +120,21 @@ public class DataReceiptVo implements Serializable {
      */
     @ExcelProperty(value = "1:国际票 0:国内票")
     private String internationalMark;
+
+    /** 其他类型发票
+     * 代码
+     */
+    private String code;
+
+    /** 其他类型发票
+     * 号码
+     */
+    private String number;
+
+    /** 其他类型发票
+     * 标题
+     */
+    private String title;
 
     /**
      * 发票专用章存在性判断

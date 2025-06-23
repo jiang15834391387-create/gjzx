@@ -51,6 +51,14 @@ public interface BpmFormService {
     BpmFormVo getForm(Long id);
 
     /**
+     * 获得动态表单
+     *
+     * @param id 编号
+     * @return 动态表单
+     */
+    Map<String, String> getExpenseAccount(Long id);
+
+    /**
      * 获得动态表单列表
      *
      * @return 动态表单列表

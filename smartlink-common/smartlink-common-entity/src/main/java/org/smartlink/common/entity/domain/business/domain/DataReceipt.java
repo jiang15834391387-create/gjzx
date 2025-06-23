@@ -60,12 +60,6 @@ public class DataReceipt extends TenantEntity {
     private String storeName;
 
     /**
-     * 发票消费类型
-     */
-    private String kind;
-
-
-    /**
      * 图片旋转角度
      */
     private String orientation;
@@ -104,6 +98,26 @@ public class DataReceipt extends TenantEntity {
      * 1:国际票 0:国内票
      */
     private String internationalMark;
+
+    /** 其他类型发票
+     * 代码
+     */
+    private String code;
+
+    /** 其他类型发票
+     * 号码
+     */
+    private String number;
+
+    /** 其他类型发票
+     * 消费类型
+     */
+    private String kind;
+
+    /** 其他类型发票
+     * 标题
+     */
+    private String title;
 
     /**
      * 发票专用章存在性判断

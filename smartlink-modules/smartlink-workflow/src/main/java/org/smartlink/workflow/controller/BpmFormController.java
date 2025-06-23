@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @Tag(name = "管理后台 - 动态表单")
@@ -62,6 +63,14 @@ public class BpmFormController {
     public R<BpmFormVo> getForm(@RequestParam("id") Long id) {
         BpmFormVo form = formService.getForm(id);
         return R.ok(form);
+    }
+
+    @GetMapping("/getExpenseAccount")
+    @Operation(summary = "取报销单键值")
+    @Parameter(name = "id", description = "编号", required = true)
+    // @SaCheckPermission("bpm:form:query")
+    public R<Map<String, String>> getExpenseAccount(@RequestParam("id") Long id) {
+        return R.ok(formService.getExpenseAccount(id));
     }
 
     @GetMapping({"/list-all-simple", "/simple-list"})
