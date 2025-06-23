@@ -63,8 +63,15 @@ public class ReceiptConversion implements ChangeIdentifyInfo<List<IdentifyResult
             receipt.setCurrencyCode(jsonObject.getStr("currency_code"));
             receipt.setKind(jsonObject.getStr("type"));
             receipt.setInternationalMark(jsonObject.getStr("international_mark"));
+            receipt.setCode(jsonObject.getStr("code"));
+            receipt.setNumber(jsonObject.getStr("number"));
+            receipt.setKind(jsonObject.getStr("kind"));
+            receipt.setTitle(jsonObject.getStr("title"));
 
             receipt.setOrientation(identifyResults.getOrientation());
+
+            //发票类型
+            String invoiceCode = identifyResults.getType();
             if (identifyResults.getRegion() != null && identifyResults.getRegion().length > 0) {
                 receipt.setRegion(String.join(",", identifyResults.getRegion()));
             } else {
@@ -73,9 +80,13 @@ public class ReceiptConversion implements ChangeIdentifyInfo<List<IdentifyResult
 
             //发票待查验
             dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-            dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode());
+            if (identifyResults.getType().equals(InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode())){
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode());
+            } else {
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode());
+            }
             dataImageFilesInfo.setMessage(identifyResults.getMessage());
-            resultsList.add(new IdentificationData<>(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode(), receipt, identifyResults.getExtra(), identifyResults.getMessage()));
+            resultsList.add(new IdentificationData<>(invoiceCode, receipt, identifyResults.getExtra(), identifyResults.getMessage()));
 
         }
         return resultsList;
