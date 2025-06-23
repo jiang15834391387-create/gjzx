@@ -45,6 +45,10 @@ public class InvoiceVo {
     private String invoiceTime;//时间
     private String companyName;//缴款单位(人)公司名称
     private String provinces;//省/市
+    private String code;//其他发票类型-代码
+    private String number;//其他发票类型-号码
+    private String kind;//其他发票类型-消费类型
+    private String title;//其他发票类型-标题
     private DataImageFilesInfo filesInfo;//图片对象
     @JsonIgnore
     public BigDecimal getMoneyAsBigDecimal() {

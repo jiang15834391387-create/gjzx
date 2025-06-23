@@ -166,8 +166,9 @@ public class CheckServiceImpl implements ICheckService {
                 case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
                      removeTollRoads(filesInfo);
                      break;
-                //小票
+                //小票/可报销其他发票
                 case InvoiceConstants.GLORITY_RECEIPT_CODE:
+                case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                      removeReceipt(filesInfo);
                      break;
                 //出行发票
@@ -205,7 +206,6 @@ public class CheckServiceImpl implements ICheckService {
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-                case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                 case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                      removeOcrInvoice(filesInfo);
                      break;
@@ -366,9 +366,8 @@ public class CheckServiceImpl implements ICheckService {
             case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                 // 处理增值税发票
                 return updateOcrInvoice(generalInfo,request.getInvoiceType());
-            //机打发票/增值税发票清单/可报销其他发票
+            //机打发票/增值税发票清单
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 return updateOrdinaryInvoice(generalInfo);
             //机动车销售发票
@@ -405,8 +404,9 @@ public class CheckServiceImpl implements ICheckService {
             //过路费发票
             case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
                 return updateTollRoads(generalInfo);
-            //小票
+            //小票/可报销其他发票
             case InvoiceConstants.GLORITY_RECEIPT_CODE:
+            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                 return updateReceipt(generalInfo);
             //出行发票/滴滴
             case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
@@ -1298,11 +1298,15 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setStoreName(receipts.getStoreName());
                         invoiceVo.setInvoiceDate(receipts.getInvoiceDate());
                         invoiceVo.setInvoiceNumber(receipts.getInvoiceNumber());
-                        invoiceVo.setInvoiceType(InvoiceGlorityEnumd.GLORITY_RECEIPT_CODE.getCode());
+                        invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setInvoiceTotal(receipts.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCode(receipts.getCode());
+                        invoiceVo.setNumber(receipts.getNumber());
+                        invoiceVo.setKind(receipts.getKind());
+                        invoiceVo.setTitle(receipts.getTitle());
                         return invoiceVo;
                     }
                 );
@@ -1669,9 +1673,8 @@ public class CheckServiceImpl implements ICheckService {
                         return R.ok(new DataResponseDTO(res, info, detailInfo));
                     case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                         res.setInvoice(InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode());
-                        info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
-                        detailInfo=ocrDetailsMapper.selectList(new LambdaQueryWrapper<DataOcrDetails>().eq(DataOcrDetails::getFileId, fileId));
-                        return R.ok(new DataResponseDTO(res, info, detailInfo));
+                        info=dataReceiptMapper.selectOne(new LambdaQueryWrapper<DataReceipt>().eq(DataReceipt::getFileId, fileId));
+                        return R.ok(new DataResponseDTO(res, info, null));
                     case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
                         res.setInvoice(InvoiceGlorityEnumd.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE.getCode());
                         DataOcrInfo dataOcrInfo2 = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
@@ -1814,7 +1817,6 @@ public class CheckServiceImpl implements ICheckService {
                 return addOcrInvoice(generalInfo,invoiceType);
             //机打发票/增值税发票清单/可报销其他发票
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
-            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 return addOrdinaryInvoice(generalInfo,invoiceType);
             //机动车销售发票
@@ -1851,8 +1853,9 @@ public class CheckServiceImpl implements ICheckService {
             //过路费发票
             case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
                 return addTollRoads(generalInfo,invoiceType);
-            //小票
+            //小票/可报销其他发票
             case InvoiceConstants.GLORITY_RECEIPT_CODE:
+            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                 return addReceipt(generalInfo,invoiceType);
             //出行发票/滴滴
             case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
