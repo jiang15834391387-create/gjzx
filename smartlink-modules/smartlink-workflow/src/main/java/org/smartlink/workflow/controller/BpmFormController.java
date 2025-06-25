@@ -69,8 +69,8 @@ public class BpmFormController {
     @Operation(summary = "取报销单键值")
     @Parameter(name = "id", description = "编号", required = true)
     // @SaCheckPermission("bpm:form:query")
-    public R<Map<String, String>> getExpenseAccount(@RequestParam("id") Long id) {
-        return R.ok(formService.getExpenseAccount(id));
+    public R<List<Map<String, String>>> getExpenseAccount(@RequestParam("id") Long id, @RequestParam("fromId") Long fromId) {
+        return R.ok(formService.getExpenseAccount(id, fromId));
     }
 
     @GetMapping({"/list-all-simple", "/simple-list"})
