@@ -3,6 +3,7 @@ package org.smartlink.workflow.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.MapstructUtils;
@@ -14,18 +15,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.satoken.utils.LoginHelper;
-import org.smartlink.workflow.domain.BpmFormDO;
-import org.smartlink.workflow.domain.TestExpenseReimbursement;
-import org.smartlink.workflow.domain.WfCategory;
+import org.smartlink.workflow.domain.*;
 import org.smartlink.workflow.domain.vo.WfCategoryVo;
 import org.smartlink.workflow.mapper.BpmFormMapper;
 import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
 import org.smartlink.workflow.mapper.WfCategoryMapper;
+import org.smartlink.workflow.service.IWfDefinitionConfigService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.smartlink.workflow.domain.bo.TestFormManageBo;
 import org.smartlink.workflow.domain.vo.TestFormManageVo;
-import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.service.ITestFormManageService;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +51,7 @@ public class TestFormManageServiceImpl implements ITestFormManageService {
     private final BpmFormMapper bpmFormMapper;
     @Resource
     private TestExpenseReimbursementMapper expenseReimbursementMapper;
-
+    private final IWfDefinitionConfigService wfDefinitionConfigService;
     /**
      * 查询单管理
      *
@@ -118,11 +117,11 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
             if(StringUtils.isEmpty(formName) || StringUtils.isEmpty(formType)){
                 return R.fail("参数错误");
             }
-            List<TestFormManage> nameList = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_name", formName));
+            List<TestFormManage> nameList = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_name", formName).eq("is_deleted", 0));
             if(nameList!=null && nameList.size()>0){
                 return R.fail("表单名称重复");
             }
-            List<TestFormManage> testFormManages = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type", formType));
+            List<TestFormManage> testFormManages = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type", formType).eq("is_deleted", 0));
             if(testFormManages!=null && testFormManages.size()>0){
                 return R.fail("表单类型重复");
             }
@@ -135,6 +134,13 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
             }
             add.setCreateDept(LoginHelper.getDeptId());
             add.setTenantId(LoginHelper.getTenantId());
+
+
+            List<WfDefinitionConfig> configList=wfDefinitionConfigService.selectTableName(add.getFormType());
+            if(CollectionUtils.isNotEmpty(configList)){
+                add.setIsBindModel(1);
+            }
+
             flag = baseMapper.insert(add) > 0;
             if (flag) {
                 bo.setId(add.getId());
@@ -162,11 +168,11 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
             if(StringUtils.isEmpty(formName) || StringUtils.isEmpty(formType)){
                 return R.fail("参数错误");
             }
-            List<TestFormManage> nameList = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_name", formName).ne("id",bo.getId()));
+            List<TestFormManage> nameList = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_name", formName).ne("id",bo.getId()).eq("is_deleted", 0));
             if(nameList!=null && nameList.size()>0){
                 return R.fail("表单名称重复");
             }
-            List<TestFormManage> testFormManages = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type", formType).ne("id",bo.getId()));
+            List<TestFormManage> testFormManages = baseMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type", formType).ne("id",bo.getId()).eq("is_deleted", 0));
             if(testFormManages!=null && testFormManages.size()>0){
                 return R.fail("表单类型重复");
             }
@@ -176,6 +182,12 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
             if(!StringUtils.isEmpty(s)){
                 return R.fail(s);
             }
+            update.setIsBindModel(0);
+            List<WfDefinitionConfig> configList=wfDefinitionConfigService.selectTableName(bo.getFormType());
+            if(CollectionUtils.isNotEmpty(configList)){
+                update.setIsBindModel(1);
+            }
+
             baseMapper.updateById(update);
         } catch (Exception e) {
             log.info("修改失败{}",e);

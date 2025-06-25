@@ -1,5 +1,6 @@
 package org.smartlink.workflow.service;
 
+import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.vo.WfDefinitionConfigVo;
 import org.smartlink.workflow.domain.bo.WfDefinitionConfigBo;
 
@@ -81,4 +82,6 @@ public interface IWfDefinitionConfigService {
      * @return 结果
      */
     Boolean deleteByDefIds(Collection<String> ids);
+
+    List<WfDefinitionConfig> selectTableName(String formType);
 }

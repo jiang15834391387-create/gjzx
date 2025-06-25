@@ -125,4 +125,10 @@ public class WfDefinitionConfigServiceImpl implements IWfDefinitionConfigService
     public Boolean deleteByDefIds(Collection<String> ids) {
         return baseMapper.delete(new LambdaQueryWrapper<WfDefinitionConfig>().in(WfDefinitionConfig::getDefinitionId, ids)) > 0;
     }
+
+    @Override
+    public List<WfDefinitionConfig> selectTableName(String formType) {
+        return baseMapper.selectList(new LambdaQueryWrapper<WfDefinitionConfig>().in(WfDefinitionConfig::getTableName, formType));
+
+    }
 }
