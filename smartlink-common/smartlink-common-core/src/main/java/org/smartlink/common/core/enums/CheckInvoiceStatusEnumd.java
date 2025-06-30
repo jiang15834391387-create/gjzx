@@ -11,7 +11,7 @@ public enum CheckInvoiceStatusEnumd {
     /**
      * 发票待查验
      */
-    TO_BE_VERIFIED_CODE("0","发票待查验"),
+     TO_BE_VERIFIED_CODE("0","发票待查验"),
     /**
      * 发票查验中
      */
