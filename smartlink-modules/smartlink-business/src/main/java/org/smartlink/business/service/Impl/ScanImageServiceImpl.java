@@ -130,7 +130,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                         //缩略图存储
                         UploadResult multigraphSmallImage = OssFactory.instance().upload(multigraphCutThumbnailImgFileStream, "small_" + dataImageFilesInfoOfd.getFileId() + "." + "png", (long) multigraphCutThumbnailImgFile.size(), detectContentType(multigraphCutThumbnailImgFileStream));
                         Object entity = identificationDaOfd.t;
-                        dataImageFilesInfoOfd.setFileName(multipartFile.getOriginalFilename());
+                        dataImageFilesInfoOfd.setFileName(InvoiceGlorityEnumd.getByCode(identificationDaOfd.k).getDesc() + "_" +multigraphOriginalImage.getFilename());
                         dataImageFilesInfoOfd.setIurl(multigraphOriginalImage.getUrl());
                         dataImageFilesInfoOfd.setFileMd5(multigraphOriginalImage.getETag());
                         dataImageFilesInfoOfd.setSurl(multigraphSmallImage.getUrl());
@@ -150,7 +150,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                         Object entity = identificationDaXml.t;
                         dataImageFilesInfoXml.setMessage(identificationDaXml.m);
                         dataImageFilesInfoXml.setInvoice(identificationDaXml.k);
-                        dataImageFilesInfoXml.setFileName(multipartFile.getOriginalFilename());
+                        dataImageFilesInfoXml.setFileName(InvoiceGlorityEnumd.getByCode(identificationDaXml.k).getDesc() + "_" + multigraphOriginalXml.getFilename());
                         dataImageFilesInfoXml.setIurl(multigraphOriginalXml.getUrl());
                         dataImageFilesInfoXml.setFileMd5(multigraphOriginalXml.getETag());
                         dataImageFilesInfoXml.setFileSize(String.valueOf(multipartFile.getSize()));
@@ -194,7 +194,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                         //缩略图存储
                         UploadResult multigraphSmallImage = OssFactory.instance().upload(multigraphCutThumbnailImgFileStream, "small_" + dataImageFilesInfoSm.getFileId() + "." + "jpg", (long) multigraphCutThumbnailImgFile.size(), detectContentType(multigraphCutThumbnailImgFileStream));
 
-                        dataImageFilesInfoSm.setFileName(multipartFile.getOriginalFilename());
+                        dataImageFilesInfoSm.setFileName(InvoiceGlorityEnumd.getByCode(identificationData.get(identificationDatum).k).getDesc() + "_" + multigraphOriginalImage.getFilename());
                         dataImageFilesInfoSm.setIurl(multigraphOriginalImage.getUrl());
                         dataImageFilesInfoSm.setPurl(pdfUpload.getUrl());
                         dataImageFilesInfoSm.setFileMd5(multigraphOriginalImage.getETag());
@@ -222,7 +222,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                     dataImageFilesInfo.setIurl(originalImage.getUrl());
                     dataImageFilesInfo.setSurl(smallImage.getUrl());
                     dataImageFilesInfo.setFileMd5(originalImage.getETag());
-                    dataImageFilesInfo.setFileName(multipartFile.getOriginalFilename());
+                    dataImageFilesInfo.setFileName(InvoiceGlorityEnumd.getByCode(dataImageFilesInfo.getInvoice()).getDesc() + "_" + originalImage.getFilename());
                     dataImageFilesInfo.setFileSize(String.valueOf(multipartFile.getSize()));
 
                     //是否多图
@@ -281,7 +281,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                             //缩略图存储
                             UploadResult multigraphSmallImage = OssFactory.instance().upload(multigraphCutThumbnailImgFileStream, "small_" + dataImageFilesInfoSm.getFileId() + "." + fileSuffix, (long) multigraphCutThumbnailImgFile.size(), detectContentType(multigraphCutThumbnailImgFileStream));
 
-                            dataImageFilesInfoSm.setFileName(multipartFile.getOriginalFilename());
+                            dataImageFilesInfoSm.setFileName(InvoiceGlorityEnumd.getByCode(identificationDatum.k).getDesc() + "_" + multigraphOriginalImage.getFilename());
                             dataImageFilesInfoSm.setIurl(multigraphOriginalImage.getUrl());
                             dataImageFilesInfoSm.setFileMd5(multigraphOriginalImage.getETag());
                             dataImageFilesInfoSm.setSurl(multigraphSmallImage.getUrl());
@@ -697,7 +697,7 @@ public class ScanImageServiceImpl implements ScanImageService {
             dataImageFilesInfo.setIurl(originalImage.getUrl());
             dataImageFilesInfo.setSurl(smallImage.getUrl());
             dataImageFilesInfo.setFileMd5(originalImage.getETag());
-            dataImageFilesInfo.setFileName(multipartFile.getOriginalFilename());
+            dataImageFilesInfo.setFileName(originalImage.getFilename());
             dataImageFilesInfo.setInvoice(invoiceType);
             dataImageFilesInfo.setFileStatus(status);
             dataImageFilesInfo.setMessage(message);
