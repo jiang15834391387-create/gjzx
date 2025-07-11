@@ -172,6 +172,11 @@ public class DataMedicalTreatmentBo extends BaseEntity {
     private String otherPayments;
 
     /**
+     * 小计
+     */
+    private String subTotal;
+
+    /**
      * 个人账户支付
      */
     @NotBlank(message = "个人账户支付不能为空", groups = { AddGroup.class, EditGroup.class })

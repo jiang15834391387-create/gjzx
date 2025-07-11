@@ -253,6 +253,11 @@ public class DataOcrInfoVo implements Serializable {
     private String sellerNo;
 
     /**
+     * 服务类型
+     */
+    private String serviceName;
+
+    /**
      * 合计金额（税前）
      */
     @ExcelProperty(value = "合计金额", converter = ExcelDictConvert.class)

@@ -250,6 +250,11 @@ public class DataMedicalTreatmentVo implements Serializable {
     private String totalWords;
 
     /**
+     * 小计
+     */
+    private String subTotal;
+
+    /**
      * 日期
      */
     @ExcelProperty(value = "日期")

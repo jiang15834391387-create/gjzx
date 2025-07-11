@@ -75,6 +75,11 @@ public class DataMotorVehicleSaleBo extends BaseEntity {
     private String certificateOfImport;
 
     /**
+     * 总计 大写
+     */
+    private String totalCn;
+
+    /**
      * 是否查验标识，（0查验失败，1查验成功）
      */
     @NotBlank(message = "是否查验标识，（0查验失败，1查验成功）不能为空", groups = { AddGroup.class, EditGroup.class })

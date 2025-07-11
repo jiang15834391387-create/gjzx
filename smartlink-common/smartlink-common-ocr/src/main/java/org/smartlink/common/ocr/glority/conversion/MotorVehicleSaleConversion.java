@@ -80,6 +80,12 @@ public class MotorVehicleSaleConversion implements ChangeIdentifyInfo<List<Ident
             motorVehicleSale.setInvoiceSheet(jsonObject.getStr("form_type"));
             motorVehicleSale.setPageNumber(jsonObject.getStr("form_name"));
             motorVehicleSale.setPreTaxAmount(jsonObject.getStr("pretax_amount"));
+            motorVehicleSale.setTotalCn(jsonObject.getStr("total_cn"));
+            motorVehicleSale.setSellerBankName(jsonObject.getStr("account"));
+            motorVehicleSale.setDrawer(jsonObject.getStr("issuer"));
+            motorVehicleSale.setLimitedPeopleCount(jsonObject.getStr("max_people_num"));
+            motorVehicleSale.setProduceArea(jsonObject.getStr("origin"));
+            motorVehicleSale.setElectronicNumber(jsonObject.getStr("electronic_number"));
 
 
 

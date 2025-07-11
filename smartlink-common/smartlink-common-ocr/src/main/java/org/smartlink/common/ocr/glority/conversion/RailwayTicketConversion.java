@@ -82,6 +82,7 @@ public class RailwayTicketConversion implements ChangeIdentifyInfo<List<Identify
             railwayTicket.setDateOfIssue(jsonObject.getStr("date_of_issue"));
             railwayTicket.setPhonicsOfDepartureStation(jsonObject.getStr("phonics_of_departure_station"));
             railwayTicket.setPhonicsOfDestinationStation(jsonObject.getStr("phonics_of_destination_station"));
+            railwayTicket.setRemark(jsonObject.getStr("remark"));
 
 
             railwayTicket.setOrientation(identifyResults.getOrientation());

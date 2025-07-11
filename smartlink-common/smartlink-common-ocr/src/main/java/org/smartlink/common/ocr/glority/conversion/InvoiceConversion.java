@@ -66,7 +66,7 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setRightInvoiceNumber(jsonObject.getStr("number_confirm"));
             invoice.setRightInvoiceCode(jsonObject.getStr("code_confirm"));
             // 大写 价税合计
-            invoice.setTotalUppercase(jsonObject.getStr("total"));
+            invoice.setTotalUppercase(jsonObject.getStr("total_cn"));
             invoice.setCheckCode(jsonObject.getStr("check_code"));
             invoice.setSellerName(jsonObject.getStr("seller"));
             invoice.setSellerNo(jsonObject.getStr("seller_tax_id"));
@@ -84,6 +84,7 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
                 }
             }
             invoice.setMachineCode(jsonObject.getStr("machine_code"));
+            invoice.setTravelTax(jsonObject.getStr("travel_tax"));
             invoice.setPayee(jsonObject.getStr("receiptor"));
             invoice.setChecker(jsonObject.getStr("reviewer"));
             invoice.setIssuer(jsonObject.getStr("issuer"));
@@ -96,11 +97,17 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setPageNumber(jsonObject.getStr("form_name"));
             invoice.setRemark(jsonObject.getStr("remark"));
             invoice.setItemNames(jsonObject.getStr("item_names"));
+            invoice.setPurchaseMark(jsonObject.getStr("acquisition_mark"));
             invoice.setKind(jsonObject.getStr("kind"));
             invoice.setElectronicMark(jsonObject.getStr("electronic_mark"));
             invoice.setBlockChain(jsonObject.getStr("block_chain"));
             invoice.setTransitMark(jsonObject.getStr("transit_mark"));
+            invoice.setReplaceOpen(jsonObject.getStr("agent_mark"));
+            invoice.setOilMark(jsonObject.getStr("oil_mark"));
+            invoice.setVehicleMark(jsonObject.getStr("vehicle_mark"));
             invoice.setArea(jsonObject.getStr("area"));
+            invoice.setServiceName(jsonObject.getStr("service_name"));
+            invoice.setElectronicNumber(jsonObject.getStr("electronic_number"));
             //发票类型
             String invoiceCode = identifyResults.getType();
 //            String invoiceCodes = "";

@@ -110,6 +110,11 @@ public class DataTaxiTicketsVo implements Serializable {
     private String timeGetOff;
 
     /**
+     * 金额
+     */
+    private String fare;
+
+    /**
      * 上车时间
      */
     @ExcelProperty(value = "上车时间")

@@ -179,6 +179,11 @@ public class DataOcrInfoBo extends BaseEntity {
     private String pageNumber;
 
     /**
+     * 服务类型
+     */
+    private String serviceName;
+
+    /**
      * 发票联次
      */
     @NotBlank(message = "发票联次不能为空", groups = { AddGroup.class, EditGroup.class })

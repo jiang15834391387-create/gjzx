@@ -58,10 +58,10 @@ public class DataNonTaxConversion implements ChangeIdentifyInfo<List<IdentifyRes
             invoice.setElectronicMark(jsonObject.getStr("electronic_mark"));
             invoice.setKind(jsonObject.getStr("kind"));
             // 大写 价税合计
-            invoice.setOtherInfo(jsonObject.getStr("other_info"));
             invoice.setCheckCode(jsonObject.getStr("check_code"));
             invoice.setPayee(jsonObject.getStr("payee"));
             invoice.setPayer(jsonObject.getStr("payer"));
+            invoice.setOtherInfo(jsonObject.getStr("other_info"));
             invoice.setSocialCreditCode(jsonObject.getStr("social_credit_code"));
             invoice.setInvoiceTotal(jsonObject.getStr("total"));
             invoice.setTotalWords(jsonObject.getStr("total_words"));
@@ -89,6 +89,7 @@ public class DataNonTaxConversion implements ChangeIdentifyInfo<List<IdentifyRes
                     e.setProjectCode(fJson.containsKey("project_code") ? fJson.get("project_code") : null);
                     e.setStandardOfCharge(fJson.containsKey("standard_of_charge") ? fJson.get("standard_of_charge") : null);
                     e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    e.setUnit(fJson.containsKey("uom") ? fJson.get("uom") : null);
                     ocrDetailsList.add(e);
                 }
             }

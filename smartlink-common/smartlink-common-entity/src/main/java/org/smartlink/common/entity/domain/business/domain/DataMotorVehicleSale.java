@@ -220,9 +220,14 @@ public class DataMotorVehicleSale extends TenantEntity {
     private String tonnage;
 
     /**
-     * 总计
+     * 总计 小写
      */
     private String invoiceTotal;
+
+    /**
+     * 总计 大写
+     */
+    private String totalCn;
 
     /**
      * 发票专用章存在性判断

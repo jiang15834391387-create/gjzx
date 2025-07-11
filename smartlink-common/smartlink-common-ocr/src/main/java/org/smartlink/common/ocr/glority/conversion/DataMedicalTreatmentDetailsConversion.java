@@ -53,6 +53,8 @@ public class DataMedicalTreatmentDetailsConversion implements ChangeIdentifyInfo
             invoice.setKind(jsonObject.getStr("kind"));
             invoice.setPayee(jsonObject.getStr("payee"));
             invoice.setPayer(jsonObject.getStr("payer"));
+            invoice.setInvoiceTotal(jsonObject.getStr("total"));
+            invoice.setSubTotal(jsonObject.getStr("subtotal"));
 
             JSONArray list = jsonObject.getJSONArray("items");
             List<DataOcrDetails> ocrDetailsList = new ArrayList<>();
