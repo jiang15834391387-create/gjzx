@@ -179,6 +179,11 @@ public class DataOcrInfoBo extends BaseEntity {
     private String pageNumber;
 
     /**
+     * 总计
+     */
+    private String invoiceTotal;
+
+    /**
      * 服务类型
      */
     private String serviceName;

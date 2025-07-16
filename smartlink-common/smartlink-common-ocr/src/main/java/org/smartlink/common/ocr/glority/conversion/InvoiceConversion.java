@@ -62,7 +62,7 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
                 invoice.setSumAmount(jsonObject.getStr("total"));
             }
             invoice.setPretaxAmount(jsonObject.getStr("pretax_amount"));
-            invoice.setTotalLowercase(jsonObject.getStr("total"));
+            invoice.setInvoiceTotal(jsonObject.getStr("total"));
             invoice.setRightInvoiceNumber(jsonObject.getStr("number_confirm"));
             invoice.setRightInvoiceCode(jsonObject.getStr("code_confirm"));
             // 大写 价税合计
@@ -109,8 +109,8 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             invoice.setServiceName(jsonObject.getStr("service_name"));
             invoice.setElectronicNumber(jsonObject.getStr("electronic_number"));
             //发票类型
-            String invoiceCode = identifyResults.getType();
-//            String invoiceCodes = "";
+//            String invoiceCode = identifyResults.getType();
+            String invoiceCode = "";
             if (identifyResults.getRegion() != null && identifyResults.getRegion().length > 0) {
                 invoice.setRegion(String.join(",", identifyResults.getRegion()));
             } else {
@@ -118,21 +118,25 @@ public class InvoiceConversion implements ChangeIdentifyInfo<List<IdentifyResult
             }
             invoice.setOrientation(identifyResults.getOrientation());
             dataImageFilesInfo.setMessage(identifyResults.getMessage());
-            dataImageFilesInfo.setInvoice(invoiceCode);
+
             //发票类型判断
-//            if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("electronic_mark"))) {
-//                //增值税电子专用发票
-//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode());
-////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode();
-//            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("block_chain"))) {
-//                //区块链电子发票
-//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode());
-////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode();
-//            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("transit_mark"))) {
-//                //收费公路通行费增值税电子普通发票
-//                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode());
-////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode();
-//            } else if (InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode().equals(invoiceCode)) {
+            if (InvoiceGlorityEnumd.GLORITY_TAX_SPECIAL_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("electronic_mark"))) {
+                //增值税电子专用发票
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode());
+                invoiceCode = InvoiceGlorityEnumd.GLORITY_ELECTRON_TAX_SPECIAL_CODE.getCode();
+            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("block_chain"))) {
+                //区块链电子发票
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode());
+                invoiceCode = InvoiceGlorityEnumd.GLORITY_ELECTRONIC_QUKUAILIAN_CODE.getCode();
+            } else if (InvoiceGlorityEnumd.GLORITY_ELECTRONIC_CODE.getCode().equals(invoiceCode) && "1".equals(jsonObject.getStr("transit_mark"))) {
+                //收费公路通行费增值税电子普通发票
+                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode());
+                invoiceCode = InvoiceGlorityEnumd.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE.getCode();
+            } else {
+                invoiceCode = identifyResults.getType();
+                dataImageFilesInfo.setInvoice(invoiceCode);
+            }
+//            else if (InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode().equals(invoiceCode)) {
 //                //增值税普通发票(卷票)
 //                dataImageFilesInfo.setInvoice(InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode());
 ////                invoiceCodes = InvoiceGlorityEnumd.GLORITY_ROLL_TICKET_CODE.getCode();

@@ -180,6 +180,11 @@ public class DataOcrInfoVo implements Serializable {
     private String sellCompanySeal;
 
     /**
+     * 总计
+     */
+    private String invoiceTotal;
+
+    /**
      * 发票联
      */
     @ExcelProperty(value = "发票联")

@@ -142,6 +142,11 @@ public class DataOcrInfo extends TenantEntity {
     private String totalLowercase;
 
     /**
+     * 总计
+     */
+    private String invoiceTotal;
+
+    /**
      * 税前金额
      */
     private String pretaxAmount;
