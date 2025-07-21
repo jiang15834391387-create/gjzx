@@ -144,6 +144,7 @@ public class DataOcrInfoServiceImp implements IDataOcrInfoServices {
         lqw.eq(StringUtils.isNotBlank(bo.getDeduction()), DataOcrInfo::getDeduction, bo.getDeduction());
         lqw.eq(StringUtils.isNotBlank(bo.getHandwrite()), DataOcrInfo::getHandwrite, bo.getHandwrite());
         lqw.eq(StringUtils.isNotBlank(bo.getDeleteFlag()), DataOcrInfo::getDeleteFlag, bo.getDeleteFlag());
+        lqw.eq(StringUtils.isNotBlank(bo.getServiceName()), DataOcrInfo::getServiceName, bo.getServiceName());
         return lqw;
     }
 

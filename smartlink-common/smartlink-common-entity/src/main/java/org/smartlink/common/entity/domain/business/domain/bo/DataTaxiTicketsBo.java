@@ -131,6 +131,11 @@ public class DataTaxiTicketsBo extends BaseEntity {
     private String fuelSurcharge;
 
     /**
+     * 金额
+     */
+    private String fare;
+
+    /**
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     @NotBlank(message = "单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]不能为空", groups = { AddGroup.class, EditGroup.class })

@@ -172,6 +172,11 @@ public class DataMotorVehicleSaleVo implements Serializable {
     private String province;
 
     /**
+     * 总计 大写
+     */
+    private String totalCn;
+
+    /**
      * 销售方名称
      */
     @ExcelProperty(value = "销售方名称")

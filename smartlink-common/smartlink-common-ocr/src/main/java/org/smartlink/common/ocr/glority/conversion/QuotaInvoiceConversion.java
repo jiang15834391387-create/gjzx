@@ -55,7 +55,7 @@ public class QuotaInvoiceConversion implements ChangeIdentifyInfo<List<IdentifyR
             quotaInvoice.setInvoiceNumber(jsonObject.getStr("number"));
             quotaInvoice.setInvoiceTotal(jsonObject.getStr("total"));
             quotaInvoice.setCompanySeal(jsonObject.getStr("company_seal"));
-            quotaInvoice.setCompanySeal(jsonObject.getStr("kind"));
+            quotaInvoice.setKind(jsonObject.getStr("kind"));
             quotaInvoice.setProvince(jsonObject.getStr("province"));
             quotaInvoice.setCity(jsonObject.getStr("city"));
             quotaInvoice.setNonCommercialMark(jsonObject.getStr("non_commercial_mark"));

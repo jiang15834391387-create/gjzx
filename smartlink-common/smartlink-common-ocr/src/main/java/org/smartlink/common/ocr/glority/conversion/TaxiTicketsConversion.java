@@ -61,6 +61,7 @@ public class TaxiTicketsConversion implements ChangeIdentifyInfo<List<IdentifyRe
             taxiTickets.setCity(jsonObject.getStr("city"));
             taxiTickets.setKind(jsonObject.getStr("kind"));
             taxiTickets.setFuelSurcharge(jsonObject.getStr("surcharge"));
+            taxiTickets.setFuelSurcharge(jsonObject.getStr("fare"));
 
             taxiTickets.setOrientation(identifyResults.getOrientation());
             if (identifyResults.getRegion() != null && identifyResults.getRegion().length > 0) {

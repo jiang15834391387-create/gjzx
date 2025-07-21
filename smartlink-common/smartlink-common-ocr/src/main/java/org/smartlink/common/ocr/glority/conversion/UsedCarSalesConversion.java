@@ -52,10 +52,9 @@ public class UsedCarSalesConversion implements ChangeIdentifyInfo<List<IdentifyR
             dataUsedCarSales.setInvoiceCode(jsonObject.getStr("code"));
             dataUsedCarSales.setInvoiceDate(jsonObject.getStr("date"));
             dataUsedCarSales.setInvoiceTotal(jsonObject.getStr("total"));
+            dataUsedCarSales.setTotalUppercase(jsonObject.getStr("total_cn"));
             dataUsedCarSales.setSellerName(jsonObject.getStr("seller"));
-            dataUsedCarSales.setRegisTrationNumber(jsonObject.getStr("seller"));
-            dataUsedCarSales.setSellerName(jsonObject.getStr("seller"));
-            dataUsedCarSales.setSellerName(jsonObject.getStr("registration_number"));
+            dataUsedCarSales.setRegisTrationNumber(jsonObject.getStr("registration_number"));
             dataUsedCarSales.setVehicleType(jsonObject.getStr("car_type"));
             dataUsedCarSales.setBuyerId(jsonObject.getStr("buyer_id"));
             dataUsedCarSales.setSellerId(jsonObject.getStr("seller_id"));
@@ -67,13 +66,17 @@ public class UsedCarSalesConversion implements ChangeIdentifyInfo<List<IdentifyR
             dataUsedCarSales.setLicensePlate(jsonObject.getStr("license_plate"));
             dataUsedCarSales.setBuyerPhone(jsonObject.getStr("buyer_tel"));
             dataUsedCarSales.setCompanyName(jsonObject.getStr("company_name"));
+            dataUsedCarSales.setCompanyTaxId(jsonObject.getStr("company_tax_id"));
+            dataUsedCarSales.setLemonMarketBankAndCcount(jsonObject.getStr("company_bank_account"));
+            dataUsedCarSales.setLemonMarketPhone(jsonObject.getStr("company_phone"));
+            dataUsedCarSales.setLemonMarketAddress(jsonObject.getStr("company_address"));
             dataUsedCarSales.setCarCode(jsonObject.getStr("car_code"));
             dataUsedCarSales.setCarModel(jsonObject.getStr("car_model"));
             dataUsedCarSales.setCompanySeal(jsonObject.getStr("company_seal"));
-            dataUsedCarSales.setMachineCode(jsonObject.getStr("machine_id"));
+            dataUsedCarSales.setMachineId(jsonObject.getStr("machine_id"));
             dataUsedCarSales.setInvoiceSheet(jsonObject.getStr("form_type"));
             dataUsedCarSales.setPageNumber(jsonObject.getStr("form_name"));
-            dataUsedCarSales.setPageNumber(jsonObject.getStr("kind"));
+            dataUsedCarSales.setKind(jsonObject.getStr("kind"));
             dataUsedCarSales.setTitle(jsonObject.getStr("title"));
             dataUsedCarSales.setMachineNumber(jsonObject.getStr("machine_number"));
             dataUsedCarSales.setMachineCode(jsonObject.getStr("machine_code"));
@@ -85,7 +88,7 @@ public class UsedCarSalesConversion implements ChangeIdentifyInfo<List<IdentifyR
             dataUsedCarSales.setCity(jsonObject.getStr("city"));
             dataUsedCarSales.setBusinessUnitAddress(jsonObject.getStr("auction_address"));
             dataUsedCarSales.setBusinessUnit(jsonObject.getStr("auction_company"));
-            dataUsedCarSales.setBusinessUnit(jsonObject.getStr("auction_company"));
+            dataUsedCarSales.setBusinessUnitTaxNo(jsonObject.getStr("auction_tax_id"));
             dataUsedCarSales.setSellerAccount(jsonObject.getStr("auction_bank_account"));
             dataUsedCarSales.setBusinessUnitPhone(jsonObject.getStr("auction_phone"));
 

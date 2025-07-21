@@ -72,6 +72,19 @@ public class FlightItineraryConversion implements ChangeIdentifyInfo<List<Identi
         flightItinerary.setAgentCode(jsonObject.getStr("agentcode"));
         flightItinerary.setFare(jsonObject.getStr("fare"));
         flightItinerary.setTax(jsonObject.getStr("tax"));
+        flightItinerary.setPrintNumber(jsonObject.getStr("print_number"));
+        flightItinerary.setEndorsement(jsonObject.getStr("endorsement"));
+        flightItinerary.setTitle(jsonObject.getStr("title"));
+        flightItinerary.setElectronicMark(jsonObject.getStr("electronic_mark"));
+        flightItinerary.setIssuingStatus(jsonObject.getStr("issuing_status"));
+        flightItinerary.setQrcode(jsonObject.getStr("qrcode"));
+        flightItinerary.setReceiptNumber(jsonObject.getStr("receipt_number"));
+        flightItinerary.setNumberOfGpOrder(jsonObject.getStr("number_of_gp_order"));
+        flightItinerary.setPromptInformation(jsonObject.getStr("prompt_information"));
+        flightItinerary.setOtherTaxes(jsonObject.getStr("other_taxes"));
+        flightItinerary.setBuyer(jsonObject.getStr("buyer"));
+        flightItinerary.setSeller(jsonObject.getStr("buyer"));
+        flightItinerary.setBuyerTaxId(jsonObject.getStr("buyer_tax_id"));
 
 
             if (identifyResults.getRegion() != null && identifyResults.getRegion().length > 0) {
@@ -93,6 +106,7 @@ public class FlightItineraryConversion implements ChangeIdentifyInfo<List<Identi
                     e.setFlightNumber(fJson.containsKey("flight_number") ? fJson.get("flight_number") : null);
                     e.setInvoiceDate(fJson.containsKey("date") ? fJson.get("date") : null);
                     e.setSeat(fJson.containsKey("seat") ? fJson.get("seat") : null);
+                    e.setInvoiceTime(fJson.containsKey("time") ? fJson.get("time") : null);
                     e.setCarrier(fJson.containsKey("carrier") ? fJson.get("carrier") : null);
                     e.setAllow(fJson.containsKey("allow") ? fJson.get("allow") : null);
                     e.setFareBasis(fJson.containsKey("fare_basis") ? fJson.get("fare_basis") : null);

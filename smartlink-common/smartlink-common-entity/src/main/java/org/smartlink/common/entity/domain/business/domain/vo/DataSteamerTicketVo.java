@@ -139,6 +139,12 @@ public class DataSteamerTicketVo implements Serializable {
     private String region;
 
     /**
+     * 是否删除标识 0-不删除  1-删除
+     */
+    private String deleteFlag;
+
+
+    /**
      * 备注
      */
     @ExcelProperty(value = "备注")

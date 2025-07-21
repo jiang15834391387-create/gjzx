@@ -12,7 +12,7 @@ import java.io.Serial;
 import java.util.List;
 
 /**
- * 医疗票据对象 data_medical_treatment
+ * 票医疗据对象 data_medical_treatment
  *
  * @author Lion Li
  * @date 2025-01-08
@@ -195,6 +195,11 @@ public class DataMedicalTreatment extends TenantEntity {
      * 合计金额(小写)
      */
     private String invoiceTotal;
+
+    /**
+     * 小计
+     */
+    private String subTotal;
 
     /**
      * 合计金额(大写)

@@ -180,6 +180,11 @@ public class DataOcrInfoVo implements Serializable {
     private String sellCompanySeal;
 
     /**
+     * 总计
+     */
+    private String invoiceTotal;
+
+    /**
      * 发票联
      */
     @ExcelProperty(value = "发票联")
@@ -251,6 +256,11 @@ public class DataOcrInfoVo implements Serializable {
      */
     @ExcelProperty(value = "销货方纳税编号")
     private String sellerNo;
+
+    /**
+     * 服务类型
+     */
+    private String serviceName;
 
     /**
      * 合计金额（税前）

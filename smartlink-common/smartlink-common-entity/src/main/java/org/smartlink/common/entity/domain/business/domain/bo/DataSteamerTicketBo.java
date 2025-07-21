@@ -136,6 +136,12 @@ public class DataSteamerTicketBo extends BaseEntity {
     private String region;
 
     /**
+     * 是否删除标识 0-不删除  1-删除
+     */
+    private String deleteFlag;
+
+
+    /**
      * 备注
      */
     @NotBlank(message = "备注不能为空", groups = { AddGroup.class, EditGroup.class })

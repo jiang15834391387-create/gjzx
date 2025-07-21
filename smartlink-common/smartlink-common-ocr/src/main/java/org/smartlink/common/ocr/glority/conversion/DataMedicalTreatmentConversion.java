@@ -72,7 +72,7 @@ public class DataMedicalTreatmentConversion implements ChangeIdentifyInfo<List<I
             invoice.setMedicalInsuranceNumber(jsonObject.getStr("medical_insurance_number"));
             invoice.setVisitDate(jsonObject.getStr("visit_date"));
             invoice.setMedicalInstitutionType(jsonObject.getStr("medical_institution_type"));
-            invoice.setMedicalInstitutionType(jsonObject.getStr("medical_insurance_type"));
+            invoice.setMedicalInsuranceType(jsonObject.getStr("medical_insurance_type"));
             invoice.setGende(jsonObject.getStr("gender"));
             invoice.setOtherPayments(jsonObject.getStr("other_payments"));
             invoice.setPersonalAccountPayment(jsonObject.getStr("personal_account_payment"));
@@ -100,6 +100,7 @@ public class DataMedicalTreatmentConversion implements ChangeIdentifyInfo<List<I
                     e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
                     e.setDetailAmount(fJson.containsKey("amount") ? fJson.get("amount") : null);
                     e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
+                    e.setUnit(fJson.containsKey("uom") ? fJson.get("uom") : null);
                     ocrDetailsList.add(e);
                 }
             }

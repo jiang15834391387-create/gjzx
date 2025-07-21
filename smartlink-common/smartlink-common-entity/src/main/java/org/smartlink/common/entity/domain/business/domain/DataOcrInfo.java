@@ -102,6 +102,11 @@ public class DataOcrInfo extends TenantEntity {
     private String title;
 
     /**
+     * 服务类型
+     */
+    private String serviceName;
+
+    /**
      * 发票代码
      */
     private String invoiceCode;
@@ -135,6 +140,11 @@ public class DataOcrInfo extends TenantEntity {
      * 小写金额，（价税合计）
      */
     private String totalLowercase;
+
+    /**
+     * 总计
+     */
+    private String invoiceTotal;
 
     /**
      * 税前金额
@@ -247,7 +257,7 @@ public class DataOcrInfo extends TenantEntity {
     private String transitMark;
 
     /**
-     * 机动车标志
+     * 成品油标志
      */
     private String oilMark;
 

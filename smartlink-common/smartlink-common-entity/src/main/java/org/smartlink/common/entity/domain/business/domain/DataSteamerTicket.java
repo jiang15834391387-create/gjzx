@@ -125,6 +125,12 @@ public class DataSteamerTicket extends TenantEntity {
     private String remark;
 
     /**
+     * 是否删除标识 0-不删除  1-删除
+     */
+    private String deleteFlag;
+
+
+    /**
      * 版本号
      */
     @Version

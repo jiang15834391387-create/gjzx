@@ -116,6 +116,11 @@ public class DataTaxiTickets extends TenantEntity {
     private String fuelSurcharge;
 
     /**
+     * 金额
+     */
+    private String fare;
+
+    /**
      * 单张发票区域: 左上点 和 右下点[x1, y1, x2, y2]
      */
     private String region;

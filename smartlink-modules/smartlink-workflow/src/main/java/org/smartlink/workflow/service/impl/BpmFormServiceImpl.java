@@ -115,12 +115,11 @@ public class BpmFormServiceImpl implements BpmFormService {
     }
 
     @Override
-    public Map<String, String> getExpenseAccount(Long id) {
-        Map<String, String> result = new LinkedHashMap<>();
+    public List<Map<String, String>> getExpenseAccount(Long id, Long fromId) {
+        List<Map<String, String>> result = new ArrayList<>();
 
         TestExpenseReimbursementVo testExpenseReimbursementVo = iTestExpenseReimbursementService.queryById(id);
         if (ObjectUtil.isNotNull(testExpenseReimbursementVo) && ObjectUtil.isNotNull(testExpenseReimbursementVo.getFromId())) {
-            Long fromId = testExpenseReimbursementVo.getFromId();
             BpmFormVo form = this.getForm(fromId);
 
             if (ObjectUtil.isNotNull(form) && CollUtil.isNotEmpty(form.getFields())) {
@@ -135,6 +134,12 @@ public class BpmFormServiceImpl implements BpmFormService {
                     JSONObject fieldObj = JSONUtil.parseObj(fieldJson);
                     String fieldKey = fieldObj.getStr("field");
                     String fieldTitle = fieldObj.getStr("title");
+                    String fieldType = fieldObj.getStr("type");
+
+                    // 跳过 type 为 uploader 的字段
+                    if ("uploader".equalsIgnoreCase(fieldType)) {
+                        continue;
+                    }
 
                     // 统一转换为字符串
                     Object value = consumptionDetails.get(fieldKey);
@@ -146,13 +151,18 @@ public class BpmFormServiceImpl implements BpmFormService {
                         stringValue = value.toString();
                     }
 
-                    result.put(fieldTitle, stringValue);
+                    Map<String, String> item = new HashMap<>();
+                    item.put("title", fieldTitle);
+                    item.put("value", stringValue);
+
+                    result.add(item);
                 }
             }
         }
 
         return result;
     }
+
 
 
     @Override

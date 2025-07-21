@@ -67,13 +67,10 @@ public class DataElectronicTransportationGoodsConversion implements ChangeIdenti
                     LinkedHashMap<String, String> fJson = ((cn.hutool.json.JSONObject) invoiceDetails).toBean(LinkedHashMap.class);
                     e.setId(IdUtil.fastSimpleUUID());
                     e.setFileId(dataImageFilesInfo.getFileId());
-                    e.setPrice(fJson.containsKey("dutiable_price") ? fJson.get("dutiable_price") : null);
-                    e.setName(fJson.containsKey("name_of_goods") ? fJson.get("name_of_goods") : null);
-                    e.setDetailsCount(fJson.containsKey("quantity") ? fJson.get("quantity") : null);
-                    e.setTax(fJson.containsKey("tax") ? fJson.get("tax") : null);
-                    e.setTaxNumber(fJson.containsKey("tax_number") ? fJson.get("tax_number") : null);
-                    e.setTaxRate(fJson.containsKey("tax_rate") ? fJson.get("tax_rate") : null);
-                    e.setUnit(fJson.containsKey("unit") ? fJson.get("unit") : null);
+                    e.setOrderNumber(fJson.containsKey("order_number") ? fJson.get("order_number") : null);
+                    e.setServiceType(fJson.containsKey("service_type") ? fJson.get("service_type") : null);
+                    e.setDetailAmount(fJson.containsKey("total") ? fJson.get("total") : null);
+                    e.setUsageTime(fJson.containsKey("usage_time") ? fJson.get("usage_time") : null);
 
                     ocrDetailsList.add(e);
                 }
