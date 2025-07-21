@@ -2,6 +2,7 @@ package org.smartlink.workflow.service;
 
 
 import jakarta.validation.constraints.NotNull;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.workflow.domain.TestFormManage;
@@ -70,4 +71,7 @@ public interface ITestExpenseReimbursementService {
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
     List<TestFormManage> byFromId(@NotNull(message = "表单id为空") String id);
+
+
+    R<Void> setReceiptUrl(TestExpenseReimbursementBo bo);
 }

@@ -123,4 +123,13 @@ public class TestExpenseReimbursementController extends BaseController {
         return R.ok(testExpenseReimbursementService.byFromId(id));
     }
 
+
+    /**
+     * 上传收据回单
+     */
+    @PostMapping("/setReceiptUrl")
+    public R<Void> setReceiptUrl(@RequestBody TestExpenseReimbursementBo bo) {
+        return testExpenseReimbursementService.setReceiptUrl(bo);
+    }
+
 }

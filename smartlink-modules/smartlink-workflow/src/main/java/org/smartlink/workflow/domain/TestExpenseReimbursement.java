@@ -74,4 +74,6 @@ public class TestExpenseReimbursement extends TenantEntity {
      */
     private String detailsData;
 
+    private String  receiptUrl;
+
 }

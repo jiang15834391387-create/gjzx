@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.dto.RoleDTO;
 import org.smartlink.common.core.domain.event.ProcessEvent;
 import org.smartlink.common.core.domain.event.ProcessTaskEvent;
@@ -352,6 +353,26 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     @Override
     public List<TestFormManage> byFromId(String type) {
         return testFormManageMapper.selectList(new QueryWrapper<TestFormManage>().eq("form_type",type).eq("is_deleted",0));
+    }
+
+    @Override
+    public R<Void> setReceiptUrl(TestExpenseReimbursementBo bo) {
+        Long id = bo.getId();
+        String receiptUrl = bo.getReceiptUrl();
+        if(id==null||StringUtils.isEmpty(receiptUrl)){
+            return R.fail("请求参数不全");
+        }
+        TestExpenseReimbursement testExpenseReimbursement = baseMapper.selectById(id);
+        if(testExpenseReimbursement==null){
+            return R.fail("单据不存在");
+        }
+        String status = testExpenseReimbursement.getStatus();
+        if (!status.equals(BusinessStatusEnum.FINISH.getStatus())){
+            return R.fail("单据未完成");
+        }
+        testExpenseReimbursement.setReceiptUrl(receiptUrl);
+        baseMapper.updateById(testExpenseReimbursement);
+        return R.ok();
     }
 
 

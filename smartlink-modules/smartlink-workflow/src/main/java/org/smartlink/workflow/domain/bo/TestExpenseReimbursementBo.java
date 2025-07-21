@@ -89,4 +89,6 @@ public class TestExpenseReimbursementBo extends BaseEntity {
 
 
     private String detailsData;
+
+    private String  receiptUrl;
 }
