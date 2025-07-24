@@ -187,6 +187,11 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
     @Override
     public void resetConfigCache() {
         CacheUtils.clear(CacheNames.SYS_CONFIG);
+        // 重新加载所有参数配置并写入缓存
+        List<SysConfigVo> configs = this.selectConfigList(new SysConfigBo()); // 查询所有配置项
+        for (SysConfigVo config : configs) {
+            CacheUtils.put(CacheNames.SYS_CONFIG, config.getConfigKey(), config.getConfigValue());
+        }
     }
 
     /**
