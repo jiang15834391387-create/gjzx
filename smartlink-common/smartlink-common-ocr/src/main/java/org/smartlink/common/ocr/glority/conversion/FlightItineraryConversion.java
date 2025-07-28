@@ -83,7 +83,7 @@ public class FlightItineraryConversion implements ChangeIdentifyInfo<List<Identi
         flightItinerary.setPromptInformation(jsonObject.getStr("prompt_information"));
         flightItinerary.setOtherTaxes(jsonObject.getStr("other_taxes"));
         flightItinerary.setBuyer(jsonObject.getStr("buyer"));
-        flightItinerary.setSeller(jsonObject.getStr("buyer"));
+        flightItinerary.setSeller(jsonObject.getStr("seller"));
         flightItinerary.setBuyerTaxId(jsonObject.getStr("buyer_tax_id"));
 
 
