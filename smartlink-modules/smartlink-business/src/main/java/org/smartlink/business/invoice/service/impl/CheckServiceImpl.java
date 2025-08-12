@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.util.StringUtils;
 import org.smartlink.business.doman.vo.InvoiceVo;
+import org.smartlink.business.doman.vo.InvoiceWriteBackVo;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
 import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.invoice.service.ICheckService;
@@ -1878,6 +1879,7 @@ public class CheckServiceImpl implements ICheckService {
         }
         return R.fail(500,"发票类型错误");
     }
+
     //火车票新增
     private R<Void> addRailwayTicket(Map<String, Object> generalInfo, String invoiceType) {
         DataRailwayTicket res =BeanUtil.toBean(generalInfo, DataRailwayTicket.class);
@@ -2138,5 +2140,120 @@ public class CheckServiceImpl implements ICheckService {
             return R.fail("修改图片信息失败");
         }
         return R.ok();
+    }
+    //发票回写查询
+    @Override
+    public List<InvoiceWriteBackVo> invoiceWriteSelect(List<HashMap<String,Object>> list) {
+        List<InvoiceWriteBackVo> voList = new ArrayList<>();
+        for (HashMap<String,Object> invoiceType : list) {
+            String type = invoiceType.get("type").toString();
+            String id = invoiceType.get("id").toString();
+            InvoiceWriteBackVo invoiceWriteBackVo = selectTypeInvoice(type, id);
+            if (ObjectUtil.isNotEmpty(invoiceWriteBackVo)){
+                voList.add(invoiceWriteBackVo);
+            }
+        }
+        return voList;
+    }
+
+    private InvoiceWriteBackVo selectTypeInvoice(String invoiceType, String invoiceId) {
+        switch (invoiceType) {
+            //增值税、机打
+            case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_TAX_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
+            case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+            case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_LIST:
+                DataOcrInfo ocrInfo = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(ocrInfo.getTotalLowercase()).setDetails(ocrInfo.getRemark()).setInvoiceId(invoiceId);
+            //机动车
+            case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
+                DataMotorVehicleSale dataMotorVehicleSale =motorVehicleSaleMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataMotorVehicleSale.getInvoiceTotal()).setDetails(dataMotorVehicleSale.getRemark()).setInvoiceId(invoiceId);
+
+            //航空运输电子客票行程单
+            case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                DataFlightItinerary dataFlightItinerary =flightItineraryMapper.selectOne(new LambdaQueryWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataFlightItinerary.getInvoiceTotal()).setDetails(dataFlightItinerary.getRemark()).setInvoiceId(invoiceId);
+            //二手车
+            case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
+                DataUsedCarSales usedCarSales =usedCarSalesMapper.selectOne(new LambdaQueryWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(usedCarSales.getInvoiceTotal()).setDetails(usedCarSales.getRemark()).setInvoiceId(invoiceId);
+
+            //船票
+            case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
+                DataSteamerTicket dataSteamerTicket =steamerTicketMapper.selectOne(new LambdaQueryWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataSteamerTicket.getInvoiceTotal()).setDetails(dataSteamerTicket.getRemark()).setInvoiceId(invoiceId);
+
+            //医疗票明细票
+            case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
+            case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
+                DataMedicalTreatment medicalTreatment=dataMedicalTreatmentMapper.selectOne(new LambdaQueryWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(medicalTreatment.getInvoiceTotal()).setDetails(medicalTreatment.getRemark()).setInvoiceId(invoiceId);
+
+            //非税收入类发票
+            case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                DataNonTax dataNonTax =dataNonTaxMapper.selectOne(new LambdaQueryWrapper<DataNonTax>().eq(DataNonTax::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataNonTax.getInvoiceTotal()).setDetails(dataNonTax.getRemark()).setInvoiceId(invoiceId);
+
+            //定额发票
+            case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
+                DataQuotaInvoice dataQuotaInvoice =quotaInvoiceMapper.selectOne(new LambdaQueryWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataQuotaInvoice.getInvoiceTotal()).setDetails(dataQuotaInvoice.getRemark()).setInvoiceId(invoiceId);
+            //出租车发票
+            case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
+                DataTaxiTickets dataTaxiTickets =taxiTicketsMapper.selectOne(new LambdaQueryWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataTaxiTickets.getInvoiceTotal()).setDetails(dataTaxiTickets.getRemark()).setInvoiceId(invoiceId);
+            //火车发票
+            case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                DataRailwayTicket dataRailwayTicket =railwayTicketMapper.selectOne(new LambdaQueryWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataRailwayTicket.getInvoiceTotal()).setDetails(dataRailwayTicket.getRemark()).setInvoiceId(invoiceId);
+            //客运车发票
+            case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
+                DataPassengerCar dataPassengerCar =passengerCarMapper.selectOne(new LambdaQueryWrapper<DataPassengerCar>().eq(DataPassengerCar::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataPassengerCar.getInvoiceTotal()).setDetails(dataPassengerCar.getRemark()).setInvoiceId(invoiceId);
+
+            //过路费发票
+            case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
+                DataTollRoads dataTollRoads =tollRoadsMapper.selectOne(new LambdaQueryWrapper<DataTollRoads>().eq(DataTollRoads::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataTollRoads.getInvoiceTotal()).setDetails(dataTollRoads.getRemark()).setInvoiceId(invoiceId);
+            //小票/可报销其他发票
+            case InvoiceConstants.GLORITY_RECEIPT_CODE:
+            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
+                DataReceipt dataReceipt=dataReceiptMapper.selectOne(new LambdaQueryWrapper<DataReceipt>().eq(DataReceipt::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataReceipt.getInvoiceTotal()).setDetails(dataReceipt.getRemark()).setInvoiceId(invoiceId);
+            //出行发票/滴滴
+            case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
+                DataDidiItinerary didiItinerary =didiItineraryMapper.selectOne(new LambdaQueryWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(didiItinerary.getInvoiceTotal()).setDetails(didiItinerary.getRemark()).setInvoiceId(invoiceId);
+            //完税证明发票
+            case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
+                DataDutyPaidProof dutyPaidProof =paidProofMapper.selectOne(new LambdaQueryWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dutyPaidProof.getInvoiceTotal()).setDetails(dutyPaidProof.getRemark()).setInvoiceId(invoiceId);
+            //海关进口货物报关单发票
+            case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
+                DataCustomsImxportGoods dataCustomsImxportGoods =customsImportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataCustomsImxportGoods.getFreight()).setDetails(dataCustomsImxportGoods.getRemark()).setInvoiceId(invoiceId);
+            //海关出口货物报关单发票
+            case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
+                DataCustomsExportGoods dataCustomsExportGoods =customsExportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataCustomsExportGoods.getFreight()).setDetails(dataCustomsExportGoods.getRemark()).setInvoiceId(invoiceId);
+            //海关专用缴款书发票
+            case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
+                DataCustomsSpecialPayment dataCustomsSpecialPayment =customsSpecialPaymentMapper.selectOne(new LambdaQueryWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(dataCustomsSpecialPayment.getInvoiceTotal()).setDetails(dataCustomsSpecialPayment.getRemark()).setInvoiceId(invoiceId);
+            //货物运输电子收款凭证发票
+            case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
+                DataElectronicTransportationGoods transportationGoods =paymentMapper.selectOne(new LambdaQueryWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getId, invoiceId));
+                return new InvoiceWriteBackVo().setAmount(transportationGoods.getTotalPrice()).setDetails(transportationGoods.getRemark()).setInvoiceId(invoiceId);
+            default: {
+                return new InvoiceWriteBackVo();
+            }
+        }
     }
 }
