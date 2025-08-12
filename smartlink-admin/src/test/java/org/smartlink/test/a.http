@@ -273,12 +273,12 @@ clientid: e5cd7e4891bf95d1d19206ce24a7b32e
 ###
 POST http://127.0.0.1:8080/system/bpm/form/getConsumptionDetails
 content-Type: application/json
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiI3ZzlkMFNiZXM5V2dTWFZwdUR1UEFDSGNQRGxVRXA4TyIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.advzdS3Y45_fhDSq7jLn570hxNdzirbmH-nlfwUBzMw
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpblR5cGUiOiJsb2dpbiIsImxvZ2luSWQiOiJzeXNfdXNlcjoxIiwicm5TdHIiOiJSVE01NlVNS2pxaXFTOFY3N2RpY0ZEMDZPM2ZYdzBXeiIsImNsaWVudGlkIjoiZTVjZDdlNDg5MWJmOTVkMWQxOTIwNmNlMjRhN2IzMmUiLCJ0ZW5hbnRJZCI6IjAwMDAwMCIsInVzZXJJZCI6MSwidXNlck5hbWUiOiJhZG1pbiIsImRlcHRJZCI6MTAzLCJkZXB0TmFtZSI6IueglOWPkemDqOmXqCIsImRlcHRDYXRlZ29yeSI6IiJ9.CYTNlz3jbpyfCG6mSTiIn1vabXezaEMl034OH86Yxwk
 clientid: e5cd7e4891bf95d1d19206ce24a7b32e
 
 {
     "fromId": "1901567509500977153",
-    "details": [{"a":1,"b":2}]
+    "details": [{"id":"ec1e25fae2b0489ca651e37daa5bbb1d","type": "10102"},{"id":"ecace5d4ad32445b9897218a44fb2fc0","type": "10102"}]
 }
 
 ###

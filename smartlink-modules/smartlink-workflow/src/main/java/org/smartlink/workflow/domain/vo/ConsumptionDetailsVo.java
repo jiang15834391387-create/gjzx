@@ -2,6 +2,7 @@ package org.smartlink.workflow.domain.vo;
 
 import lombok.Data;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -10,7 +11,7 @@ import java.util.List;
 @Data
 public class ConsumptionDetailsVo {
 
-    private List<DetailsVo> details;
+    private List<HashMap<String, Object>>details;
 
     private Long fromId;
 }

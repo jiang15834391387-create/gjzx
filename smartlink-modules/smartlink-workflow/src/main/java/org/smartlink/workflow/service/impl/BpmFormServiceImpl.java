@@ -15,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import jodd.bean.BeanUtil;
 import org.apache.commons.collections4.CollectionUtils;
+import org.smartlink.business.doman.vo.InvoiceWriteBackVo;
+import org.smartlink.business.invoice.service.ICheckService;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.json.utils.JsonUtils;
@@ -55,6 +57,9 @@ public class BpmFormServiceImpl implements BpmFormService {
     private TestExpenseReimbursementMapper expenseReimbursementMapper;
     @Resource
     private ITestExpenseReimbursementService iTestExpenseReimbursementService;
+    @Resource
+    private ICheckService checkService;
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public Long createForm(BpmFormVo createReqVO) {
@@ -219,7 +224,7 @@ public class BpmFormServiceImpl implements BpmFormService {
     @Override
     public R<String> getConsumptionDetails(ConsumptionDetailsVo vo) {
         Long fromId = vo.getFromId();
-        List<DetailsVo> details = vo.getDetails();
+        List<HashMap<String, Object>> details = vo.getDetails();
         if (fromId==null|| CollectionUtils.isEmpty(details)){
             return R.fail("参数不全");
         }
@@ -228,27 +233,25 @@ public class BpmFormServiceImpl implements BpmFormService {
             return R.fail("表单不存在");
         }
 
-
-
-        /**
-         * 获取样式
-         */
-        String detailsTemplate = getDetailsTemplate(fromId);
-
-        return null;
+        List<InvoiceWriteBackVo> invoiceWriteBackVos = checkService.invoiceWriteSelect(details);
+        if(!CollectionUtils.isEmpty(invoiceWriteBackVos)){
+            String detailsTemplate = getDetailsTemplate(fromId,invoiceWriteBackVos);
+            return R.ok(detailsTemplate);
+        }
+        return R.ok();
     }
 
 
-    public String getDetailsTemplate(Long fromId) {
+    public String getDetailsTemplate(Long fromId,List<InvoiceWriteBackVo> list) {
         BpmFormVo form = this.getForm(fromId);
         if(form!=null){
-            String getfield = getfield(form);
+            String getfield = getfield(form, list);
             return getfield;
         }
        return null;
     }
 
-    public String getfield(BpmFormVo form) {
+    public String getfield(BpmFormVo form,List<InvoiceWriteBackVo> list) {
         List<String> fields = form.getFields();
         for (String fieldJson : fields) {
             cn.hutool.json.JSONObject fieldObj = JSONUtil.parseObj(fieldJson);
@@ -272,35 +275,31 @@ public class BpmFormServiceImpl implements BpmFormService {
                                     String rule2 = prop2.getStr("rule");
                                     if(rule2 != null && !rule2.trim().isEmpty()){
                                         com.alibaba.fastjson.JSONArray array2 = JSON.parseArray(rule2);
-                                        List<HashMap<String, String>> itemArr=new ArrayList<>();
+                                        HashMap<String, String> item=new HashMap<>();
                                         if (!array2.isEmpty()) {
                                             for (int ii = 0; ii < array2.size(); ii++){
                                                 cn.hutool.json.JSONObject obj = JSONUtil.parseObj(array2.get( ii));
                                                 String fieldTitle = obj.getStr("title");
                                                 String fieldField = obj.getStr("field");
-                                                if (!StringUtils.isEmpty(fieldTitle)&& !StringUtils.isEmpty(fieldField)){
-                                                    HashMap<String, String> item=new HashMap<>();
+
                                                     switch (fieldTitle){
                                                         case "报销金额":
-                                                            item.put(fieldField, "报销金额");
+                                                            item.put("报销金额",fieldField);
                                                             break;
                                                         case "费用描述":
-                                                            item.put(fieldField,"费用描述");
+                                                            item.put("费用描述",fieldField);
                                                             break;
                                                         case "发票上传":
-                                                            item.put(fieldField,"发票上传");
+                                                            item.put("发票上传",fieldField);
                                                             break;
                                                         default:
                                                             break;
                                                     }
-                                                    if(item != null&& item.size()>0){
-                                                        itemArr.add(item);
-                                                    }
-                                                }
                                             }
-                                            if (itemArr!= null&& itemArr.size()>0){
+                                            if (item!= null&& item.size()>0){
+                                                List<HashMap<String, Object>> invoiceWriteBack = this.getInvoiceWriteBack(list, item);
                                                 com.alibaba.fastjson.JSONObject jsonObject2 = new com.alibaba.fastjson.JSONObject();
-                                                jsonObject2.put(field, itemArr);
+                                                jsonObject2.put(field, invoiceWriteBack);
                                                 com.alibaba.fastjson.JSONObject jsonObject3 = new com.alibaba.fastjson.JSONObject();
                                                 jsonObject3.put(fieldKey, jsonObject2);
                                                 return jsonObject3.toString();
@@ -318,5 +317,33 @@ public class BpmFormServiceImpl implements BpmFormService {
         }
         return null;
     }
+
+    public List<HashMap<String, Object>> getInvoiceWriteBack(List<InvoiceWriteBackVo> list,HashMap<String, String> item) {
+        List<HashMap<String, Object>> invoiceWriteBack = new ArrayList<>();
+        for (InvoiceWriteBackVo invoiceWriteBackVo : list){
+            HashMap<String, Object> invoiceWriteBackMap = new HashMap<>();
+            String o = item.get("报销金额");
+            String o1 = item.get("费用描述");
+            String o2 = item.get("发票上传");
+            String amount = invoiceWriteBackVo.getAmount();
+            String details = invoiceWriteBackVo.getDetails();
+            String invoiceId = invoiceWriteBackVo.getInvoiceId();
+            if(!StringUtils.isEmpty(o)&&!StringUtils.isEmpty(amount)){
+                invoiceWriteBackMap.put(o,amount);
+            }
+            if(!StringUtils.isEmpty(o1)&&!StringUtils.isEmpty(details)){
+                invoiceWriteBackMap.put(o1,details);
+            }
+            if(!StringUtils.isEmpty(o2)&&!StringUtils.isEmpty(invoiceId)){
+                ArrayList<Object> objects = new ArrayList<>();
+                objects.add(invoiceId);
+                invoiceWriteBackMap.put(o2,objects);
+            }
+            invoiceWriteBack.add(invoiceWriteBackMap);
+        }
+
+        return invoiceWriteBack;
+    }
+
 
 }

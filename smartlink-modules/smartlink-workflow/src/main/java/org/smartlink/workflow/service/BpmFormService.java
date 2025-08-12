@@ -77,5 +77,5 @@ public interface BpmFormService {
      * @return 动态表单分页
      */
     Page<BpmFormDO> getFormPage(BpmFormDO pageReqVO, PageQuery pageQuery);
-    public R<String> getConsumptionDetails(ConsumptionDetailsVo vo);
+    R<String> getConsumptionDetails(ConsumptionDetailsVo vo);
 }

@@ -127,6 +127,10 @@
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-entity</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-business</artifactId>
+        </dependency>
 
     </dependencies>
 
