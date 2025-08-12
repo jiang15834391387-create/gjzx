@@ -2,9 +2,11 @@ package org.smartlink.workflow.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.Valid;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 
 import org.smartlink.workflow.domain.BpmFormDO;
+import org.smartlink.workflow.domain.vo.ConsumptionDetailsVo;
 import org.smartlink.workflow.domain.vo.form.BpmFormVo;
 
 
@@ -75,5 +77,5 @@ public interface BpmFormService {
      * @return 动态表单分页
      */
     Page<BpmFormDO> getFormPage(BpmFormDO pageReqVO, PageQuery pageQuery);
-
+    public R<String> getConsumptionDetails(ConsumptionDetailsVo vo);
 }

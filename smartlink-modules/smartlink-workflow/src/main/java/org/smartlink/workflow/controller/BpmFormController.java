@@ -12,6 +12,7 @@ import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.workflow.domain.BpmFormDO;
+import org.smartlink.workflow.domain.vo.ConsumptionDetailsVo;
 import org.smartlink.workflow.domain.vo.form.BpmFormRespVO;
 import org.smartlink.workflow.domain.vo.form.BpmFormSaveReqVO;
 import org.smartlink.workflow.domain.vo.form.BpmFormVo;
@@ -72,6 +73,14 @@ public class BpmFormController {
     public R<List<Map<String, String>>> getExpenseAccount(@RequestParam("id") Long id, @RequestParam("fromId") Long fromId) {
         return R.ok(formService.getExpenseAccount(id, fromId));
     }
+
+
+
+    @PostMapping("/getConsumptionDetails")
+    public R<String> getConsumptionDetails(@RequestBody ConsumptionDetailsVo vo) {
+        return formService.getConsumptionDetails(vo);
+    }
+
 
     @GetMapping({"/list-all-simple", "/simple-list"})
     @Operation(summary = "获得动态表单的精简列表", description = "用于表单下拉框")

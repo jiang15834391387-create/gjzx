@@ -6,17 +6,24 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONString;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import jodd.bean.BeanUtil;
+import org.apache.commons.collections4.CollectionUtils;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.workflow.domain.BpmFormDO;
 import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.TestFormManage;
+import org.smartlink.workflow.domain.vo.ConsumptionDetailsVo;
+import org.smartlink.workflow.domain.vo.DetailsVo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.domain.vo.form.BpmFormVo;
 import org.smartlink.workflow.mapper.BpmFormMapper;
@@ -48,7 +55,7 @@ public class BpmFormServiceImpl implements BpmFormService {
     private TestExpenseReimbursementMapper expenseReimbursementMapper;
     @Resource
     private ITestExpenseReimbursementService iTestExpenseReimbursementService;
-
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public Long createForm(BpmFormVo createReqVO) {
         // 插入
@@ -209,5 +216,107 @@ public class BpmFormServiceImpl implements BpmFormService {
 
     }
 
+    @Override
+    public R<String> getConsumptionDetails(ConsumptionDetailsVo vo) {
+        Long fromId = vo.getFromId();
+        List<DetailsVo> details = vo.getDetails();
+        if (fromId==null|| CollectionUtils.isEmpty(details)){
+            return R.fail("参数不全");
+        }
+        BpmFormVo form = this.getForm(fromId);
+        if(form==null){
+            return R.fail("表单不存在");
+        }
+
+
+
+        /**
+         * 获取样式
+         */
+        String detailsTemplate = getDetailsTemplate(fromId);
+
+        return null;
+    }
+
+
+    public String getDetailsTemplate(Long fromId) {
+        BpmFormVo form = this.getForm(fromId);
+        if(form!=null){
+            String getfield = getfield(form);
+            return getfield;
+        }
+       return null;
+    }
+
+    public String getfield(BpmFormVo form) {
+        List<String> fields = form.getFields();
+        for (String fieldJson : fields) {
+            cn.hutool.json.JSONObject fieldObj = JSONUtil.parseObj(fieldJson);
+            String fieldKey = fieldObj.getStr("field");
+            String props = fieldObj.getStr("props");
+            if(!StringUtils.isEmpty(props)){
+                cn.hutool.json.JSONObject prop = JSONUtil.parseObj(props);
+                String rule = prop.getStr("rule");
+                if(rule != null && !rule.trim().isEmpty()){
+                    com.alibaba.fastjson.JSONArray array = JSON.parseArray(rule);
+                    if (!array.isEmpty()) {
+                        for (int i = 0; i < array.size(); i++){
+                            com.alibaba.fastjson.JSONObject first = array.getJSONObject(i);
+                            String type = first.getString("type");
+                            if(!StringUtils.isEmpty(type)&& "group".equals(type)){
+                                String title = first.getString("title");
+                                String field = first.getString("field");
+                                String props1 = first.getString("props");
+                                if(!StringUtils.isEmpty(props)&&"报销明细".equals(title)){
+                                    cn.hutool.json.JSONObject prop2 = JSONUtil.parseObj(props1);
+                                    String rule2 = prop2.getStr("rule");
+                                    if(rule2 != null && !rule2.trim().isEmpty()){
+                                        com.alibaba.fastjson.JSONArray array2 = JSON.parseArray(rule2);
+                                        List<HashMap<String, String>> itemArr=new ArrayList<>();
+                                        if (!array2.isEmpty()) {
+                                            for (int ii = 0; ii < array2.size(); ii++){
+                                                cn.hutool.json.JSONObject obj = JSONUtil.parseObj(array2.get( ii));
+                                                String fieldTitle = obj.getStr("title");
+                                                String fieldField = obj.getStr("field");
+                                                if (!StringUtils.isEmpty(fieldTitle)&& !StringUtils.isEmpty(fieldField)){
+                                                    HashMap<String, String> item=new HashMap<>();
+                                                    switch (fieldTitle){
+                                                        case "报销金额":
+                                                            item.put(fieldField, "报销金额");
+                                                            break;
+                                                        case "费用描述":
+                                                            item.put(fieldField,"费用描述");
+                                                            break;
+                                                        case "发票上传":
+                                                            item.put(fieldField,"发票上传");
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    if(item != null&& item.size()>0){
+                                                        itemArr.add(item);
+                                                    }
+                                                }
+                                            }
+                                            if (itemArr!= null&& itemArr.size()>0){
+                                                com.alibaba.fastjson.JSONObject jsonObject2 = new com.alibaba.fastjson.JSONObject();
+                                                jsonObject2.put(field, itemArr);
+                                                com.alibaba.fastjson.JSONObject jsonObject3 = new com.alibaba.fastjson.JSONObject();
+                                                jsonObject3.put(fieldKey, jsonObject2);
+                                                return jsonObject3.toString();
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+        return null;
+    }
 
 }
