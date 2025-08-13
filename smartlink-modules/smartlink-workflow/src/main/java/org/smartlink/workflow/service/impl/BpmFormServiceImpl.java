@@ -222,7 +222,7 @@ public class BpmFormServiceImpl implements BpmFormService {
     }
 
     @Override
-    public R<String> getConsumptionDetails(ConsumptionDetailsVo vo) {
+    public R<Object> getConsumptionDetails(ConsumptionDetailsVo vo) {
         Long fromId = vo.getFromId();
         List<HashMap<String, Object>> details = vo.getDetails();
         if (fromId==null|| CollectionUtils.isEmpty(details)){
@@ -235,18 +235,21 @@ public class BpmFormServiceImpl implements BpmFormService {
 
         List<InvoiceWriteBackVo> invoiceWriteBackVos = checkService.invoiceWriteSelect(details);
         if(!CollectionUtils.isEmpty(invoiceWriteBackVos)){
-            String detailsTemplate = getDetailsTemplate(fromId,invoiceWriteBackVos);
+            Object detailsTemplate = getDetailsTemplate(fromId,invoiceWriteBackVos);
             return R.ok(detailsTemplate);
         }
         return R.ok();
     }
 
 
-    public String getDetailsTemplate(Long fromId,List<InvoiceWriteBackVo> list) {
+    public Object getDetailsTemplate(Long fromId,List<InvoiceWriteBackVo> list) {
         BpmFormVo form = this.getForm(fromId);
         if(form!=null){
             String getfield = getfield(form, list);
-            return getfield;
+            if(!StringUtils.isEmpty(getfield)){
+                return (Object) getfield;
+            }
+
         }
        return null;
     }

@@ -77,7 +77,7 @@ public class BpmFormController {
 
 
     @PostMapping("/getConsumptionDetails")
-    public R<String> getConsumptionDetails(@RequestBody ConsumptionDetailsVo vo) {
+    public R<Object> getConsumptionDetails(@RequestBody ConsumptionDetailsVo vo) {
         return formService.getConsumptionDetails(vo);
     }
 
