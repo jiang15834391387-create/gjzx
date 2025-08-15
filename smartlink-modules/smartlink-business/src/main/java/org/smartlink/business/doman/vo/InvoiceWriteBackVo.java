@@ -23,4 +23,8 @@ public class InvoiceWriteBackVo {
         this.details = details;
         return this;
     }
+    public InvoiceWriteBackVo setUrL(String url) {
+        this.url = url;
+        return this;
+    }
 }

@@ -2170,90 +2170,117 @@ public class CheckServiceImpl implements ICheckService {
             case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 DataOcrInfo ocrInfo = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(ocrInfo.getTotalLowercase()).setDetails(ocrInfo.getRemark()).setInvoiceId(invoiceId);
+                String url1 = getInvoiceUrl(ocrInfo.getFileId());
+                return new InvoiceWriteBackVo().setAmount(ocrInfo.getTotalLowercase()).setDetails(ocrInfo.getRemark()).setInvoiceId(invoiceId).setUrL(url1);
             //机动车
             case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
                 DataMotorVehicleSale dataMotorVehicleSale =motorVehicleSaleMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataMotorVehicleSale.getInvoiceTotal()).setDetails(dataMotorVehicleSale.getRemark()).setInvoiceId(invoiceId);
+                String url2 = getInvoiceUrl(dataMotorVehicleSale.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataMotorVehicleSale.getInvoiceTotal()).setDetails(dataMotorVehicleSale.getRemark()).setInvoiceId(invoiceId).setUrL(url2);
 
             //航空运输电子客票行程单
             case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
                 DataFlightItinerary dataFlightItinerary =flightItineraryMapper.selectOne(new LambdaQueryWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataFlightItinerary.getInvoiceTotal()).setDetails(dataFlightItinerary.getRemark()).setInvoiceId(invoiceId);
+                String url3 = getInvoiceUrl(dataFlightItinerary.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataFlightItinerary.getInvoiceTotal()).setDetails(dataFlightItinerary.getRemark()).setInvoiceId(invoiceId).setUrL(url3);
             //二手车
             case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
                 DataUsedCarSales usedCarSales =usedCarSalesMapper.selectOne(new LambdaQueryWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(usedCarSales.getInvoiceTotal()).setDetails(usedCarSales.getRemark()).setInvoiceId(invoiceId);
+                String url4 = getInvoiceUrl(usedCarSales.getFileId());
+                return new InvoiceWriteBackVo().setAmount(usedCarSales.getInvoiceTotal()).setDetails(usedCarSales.getRemark()).setInvoiceId(invoiceId).setUrL(url4);
 
             //船票
             case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
                 DataSteamerTicket dataSteamerTicket =steamerTicketMapper.selectOne(new LambdaQueryWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataSteamerTicket.getInvoiceTotal()).setDetails(dataSteamerTicket.getRemark()).setInvoiceId(invoiceId);
+                String url5 = getInvoiceUrl(dataSteamerTicket.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataSteamerTicket.getInvoiceTotal()).setDetails(dataSteamerTicket.getRemark()).setInvoiceId(invoiceId).setUrL(url5);
 
             //医疗票明细票
             case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
             case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
                 DataMedicalTreatment medicalTreatment=dataMedicalTreatmentMapper.selectOne(new LambdaQueryWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(medicalTreatment.getInvoiceTotal()).setDetails(medicalTreatment.getRemark()).setInvoiceId(invoiceId);
+                String url6 = getInvoiceUrl(medicalTreatment.getFileId());
+                return new InvoiceWriteBackVo().setAmount(medicalTreatment.getInvoiceTotal()).setDetails(medicalTreatment.getRemark()).setInvoiceId(invoiceId).setUrL(url6);
 
             //非税收入类发票
             case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
                 DataNonTax dataNonTax =dataNonTaxMapper.selectOne(new LambdaQueryWrapper<DataNonTax>().eq(DataNonTax::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataNonTax.getInvoiceTotal()).setDetails(dataNonTax.getRemark()).setInvoiceId(invoiceId);
+                String url7 = getInvoiceUrl(dataNonTax.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataNonTax.getInvoiceTotal()).setDetails(dataNonTax.getRemark()).setInvoiceId(invoiceId).setUrL(url7);
 
             //定额发票
             case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
                 DataQuotaInvoice dataQuotaInvoice =quotaInvoiceMapper.selectOne(new LambdaQueryWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataQuotaInvoice.getInvoiceTotal()).setDetails(dataQuotaInvoice.getRemark()).setInvoiceId(invoiceId);
+                String url8 = getInvoiceUrl(dataQuotaInvoice.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataQuotaInvoice.getInvoiceTotal()).setDetails(dataQuotaInvoice.getRemark()).setInvoiceId(invoiceId).setUrL(url8);
             //出租车发票
             case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
                 DataTaxiTickets dataTaxiTickets =taxiTicketsMapper.selectOne(new LambdaQueryWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataTaxiTickets.getInvoiceTotal()).setDetails(dataTaxiTickets.getRemark()).setInvoiceId(invoiceId);
+                String url9 = getInvoiceUrl(dataTaxiTickets.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataTaxiTickets.getInvoiceTotal()).setDetails(dataTaxiTickets.getRemark()).setInvoiceId(invoiceId).setUrL(url9);
             //火车发票
             case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
                 DataRailwayTicket dataRailwayTicket =railwayTicketMapper.selectOne(new LambdaQueryWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataRailwayTicket.getInvoiceTotal()).setDetails(dataRailwayTicket.getRemark()).setInvoiceId(invoiceId);
+                String url10 = getInvoiceUrl(dataRailwayTicket.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataRailwayTicket.getInvoiceTotal()).setDetails(dataRailwayTicket.getRemark()).setInvoiceId(invoiceId).setUrL(url10);
             //客运车发票
             case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
                 DataPassengerCar dataPassengerCar =passengerCarMapper.selectOne(new LambdaQueryWrapper<DataPassengerCar>().eq(DataPassengerCar::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataPassengerCar.getInvoiceTotal()).setDetails(dataPassengerCar.getRemark()).setInvoiceId(invoiceId);
+                String url11 = getInvoiceUrl(dataPassengerCar.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataPassengerCar.getInvoiceTotal()).setDetails(dataPassengerCar.getRemark()).setInvoiceId(invoiceId).setUrL(url11);
 
             //过路费发票
             case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
                 DataTollRoads dataTollRoads =tollRoadsMapper.selectOne(new LambdaQueryWrapper<DataTollRoads>().eq(DataTollRoads::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataTollRoads.getInvoiceTotal()).setDetails(dataTollRoads.getRemark()).setInvoiceId(invoiceId);
+                String url12 = getInvoiceUrl(dataTollRoads.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataTollRoads.getInvoiceTotal()).setDetails(dataTollRoads.getRemark()).setInvoiceId(invoiceId).setUrL(url12);
             //小票/可报销其他发票
             case InvoiceConstants.GLORITY_RECEIPT_CODE:
             case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
                 DataReceipt dataReceipt=dataReceiptMapper.selectOne(new LambdaQueryWrapper<DataReceipt>().eq(DataReceipt::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataReceipt.getInvoiceTotal()).setDetails(dataReceipt.getRemark()).setInvoiceId(invoiceId);
+                String url13 = getInvoiceUrl(dataReceipt.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataReceipt.getInvoiceTotal()).setDetails(dataReceipt.getRemark()).setInvoiceId(invoiceId).setUrL(url13);
             //出行发票/滴滴
             case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
                 DataDidiItinerary didiItinerary =didiItineraryMapper.selectOne(new LambdaQueryWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(didiItinerary.getInvoiceTotal()).setDetails(didiItinerary.getRemark()).setInvoiceId(invoiceId);
+                String ur14 = getInvoiceUrl(didiItinerary.getFileId());
+                return new InvoiceWriteBackVo().setAmount(didiItinerary.getInvoiceTotal()).setDetails(didiItinerary.getRemark()).setInvoiceId(invoiceId).setUrL(ur14);
             //完税证明发票
             case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
                 DataDutyPaidProof dutyPaidProof =paidProofMapper.selectOne(new LambdaQueryWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dutyPaidProof.getInvoiceTotal()).setDetails(dutyPaidProof.getRemark()).setInvoiceId(invoiceId);
+                String ur15 = getInvoiceUrl(dutyPaidProof.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dutyPaidProof.getInvoiceTotal()).setDetails(dutyPaidProof.getRemark()).setInvoiceId(invoiceId).setUrL(ur15);
             //海关进口货物报关单发票
             case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
                 DataCustomsImxportGoods dataCustomsImxportGoods =customsImportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataCustomsImxportGoods.getFreight()).setDetails(dataCustomsImxportGoods.getRemark()).setInvoiceId(invoiceId);
+                String ur16 = getInvoiceUrl(dataCustomsImxportGoods.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataCustomsImxportGoods.getFreight()).setDetails(dataCustomsImxportGoods.getRemark()).setInvoiceId(invoiceId).setUrL(ur16);
             //海关出口货物报关单发票
             case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
                 DataCustomsExportGoods dataCustomsExportGoods =customsExportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataCustomsExportGoods.getFreight()).setDetails(dataCustomsExportGoods.getRemark()).setInvoiceId(invoiceId);
+                String ur17 = getInvoiceUrl(dataCustomsExportGoods.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataCustomsExportGoods.getFreight()).setDetails(dataCustomsExportGoods.getRemark()).setInvoiceId(invoiceId).setUrL(ur17);
             //海关专用缴款书发票
             case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
                 DataCustomsSpecialPayment dataCustomsSpecialPayment =customsSpecialPaymentMapper.selectOne(new LambdaQueryWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(dataCustomsSpecialPayment.getInvoiceTotal()).setDetails(dataCustomsSpecialPayment.getRemark()).setInvoiceId(invoiceId);
+                String ur18 = getInvoiceUrl(dataCustomsSpecialPayment.getFileId());
+                return new InvoiceWriteBackVo().setAmount(dataCustomsSpecialPayment.getInvoiceTotal()).setDetails(dataCustomsSpecialPayment.getRemark()).setInvoiceId(invoiceId).setUrL(ur18);
             //货物运输电子收款凭证发票
             case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
                 DataElectronicTransportationGoods transportationGoods =paymentMapper.selectOne(new LambdaQueryWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getId, invoiceId));
-                return new InvoiceWriteBackVo().setAmount(transportationGoods.getTotalPrice()).setDetails(transportationGoods.getRemark()).setInvoiceId(invoiceId);
+                String ur19 = getInvoiceUrl(transportationGoods.getFileId());
+                return new InvoiceWriteBackVo().setAmount(transportationGoods.getTotalPrice()).setDetails(transportationGoods.getRemark()).setInvoiceId(invoiceId).setUrL(ur19);
             default: {
                 return new InvoiceWriteBackVo();
             }
         }
+    }
+    private String getInvoiceUrl(String fileId){
+        DataImageFilesInfo imageFilesInfo = filesInfoMapper.selectOne(new LambdaQueryWrapper<DataImageFilesInfo>()
+            .eq(DataImageFilesInfo::getFileId, fileId));
+        if (ObjectUtil.isNotEmpty(imageFilesInfo)){
+            return imageFilesInfo.getIurl();
+        }
+        return "";
     }
 }
