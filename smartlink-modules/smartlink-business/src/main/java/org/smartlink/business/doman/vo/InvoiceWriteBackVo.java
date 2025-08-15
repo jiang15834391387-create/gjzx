@@ -7,6 +7,7 @@ public class InvoiceWriteBackVo {
     private String amount;//金额
     private String details;//详情
     private String invoiceId;//发票id
+    private String url;
 
     public InvoiceWriteBackVo setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;

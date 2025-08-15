@@ -338,8 +338,11 @@ public class BpmFormServiceImpl implements BpmFormService {
                 invoiceWriteBackMap.put(o1,details);
             }
             if(!StringUtils.isEmpty(o2)&&!StringUtils.isEmpty(invoiceId)){
-                ArrayList<Object> objects = new ArrayList<>();
-                objects.add(invoiceId);
+                ArrayList<HashMap<String, Object>> objects = new ArrayList<>();
+                HashMap<String, Object> objectObjectHashMap = new HashMap<>();
+                objectObjectHashMap.put("id", invoiceId);
+                objectObjectHashMap.put("url", invoiceWriteBackVo.getUrl());
+                objects.add(objectObjectHashMap);
                 invoiceWriteBackMap.put(o2,objects);
             }
             invoiceWriteBack.add(invoiceWriteBackMap);
