@@ -1,23 +1,22 @@
 package org.smartlink.system.controller.system;
 
-import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.core.util.ObjectUtil;
-import org.smartlink.common.log.annotation.Log;
-import org.smartlink.common.web.core.BaseController;
-import org.smartlink.common.mybatis.core.page.PageQuery;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
-import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.excel.utils.ExcelUtil;
+import org.smartlink.common.log.annotation.Log;
+import org.smartlink.common.log.enums.BusinessType;
+import org.smartlink.common.mybatis.core.page.PageQuery;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.web.core.BaseController;
 import org.smartlink.system.domain.bo.SysDictDataBo;
 import org.smartlink.system.domain.vo.SysDictDataVo;
 import org.smartlink.system.service.ISysDictDataService;
 import org.smartlink.system.service.ISysDictTypeService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class SysDictDataController extends BaseController {
     /**
      * 查询字典数据列表
      */
-    @SaCheckPermission("system:dict:list")
+    //@SaCheckPermission("system:dict:list")
     @GetMapping("/list")
     public TableDataInfo<SysDictDataVo> list(SysDictDataBo dictData, PageQuery pageQuery) {
         return dictDataService.selectPageDictDataList(dictData, pageQuery);
@@ -48,7 +47,7 @@ public class SysDictDataController extends BaseController {
      * 导出字典数据列表
      */
     @Log(title = "字典数据", businessType = BusinessType.EXPORT)
-    @SaCheckPermission("system:dict:export")
+    //@SaCheckPermission("system:dict:export")
     @PostMapping("/export")
     public void export(SysDictDataBo dictData, HttpServletResponse response) {
         List<SysDictDataVo> list = dictDataService.selectDictDataList(dictData);
@@ -60,7 +59,7 @@ public class SysDictDataController extends BaseController {
      *
      * @param dictCode 字典code
      */
-    @SaCheckPermission("system:dict:query")
+    //@SaCheckPermission("system:dict:query")
     @GetMapping(value = "/{dictCode}")
     public R<SysDictDataVo> getInfo(@PathVariable Long dictCode) {
         return R.ok(dictDataService.selectDictDataById(dictCode));
@@ -83,7 +82,7 @@ public class SysDictDataController extends BaseController {
     /**
      * 新增字典类型
      */
-    @SaCheckPermission("system:dict:add")
+    //@SaCheckPermission("system:dict:add")
     @Log(title = "字典数据", businessType = BusinessType.INSERT)
     @PostMapping
     public R<Void> add(@Validated @RequestBody SysDictDataBo dict) {
@@ -97,7 +96,7 @@ public class SysDictDataController extends BaseController {
     /**
      * 修改保存字典类型
      */
-    @SaCheckPermission("system:dict:edit")
+    //@SaCheckPermission("system:dict:edit")
     @Log(title = "字典数据", businessType = BusinessType.UPDATE)
     @PutMapping
     public R<Void> edit(@Validated @RequestBody SysDictDataBo dict) {
@@ -113,7 +112,7 @@ public class SysDictDataController extends BaseController {
      *
      * @param dictCodes 字典code串
      */
-    @SaCheckPermission("system:dict:remove")
+    //@SaCheckPermission("system:dict:remove")
     @Log(title = "字典类型", businessType = BusinessType.DELETE)
     @DeleteMapping("/{dictCodes}")
     public R<Void> remove(@PathVariable Long[] dictCodes) {
