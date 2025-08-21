@@ -289,6 +289,9 @@ public class BpmFormServiceImpl implements BpmFormService {
                                                         case "报销金额":
                                                             item.put("报销金额",fieldField);
                                                             break;
+                                                        case "消费金额":
+                                                            item.put("消费金额",fieldField);
+                                                            break;
                                                         case "费用描述":
                                                             item.put("费用描述",fieldField);
                                                             break;
