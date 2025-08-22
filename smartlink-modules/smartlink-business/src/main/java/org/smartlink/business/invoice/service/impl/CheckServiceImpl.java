@@ -978,6 +978,8 @@ public class CheckServiceImpl implements ICheckService {
      */
     @Override
     public Page<InvoiceVo> selectPageCheck(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
+        Long userId = LoginHelper.getUserId();
+        pageQuery.setUserId(userId);
         List<InvoiceVo> invoiceVosList = new ArrayList<>();
        return this.selectPageCommon(pageQuery, invoiceVosList);
     }
