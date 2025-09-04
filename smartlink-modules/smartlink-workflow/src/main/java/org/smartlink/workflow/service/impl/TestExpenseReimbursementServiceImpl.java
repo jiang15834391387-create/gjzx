@@ -183,7 +183,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 bo.setDataChannel("pc");
             }
 
-            ArrayList<String> list=null;
+            /*ArrayList<String> list=null;
             String detailsData = bo.getDetailsData();
             if(StringUtils.isEmpty(detailsData)){
                 log.info("为传递发票图片信息");
@@ -196,7 +196,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 if(CollectionUtils.isNotEmpty(list)){
                     validImage(list);
                 }
-            }
+            }*/
 
             add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
             validEntityBeforeSave(add);
@@ -214,9 +214,9 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             if (flag) {
                 bo.setId(add.getId());
             }
-            if(CollectionUtils.isNotEmpty(list)){
+            /*if(CollectionUtils.isNotEmpty(list)){
                 dataImageFilesInfoService.bindAndRelieve(add.getId().toString(), list, true);
-            }
+            }*/
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -232,8 +232,12 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             if (StringUtils.isNotBlank(type)&& type.equals("uploadInvoice")) {
                 String s = map.get("value");
                 if(!StringUtils.isEmpty(s)){
-                    String[] urls = s.split(",");
-                    list.addAll(Arrays.asList(urls));
+                    if(s.contains(",")){
+                        list.add(s);
+                    }else {
+                        String[] urls = s.split(",");
+                        list.addAll(Arrays.asList(urls));
+                    }
                 }
             }
         }
@@ -338,16 +342,22 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        ArrayList<String> list = new ArrayList<>();
+        //ArrayList<String> list = new ArrayList<>();
         try {
             baseMapper.delBatchById(ids, LoginHelper.getUserId());
-            if (CollectionUtils.isNotEmpty(ids)){
+            /*if (CollectionUtils.isNotEmpty(ids)){
                 for (Long id : ids){
                     dataImageFilesInfoService.bindAndRelieve(id.toString(), list, false);
                 }
-            }
+            }*/
             List<String> idList = StreamUtils.toList(ids, String::valueOf);
             workflowService.deleteRunAndHisInstance(idList);
+            for (Long id : ids){
+                TestExpenseReimbursement testExpenseReimbursement = baseMapper.selectById(id);
+                if(testExpenseReimbursement!=null){
+                    invoiceStatus(testExpenseReimbursement,null);
+                }
+            }
         } catch (Exception e) {
             log.error("删除失败，执行回滚{}",e);
             throw new RuntimeException("失败");
@@ -430,10 +440,52 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                     testExpenseReimbursement.setStatus(BusinessStatusEnum.WAITING.getStatus());
                 }
                 baseMapper.updateById(testExpenseReimbursement);
+                invoiceStatus(testExpenseReimbursement,processEvent.getStatus());
             }
         }
     }
 
+    public void invoiceStatus(TestExpenseReimbursement vo,String status){
+        ArrayList<String> idList = getIdList(vo);
+        Long id = vo.getId();
+        if(CollectionUtils.isNotEmpty(idList)){
+            if(!StringUtils.isEmpty(status)){
+                if(status.equals(BusinessStatusEnum.DRAFT.getStatus())
+                    ||status.equals(BusinessStatusEnum.WAITING.getStatus())){
+                    //绑定(参数：List id)
+                    dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, false);
+                    dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, true);
+                }else if (status.equals(BusinessStatusEnum.CANCEL.getStatus())
+                    ||status.equals(BusinessStatusEnum.FINISH.getStatus())
+                    ||status.equals(BusinessStatusEnum.INVALID.getStatus())
+                    ||status.equals(BusinessStatusEnum.TERMINATION.getStatus())){
+                    //解绑(参数：List id)
+                    dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, false);
+                }
+            }else {
+                //解绑(参数：List id)
+                dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, false);
+            }
+        }
+    }
+
+    public ArrayList<String> getIdList(TestExpenseReimbursement bo) {
+        ArrayList<String> list=null;
+        String detailsData = bo.getDetailsData();
+        if(!StringUtils.isEmpty(detailsData)){
+            {
+                List<Map<String, String>> maps = parseJsonString(detailsData);
+                if (CollectionUtils.isEmpty(maps)) {
+                    new ServiceException("请求参数不全");
+                }
+                list = joinImageFile(maps);
+                if (CollectionUtils.isNotEmpty(list)) {
+                    return list;
+                }
+            }
+        }
+        return list;
+    }
 
     @EventListener(ProcessTaskEvent.class)
     public void processTaskHandler2(ProcessTaskEvent processTaskEvent) {
