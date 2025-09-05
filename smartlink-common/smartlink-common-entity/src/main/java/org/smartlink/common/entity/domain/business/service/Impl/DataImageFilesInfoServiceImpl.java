@@ -186,13 +186,17 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
             if (StringUtils.isBlank(workflowId)) {
                 return R.fail();
             }
-            for (String fileId : fileIds) {
-                LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(DataImageFilesInfo::getFileId, fileId);
-                DataImageFilesInfo filesInfo = baseMapper.selectOne(queryWrapper);
-                filesInfo.setWorkflowId(workflowId);
-                filesInfo.setFileFlowStatus(FileStatusEnumd.REIMBURSED.getCode());
-                baseMapper.updateById(filesInfo);
+            if(!CollectionUtils.isEmpty(fileIds)){
+                for (String fileId : fileIds) {
+                    LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(DataImageFilesInfo::getFileId, fileId);
+                    DataImageFilesInfo filesInfo = baseMapper.selectOne(queryWrapper);
+                    if(filesInfo!=null){
+                        filesInfo.setWorkflowId(workflowId);
+                        filesInfo.setFileFlowStatus(FileStatusEnumd.REIMBURSED.getCode());
+                        baseMapper.updateById(filesInfo);
+                    }
+                }
             }
 
           }else {
