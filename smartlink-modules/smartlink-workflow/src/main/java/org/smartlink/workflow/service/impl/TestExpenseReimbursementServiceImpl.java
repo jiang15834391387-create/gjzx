@@ -183,7 +183,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 bo.setDataChannel("pc");
             }
 
-            /*ArrayList<String> list=null;
+            ArrayList<String> list=null;
             String detailsData = bo.getDetailsData();
             if(StringUtils.isEmpty(detailsData)){
                 log.info("为传递发票图片信息");
@@ -196,7 +196,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 if(CollectionUtils.isNotEmpty(list)){
                     validImage(list);
                 }
-            }*/
+            }
 
             add = MapstructUtils.convert(bo, TestExpenseReimbursement.class);
             validEntityBeforeSave(add);
@@ -475,13 +475,13 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         if(!StringUtils.isEmpty(detailsData)){
             {
                 List<Map<String, String>> maps = parseJsonString(detailsData);
-                if (CollectionUtils.isEmpty(maps)) {
-                    new ServiceException("请求参数不全");
+                if (!CollectionUtils.isEmpty(maps)) {
+                    list = joinImageFile(maps);
+                    if (CollectionUtils.isNotEmpty(list)) {
+                        return list;
+                    }
                 }
-                list = joinImageFile(maps);
-                if (CollectionUtils.isNotEmpty(list)) {
-                    return list;
-                }
+
             }
         }
         return list;
