@@ -11,6 +11,7 @@ import org.smartlink.common.mybatis.core.page.TableDataInfo;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 图片文件Service接口
@@ -83,9 +84,9 @@ public interface IDataImageFilesInfoService {
 
     List<DataImageFilesInfo> listlqw(LambdaQueryWrapper<DataImageFilesInfo> queryWrapper);
 
-    R<Void> bindAndRelieve(String workflowId, List<String> fileIds, Boolean isBinding);
+    R<Void> bindAndRelieve(String workflowId, List<Map<String, String>> fileIds, Boolean isBinding);
 
     R<List<DataImageFilesInfo>> getAllFiles(String workflowId, List<String> fileIds);
 
-    Long checkFile(List<String> fileIds);
+    Long checkFile(List<Map<String, String>> fileIds);
 }

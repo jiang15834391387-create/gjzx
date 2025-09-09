@@ -183,12 +183,10 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 bo.setDataChannel("pc");
             }
 
-            ArrayList<String> list=null;
+            ArrayList<Map<String, String>> list=null;
             String detailsData = bo.getDetailsData();
-            if(StringUtils.isEmpty(detailsData)){
-                log.info("为传递发票图片信息");
-            }else{
-                List<Map<String, String>> maps = parseJsonString(detailsData);
+            if(!StringUtils.isEmpty(detailsData)){
+                List<Map<String, Object>> maps = parseJsonString(detailsData);
                 if (CollectionUtils.isEmpty(maps)){
                     new ServiceException("请求参数不全");
                 }
@@ -225,47 +223,69 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
 
     }
 
-    private ArrayList<String> joinImageFile(List<Map<String, String>> maps) {
-        ArrayList<String> list = new ArrayList<>();
-        for (Map<String, String> map : maps) {
-            String type = map.get("type");
-            if (StringUtils.isNotBlank(type)&& type.equals("uploadInvoice")) {
-                String s = map.get("value");
-                if(!StringUtils.isEmpty(s)){
-                    if(s.contains(",")){
-                        list.add(s);
-                    }else {
-                        String[] urls = s.split(",");
-                        list.addAll(Arrays.asList(urls));
+    private ArrayList<Map<String, String>> joinImageFile(List<Map<String, Object>> maps) {
+        ArrayList<Map<String, String>> list = new ArrayList<>();
+        for (Map<String, Object> map : maps) {
+            Object type = map.get("type");
+            if (type!=null&& type.equals("uploadInvoice")) {
+                Object jsonString = map.get("value");
+                if(jsonString!=null){
+                    JSONArray jsonArray = null;
+                    if (jsonString instanceof JSONArray) {
+                        // 已经是 JSONArray，直接用
+                        jsonArray = (JSONArray) jsonString;
+                    } else if (jsonString instanceof String) {
+                        // 如果是字符串，转一下
+                        jsonArray = new JSONArray((String) jsonString);
                     }
-                }
+                        //JSONArray jsonArray = new JSONArray((List<?>) jsonString);
+                        if (jsonArray != null && jsonArray.length() > 0) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                                if (jsonObject != null) {
+                                    String id = jsonObject.getString("id");
+                                    String t = jsonObject.getString("type");
+                                    HashMap<String, String> objectObjectHashMap = new HashMap<>();
+                                    objectObjectHashMap.put("id", id);
+                                    objectObjectHashMap.put("type", t);
+                                    list.add(objectObjectHashMap);
+                                }
+                            }
+                        }
+                    }
             }
         }
         return list;
 
     }
 
-    private void validImage(List<String> list) {
+    private void validImage(List<Map<String, String>> list) {
+        if(CollectionUtils.isEmpty(list)){
+            return;
+        }
+        //校验发票是否使用（待完善）
+
+
         Long l = dataImageFilesInfoService.checkFile(list);
         if(l>0){
             throw new ServiceException("不可重复绑定");
         }
     }
 
-    public static List<Map<String, String>> parseJsonString(String jsonString) {
-        List<Map<String, String>> result = new ArrayList<>();
+    public static List<Map<String, Object>> parseJsonString(String jsonString) {
+        List<Map<String, Object>> result = new ArrayList<>();
         JSONArray jsonArray = new JSONArray(jsonString);
 
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject jsonObject = jsonArray.getJSONObject(i);
-            Map<String, String> item = new HashMap<>();
+            Map<String, Object> item = new HashMap<>();
             String key = jsonObject.getString("key");
-            String value = jsonObject.getString("value");
+            Object value = jsonObject.get("value");
             String type = jsonObject.getString("type");
-            if(StringUtils.isNotEmpty(key)&&  StringUtils.isNotEmpty(value)&& StringUtils.isNotEmpty(type)){
+            if(StringUtils.isNotEmpty(key)&&  value!=null&& StringUtils.isNotEmpty(type)){
                 item.put("key", jsonObject.getString("key"));
-                item.put("type", jsonObject.getString("type"));
-                item.put("value", jsonObject.getString("value"));
+                item.put("type", type);
+                item.put("value", value);
                 result.add(item);
             }
         }
@@ -446,7 +466,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     }
 
     public void invoiceStatus(TestExpenseReimbursement vo,String status){
-        ArrayList<String> idList = getIdList(vo);
+        ArrayList<Map<String, String>> idList = getIdList(vo);
         Long id = vo.getId();
         if(CollectionUtils.isNotEmpty(idList)){
             if(!StringUtils.isEmpty(status)){
@@ -469,20 +489,17 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         }
     }
 
-    public ArrayList<String> getIdList(TestExpenseReimbursement bo) {
-        ArrayList<String> list=null;
+    public ArrayList<Map<String, String>> getIdList(TestExpenseReimbursement bo) {
+        ArrayList<Map<String, String>> list=null;
         String detailsData = bo.getDetailsData();
         if(!StringUtils.isEmpty(detailsData)){
-            {
-                List<Map<String, String>> maps = parseJsonString(detailsData);
+                List<Map<String, Object>> maps = parseJsonString(detailsData);
                 if (!CollectionUtils.isEmpty(maps)) {
                     list = joinImageFile(maps);
                     if (CollectionUtils.isNotEmpty(list)) {
                         return list;
                     }
                 }
-
-            }
         }
         return list;
     }

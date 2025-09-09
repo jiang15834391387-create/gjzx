@@ -118,8 +118,8 @@ public class DataImageFilesInfoController extends BaseController {
     /**
      * 获取附件
      */
-    @PostMapping("/getAllFiles")
+    /*@PostMapping("/getAllFiles")
     public R<List<DataImageFilesInfo>> getAllFiles(@RequestBody BindUnbindDTO jsonObject) {
         return dataImageFilesInfoService.getAllFiles(jsonObject.getWorkflowId(),jsonObject.getFileIds());
-    }
+    }*/
 }

@@ -181,20 +181,30 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
     }
 
     @Override
-    public R<Void> bindAndRelieve(String workflowId, List<String> fileIds, Boolean isBinding) {
+    public R<Void> bindAndRelieve(String workflowId, List<Map<String, String>> fileIds, Boolean isBinding) {
         if (isBinding){
             if (StringUtils.isBlank(workflowId)) {
                 return R.fail();
             }
             if(!CollectionUtils.isEmpty(fileIds)){
-                for (String fileId : fileIds) {
-                    LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
-                    queryWrapper.eq(DataImageFilesInfo::getFileId, fileId);
-                    DataImageFilesInfo filesInfo = baseMapper.selectOne(queryWrapper);
-                    if(filesInfo!=null){
-                        filesInfo.setWorkflowId(workflowId);
-                        filesInfo.setFileFlowStatus(FileStatusEnumd.REIMBURSED.getCode());
-                        baseMapper.updateById(filesInfo);
+                for (Map<String, String> file : fileIds) {
+                    String id = file.get("id");
+                    String type = file.get("type");
+                    if(!StringUtils.isEmpty(id)&&!StringUtils.isEmpty(type)){
+                        //根据id查询对应的发票fileId
+                        String fileId=null;
+
+
+
+                        //根据发票fileId处理业务
+                        LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
+                        queryWrapper.eq(DataImageFilesInfo::getFileId, fileId);
+                        DataImageFilesInfo filesInfo = baseMapper.selectOne(queryWrapper);
+                        if(filesInfo!=null){
+                            filesInfo.setWorkflowId(workflowId);
+                            filesInfo.setFileFlowStatus(FileStatusEnumd.REIMBURSED.getCode());
+                            baseMapper.updateById(filesInfo);
+                        }
                     }
                 }
             }
@@ -237,7 +247,7 @@ public class DataImageFilesInfoServiceImpl implements IDataImageFilesInfoService
     }
 
     @Override
-    public Long checkFile(List<String> fileIds) {
+    public Long checkFile(List<Map<String, String>> fileIds) {
         LambdaQueryWrapper<DataImageFilesInfo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.in(DataImageFilesInfo::getFileId, fileIds);
         queryWrapper.isNotNull(DataImageFilesInfo::getWorkflowId);
