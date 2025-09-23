@@ -5,6 +5,7 @@ import lombok.Data;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 发票夹列表对象
@@ -50,6 +51,7 @@ public class InvoiceVo {
     private String kind;//其他发票类型-消费类型
     private String title;//其他发票类型-标题
     private DataImageFilesInfo filesInfo;//图片对象
+    private Date createTime;//创建时间
     @JsonIgnore
     public BigDecimal getMoneyAsBigDecimal() {
         if (invoiceTotal == null) {

@@ -1077,6 +1077,10 @@ public class CheckServiceImpl implements ICheckService {
         // 将BigDecimal类型的totalAmount转换为String类型后赋值给grossAmount
         String totalAmountStr = totalAmount.toString();
         invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
+        //降序排序
+        invoiceVosList.sort((o1, o2) -> {
+            return o2.getCreateTime().compareTo(o1.getCreateTime());
+        });
         // 进行分页处理
         int pageNum = pageQuery.getPageNum();
         int pageSize = pageQuery.getPageSize();
@@ -1122,6 +1126,7 @@ public class CheckServiceImpl implements ICheckService {
                        invoiceVo.setInvoiceTotal(dataNonTaxRevenueReceipts.getInvoiceTotal());
                        invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                        invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                       invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                        return invoiceVo;
                    });
             }).toList();
@@ -1148,6 +1153,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     });
             }
@@ -1174,6 +1180,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     });
             }
@@ -1201,6 +1208,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceTotal(dataElectronicTransportationGoods1.getTotalPrice());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     });
             }).toList();
@@ -1227,6 +1235,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceTotal(dataCustomsSpecialPayments.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     });
             }).toList();
@@ -1252,6 +1261,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceTotal(dataDutyPaidProofs.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     }
                 );
@@ -1280,6 +1290,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceTotal(dataDidiItinerars.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     });
             }).toList();
@@ -1310,6 +1321,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setNumber(receipts.getNumber());
                         invoiceVo.setKind(receipts.getKind());
                         invoiceVo.setTitle(receipts.getTitle());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     }
                 );
@@ -1338,6 +1350,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceTotal(tollRoad.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     }
                 );
@@ -1366,6 +1379,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceTotal(passengerCar.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     }
                 );
@@ -1394,6 +1408,7 @@ public class CheckServiceImpl implements ICheckService {
                         invoiceVo.setInvoiceTotal(railwayTicket.getInvoiceTotal());
                         invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                         invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                        invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                         return invoiceVo;
                     });
             }).toList();
@@ -1419,6 +1434,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     invoiceVo.setProvinces(taxiTicket.getProvince()+taxiTicket.getCity());
+                    invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                     return invoiceVo;
                 });
             }
@@ -1446,6 +1462,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                     invoiceVo.setProvinces(dataQuotaInvoice.getProvince()+dataQuotaInvoice.getCity());
+                    invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                     return invoiceVo;
                 });
             }
@@ -1472,6 +1489,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setInvoiceTotal(dataMedicalTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                     return invoiceVo;
                 });
             }
@@ -1498,6 +1516,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setInvoiceTotal(dataShipTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                     return invoiceVo;
                 });
             }
@@ -1524,6 +1543,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setInvoiceTotal(dataAirTicket.getInvoiceTotal());
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                     return invoiceVo;
                 });
             }).toList();
@@ -1549,6 +1569,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setInvoiceTotal(dataSecondCarSaleInvoice.getInvoiceTotal());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                     return invoiceVo;
                 });
 
@@ -1575,6 +1596,7 @@ public class CheckServiceImpl implements ICheckService {
                     invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                     invoiceVo.setInvoiceTotal(dataCarSaleInvoice.getInvoiceTotal());
                     invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                    invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                     return invoiceVo;
                 });
         }).toList();
@@ -1598,6 +1620,7 @@ public class CheckServiceImpl implements ICheckService {
                 invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                 invoiceVo.setInvoiceTotal(dataOcrInfo.getTotalLowercase());
                 invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                 return invoiceVo;
             });
         }).toList();
