@@ -219,4 +219,18 @@ public interface ISysUserService {
      * @return 结果
      */
     List<SysUserVo> selectUserListByDept(Long deptId);
+
+    /**
+     * 查询所有学生的用户
+     *
+     * @return 角色所有用户
+     */
+    List<SysUserVo> selectUserListByRole();
+
+    /**
+     * 批量添加用户角色
+     *
+     * @param sysUserVos 用户角色
+     */
+    void addRole(List<SysUserVo> sysUserVos);
 }
