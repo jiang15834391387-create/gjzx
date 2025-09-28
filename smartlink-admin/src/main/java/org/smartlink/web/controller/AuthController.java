@@ -14,17 +14,20 @@ import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.model.AuthUser;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
+import net.bytebuddy.utility.dispatcher.JavaDispatcher;
+import org.apache.poi.ss.formula.functions.T;
+import org.smartlink.business.service.ScanImageService;
 import org.smartlink.common.core.constant.CacheConstants;
 import org.smartlink.common.core.constant.GlobalConstants;
 import org.smartlink.common.core.constant.UserConstants;
 import org.smartlink.common.core.domain.R;
-import org.smartlink.common.core.domain.model.LoginBody;
-import org.smartlink.common.core.domain.model.RegisterBody;
-import org.smartlink.common.core.domain.model.SmsLoginBody;
-import org.smartlink.common.core.domain.model.SocialLoginBody;
+import org.smartlink.common.core.domain.model.*;
+import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.core.utils.*;
 import org.smartlink.common.encrypt.annotation.ApiEncrypt;
 import org.smartlink.common.json.utils.JsonUtils;
+import org.smartlink.common.log.annotation.Log;
+import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.redis.utils.RedisUtils;
 import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.social.config.properties.SocialLoginConfigProperties;
@@ -34,12 +37,11 @@ import org.smartlink.common.sse.dto.SseMessageDto;
 import org.smartlink.common.sse.utils.SseMessageUtils;
 import org.smartlink.common.tenant.helper.TenantHelper;
 import org.smartlink.system.domain.bo.SysTenantBo;
+import org.smartlink.system.domain.bo.SysUserBo;
 import org.smartlink.system.domain.vo.SysClientVo;
 import org.smartlink.system.domain.vo.SysTenantVo;
-import org.smartlink.system.service.ISysClientService;
-import org.smartlink.system.service.ISysConfigService;
-import org.smartlink.system.service.ISysSocialService;
-import org.smartlink.system.service.ISysTenantService;
+import org.smartlink.system.domain.vo.SysUserExportVo;
+import org.smartlink.system.service.*;
 import org.smartlink.web.domain.bo.ForgetPasswordBo;
 import org.smartlink.web.domain.vo.LoginTenantVo;
 import org.smartlink.web.domain.vo.LoginVo;
@@ -50,6 +52,7 @@ import org.smartlink.web.service.SysLoginService;
 import org.smartlink.web.service.SysRegisterService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -70,7 +73,9 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
+    private final ISysUserService userService;
+    private final ScanImageService scanImageService;
+    ////////////////
     private final SocialProperties socialProperties;
     private final SysLoginService loginService;
     private final SysRegisterService registerService;
@@ -271,8 +276,9 @@ public class AuthController {
 
     //app账号密码登录
     @PostMapping("/applogin")
-    public R<LoginVo> applogin(@RequestBody String body) {
-        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
+    public R<LoginVo> applogin(@RequestBody LoginBody loginBody, PasswordLoginBody loginBodyPass) {
+//        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
+//        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
         ValidatorUtils.validate(loginBody);
         // 授权类型和客户端id
         String clientId = loginBody.getClientId();
@@ -288,7 +294,7 @@ public class AuthController {
         // 校验租户
         loginService.checkTenant(loginBody.getTenantId());
         // 登录
-        LoginVo loginVo = iLoginService.applogin(body, client);
+        LoginVo loginVo = iLoginService.applogin(loginBodyPass, client);
         loginVo.setNickName(loginVo.getNickName());
         Long userId = LoginHelper.getUserId();
         scheduledExecutorService.schedule(() -> {
@@ -298,6 +304,85 @@ public class AuthController {
             SseMessageUtils.publishMessage(dto);
         }, 5, TimeUnit.SECONDS);
         return R.ok(loginVo);
+    }
+
+    /**
+     * 发票上传
+     *
+     * @param files 多文件对象
+     * @param uploadType 上传类型 0 邮件 1 手动
+     */
+//    @Log(title = "发票上传", businessType = BusinessType.INSERT)
+    @SaIgnore
+    @PostMapping("/upload")
+    public R<T> upload(@RequestParam(value = "files", required = false) MultipartFile[] files,
+                       @RequestParam(value = "uploadType") String uploadType) throws Exception {
+        R<T> res = null;
+        LoginBody loginBody = new LoginBody();
+
+        List<SysUserExportVo> list = userService.selectUserExportList(new SysUserBo());
+        loginBody.setClientId("428a8310cd442757ae699df5d894f051");
+        loginBody.setTenantId("000000");
+        loginBody.setGrantType("password,sms,social");
+        for (SysUserExportVo user : list) {
+            PasswordLoginBody loginBodyPass = new PasswordLoginBody();
+            loginBodyPass.setUsername(user.getPhonenumber()); // 覆盖式赋值
+            loginBodyPass.setPassword("admin123"); // 覆盖式赋值
+            loginBodyPass.setTenantId("000000"); // 覆盖式赋值
+
+
+
+//                ValidatorUtils.validate(loginBody);
+                // 授权类型和客户端id
+                String clientId = loginBody.getClientId();
+                String grantType = loginBody.getGrantType();
+                SysClientVo client = clientService.queryByClientId(clientId);
+                // 查询不到 client 或 client 内不包含 grantType
+                if (ObjectUtil.isNull(client) || !StringUtils.contains(client.getGrantType(), grantType)) {
+                    log.info("客户端id: {} 认证类型：{} 异常!.", clientId, grantType);
+                    return R.fail(MessageUtils.message("auth.grant.type.error"));
+                } else if (!UserConstants.NORMAL.equals(client.getStatus())) {
+                    return R.fail(MessageUtils.message("auth.grant.type.blocked"));
+                }
+                // 校验租户
+                loginService.checkTenant(loginBody.getTenantId());
+                // 登录
+                LoginVo loginVo = iLoginService.applogin(loginBodyPass, client);
+                loginVo.setNickName(loginVo.getNickName());
+                Long userId = LoginHelper.getUserId();
+                scheduledExecutorService.schedule(() -> {
+                    SseMessageDto dto = new SseMessageDto();
+                    dto.setMessage("欢迎登录");
+                    dto.setUserIds(List.of(userId));
+                    SseMessageUtils.publishMessage(dto);
+                }, 5, TimeUnit.SECONDS);
+
+
+            if (uploadType.equals("0")){
+                List<MultipartFile> fetchFilesFromEmail = scanImageService.fetchFilesFromEmail();
+                if (fetchFilesFromEmail.size()!= 0){
+                    for (MultipartFile multipart : fetchFilesFromEmail) {
+                        res = scanImageService.uploadImage(multipart, uploadType);
+                    }
+                }
+            } else {
+                if (files != null && files.length > 0) {
+                    for (MultipartFile file : files) {
+                        res = scanImageService.uploadImage(file, uploadType);
+                        if (res.getMsg().equals(FileStatusEnumd.OCR_FAILED.getDesc())) {
+                            continue;  // 跳过当前文件，继续处理下一个
+                        }
+                    }
+                } else {
+                    return R.fail("请上传文件!");
+                }
+            }
+            break; // 只执行一次，跳出循环
+        }
+
+
+
+        return res;
     }
 
 

@@ -34,9 +34,9 @@ public class LoginServiceImpl implements ILoginService {
     }
 
     // app账号密码登录
-    public LoginVo applogin(String body, SysClientVo client) {
-        PasswordLoginBody loginBody = JsonUtils.parseObject(body, PasswordLoginBody.class);
-        ValidatorUtils.validate(loginBody);
+    public LoginVo applogin(PasswordLoginBody loginBody, SysClientVo client) {
+//        PasswordLoginBody loginBody = JsonUtils.parseObject(body, PasswordLoginBody.class);
+//        ValidatorUtils.validate(loginBody);
         String tenantId = loginBody.getTenantId();
         String username = loginBody.getUsername();
         String password = loginBody.getPassword();
