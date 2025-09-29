@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.util.StringUtils;
-import org.smartlink.business.doman.dto.StructureDataDTO;
+import org.smartlink.business.doman.dto.FileDataDTO;
 import org.smartlink.business.doman.vo.InvoiceVo;
 import org.smartlink.business.doman.vo.InvoiceWriteBackVo;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
@@ -1079,9 +1079,9 @@ public class CheckServiceImpl implements ICheckService {
         String totalAmountStr = totalAmount.toString();
         invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
         //降序排序
-        invoiceVosList.sort((o1, o2) -> {
-            return o2.getCreateTime().compareTo(o1.getCreateTime());
-        });
+//        invoiceVosList.sort((o1, o2) -> {
+//            return o2.getCreateTime().compareTo(o1.getCreateTime());
+//        });
         // 进行分页处理
         int pageNum = pageQuery.getPageNum();
         int pageSize = pageQuery.getPageSize();
@@ -1619,7 +1619,7 @@ public class CheckServiceImpl implements ICheckService {
                 invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
                 invoiceVo.setMessage(dataImageFilesInfo.getMessage());
                 invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
-                invoiceVo.setInvoiceTotal(dataOcrInfo.getTotalLowercase());
+                invoiceVo.setInvoiceTotal(dataOcrInfo.getInvoiceTotal());
                 invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
                 invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
                 return invoiceVo;
@@ -2182,6 +2182,8 @@ public class CheckServiceImpl implements ICheckService {
         return voList;
     }
 
+
+
     private InvoiceWriteBackVo selectTypeInvoice(String invoiceType, String invoiceId) {
         switch (invoiceType) {
             //增值税、机打
@@ -2197,7 +2199,7 @@ public class CheckServiceImpl implements ICheckService {
             case InvoiceConstants.DIGITAL_INVOICE_LIST:
                 DataOcrInfo ocrInfo = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getId, invoiceId));
                 String url1 = getInvoiceUrl(ocrInfo.getFileId());
-                return new InvoiceWriteBackVo().setAmount(ocrInfo.getTotalLowercase()).setDetails(ocrInfo.getRemark()).setInvoiceId(invoiceId).setUrL(url1);
+                return new InvoiceWriteBackVo().setAmount(ocrInfo.getInvoiceTotal()).setDetails(ocrInfo.getRemark()).setInvoiceId(invoiceId).setUrL(url1);
             //机动车
             case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
                 DataMotorVehicleSale dataMotorVehicleSale =motorVehicleSaleMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getId, invoiceId));
@@ -2308,6 +2310,24 @@ public class CheckServiceImpl implements ICheckService {
             return imageFilesInfo.getIurl();
         }
         return "";
+    }
+
+    @Override
+    public R<List<FileDataDTO>> selectFileInfo(List<String> fileIds) {
+        if (CollectionUtil.isEmpty(fileIds)){
+            return R.fail("文件Id不能为空");
+        }
+        List<DataImageFilesInfo> filesInfos = filesInfoMapper.selectList(new LambdaQueryWrapper<DataImageFilesInfo>()
+            .in(DataImageFilesInfo::getFileId, fileIds));
+        if (CollectionUtil.isEmpty(filesInfos)){
+            return R.fail("没有查到文件信息");
+        }
+        for (DataImageFilesInfo filesInfo : filesInfos) {
+            FileDataDTO fileDataDTO = new FileDataDTO();
+            fileDataDTO.setFileName(filesInfo.getFileName());
+            //filesInfo.getSurl()
+        }
+        return null;
     }
 
 }

@@ -3,6 +3,7 @@ package org.smartlink.business.invoice.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
+import org.smartlink.business.doman.dto.FileDataDTO;
 import org.smartlink.business.doman.vo.InvoiceVo;
 import org.smartlink.business.invoice.service.ICheckService;
 import org.smartlink.common.check.doman.InvoicePageQuery;
@@ -68,6 +69,13 @@ public class CheckInvoiceController extends BaseController {
     @PostMapping("/addInvoice")
     public R<Void> addInvoice(@RequestBody InvoiceRequest request) throws Exception {
         return service.addInvoice(request);
+    }
+    /**
+     *查询文件信息
+     */
+    @PostMapping("/selectFileInfo")
+    public R<List<FileDataDTO>> selectFileInfo(@RequestBody List<String> fileIds){
+        return service.selectFileInfo(fileIds);
     }
 
 }
