@@ -2,6 +2,7 @@ package org.smartlink.business.invoice.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.constraints.NotBlank;
+import org.smartlink.business.doman.dto.StructureDataDTO;
 import org.smartlink.business.doman.vo.InvoiceVo;
 import org.smartlink.business.doman.vo.InvoiceWriteBackVo;
 import org.smartlink.common.check.doman.InvoicePageQuery;
@@ -29,4 +30,5 @@ public interface ICheckService {
     R<Void> addInvoice(InvoiceRequest request) throws Exception;
 
     List<InvoiceWriteBackVo> invoiceWriteSelect(List<HashMap<String,Object>> list);
+
 }

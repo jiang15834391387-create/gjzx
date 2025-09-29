@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.util.StringUtils;
+import org.smartlink.business.doman.dto.StructureDataDTO;
 import org.smartlink.business.doman.vo.InvoiceVo;
 import org.smartlink.business.doman.vo.InvoiceWriteBackVo;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
@@ -2308,4 +2309,5 @@ public class CheckServiceImpl implements ICheckService {
         }
         return "";
     }
+
 }

@@ -69,4 +69,5 @@ public class CheckInvoiceController extends BaseController {
     public R<Void> addInvoice(@RequestBody InvoiceRequest request) throws Exception {
         return service.addInvoice(request);
     }
+
 }
