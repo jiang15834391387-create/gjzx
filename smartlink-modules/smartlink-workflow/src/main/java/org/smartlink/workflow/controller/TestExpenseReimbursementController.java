@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.smartlink.business.doman.dto.StructureDataDTO;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.core.validate.EditGroup;
@@ -130,6 +131,13 @@ public class TestExpenseReimbursementController extends BaseController {
     @PostMapping("/setReceiptUrl")
     public R<Void> setReceiptUrl(@RequestBody TestExpenseReimbursementBo bo) {
         return testExpenseReimbursementService.setReceiptUrl(bo);
+    }
+    /**
+     *查询发票附件/结构化数据/银行回单
+     */
+    @GetMapping("/selectStructureData")
+    public R<List<StructureDataDTO>> selectStructureData(@RequestBody List<String> workIds){
+        return testExpenseReimbursementService.selectStructureData(workIds);
     }
 
 }
