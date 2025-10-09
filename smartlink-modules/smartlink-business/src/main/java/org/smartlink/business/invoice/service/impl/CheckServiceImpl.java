@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -31,10 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -1005,70 +1003,8 @@ public class CheckServiceImpl implements ICheckService {
         if (CollectionUtil.isEmpty(dataImageFilesInfos)) {
             return invoiceVoPage;
         }
-        int coreCount = Runtime.getRuntime().availableProcessors();
-        // 核心线程数设置为 CPU 核心数的 2 倍
-        int corePoolSize = coreCount * 2;
-        // 最大线程数设置为 CPU 核心数的 4 倍
-        int maximumPoolSize = coreCount * 4;
-        // 空闲线程存活时间设置为 60 秒
-        long keepAliveTime = 60L;
-        BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-            corePoolSize,
-            maximumPoolSize,
-            keepAliveTime,
-            TimeUnit.SECONDS,
-            workQueue);
-        List<Callable<List<InvoiceVo>>> tasks = new ArrayList<>();
-        tasks.add(() -> transitionOcrInfo(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionSecondCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionAirTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionShipTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionMedicalTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionQuotaInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionTaxiTickets(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionRailwayTicket(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionPassengerCar(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionTollRoads(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionReceipt(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionTravelInvoice(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionDutyPaidProof(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionCustomsSpecialPayment(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionCustomsImportGoods(dataImageFilesInfos, pageQuery.getUserId()));
-        tasks.add(() -> transitionNonTaxRevenueReceipts(dataImageFilesInfos, pageQuery.getUserId()));
-        CompletableFuture<List<InvoiceVo>>[] futures;
-        futures = new CompletableFuture[tasks.size()];
-        for (int i = 0; i < tasks.size(); i++) {
-            Callable<List<InvoiceVo>> callable = tasks.get(i);
-            Supplier<List<InvoiceVo>> supplier = () -> {
-                try {
-                    return callable.call();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            };
-            futures[i] = CompletableFuture.supplyAsync(supplier, threadPoolExecutor);
-        }
-        // 使用allOf等待所有任务完成
-        CompletableFuture.allOf(futures).join();
-        // 收集所有任务的结果
-        for (CompletableFuture<List<InvoiceVo>> future : futures) {
-            invoiceVosList.addAll(future.get());
-        }
-        // 设置发票的文件信息
-        Map<String, DataImageFilesInfo> filesInfoMap = dataImageFilesInfos.stream()
-            .filter(file -> StrUtil.isNotBlank(file.getFileId()))
-            .collect(Collectors.toMap(DataImageFilesInfo::getFileId, Function.identity(), (v1, v2) -> v1));
-
-        invoiceVosList.forEach(invoiceVo -> {
-            if (StrUtil.isNotBlank(invoiceVo.getFileId())) {
-                invoiceVo.setFilesInfo(filesInfoMap.get(invoiceVo.getFileId()));
-            }
-        });
-
+        List<InvoiceVo> ocrInfoResult = transitionOcrInfo(dataImageFilesInfos, pageQuery.getUserId());
+        invoiceVosList.addAll(ocrInfoResult);
         invoiceVoPage.setRecords(invoiceVosList);
         invoiceVoPage.setTotal(invoiceVosList.size());
         // 计算总计金额
@@ -1078,11 +1014,11 @@ public class CheckServiceImpl implements ICheckService {
         // 将BigDecimal类型的totalAmount转换为String类型后赋值给grossAmount
         String totalAmountStr = totalAmount.toString();
         invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
-        //降序排序
+//        降序排序
 //        invoiceVosList.sort((o1, o2) -> {
 //            return o2.getCreateTime().compareTo(o1.getCreateTime());
 //        });
-        // 进行分页处理
+         //进行分页处理
         int pageNum = pageQuery.getPageNum();
         int pageSize = pageQuery.getPageSize();
         if (pageNum < 1) {
@@ -1096,15 +1032,115 @@ public class CheckServiceImpl implements ICheckService {
             // 请求的页码超出范围，返回空的分页数据
             invoiceVoPage.setRecords(Collections.emptyList());
             invoiceVoPage.setTotal(invoiceVosList.size());
-            threadPoolExecutor.shutdown();
             return invoiceVoPage;
         }
         int endIndex = Math.min(startIndex + pageSize, invoiceVosList.size());
         List<InvoiceVo> pageData = invoiceVosList.subList(startIndex, endIndex);
         invoiceVoPage.setRecords(pageData);
         invoiceVoPage.setTotal(invoiceVosList.size());
-        threadPoolExecutor.shutdown();
+        String jsonStr = JSON.toJSONString(invoiceVoPage);
+        log.info("列表查询数据返回结果:{}",jsonStr);
         return invoiceVoPage;
+//        int coreCount = Runtime.getRuntime().availableProcessors();
+//        // 核心线程数设置为 CPU 核心数的 2 倍
+//        int corePoolSize = coreCount * 2;
+//        // 最大线程数设置为 CPU 核心数的 4 倍
+//        int maximumPoolSize = coreCount * 4;
+//        // 空闲线程存活时间设置为 60 秒
+//        long keepAliveTime = 60L;
+//        BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>();
+//        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+//            corePoolSize,
+//            maximumPoolSize,
+//            keepAliveTime,
+//            TimeUnit.SECONDS,
+//            workQueue);
+//        List<Callable<List<InvoiceVo>>> tasks = new ArrayList<>();
+//        tasks.add(() -> transitionOcrInfo(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionSecondCarSaleInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionAirTicket(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionShipTicket(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionMedicalTicket(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionQuotaInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionTaxiTickets(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionRailwayTicket(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionPassengerCar(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionTollRoads(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionReceipt(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionTravelInvoice(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionDutyPaidProof(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionCustomsSpecialPayment(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionElectronicTransportationGoods(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionCustomsExportGoods(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionCustomsImportGoods(dataImageFilesInfos, pageQuery.getUserId()));
+//        tasks.add(() -> transitionNonTaxRevenueReceipts(dataImageFilesInfos, pageQuery.getUserId()));
+//        CompletableFuture<List<InvoiceVo>>[] futures;
+//        futures = new CompletableFuture[tasks.size()];
+//        for (int i = 0; i < tasks.size(); i++) {
+//            Callable<List<InvoiceVo>> callable = tasks.get(i);
+//            Supplier<List<InvoiceVo>> supplier = () -> {
+//                try {
+//                    return callable.call();
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
+//            };
+//            futures[i] = CompletableFuture.supplyAsync(supplier, threadPoolExecutor);
+//        }
+//        // 使用allOf等待所有任务完成
+//        CompletableFuture.allOf(futures).join();
+//        // 收集所有任务的结果
+//        for (CompletableFuture<List<InvoiceVo>> future : futures) {
+//            invoiceVosList.addAll(future.get());
+//        }
+//        // 设置发票的文件信息
+//        Map<String, DataImageFilesInfo> filesInfoMap = dataImageFilesInfos.stream()
+//            .filter(file -> StrUtil.isNotBlank(file.getFileId()))
+//            .collect(Collectors.toMap(DataImageFilesInfo::getFileId, Function.identity(), (v1, v2) -> v1));
+//
+//        invoiceVosList.forEach(invoiceVo -> {
+//            if (StrUtil.isNotBlank(invoiceVo.getFileId())) {
+//                invoiceVo.setFilesInfo(filesInfoMap.get(invoiceVo.getFileId()));
+//            }
+//        });
+//
+//        invoiceVoPage.setRecords(invoiceVosList);
+//        invoiceVoPage.setTotal(invoiceVosList.size());
+//        // 计算总计金额
+//        BigDecimal totalAmount = invoiceVosList.stream()
+//            .map(InvoiceVo::getMoneyAsBigDecimal)
+//            .reduce(BigDecimal.ZERO, BigDecimal::add);
+//        // 将BigDecimal类型的totalAmount转换为String类型后赋值给grossAmount
+//        String totalAmountStr = totalAmount.toString();
+//        invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
+        //降序排序
+//        invoiceVosList.sort((o1, o2) -> {
+//            return o2.getCreateTime().compareTo(o1.getCreateTime());
+//        });
+        // 进行分页处理
+//        int pageNum = pageQuery.getPageNum();
+//        int pageSize = pageQuery.getPageSize();
+//        if (pageNum < 1) {
+//            pageNum = 1;
+//        }
+//        if (pageSize < 1) {
+//            pageSize = 10;
+//        }
+//        int startIndex = (pageNum - 1) * pageSize;
+//        if (startIndex >= invoiceVosList.size()) {
+//            // 请求的页码超出范围，返回空的分页数据
+//            invoiceVoPage.setRecords(Collections.emptyList());
+//            invoiceVoPage.setTotal(invoiceVosList.size());
+//            threadPoolExecutor.shutdown();
+//            return invoiceVoPage;
+//        }
+//        int endIndex = Math.min(startIndex + pageSize, invoiceVosList.size());
+//        List<InvoiceVo> pageData = invoiceVosList.subList(startIndex, endIndex);
+//        invoiceVoPage.setRecords(pageData);
+//        invoiceVoPage.setTotal(invoiceVosList.size());
+//        threadPoolExecutor.shutdown();
+//        return invoiceVoPage;
     }
 
     //查询非税发票InvoiceVo
@@ -1621,7 +1657,7 @@ public class CheckServiceImpl implements ICheckService {
                 invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
                 invoiceVo.setInvoiceTotal(dataOcrInfo.getInvoiceTotal());
                 invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
-                invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
+                invoiceVo.setFilesInfo(dataImageFilesInfo);
                 return invoiceVo;
             });
         }).toList();
@@ -2329,5 +2365,108 @@ public class CheckServiceImpl implements ICheckService {
         }
         return null;
     }
+
+    @Override
+    public Page<InvoiceVo> selectPageList(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
+        Long userId = LoginHelper.getUserId();
+        pageQuery.setUserId(userId);
+        List<InvoiceVo> invoiceVosList = new ArrayList<>();
+        //查询图片file_status为8的图片
+        LambdaQueryWrapper<DataImageFilesInfo> eqs = new LambdaQueryWrapper<DataImageFilesInfo>()
+            .eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
+            .eq(DataImageFilesInfo::getFileStatus, FileStatusEnumd.OCR_FAILED.getCode());
+        List<DataImageFilesInfo> images = filesInfoMapper.selectList(eqs);
+        if (CollectionUtil.isNotEmpty(images)){
+            images.forEach(ima->{
+                InvoiceVo invoiceVo = new InvoiceVo();
+                invoiceVo.setFilesInfo(ima);
+                invoiceVosList.add(invoiceVo);
+            });
+        }
+        return this.selectPageCommons(pageQuery, invoiceVosList);
+    }
+
+    private Page<InvoiceVo> selectPageCommons(InvoicePageQuery pageQuery, List<InvoiceVo> invoiceVosList) {
+        Page<InvoiceVo> invoiceVoPage = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
+        //查询待报销,已报销,未报销
+        LambdaQueryWrapper<DataImageFilesInfo> eq = new LambdaQueryWrapper<DataImageFilesInfo>()
+            .eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
+            .eq(DataImageFilesInfo::getFileFlowStatus, pageQuery.getStatus())
+            .eq(StrUtil.isNotBlank(pageQuery.getCheckStatus()), DataImageFilesInfo::getCheckStatus, pageQuery.getCheckStatus());
+        List<DataImageFilesInfo> dataImageFilesInfos = filesInfoMapper.selectList(eq);
+        if (CollectionUtil.isEmpty(dataImageFilesInfos)) {
+            return invoiceVoPage;
+        }
+        List<InvoiceVo> ocrInfoResult = transitionOcrInfos(dataImageFilesInfos, pageQuery.getUserId());
+        invoiceVosList.addAll(ocrInfoResult);
+        invoiceVoPage.setRecords(invoiceVosList);
+        invoiceVoPage.setTotal(invoiceVosList.size());
+        // 计算总计金额
+        BigDecimal totalAmount = invoiceVosList.stream()
+            .map(InvoiceVo::getMoneyAsBigDecimal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 将BigDecimal类型的totalAmount转换为String类型后赋值给grossAmount
+        String totalAmountStr = totalAmount.toString();
+        invoiceVosList.forEach(invoiceVo -> invoiceVo.setGrossAmount(totalAmountStr));
+//        降序排序
+//        invoiceVosList.sort((o1, o2) -> {
+//            return o2.getCreateTime().compareTo(o1.getCreateTime());
+//        });
+        //进行分页处理
+        int pageNum = pageQuery.getPageNum();
+        int pageSize = pageQuery.getPageSize();
+        if (pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
+        int startIndex = (pageNum - 1) * pageSize;
+        if (startIndex >= invoiceVosList.size()) {
+            // 请求的页码超出范围，返回空的分页数据
+            invoiceVoPage.setRecords(Collections.emptyList());
+            invoiceVoPage.setTotal(invoiceVosList.size());
+            return invoiceVoPage;
+        }
+        int endIndex = Math.min(startIndex + pageSize, invoiceVosList.size());
+        List<InvoiceVo> pageData = invoiceVosList.subList(startIndex, endIndex);
+        invoiceVoPage.setRecords(pageData);
+        invoiceVoPage.setTotal(invoiceVosList.size());
+        log.info("最新列表查询返回!!");
+        return invoiceVoPage;
+    }
+
+    private List<InvoiceVo> transitionOcrInfos(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+
+        List<InvoiceVo> invoiceList = new ArrayList<>();
+        for (DataImageFilesInfo dataImageFilesInfo : dataImageFilesInfos) {
+            InvoiceVo invoiceVo = new InvoiceVo();
+            invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+            invoiceVo.setFileId(dataImageFilesInfo.getFileId());
+            invoiceList.add(invoiceVo);
+        }
+//        invoiceList = dataImageFilesInfos.stream().flatMap(dataImageFilesInfo -> {
+////            List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(new LambdaQueryWrapper<DataOcrInfo>()
+////                .eq(DataOcrInfo::getFileId, dataImageFilesInfo.getFileId()).eq(DataOcrInfo::getCreateBy, userId));
+//            return dataImageFilesInfo.stream().map(dataOcrInfo -> {
+//                InvoiceVo invoiceVo = new InvoiceVo();
+////                invoiceVo.setId(dataOcrInfo.getId());
+////                invoiceVo.setFileId(dataOcrInfo.getFileId());
+////                invoiceVo.setBuyerName(dataOcrInfo.getBuyerName());
+////                invoiceVo.setSellerName(dataOcrInfo.getSellerName());
+////                invoiceVo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
+////                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+////                invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+////                invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+////                invoiceVo.setInvoiceTotal(dataOcrInfo.getInvoiceTotal());
+//                invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+//                invoiceVo.setStatus(dataImageFilesInfo.getFileId());
+//                //invoiceVo.setCreateTime(dataImageFilesInfo.getCreateTime());
+//                return invoiceVo;
+//            });
+//        }).toList();
+        return invoiceList;
+    }
+
 
 }

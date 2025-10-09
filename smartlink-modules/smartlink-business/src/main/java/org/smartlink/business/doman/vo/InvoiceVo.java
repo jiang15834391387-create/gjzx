@@ -52,6 +52,7 @@ public class InvoiceVo {
     private String title;//其他发票类型-标题
     private DataImageFilesInfo filesInfo;//图片对象
     private Date createTime;//创建时间
+    //private String workflowId;//绑定id
     @JsonIgnore
     public BigDecimal getMoneyAsBigDecimal() {
         if (invoiceTotal == null) {

@@ -14,6 +14,7 @@ import org.smartlink.common.web.core.BaseController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RestController
@@ -76,6 +77,14 @@ public class CheckInvoiceController extends BaseController {
     @PostMapping("/selectFileInfo")
     public R<List<FileDataDTO>> selectFileInfo(@RequestBody List<String> fileIds){
         return service.selectFileInfo(fileIds);
+    }
+
+    /**
+     *返回id和状态
+     */
+    @PostMapping("/selectPageStatus")
+    public Page<InvoiceVo> selectPageList(@RequestBody InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
+        return service.selectPageList(pageQuery);
     }
 
 }

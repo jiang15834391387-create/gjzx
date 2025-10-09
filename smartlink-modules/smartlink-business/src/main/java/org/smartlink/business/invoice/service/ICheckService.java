@@ -32,4 +32,6 @@ public interface ICheckService {
     List<InvoiceWriteBackVo> invoiceWriteSelect(List<HashMap<String,Object>> list);
 
     R<List<FileDataDTO>> selectFileInfo(List<String> fileIds);
+
+    Page<InvoiceVo> selectPageList(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException;
 }

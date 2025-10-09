@@ -292,10 +292,10 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         //校验发票是否使用（待完善）
 
 
-        Long l = dataImageFilesInfoService.checkFile(list);
-        if(l>0){
-            throw new ServiceException("不可重复绑定");
-        }
+//        Long l = dataImageFilesInfoService.checkFile(list);
+//        if(l>0){
+//            throw new ServiceException("不可重复绑定");
+//        }
     }
 
     public static List<Map<String, Object>> parseJsonString(String jsonString) {
