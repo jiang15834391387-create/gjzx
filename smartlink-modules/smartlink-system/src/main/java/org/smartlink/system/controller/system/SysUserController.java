@@ -1,6 +1,7 @@
 package org.smartlink.system.controller.system;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.secure.BCrypt;
 import cn.hutool.core.lang.tree.Tree;
 import cn.hutool.core.util.ArrayUtil;
@@ -46,6 +47,7 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 @RestController
+@SaIgnore
 @RequestMapping("/system/user")
 public class SysUserController extends BaseController {
 

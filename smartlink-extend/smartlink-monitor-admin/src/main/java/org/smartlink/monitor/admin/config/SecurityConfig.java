@@ -40,6 +40,10 @@ public class SecurityConfig {
                 authorize.requestMatchers(
                         new AntPathRequestMatcher(adminContextPath + "/assets/**"),
                         new AntPathRequestMatcher(adminContextPath + "/login")
+                    , new AntPathRequestMatcher("/**/**/getUserInfo")
+                        , new AntPathRequestMatcher("/**/**/**/getUserInfo")
+                        , new AntPathRequestMatcher("/getUserInfo")
+
                     ).permitAll()
                     .anyRequest().authenticated())
             .formLogin((formLogin) ->

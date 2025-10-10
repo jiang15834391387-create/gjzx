@@ -589,6 +589,24 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         return R.ok(dataDTOs);
     }
 
+    @Override
+    public List<Map<String,String>> selectList() {
+        List<SysUser> sysUsers = userMapper.selectList(new QueryWrapper<SysUser>().eq("del_flag", "0").eq("status", "0"));
+        if(CollectionUtils.isNotEmpty(sysUsers)){
+            List<Map<String,String>> list=new ArrayList<>();
+            for (SysUser sysUser : sysUsers){
+                Map<String,String> map=new HashMap<>();
+                map.put("userId",sysUser.getUserId().toString());
+                map.put("userName",sysUser.getUserName());
+                map.put("nickName",sysUser.getNickName());
+                list.add( map);
+            }
+            return list;
+        }else {
+            return null;
+        }
+    }
+
     private InvoiceDataDTO selectTypeInvoice(String invoiceType, String fileId) {
         Object info= null;
         switch (invoiceType) {
