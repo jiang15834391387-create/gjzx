@@ -503,6 +503,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 }else if (status.equals(BusinessStatusEnum.CANCEL.getStatus())
                     ||status.equals(BusinessStatusEnum.FINISH.getStatus())
                     ||status.equals(BusinessStatusEnum.INVALID.getStatus())
+                    ||status.equals(BusinessStatusEnum.BACK.getStatus())
                     ||status.equals(BusinessStatusEnum.TERMINATION.getStatus())){
                     //解绑(参数：List id)
                     dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, false);
