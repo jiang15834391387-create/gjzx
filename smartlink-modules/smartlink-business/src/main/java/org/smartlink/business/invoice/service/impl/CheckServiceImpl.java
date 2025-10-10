@@ -28,11 +28,14 @@ import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.response.DataResponseDTO;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.satoken.utils.LoginHelper;
+import org.smartlink.system.service.ISysConfigService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -65,7 +68,8 @@ public class CheckServiceImpl implements ICheckService {
     private final DataElectronicTransportationGoodsMapper paymentMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
     private final DataOcrDetailsMapper ocrDetailsMapper;
-    public CheckServiceImpl(DataNonTaxMapper dataNonTaxMapper, CheckInvoice checkInvoice, DataImageFilesInfoMapper filesInfoMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataSteamerTicketMapper steamerTicketMapper, DataMedicalTreatmentMapper dataMedicalTreatmentMapper, DataMedicalTreatmentDetailMapper dataMedicalTreatmentDetailMapper, DataQuotaInvoiceMapper quotaInvoiceMapper, DataTaxiTicketsMapper taxiTicketsMapper, DataRailwayTicketMapper railwayTicketMapper, DataPassengerCarMapper passengerCarMapper, DataTollRoadsMapper tollRoadsMapper, DataReceiptMapper dataReceiptMapper, DataDidiItineraryMapper didiItineraryMapper, DataDidiItineraryDetailsMapper didiItineraryDetailsMapper, DataDutyPaidProofMapper paidProofMapper, DataDutyPaidProofDetailsMapper paidProofDetailsMapper, DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper, DataCustomsImxportGoodsMapper customsImportGoodsMapper, DataCustomsExportGoodsMapper customsExportGoodsMapper, DataCustomsExportGoodsDetailMapper customsExportGoodsDetailMapper, DataCustomsSpecialPaymentMapper customsSpecialPaymentMapper, DataElectronicTransportationGoodsMapper paymentMapper, DataOcrInfoMapper ocrInfoMapper, DataOcrDetailsMapper ocrDetailsMapper) {
+    private final ISysConfigService configService;
+    public CheckServiceImpl(DataNonTaxMapper dataNonTaxMapper, CheckInvoice checkInvoice, DataImageFilesInfoMapper filesInfoMapper, DataMotorVehicleSaleMapper motorVehicleSaleMapper, DataUsedCarSalesMapper usedCarSalesMapper, DataFlightItineraryMapper flightItineraryMapper, DataFlightsItineraryDetailMapper flightsItineraryDetailMapper, DataSteamerTicketMapper steamerTicketMapper, DataMedicalTreatmentMapper dataMedicalTreatmentMapper, DataMedicalTreatmentDetailMapper dataMedicalTreatmentDetailMapper, DataQuotaInvoiceMapper quotaInvoiceMapper, DataTaxiTicketsMapper taxiTicketsMapper, DataRailwayTicketMapper railwayTicketMapper, DataPassengerCarMapper passengerCarMapper, DataTollRoadsMapper tollRoadsMapper, DataReceiptMapper dataReceiptMapper, DataDidiItineraryMapper didiItineraryMapper, DataDidiItineraryDetailsMapper didiItineraryDetailsMapper, DataDutyPaidProofMapper paidProofMapper, DataDutyPaidProofDetailsMapper paidProofDetailsMapper, DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper, DataCustomsImxportGoodsMapper customsImportGoodsMapper, DataCustomsExportGoodsMapper customsExportGoodsMapper, DataCustomsExportGoodsDetailMapper customsExportGoodsDetailMapper, DataCustomsSpecialPaymentMapper customsSpecialPaymentMapper, DataElectronicTransportationGoodsMapper paymentMapper, DataOcrInfoMapper ocrInfoMapper, DataOcrDetailsMapper ocrDetailsMapper, ISysConfigService configService) {
         this.dataNonTaxMapper = dataNonTaxMapper;
         this.checkInvoice = checkInvoice;
         this.filesInfoMapper = filesInfoMapper;
@@ -94,6 +98,7 @@ public class CheckServiceImpl implements ICheckService {
         this.paymentMapper = paymentMapper;
         this.ocrInfoMapper = ocrInfoMapper;
         this.ocrDetailsMapper = ocrDetailsMapper;
+        this.configService = configService;
     }
 
     //批量删除
@@ -954,17 +959,17 @@ public class CheckServiceImpl implements ICheckService {
         pageQuery.setUserId(userId);
         List<InvoiceVo> invoiceVosList = new ArrayList<>();
         //查询图片file_status为8的图片
-        LambdaQueryWrapper<DataImageFilesInfo> eqs = new LambdaQueryWrapper<DataImageFilesInfo>()
-            .eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
-            .eq(DataImageFilesInfo::getFileStatus, FileStatusEnumd.OCR_FAILED.getCode());
-        List<DataImageFilesInfo> images = filesInfoMapper.selectList(eqs);
-        if (CollectionUtil.isNotEmpty(images)){
-            images.forEach(ima->{
-                InvoiceVo invoiceVo = new InvoiceVo();
-                invoiceVo.setFilesInfo(ima);
-                invoiceVosList.add(invoiceVo);
-            });
-        }
+       // LambdaQueryWrapper<DataImageFilesInfo> eqs = new LambdaQueryWrapper<DataImageFilesInfo>();
+            //.eq(DataImageFilesInfo::getCreateBy, pageQuery.getUserId())
+            //.eq(DataImageFilesInfo::getFileStatus, FileStatusEnumd.OCR_FAILED.getCode());
+//        List<DataImageFilesInfo> images = filesInfoMapper.selectList(eqs);
+//        if (CollectionUtil.isNotEmpty(images)){
+//            images.forEach(ima->{
+//                InvoiceVo invoiceVo = new InvoiceVo();
+//                invoiceVo.setFilesInfo(ima);
+//                invoiceVosList.add(invoiceVo);
+//            });
+//        }
         return this.selectPageCommon(pageQuery, invoiceVosList);
     }
 
@@ -1003,7 +1008,7 @@ public class CheckServiceImpl implements ICheckService {
         if (CollectionUtil.isEmpty(dataImageFilesInfos)) {
             return invoiceVoPage;
         }
-        List<InvoiceVo> ocrInfoResult = transitionOcrInfo(dataImageFilesInfos, pageQuery.getUserId());
+        List<InvoiceVo> ocrInfoResult = transitionOcrInfo(dataImageFilesInfos);
         invoiceVosList.addAll(ocrInfoResult);
         invoiceVoPage.setRecords(invoiceVosList);
         invoiceVoPage.setTotal(invoiceVosList.size());
@@ -1019,6 +1024,18 @@ public class CheckServiceImpl implements ICheckService {
 //            return o2.getCreateTime().compareTo(o1.getCreateTime());
 //        });
          //进行分页处理
+        String jsonStr1 = JSON.toJSONString(invoiceVosList);
+        log.info("列表查询数据返回结果:{}",jsonStr1);
+//        SysConfigBo sysConfigBo = new SysConfigBo();
+//        sysConfigBo.setConfigKey("sys.listww");
+//        sysConfigBo.setConfigValue(jsonStr1);
+//        sysConfigBo.setConfigName("缓存发票列表数据ww");
+//        if (!configService.checkConfigKeyUnique(sysConfigBo)) {
+//             log.info("缓存新增参数:{} 失败，参数键名已存在",sysConfigBo.getConfigName());
+//        }else {
+//            configService.insertConfig(sysConfigBo);
+//
+//        }
         int pageNum = pageQuery.getPageNum();
         int pageSize = pageQuery.getPageSize();
         if (pageNum < 1) {
@@ -1640,29 +1657,29 @@ public class CheckServiceImpl implements ICheckService {
         return invoiceList;
     }
     //根据fileId查询ocr信息并组装成InvoiceVo
-    public List<InvoiceVo> transitionOcrInfo(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
-        List<InvoiceVo> invoiceList;
-        invoiceList = dataImageFilesInfos.stream().flatMap(dataImageFilesInfo -> {
-            List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(new LambdaQueryWrapper<DataOcrInfo>()
-                .eq(DataOcrInfo::getFileId, dataImageFilesInfo.getFileId()).eq(DataOcrInfo::getCreateBy, userId));
-            return dataOcrInfos.stream().map(dataOcrInfo -> {
-                InvoiceVo invoiceVo = new InvoiceVo();
-                invoiceVo.setId(dataOcrInfo.getId());
-                invoiceVo.setFileId(dataOcrInfo.getFileId());
-                invoiceVo.setBuyerName(dataOcrInfo.getBuyerName());
-                invoiceVo.setSellerName(dataOcrInfo.getSellerName());
-                invoiceVo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
-                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
-                invoiceVo.setMessage(dataImageFilesInfo.getMessage());
-                invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
-                invoiceVo.setInvoiceTotal(dataOcrInfo.getInvoiceTotal());
-                invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
-                invoiceVo.setFilesInfo(dataImageFilesInfo);
-                return invoiceVo;
-            });
-        }).toList();
-        return invoiceList;
-    }
+//    public List<InvoiceVo> transitionOcrInfo(List<DataImageFilesInfo> dataImageFilesInfos, Long userId) {
+//        List<InvoiceVo> invoiceList;
+//        invoiceList = dataImageFilesInfos.stream().flatMap(dataImageFilesInfo -> {
+//            List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(new LambdaQueryWrapper<DataOcrInfo>()
+//                .eq(DataOcrInfo::getFileId, dataImageFilesInfo.getFileId()).eq(DataOcrInfo::getCreateBy, userId));
+//            return dataOcrInfos.stream().map(dataOcrInfo -> {
+//                InvoiceVo invoiceVo = new InvoiceVo();
+//                invoiceVo.setId(dataOcrInfo.getId());
+//                invoiceVo.setFileId(dataOcrInfo.getFileId());
+//                invoiceVo.setBuyerName(dataOcrInfo.getBuyerName());
+//                invoiceVo.setSellerName(dataOcrInfo.getSellerName());
+//                invoiceVo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
+//                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+//                invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+//                invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+//                invoiceVo.setInvoiceTotal(dataOcrInfo.getInvoiceTotal());
+//                invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+//                invoiceVo.setFilesInfo(dataImageFilesInfo);
+//                return invoiceVo;
+//            });
+//        }).toList();
+//        return invoiceList;
+//    }
     /*
     * 发票详情信息查询
      */
@@ -2468,5 +2485,57 @@ public class CheckServiceImpl implements ICheckService {
         return invoiceList;
     }
 
+    public List<InvoiceVo> transitionOcrInfo(List<DataImageFilesInfo> dataImageFilesInfos) {
+        // 需要查询的 fileId
+        Set<String> fileIds = dataImageFilesInfos.stream()
+            .map(DataImageFilesInfo::getFileId)
+            .filter(StrUtil::isNotBlank) // 过滤空fileId
+            .collect(Collectors.toSet());
+
+        if (fileIds.isEmpty()) {
+            return Collections.emptyList(); // 没有fileId，直接返回空列表
+        }
+
+        //批量查询所有关联的 DataOcrInfo
+        List<DataOcrInfo> dataOcrInfos = ocrInfoMapper.selectList(
+            new LambdaQueryWrapper<DataOcrInfo>()
+                .in(DataOcrInfo::getFileId, fileIds)
+        );
+
+        // Map：key=fileId，value=DataOcrInfo
+        Map<String, DataOcrInfo> ocrInfoMap = dataOcrInfos.stream()
+            .collect(Collectors.toMap(
+                DataOcrInfo::getFileId,
+                Function.identity(),
+                (v1, v2) -> v1 // 若fileId重复，保留第一个
+            ));
+
+        //组装 InvoiceVo 列表
+        return dataImageFilesInfos.stream()
+            .filter(dataImageFilesInfo -> StrUtil.isNotBlank(dataImageFilesInfo.getFileId()))
+            .map(dataImageFilesInfo -> {
+                InvoiceVo invoiceVo = new InvoiceVo();
+                // 从Map中获取对应的DataOcrInfo
+                DataOcrInfo ocrInfo = ocrInfoMap.get(dataImageFilesInfo.getFileId());
+                if (ocrInfo != null) {
+                    invoiceVo.setId(ocrInfo.getId());
+                    invoiceVo.setFileId(ocrInfo.getFileId());
+                    invoiceVo.setBuyerName(ocrInfo.getBuyerName());
+                    invoiceVo.setSellerName(ocrInfo.getSellerName());
+                    invoiceVo.setInvoiceDate(ocrInfo.getInvoiceDate());
+                    invoiceVo.setInvoiceTotal(ocrInfo.getInvoiceTotal());
+                }
+                invoiceVo.setInvoiceType(dataImageFilesInfo.getInvoice());
+                invoiceVo.setMessage(dataImageFilesInfo.getMessage());
+                invoiceVo.setCheckStatus(dataImageFilesInfo.getCheckStatus());
+                invoiceVo.setStatus(dataImageFilesInfo.getFileFlowStatus());
+                invoiceVo.setFilesInfo(dataImageFilesInfo);
+                return invoiceVo;
+            })
+            .collect(Collectors.toList());
+    }
 
 }
+
+
+
