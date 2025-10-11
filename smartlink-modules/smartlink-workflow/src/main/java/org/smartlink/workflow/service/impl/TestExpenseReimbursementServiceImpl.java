@@ -501,7 +501,6 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                     dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, false);
                     dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, true);
                 }else if (status.equals(BusinessStatusEnum.CANCEL.getStatus())
-                    ||status.equals(BusinessStatusEnum.FINISH.getStatus())
                     ||status.equals(BusinessStatusEnum.INVALID.getStatus())
                     ||status.equals(BusinessStatusEnum.TERMINATION.getStatus())){
                     //解绑(参数：List id)
