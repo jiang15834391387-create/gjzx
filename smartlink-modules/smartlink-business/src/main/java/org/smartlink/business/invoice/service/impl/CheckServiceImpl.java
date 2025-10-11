@@ -2478,7 +2478,7 @@ public class CheckServiceImpl implements ICheckService {
                 vo.setBuyerName(dataOcrInfo.getBuyerName());
                 vo.setSellerName(dataOcrInfo.getSellerName());
                 vo.setInvoiceDate(dataOcrInfo.getInvoiceDate());
-                vo.setInvoiceTotal(dataOcrInfo.getTotalLowercase());
+                vo.setInvoiceTotal(dataOcrInfo.getInvoiceTotal());
                 break;
             //机动车
             case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
