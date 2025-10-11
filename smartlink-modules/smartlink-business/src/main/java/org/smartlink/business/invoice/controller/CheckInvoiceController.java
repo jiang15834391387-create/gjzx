@@ -86,5 +86,13 @@ public class CheckInvoiceController extends BaseController {
     public Page<InvoiceVo> selectPageList(@RequestBody InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
         return service.selectPageList(pageQuery);
     }
+    /**
+     *
+     *批量恢复发票
+     */
+    @PostMapping("/batchRecover")
+    public R<Void> batchRecover(@RequestBody String[] ids) {
+        return service.batchRecover(List.of(ids));
+    }
 
 }

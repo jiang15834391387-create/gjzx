@@ -1025,7 +1025,7 @@ public class CheckServiceImpl implements ICheckService {
 //        });
          //进行分页处理
         String jsonStr1 = JSON.toJSONString(invoiceVosList);
-        log.info("列表查询数据返回结果:{}",jsonStr1);
+        //log.info("列表查询数据返回结果:{}",jsonStr1);
 //        SysConfigBo sysConfigBo = new SysConfigBo();
 //        sysConfigBo.setConfigKey("sys.listww");
 //        sysConfigBo.setConfigValue(jsonStr1);
@@ -1056,7 +1056,7 @@ public class CheckServiceImpl implements ICheckService {
         invoiceVoPage.setRecords(pageData);
         invoiceVoPage.setTotal(invoiceVosList.size());
         String jsonStr = JSON.toJSONString(invoiceVoPage);
-        log.info("列表查询数据返回结果:{}",jsonStr);
+        //log.info("列表查询数据返回结果:{}",jsonStr);
         return invoiceVoPage;
 //        int coreCount = Runtime.getRuntime().availableProcessors();
 //        // 核心线程数设置为 CPU 核心数的 2 倍
@@ -2403,6 +2403,7 @@ public class CheckServiceImpl implements ICheckService {
         return this.selectPageCommons(pageQuery, invoiceVosList);
     }
 
+
     private Page<InvoiceVo> selectPageCommons(InvoicePageQuery pageQuery, List<InvoiceVo> invoiceVosList) {
         Page<InvoiceVo> invoiceVoPage = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
         //查询待报销,已报销,未报销
@@ -2533,6 +2534,26 @@ public class CheckServiceImpl implements ICheckService {
                 return invoiceVo;
             })
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public R<Void> batchRecover(List<String> ids) {
+        LambdaQueryWrapper<DataImageFilesInfo> eq = new LambdaQueryWrapper<DataImageFilesInfo>()
+            .in(DataImageFilesInfo::getFileId, ids);
+        List<DataImageFilesInfo> dataImageFilesInfos = filesInfoMapper.selectList(eq);
+        if (CollectionUtil.isEmpty(dataImageFilesInfos)){
+            return R.fail("该发票没查到不可恢复");
+        }
+
+        int update = filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>()
+            .in(DataImageFilesInfo::getFileId, ids)
+            .set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.TO_BE_REIMBURSED.getCode())
+            .set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.TO_BE_REIMBURSED.getCode())
+            .set(DataImageFilesInfo::getWorkflowId, null));
+        if (update<=0){
+            return R.fail("发票恢复失败");
+        }
+        return R.ok();
     }
 
 }

@@ -34,4 +34,6 @@ public interface ICheckService {
     R<List<FileDataDTO>> selectFileInfo(List<String> fileIds);
 
     Page<InvoiceVo> selectPageList(InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException;
+
+    R<Void> batchRecover(List<String> ids);
 }
