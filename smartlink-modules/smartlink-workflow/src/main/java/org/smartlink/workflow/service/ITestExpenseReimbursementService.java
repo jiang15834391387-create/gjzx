@@ -2,16 +2,18 @@ package org.smartlink.workflow.service;
 
 
 import jakarta.validation.constraints.NotNull;
+import org.smartlink.business.doman.dto.StructureDataDTO;
 import org.smartlink.common.core.domain.R;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.system.domain.SysUser;
 import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
-import org.smartlink.workflow.domain.vo.ConsumptionDetailsVo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 费用报销申请Service接口
@@ -76,4 +78,7 @@ public interface ITestExpenseReimbursementService {
 
     R<Void> setReceiptUrl(TestExpenseReimbursementBo bo);
 
+    R<List<StructureDataDTO>> selectStructureData(List<String> workIds);
+
+    List<Map<String,String>> selectList();
 }

@@ -1,12 +1,17 @@
 package org.smartlink.workflow.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.smartlink.business.doman.dto.InvoiceDataDTO;
+import org.smartlink.business.doman.dto.StructureDataDTO;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.dto.RoleDTO;
 import org.smartlink.common.core.domain.event.ProcessEvent;
@@ -18,14 +23,13 @@ import org.smartlink.common.core.service.WorkflowService;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StreamUtils;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.entity.domain.business.domain.*;
+import org.smartlink.common.entity.domain.business.mapper.*;
 import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.mybatis.core.domain.BaseEntity;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.mybatis.core.page.PageQuery;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import lombok.RequiredArgsConstructor;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.mapper.SysDictDataMapper;
@@ -34,19 +38,14 @@ import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
-import org.smartlink.workflow.domain.vo.ConsumptionDetailsVo;
-import org.smartlink.workflow.domain.vo.DetailsVo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
-import org.smartlink.workflow.domain.vo.form.BpmFormVo;
 import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
 import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
-import org.smartlink.workflow.service.BpmFormService;
 import org.smartlink.workflow.service.ITestExpenseReimbursementService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -69,6 +68,33 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final SysUserMapper userMapper;
     private final IDataImageFilesInfoService dataImageFilesInfoService;
     private final WorkflowService workflowService;
+    private final DataNonTaxMapper dataNonTaxMapper;
+    private final DataImageFilesInfoMapper filesInfoMapper;
+    private final DataMotorVehicleSaleMapper motorVehicleSaleMapper;
+    private final DataUsedCarSalesMapper usedCarSalesMapper;
+    private final DataFlightItineraryMapper flightItineraryMapper;
+    private final DataFlightsItineraryDetailMapper flightsItineraryDetailMapper;
+    private final DataSteamerTicketMapper steamerTicketMapper;
+    private final DataMedicalTreatmentMapper dataMedicalTreatmentMapper;
+    private final DataMedicalTreatmentDetailMapper dataMedicalTreatmentDetailMapper;
+    private final DataQuotaInvoiceMapper quotaInvoiceMapper;
+    private final DataTaxiTicketsMapper taxiTicketsMapper;
+    private final DataRailwayTicketMapper railwayTicketMapper;
+    private final DataPassengerCarMapper passengerCarMapper;
+    private final DataTollRoadsMapper tollRoadsMapper;
+    private final DataReceiptMapper dataReceiptMapper;
+    private final DataDidiItineraryMapper didiItineraryMapper;
+    private final DataDidiItineraryDetailsMapper didiItineraryDetailsMapper;
+    private final DataDutyPaidProofMapper paidProofMapper;
+    private final DataDutyPaidProofDetailsMapper paidProofDetailsMapper;
+    private final DataCustomsImportGoodsDetailMapper customsImportGoodsDetailMapper;
+    private final DataCustomsImxportGoodsMapper customsImportGoodsMapper;
+    private final DataCustomsExportGoodsMapper customsExportGoodsMapper;
+    private final DataCustomsExportGoodsDetailMapper customsExportGoodsDetailMapper;
+    private final DataCustomsSpecialPaymentMapper customsSpecialPaymentMapper;
+    private final DataElectronicTransportationGoodsMapper paymentMapper;
+    private final DataOcrInfoMapper ocrInfoMapper;
+    private final DataOcrDetailsMapper ocrDetailsMapper;
     /**
      * 查询费用报销申请
      *
@@ -266,10 +292,10 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         //校验发票是否使用（待完善）
 
 
-        Long l = dataImageFilesInfoService.checkFile(list);
-        if(l>0){
-            throw new ServiceException("不可重复绑定");
-        }
+//        Long l = dataImageFilesInfoService.checkFile(list);
+//        if(l>0){
+//            throw new ServiceException("不可重复绑定");
+//        }
     }
 
     public static List<Map<String, Object>> parseJsonString(String jsonString) {
@@ -413,7 +439,6 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
 
 
 
-
     //@EventListener(condition = "#processEvent.key.startsWith('bxd')")
     public void processHandler(ProcessEvent processEvent) {
         log.info("当前任务执行了{}", processEvent.toString());
@@ -476,7 +501,6 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                     dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, false);
                     dataImageFilesInfoService.bindAndRelieve(id.toString(), idList, true);
                 }else if (status.equals(BusinessStatusEnum.CANCEL.getStatus())
-                    ||status.equals(BusinessStatusEnum.FINISH.getStatus())
                     ||status.equals(BusinessStatusEnum.INVALID.getStatus())
                     ||status.equals(BusinessStatusEnum.TERMINATION.getStatus())){
                     //解绑(参数：List id)
@@ -523,6 +547,161 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         return wfDefinitionConfigs;
     }
 
+    @Override
+    public R<List<StructureDataDTO>> selectStructureData(List<String> workIds) {
+        if (CollectionUtils.isEmpty(workIds)) {
+            return R.fail("业务单号不能为空");
+        }
+        List<StructureDataDTO> dataDTOs = new ArrayList<>();
+
+        for (String workId : workIds) {
+            // 查询当前 workId 的银行回单
+            TestExpenseReimbursement reimbursement = baseMapper.selectById(workId);
+            if (ObjectUtil.isEmpty(reimbursement)) {
+                log.info("业务单号: {} 对应的银行回单不存在", workId);
+            }
+            //查询当前 workId 的所有发票附件
+            List<DataImageFilesInfo> filesInfos = filesInfoMapper.selectList(
+                new LambdaQueryWrapper<DataImageFilesInfo>()
+                    .eq(DataImageFilesInfo::getWorkflowId, workId)
+            );
+            if (CollectionUtils.isEmpty(filesInfos)) {
+                log.info("业务单号: {} 对应的发票附件不存在", workId);
+                continue;
+            }
+            List<InvoiceDataDTO> invoiceData = new ArrayList<>();
+            for (DataImageFilesInfo filesInfo : filesInfos) {
+                String invoiceType = filesInfo.getInvoice();
+                String fileId = filesInfo.getFileId();
+                InvoiceDataDTO dataDTO = selectTypeInvoice(invoiceType, fileId);
+                dataDTO.setInvoiceImg(filesInfo.getSurl());
+                invoiceData.add(dataDTO);
+            }
+            StructureDataDTO structureDataDTO = new StructureDataDTO();
+            structureDataDTO.setReceiptUrl(reimbursement.getReceiptUrl());
+            structureDataDTO.setInvoiceInfo(invoiceData);
+            dataDTOs.add(structureDataDTO);
+        }
+        if (CollectionUtils.isEmpty(dataDTOs)) {
+            return R.fail("所有业务单号对应的银行回单或发票附件均不存在");
+        }
+        return R.ok(dataDTOs);
+    }
+
+    @Override
+    public List<Map<String,String>> selectList() {
+        List<SysUser> sysUsers = userMapper.selectList(new QueryWrapper<SysUser>().eq("del_flag", "0").eq("status", "0"));
+        if(CollectionUtils.isNotEmpty(sysUsers)){
+            List<Map<String,String>> list=new ArrayList<>();
+            for (SysUser sysUser : sysUsers){
+                Map<String,String> map=new HashMap<>();
+                map.put("userId",sysUser.getUserId().toString());
+                map.put("userName",sysUser.getUserName());
+                map.put("nickName",sysUser.getNickName());
+                list.add( map);
+            }
+            return list;
+        }else {
+            return null;
+        }
+    }
+
+    private InvoiceDataDTO selectTypeInvoice(String invoiceType, String fileId) {
+        Object info= null;
+        switch (invoiceType) {
+            //增值税、机打
+            case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_TAX_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_ROAD_TOLLS_CODE:
+            case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+            case InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_LIST:
+                info = ocrInfoMapper.selectOne(new LambdaQueryWrapper<DataOcrInfo>().eq(DataOcrInfo::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //机动车
+            case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
+                info =motorVehicleSaleMapper.selectOne(new LambdaQueryWrapper<DataMotorVehicleSale>().eq(DataMotorVehicleSale::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //航空运输电子客票行程单
+            case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                info =flightItineraryMapper.selectOne(new LambdaQueryWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //二手车
+            case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
+                info =usedCarSalesMapper.selectOne(new LambdaQueryWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //船票
+            case InvoiceConstants.GLORITY_STEAMER_TICKET_CODE:
+                info =steamerTicketMapper.selectOne(new LambdaQueryWrapper<DataSteamerTicket>().eq(DataSteamerTicket::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //医疗票明细票
+            case InvoiceConstants.MEDICAL_TICKET_DETAILS_CODE:
+            case InvoiceConstants.MEDICAL_RECEIPTS_CODE:
+                info=dataMedicalTreatmentMapper.selectOne(new LambdaQueryWrapper<DataMedicalTreatment>().eq(DataMedicalTreatment::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //非税收入类发票
+            case InvoiceConstants.NON_TAX_REVENUE_RECEIPTS_CODE:
+                info =dataNonTaxMapper.selectOne(new LambdaQueryWrapper<DataNonTax>().eq(DataNonTax::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+
+            //定额发票
+            case InvoiceConstants.GLORITY_QUOTA_INVOICE_CODE:
+                info =quotaInvoiceMapper.selectOne(new LambdaQueryWrapper<DataQuotaInvoice>().eq(DataQuotaInvoice::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //出租车发票
+            case InvoiceConstants.GLORITY_TAXI_TICKETS_CODE:
+                info =taxiTicketsMapper.selectOne(new LambdaQueryWrapper<DataTaxiTickets>().eq(DataTaxiTickets::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //火车发票
+            case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                info =railwayTicketMapper.selectOne(new LambdaQueryWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //客运车发票
+            case InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE:
+                info =passengerCarMapper.selectOne(new LambdaQueryWrapper<DataPassengerCar>().eq(DataPassengerCar::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //过路费发票
+            case InvoiceConstants.GLORITY_TOLL_ROADS_CODE:
+                info =tollRoadsMapper.selectOne(new LambdaQueryWrapper<DataTollRoads>().eq(DataTollRoads::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //小票/可报销其他发票
+            case InvoiceConstants.GLORITY_RECEIPT_CODE:
+            case InvoiceConstants.REIMBURSABLE_OTHER_CODE:
+                info =dataReceiptMapper.selectOne(new LambdaQueryWrapper<DataReceipt>().eq(DataReceipt::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //出行发票/滴滴
+            case InvoiceConstants.GLORITY_DIDI_ITINERARY_CODE:
+                info =didiItineraryMapper.selectOne(new LambdaQueryWrapper<DataDidiItinerary>().eq(DataDidiItinerary::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //完税证明发票
+            case InvoiceConstants.GLORITY_DUTY_PAID_PROOF_CODE:
+                info =paidProofMapper.selectOne(new LambdaQueryWrapper<DataDutyPaidProof>().eq(DataDutyPaidProof::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //海关进口货物报关单发票
+            case InvoiceConstants.CUSTOMS_IMPORTED_GOODS_CODE:
+                info =customsImportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsImxportGoods>().eq(DataCustomsImxportGoods::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //海关出口货物报关单发票
+            case InvoiceConstants.CUSTOMS_EXPORT_GOODS_CODE:
+                info =customsExportGoodsMapper.selectOne(new LambdaQueryWrapper<DataCustomsExportGoods>().eq(DataCustomsExportGoods::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //海关专用缴款书发票
+            case InvoiceConstants.CUSTOMS_SPECIAL_PAYMENT_VOUCHER_CODE:
+                info =customsSpecialPaymentMapper.selectOne(new LambdaQueryWrapper<DataCustomsSpecialPayment>().eq(DataCustomsSpecialPayment::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            //货物运输电子收款凭证发票
+            case InvoiceConstants.ELECTRONIC_PAYMENT_GOODS_TRANSPORTATION_CODE:
+                info =paymentMapper.selectOne(new LambdaQueryWrapper<DataElectronicTransportationGoods>().eq(DataElectronicTransportationGoods::getFileId, fileId));
+                return new InvoiceDataDTO(null, info);
+            default: {
+                return new InvoiceDataDTO(null,null);
+            }
+        }
+    }
 
 
 }

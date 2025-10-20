@@ -3,6 +3,7 @@ package org.smartlink.business.invoice.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
+import org.smartlink.business.doman.dto.FileDataDTO;
 import org.smartlink.business.doman.vo.InvoiceVo;
 import org.smartlink.business.invoice.service.ICheckService;
 import org.smartlink.common.check.doman.InvoicePageQuery;
@@ -13,6 +14,7 @@ import org.smartlink.common.web.core.BaseController;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @RestController
@@ -69,4 +71,28 @@ public class CheckInvoiceController extends BaseController {
     public R<Void> addInvoice(@RequestBody InvoiceRequest request) throws Exception {
         return service.addInvoice(request);
     }
+    /**
+     *查询文件信息
+     */
+    @PostMapping("/selectFileInfo")
+    public R<List<FileDataDTO>> selectFileInfo(@RequestBody List<String> fileIds){
+        return service.selectFileInfo(fileIds);
+    }
+
+    /**
+     *返回id和状态
+     */
+    @PostMapping("/selectPageStatus")
+    public Page<InvoiceVo> selectPageList(@RequestBody InvoicePageQuery pageQuery) throws ExecutionException, InterruptedException {
+        return service.selectPageList(pageQuery);
+    }
+    /**
+     *
+     *批量恢复发票
+     */
+    @PostMapping("/batchRecover")
+    public R<Void> batchRecover(@RequestBody String[] ids) {
+        return service.batchRecover(List.of(ids));
+    }
+
 }

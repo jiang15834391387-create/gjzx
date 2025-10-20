@@ -704,4 +704,25 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
             .in(SysUser::getDeptId, deptIds));
         return BeanUtil.copyToList(list, UserDTO.class);
     }
+
+    @Override
+    public List<SysUserVo> selectUserListByRole() {
+        return baseMapper.selectVoList(new LambdaQueryWrapper<SysUser>()
+            .ge(SysUser::getUserId, "100")
+            .eq(SysUser::getStatus, "0")
+            .eq(SysUser::getDelFlag, "0")
+        );
+    }
+
+    @Override
+    public void addRole(List<SysUserVo> sysUserVos) {
+        ArrayList<SysUserRole> sysUserRoles = new ArrayList<>();
+        sysUserVos.forEach(sysUserVo -> {
+            SysUserRole sysUserRole = new SysUserRole();
+            sysUserRole.setUserId(sysUserVo.getUserId());
+            sysUserRole.setRoleId(1972181277238611970L);
+            sysUserRoles.add(sysUserRole);
+        });
+        userRoleMapper.insertBatch(sysUserRoles);
+    }
 }

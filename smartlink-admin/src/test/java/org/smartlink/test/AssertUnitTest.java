@@ -3,6 +3,13 @@ package org.smartlink.test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.smartlink.common.core.service.UserService;
+import org.smartlink.system.domain.vo.SysUserVo;
+import org.smartlink.system.service.ISysRoleService;
+import org.smartlink.system.service.ISysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 /**
  * 断言单元测试案例
@@ -11,6 +18,9 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("断言单元测试案例")
 public class AssertUnitTest {
+
+    @Autowired
+    ISysUserService sysUserService;
 
     @DisplayName("测试 assertEquals 方法")
     @Test
@@ -40,6 +50,12 @@ public class AssertUnitTest {
     public void testAssertNull() {
         Assertions.assertNull(null);
         Assertions.assertNotNull(null);
+    }
+
+    @Test
+    public void testAssertThrows() {
+        List<SysUserVo> sysUserVos = sysUserService.selectUserListByRole();
+        sysUserService.addRole(sysUserVos);
     }
 
 }

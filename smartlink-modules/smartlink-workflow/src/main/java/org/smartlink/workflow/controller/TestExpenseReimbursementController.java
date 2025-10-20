@@ -1,31 +1,35 @@
 package org.smartlink.workflow.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import lombok.RequiredArgsConstructor;
-import jakarta.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.annotation.SaIgnore;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import org.smartlink.business.doman.dto.StructureDataDTO;
+import org.smartlink.common.core.domain.R;
+import org.smartlink.common.core.validate.AddGroup;
+import org.smartlink.common.core.validate.EditGroup;
+import org.smartlink.common.idempotent.annotation.RepeatSubmit;
+import org.smartlink.common.log.annotation.Log;
+import org.smartlink.common.log.enums.BusinessType;
+import org.smartlink.common.mybatis.core.page.PageQuery;
+import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.web.core.BaseController;
+import org.smartlink.system.domain.SysUser;
+import org.smartlink.system.mapper.SysUserMapper;
 import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
-import org.smartlink.workflow.domain.vo.ConsumptionDetailsVo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.service.ITestExpenseReimbursementService;
 import org.smartlink.workflow.utils.pdf.TemplateFieldResolver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
-import org.smartlink.common.idempotent.annotation.RepeatSubmit;
-import org.smartlink.common.log.annotation.Log;
-import org.smartlink.common.web.core.BaseController;
-import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.core.domain.R;
-import org.smartlink.common.core.validate.AddGroup;
-import org.smartlink.common.core.validate.EditGroup;
-import org.smartlink.common.log.enums.BusinessType;
-import org.smartlink.common.excel.utils.ExcelUtil;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 费用报销申请
@@ -36,6 +40,7 @@ import org.smartlink.common.mybatis.core.page.TableDataInfo;
 @Validated
 @RequiredArgsConstructor
 @RestController
+@SaIgnore
 @RequestMapping("/system/expenseReimbursement")
 public class TestExpenseReimbursementController extends BaseController {
 
@@ -132,7 +137,18 @@ public class TestExpenseReimbursementController extends BaseController {
     public R<Void> setReceiptUrl(@RequestBody TestExpenseReimbursementBo bo) {
         return testExpenseReimbursementService.setReceiptUrl(bo);
     }
+    /**
+     *查询发票附件/结构化数据/银行回单
+     */
+    @GetMapping("/selectStructureData")
+    public R<List<StructureDataDTO>> selectStructureData(@RequestBody List<String> workIds){
+        return testExpenseReimbursementService.selectStructureData(workIds);
+    }
 
-
+    @GetMapping("/getUserInfo")
+    public R<List<Map<String,String>>> getUserInfo(){
+        List<Map<String,String>> sysUsers = testExpenseReimbursementService.selectList();
+        return R.ok(sysUsers);
+    }
 
 }
