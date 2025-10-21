@@ -21,9 +21,12 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.tika.Tika;
+import org.smartlink.business.doman.vo.LhdxInvoiceVo;
 import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.service.IDataOcrService;
 import org.smartlink.business.service.ScanImageService;
+import org.smartlink.business.util.MoneyToChineseUtil;
+import org.smartlink.business.util.PdfInvoiceTemplateUtil;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
@@ -33,6 +36,8 @@ import org.smartlink.common.core.utils.file.Constants;
 import org.smartlink.common.core.utils.file.FileUtils;
 import org.smartlink.common.core.utils.file.ParamConstants;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.factory.OcrFactory;
@@ -52,6 +57,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -720,6 +726,126 @@ public class ScanImageServiceImpl implements ScanImageService {
         try (InputStream inputStream = file.getInputStream()) {
             return DigestUtils.md5Hex(inputStream);
         }
+    }
+
+    @Override
+    public void lhdxImportInvoice(List<LhdxInvoiceVo> list,String mergedFilePath) {
+        Map<String, List<LhdxInvoiceVo>> collect = list.stream().collect(Collectors.groupingBy(LhdxInvoiceVo::getInvoiceNumberCode));
+        for (String key : collect.keySet()) {
+            List<LhdxInvoiceVo> lhdxInvoiceVoList = collect.get(key);
+            String labelName = lhdxInvoiceVoList.get(0).getInvoiceType();
+            Map<String, Object> stringObjectMap = setMap(lhdxInvoiceVoList);
+            String templateName = "Invoice_template.pdf";
+            if (labelName.contains("增值税")) templateName = "zzs_Invoice_template.pdf";
+            String output = mergedFilePath + UUID.randomUUID() + ".pdf";
+
+            PdfInvoiceTemplateUtil.generatePdfFromTemplate(output, stringObjectMap,templateName);
+
+
+            String invoiceType = labelName.contains("增值税") ? "10100" : "10108";
+            SysOssVo pdfUpload = iSysOssService.upload(new File(output));
+            DataImageFilesInfo dataImageFilesInfoSm = new DataImageFilesInfo();
+            dataImageFilesInfoSm.setInvoice(invoiceType);
+            dataImageFilesInfoSm.setFileStatus(FileStatusEnumd.UPLOADED_SUCCESSFUL_CODE.getCode());
+            dataImageFilesInfoSm.setFileName(pdfUpload.getFileName());
+            dataImageFilesInfoSm.setPurl(pdfUpload.getUrl());
+            dataImageFilesInfoSm.setSurl(pdfUpload.getUrl());
+            dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
+            iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
+
+            DataOcrInfo dataOcrInfo = setDataOcrInfo(lhdxInvoiceVoList,dataImageFilesInfoSm.getFileId());
+            try{
+                dataOcrService.ocrInsert(invoiceType, dataOcrInfo);
+            }catch (Exception e){
+                log.error("处理发票信息时出错",e);
+            }
+
+        }
+    }
+
+    public Map<String, Object> setMap(List<LhdxInvoiceVo> list) {
+        Map<String, Object> replacements = new HashMap<>();
+        LhdxInvoiceVo lhdxInvoiceVo = list.get(0);
+        String labelName = lhdxInvoiceVo.getInvoiceType();
+        String invoiceNumberCode = lhdxInvoiceVo.getInvoiceNumberCode();
+        String invoiceDate = lhdxInvoiceVo.getInvoiceDate();
+        String buyerName = lhdxInvoiceVo.getBuyerName();
+        String buyerTaxId = lhdxInvoiceVo.getBuyerTaxId();
+        String sellerName = lhdxInvoiceVo.getSellerName();
+        String sellerTaxId = lhdxInvoiceVo.getSellerTaxId();
+        String drawer = lhdxInvoiceVo.getDrawer();//开票人
+        String remarks = lhdxInvoiceVo.getRemarks();//备注
+        String totalAmount = lhdxInvoiceVo.getTotalAmount();//价税合计
+
+        try{
+            for (LhdxInvoiceVo vo : list) {
+                String invoiceDetailLine = vo.getInvoiceDetailLine();//行号
+                String invoiceItemName = vo.getInvoiceItemName();//项目名称
+                String unitPrice = vo.getUnitPrice();//单价金额
+                String taxRate = vo.getTaxRate();//税率
+                String taxAmount = vo.getTaxAmount();//税额
+
+                replacements.put("ItemName"+invoiceDetailLine, invoiceItemName);
+                replacements.put("UnPrice"+invoiceDetailLine, unitPrice);
+                replacements.put("Amount"+invoiceDetailLine, unitPrice);
+                if (taxRate == null) taxRate = "*";
+                if (taxRate.equals("*")) {
+                    replacements.put("TaxRate"+invoiceDetailLine, taxRate);
+                }else if(taxRate.contains("%")){
+                    replacements.put("TaxRate"+invoiceDetailLine, taxRate);
+                }else{
+                    replacements.put("TaxRate"+invoiceDetailLine, Double.parseDouble(taxRate) * 100 + "%" );
+                }
+                replacements.put("ComTaxAm"+invoiceDetailLine, taxAmount);
+            }
+            replacements.put("InvoiceNumber", invoiceNumberCode);
+            replacements.put("IssueTime", invoiceDate);
+            replacements.put("BuyerName", buyerName);
+            replacements.put("BuyerIdNum", buyerTaxId);
+            replacements.put("SellerName", sellerName);
+            replacements.put("SellerIdNum", sellerTaxId);
+            replacements.put("totalAmount", totalAmount);
+            String cleanNumber = totalAmount.replace(",", "").trim();
+            BigDecimal bigDecimal = new BigDecimal(cleanNumber);
+            String amountInChinese = MoneyToChineseUtil.convert(bigDecimal);
+            replacements.put("amountInChinese", amountInChinese);
+            replacements.put("Remark", remarks);
+            replacements.put("Drawer", drawer);
+        } catch (Exception e) {
+            log.error("lhdxImportInvoice error:{}", e);
+        }
+
+        return replacements;
+    }
+
+
+    public DataOcrInfo setDataOcrInfo(List<LhdxInvoiceVo> list,String fileId) {
+        DataOcrInfo dataOcrInfo = new DataOcrInfo();
+        LhdxInvoiceVo invoiceVo = list.get(0);
+        dataOcrInfo.setInvoiceDate(invoiceVo.getInvoiceDate());//发票日期
+        dataOcrInfo.setInvoiceNumber(invoiceVo.getInvoiceNumber());//发票号码
+        dataOcrInfo.setInvoiceCode(invoiceVo.getInvoiceCode());//发票代码
+        dataOcrInfo.setBuyerName(invoiceVo.getBuyerName());//购买方名称
+        dataOcrInfo.setBuyerNo(invoiceVo.getBuyerTaxId());//购买方纳税识别号
+        dataOcrInfo.setSellerName(invoiceVo.getSellerName());//销售方名称
+        dataOcrInfo.setSellerNo(invoiceVo.getSellerTaxId());//销售方纳税识别号
+        dataOcrInfo.setPayee(invoiceVo.getPayee());//收款人
+        dataOcrInfo.setIssuer(invoiceVo.getDrawer());//开票人
+        dataOcrInfo.setRemark(invoiceVo.getRemarks());//备注
+
+        List<DataOcrDetails> details = new ArrayList<>();
+        for (LhdxInvoiceVo lhdxInvoiceVo : list) {
+            DataOcrDetails dataOcrDetails = new DataOcrDetails();
+            dataOcrDetails.setDetailNo(lhdxInvoiceVo.getInvoiceDetailLine());//发票明细行
+            dataOcrDetails.setProjectName(lhdxInvoiceVo.getInvoiceItemName());
+            dataOcrDetails.setPrice(lhdxInvoiceVo.getUnitPrice());
+            dataOcrDetails.setTaxRate(lhdxInvoiceVo.getTaxRate());
+            dataOcrDetails.setTax(lhdxInvoiceVo.getTaxAmount());
+            dataOcrDetails.setDetailAmount(lhdxInvoiceVo.getTotalAmount());
+            details.add(dataOcrDetails);
+        }
+        dataOcrInfo.setDetails(details);
+        return dataOcrInfo;
     }
 
 }
