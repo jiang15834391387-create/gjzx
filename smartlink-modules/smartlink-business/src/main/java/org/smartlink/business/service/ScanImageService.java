@@ -2,9 +2,9 @@ package org.smartlink.business.service;
 
 
 
-import jakarta.mail.internet.MimeMultipart;
 import org.apache.poi.ss.formula.functions.T;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.business.doman.vo.LhdxInvoiceVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -38,6 +38,9 @@ public interface ScanImageService {
      * @return 邮件文件
      */
     List<MultipartFile> fetchFilesFromEmail() throws Exception;
+
+
+    void lhdxImportInvoice(List<LhdxInvoiceVo> list,String mergedFilePath);
 //
 //    /**
 //     * 单据初始化

@@ -2,10 +2,12 @@ package org.smartlink.business.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.dev33.satoken.annotation.SaIgnore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.poi.ss.formula.functions.T;
+import org.smartlink.business.doman.vo.LhdxInvoiceVo;
+import org.smartlink.business.listener.LhdxInvoiceImportListener;
 import org.smartlink.business.service.ScanImageService;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.enums.FileStatusEnumd;
@@ -13,13 +15,18 @@ import org.smartlink.common.entity.domain.business.domain.OtherAttachments;
 import org.smartlink.common.entity.domain.business.domain.bo.DataUsedCarSalesBo;
 import org.smartlink.common.entity.domain.business.domain.vo.DataUsedCarSalesVo;
 import org.smartlink.common.entity.domain.business.service.IOtherAttachmentsService;
+import org.smartlink.common.excel.core.ExcelResult;
+import org.smartlink.common.excel.utils.ExcelUtil;
+import org.smartlink.common.entity.domain.business.service.IOtherAttachmentsService;
 import org.smartlink.common.log.annotation.Log;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.log.enums.BusinessType;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.smartlink.common.log.enums.BusinessType;
 
 import java.util.List;
 
@@ -37,9 +44,10 @@ import java.util.List;
 public class InvoiceRecognitionController {
 
     private final ScanImageService scanImageService;
-
     private final IOtherAttachmentsService iOtherAttachmentsService;
 
+    @Value("${file-path.merged}")
+    private String mergedFilePath;
     /**
      * 发票上传
      *
@@ -100,6 +108,17 @@ public class InvoiceRecognitionController {
     @GetMapping("/otherAttachmentsList")
     public List<OtherAttachments> otherAttachmentsList(OtherAttachments otherAttachments) {
         return iOtherAttachmentsService.queryList(otherAttachments);
+    }
+
+    /**
+     * 联合大学发票导入
+     */
+    @Log(title = "联合大学发票导入", businessType = BusinessType.IMPORT)
+    @PostMapping(value = "/lhdxImportInvoice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R<Void> lhdxImportInvoice(@RequestPart("file") MultipartFile file) throws Exception {
+        ExcelResult<LhdxInvoiceVo> result = ExcelUtil.importExcel(file.getInputStream(), LhdxInvoiceVo.class, new LhdxInvoiceImportListener());
+        scanImageService.lhdxImportInvoice(result.getList(),mergedFilePath);
+        return R.ok("发票数据导入任务已开始，请稍后查询进度。");
     }
 
 }
