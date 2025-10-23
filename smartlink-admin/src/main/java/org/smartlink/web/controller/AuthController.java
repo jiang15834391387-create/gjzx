@@ -276,9 +276,8 @@ public class AuthController {
 
     //app账号密码登录
     @PostMapping("/applogin")
-    public R<LoginVo> applogin(@RequestBody LoginBody loginBody, PasswordLoginBody loginBodyPass) {
-//        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
-//        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
+    public R<LoginVo> applogin(@RequestBody String body) {
+        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
         ValidatorUtils.validate(loginBody);
         // 授权类型和客户端id
         String clientId = loginBody.getClientId();
@@ -294,7 +293,7 @@ public class AuthController {
         // 校验租户
         loginService.checkTenant(loginBody.getTenantId());
         // 登录
-        LoginVo loginVo = iLoginService.applogin(loginBodyPass, client);
+        LoginVo loginVo = iLoginService.applogin(body, client);
         loginVo.setNickName(loginVo.getNickName());
         Long userId = LoginHelper.getUserId();
         scheduledExecutorService.schedule(() -> {
@@ -305,6 +304,37 @@ public class AuthController {
         }, 5, TimeUnit.SECONDS);
         return R.ok(loginVo);
     }
+    //app账号密码登录
+//    @PostMapping("/applogin")
+//    public R<LoginVo> applogin(@RequestBody LoginBody loginBody, PasswordLoginBody loginBodyPass) {
+////        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
+////        LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
+//        ValidatorUtils.validate(loginBody);
+//        // 授权类型和客户端id
+//        String clientId = loginBody.getClientId();
+//        String grantType = loginBody.getGrantType();
+//        SysClientVo client = clientService.queryByClientId(clientId);
+//        // 查询不到 client 或 client 内不包含 grantType
+//        if (ObjectUtil.isNull(client) || !StringUtils.contains(client.getGrantType(), grantType)) {
+//            log.info("客户端id: {} 认证类型：{} 异常!.", clientId, grantType);
+//            return R.fail(MessageUtils.message("auth.grant.type.error"));
+//        } else if (!UserConstants.NORMAL.equals(client.getStatus())) {
+//            return R.fail(MessageUtils.message("auth.grant.type.blocked"));
+//        }
+//        // 校验租户
+//        loginService.checkTenant(loginBody.getTenantId());
+//        // 登录
+//        LoginVo loginVo = iLoginService.applogin(loginBodyPass, client);
+//        loginVo.setNickName(loginVo.getNickName());
+//        Long userId = LoginHelper.getUserId();
+//        scheduledExecutorService.schedule(() -> {
+//            SseMessageDto dto = new SseMessageDto();
+//            dto.setMessage("欢迎登录");
+//            dto.setUserIds(List.of(userId));
+//            SseMessageUtils.publishMessage(dto);
+//        }, 5, TimeUnit.SECONDS);
+//        return R.ok(loginVo);
+//    }
 
     /**
      * 发票上传
@@ -313,77 +343,79 @@ public class AuthController {
      * @param uploadType 上传类型 0 邮件 1 手动
      */
 //    @Log(title = "发票上传", businessType = BusinessType.INSERT)
-    @SaIgnore
-    @PostMapping("/upload")
-    public R<T> upload(@RequestParam(value = "files", required = false) MultipartFile[] files,
-                       @RequestParam(value = "uploadType") String uploadType) throws Exception {
-        R<T> res = null;
-        LoginBody loginBody = new LoginBody();
-
-        List<SysUserExportVo> list = userService.selectUserExportList(new SysUserBo());
-        loginBody.setClientId("428a8310cd442757ae699df5d894f051");
-        loginBody.setTenantId("000000");
-        loginBody.setGrantType("password,sms,social");
-        for (SysUserExportVo user : list) {
-            PasswordLoginBody loginBodyPass = new PasswordLoginBody();
-            loginBodyPass.setUsername(user.getPhonenumber()); // 覆盖式赋值
-            loginBodyPass.setPassword("admin123"); // 覆盖式赋值
-            loginBodyPass.setTenantId("000000"); // 覆盖式赋值
-
-
-
-//                ValidatorUtils.validate(loginBody);
-                // 授权类型和客户端id
-                String clientId = loginBody.getClientId();
-                String grantType = loginBody.getGrantType();
-                SysClientVo client = clientService.queryByClientId(clientId);
-                // 查询不到 client 或 client 内不包含 grantType
-                if (ObjectUtil.isNull(client) || !StringUtils.contains(client.getGrantType(), grantType)) {
-                    log.info("客户端id: {} 认证类型：{} 异常!.", clientId, grantType);
-                    return R.fail(MessageUtils.message("auth.grant.type.error"));
-                } else if (!UserConstants.NORMAL.equals(client.getStatus())) {
-                    return R.fail(MessageUtils.message("auth.grant.type.blocked"));
-                }
-                // 校验租户
-                loginService.checkTenant(loginBody.getTenantId());
-                // 登录
-                LoginVo loginVo = iLoginService.applogin(loginBodyPass, client);
-                loginVo.setNickName(loginVo.getNickName());
-                Long userId = LoginHelper.getUserId();
-                scheduledExecutorService.schedule(() -> {
-                    SseMessageDto dto = new SseMessageDto();
-                    dto.setMessage("欢迎登录");
-                    dto.setUserIds(List.of(userId));
-                    SseMessageUtils.publishMessage(dto);
-                }, 5, TimeUnit.SECONDS);
-
-
-            if (uploadType.equals("0")){
-                List<MultipartFile> fetchFilesFromEmail = scanImageService.fetchFilesFromEmail();
-                if (fetchFilesFromEmail.size()!= 0){
-                    for (MultipartFile multipart : fetchFilesFromEmail) {
-                        res = scanImageService.uploadImage(multipart, uploadType);
-                    }
-                }
-            } else {
-                if (files != null && files.length > 0) {
-                    for (MultipartFile file : files) {
-                        res = scanImageService.uploadImage(file, uploadType);
-                        if (res.getMsg().equals(FileStatusEnumd.OCR_FAILED.getDesc())) {
-                            continue;  // 跳过当前文件，继续处理下一个
-                        }
-                    }
-                } else {
-                    return R.fail("请上传文件!");
-                }
-            }
-            break; // 只执行一次，跳出循环
-        }
-
-
-
-        return res;
-    }
+//    @SaIgnore
+//    @PostMapping("/upload")
+//    public R<T> upload(@RequestParam(value = "files", required = false) MultipartFile[] files,
+//                       @RequestParam(value = "uploadType") String uploadType) throws Exception {
+//        R<T> res = null;
+//        LoginBody loginBody = new LoginBody();
+//
+//        List<SysUserExportVo> list = userService.selectUserExportList(new SysUserBo());
+//        loginBody.setClientId("428a8310cd442757ae699df5d894f051");
+//        loginBody.setTenantId("000000");
+//        loginBody.setGrantType("password,sms,social");
+//        for (SysUserExportVo user : list) {
+////            for (int i = 3; i < list.size(); i++) { // 从下标 3 开始
+////                SysUserExportVo user = list.get(i);
+//            PasswordLoginBody loginBodyPass = new PasswordLoginBody();
+//            loginBodyPass.setUsername(user.getPhonenumber()); // 覆盖式赋值
+//            loginBodyPass.setPassword("admin123"); // 覆盖式赋值
+//            loginBodyPass.setTenantId("000000"); // 覆盖式赋值
+//
+//
+//
+////                ValidatorUtils.validate(loginBody);
+//                // 授权类型和客户端id
+//                String clientId = loginBody.getClientId();
+//                String grantType = loginBody.getGrantType();
+//                SysClientVo client = clientService.queryByClientId(clientId);
+//                // 查询不到 client 或 client 内不包含 grantType
+//                if (ObjectUtil.isNull(client) || !StringUtils.contains(client.getGrantType(), grantType)) {
+//                    log.info("客户端id: {} 认证类型：{} 异常!.", clientId, grantType);
+//                    return R.fail(MessageUtils.message("auth.grant.type.error"));
+//                } else if (!UserConstants.NORMAL.equals(client.getStatus())) {
+//                    return R.fail(MessageUtils.message("auth.grant.type.blocked"));
+//                }
+//                // 校验租户
+//                loginService.checkTenant(loginBody.getTenantId());
+//                // 登录
+//                LoginVo loginVo = iLoginService.applogin(loginBodyPass, client);
+//                loginVo.setNickName(loginVo.getNickName());
+//                Long userId = LoginHelper.getUserId();
+//                scheduledExecutorService.schedule(() -> {
+//                    SseMessageDto dto = new SseMessageDto();
+//                    dto.setMessage("欢迎登录");
+//                    dto.setUserIds(List.of(userId));
+//                    SseMessageUtils.publishMessage(dto);
+//                }, 5, TimeUnit.SECONDS);
+//
+//
+//            if (uploadType.equals("0")){
+//                List<MultipartFile> fetchFilesFromEmail = scanImageService.fetchFilesFromEmail();
+//                if (fetchFilesFromEmail.size()!= 0){
+//                    for (MultipartFile multipart : fetchFilesFromEmail) {
+//                        res = scanImageService.uploadImage(multipart, uploadType);
+//                    }
+//                }
+//            } else {
+//                if (files != null && files.length > 0) {
+//                    for (MultipartFile file : files) {
+//                        res = scanImageService.uploadImage(file, uploadType);
+//                        if (res.getMsg().equals(FileStatusEnumd.OCR_FAILED.getDesc())) {
+//                            continue;  // 跳过当前文件，继续处理下一个
+//                        }
+//                    }
+//                } else {
+//                    return R.fail("请上传文件!");
+//                }
+//            }
+//            break; // 只执行一次，跳出循环
+//        }
+//
+//
+//
+//        return res;
+//    }
 
 
 }

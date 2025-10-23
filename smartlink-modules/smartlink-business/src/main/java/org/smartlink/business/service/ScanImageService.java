@@ -25,6 +25,14 @@ public interface ScanImageService {
     R<T> uploadImage(MultipartFile multipartFile, String uploadType) throws Exception;
 
     /**
+     * 文件上传
+     *
+     * @param multipartFile 文件
+     * @return 图片vo
+     */
+    R<T> uploadAttachments(MultipartFile multipartFile) throws Exception;
+
+    /**
      * 邮件识别
      *
      * @return 邮件文件
