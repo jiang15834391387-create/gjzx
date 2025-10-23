@@ -134,7 +134,6 @@ public class TestLeaveServiceImpl implements ITestLeaveService {
             log.info("当前任务执行了{}", processTaskEvent.toString());
             TestLeave testLeave = baseMapper.selectById(Long.valueOf(processTaskEvent.getBusinessKey()));
             testLeave.setStatus(BusinessStatusEnum.WAITING.getStatus());
-
             baseMapper.updateById(testLeave);
         }
     }
