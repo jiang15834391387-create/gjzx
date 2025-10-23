@@ -72,6 +72,7 @@ public class SysUserController extends BaseController {
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
     @SaCheckPermission("system:user:export")
     @PostMapping("/export")
+    @SaIgnore
     public void export(SysUserBo user, HttpServletResponse response) {
         List<SysUserExportVo> list = userService.selectUserExportList(user);
         ExcelUtil.exportExcel(list, "用户数据", SysUserExportVo.class, response);

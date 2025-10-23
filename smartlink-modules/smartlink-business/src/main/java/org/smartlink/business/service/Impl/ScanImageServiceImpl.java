@@ -2,8 +2,10 @@ package org.smartlink.business.service.Impl;
 
 
 import cn.dev33.satoken.session.SaSession;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
@@ -33,7 +35,9 @@ import org.smartlink.common.core.utils.file.Constants;
 import org.smartlink.common.core.utils.file.FileUtils;
 import org.smartlink.common.core.utils.file.ParamConstants;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.OtherAttachments;
 import org.smartlink.common.entity.domain.business.service.IDataImageFilesInfoService;
+import org.smartlink.common.entity.domain.business.service.IOtherAttachmentsService;
 import org.smartlink.common.ocr.entity.IdentificationData;
 import org.smartlink.common.ocr.factory.OcrFactory;
 import org.smartlink.common.oss.entity.UploadResult;
@@ -75,6 +79,7 @@ public class ScanImageServiceImpl implements ScanImageService {
     private final IDataOcrService dataOcrService;
     private final CheckInvoice checkInvoice;
     private final ISysUserService iSysUserService;
+    private final IOtherAttachmentsService otherAttachmentsService;
 
     /**
      * 发票上传
@@ -323,6 +328,23 @@ public class ScanImageServiceImpl implements ScanImageService {
             return handleOcrFailure(multipartFile, fileSuffix, InvoiceGlorityEnumd.REIMBURSABLE_OTHER_CODE.getCode(), FileStatusEnumd.UPLOADED_SUCCESSFUL_CODE.getCode(), "用户关闭了OCR！");  // 返回 null，表示跳过
         }
 
+    }
+
+    @Override
+    public R<T> uploadAttachments(MultipartFile multipartFile) throws Exception {
+        String originalFilename = multipartFile.getOriginalFilename();
+        if (StrUtil.isBlank(originalFilename) || !originalFilename.toLowerCase().endsWith(".pdf")) {
+            return R.fail("只允许上传 pdf 文件");
+        }
+        SysOssVo upload = iSysOssService.upload(multipartFile);
+//        OtherAttachments otherAttachments = new OtherAttachments();
+//            otherAttachments.setUrl(upload.getUrl());
+//            otherAttachments.setOriginalName(upload.getOriginalName());
+//            otherAttachments.setFileSuffix(upload.getFileSuffix());
+//            otherAttachments.setFileName(upload.getFileName());
+        OtherAttachments otherAttachments = BeanUtil.copyProperties(upload, OtherAttachments.class);
+        otherAttachmentsService.insert(otherAttachments);
+        return R.ok("上传成功!");
     }
 
     public static String detectContentType(InputStream inputStream) {

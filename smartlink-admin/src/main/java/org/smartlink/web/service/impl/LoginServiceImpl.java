@@ -5,6 +5,7 @@ import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.PasswordLoginBody;
@@ -25,13 +26,14 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class LoginServiceImpl implements ILoginService {
     private final SysLoginService loginService;
     private final SysUserMapper userMapper;
-    public LoginServiceImpl(SysLoginService loginService, SysUserMapper userMapper) {
-        this.loginService = loginService;
-        this.userMapper = userMapper;
-    }
+//    public LoginServiceImpl(SysLoginService loginService, SysUserMapper userMapper) {
+//        this.loginService = loginService;
+//        this.userMapper = userMapper;
+//    }
 
     // app账号密码登录
     public LoginVo applogin(String body, SysClientVo client) {
