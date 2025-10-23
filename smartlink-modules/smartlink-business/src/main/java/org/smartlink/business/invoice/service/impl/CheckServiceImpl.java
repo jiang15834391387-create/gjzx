@@ -2503,6 +2503,7 @@ public class CheckServiceImpl implements ICheckService {
                 .in(DataOcrInfo::getFileId, fileIds)
         );
 
+
         // Map：key=fileId，value=DataOcrInfo
         Map<String, DataOcrInfo> ocrInfoMap = dataOcrInfos.stream()
             .collect(Collectors.toMap(
