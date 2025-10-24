@@ -844,6 +844,7 @@ public class ScanImageServiceImpl implements ScanImageService {
     public DataOcrInfo setDataOcrInfo(List<LhdxInvoiceVo> list,String fileId) {
         DataOcrInfo dataOcrInfo = new DataOcrInfo();
         LhdxInvoiceVo invoiceVo = list.get(0);
+        dataOcrInfo.setFileId(fileId);
         dataOcrInfo.setInvoiceDate(invoiceVo.getInvoiceDate());//发票日期
         dataOcrInfo.setInvoiceNumber(invoiceVo.getInvoiceNumber());//发票号码
         dataOcrInfo.setInvoiceCode(invoiceVo.getInvoiceCode());//发票代码
@@ -858,6 +859,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         List<DataOcrDetails> details = new ArrayList<>();
         for (LhdxInvoiceVo lhdxInvoiceVo : list) {
             DataOcrDetails dataOcrDetails = new DataOcrDetails();
+            dataOcrDetails.setFileId(fileId);
             dataOcrDetails.setDetailNo(lhdxInvoiceVo.getInvoiceDetailLine());//发票明细行
             dataOcrDetails.setProjectName(lhdxInvoiceVo.getInvoiceItemName());
             dataOcrDetails.setPrice(lhdxInvoiceVo.getUnitPrice());
