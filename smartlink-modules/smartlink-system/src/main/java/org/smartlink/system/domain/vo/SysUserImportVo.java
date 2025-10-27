@@ -1,10 +1,10 @@
 package org.smartlink.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelProperty;
-import org.smartlink.common.excel.annotation.ExcelDictFormat;
-import org.smartlink.common.excel.convert.ExcelDictConvert;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.smartlink.common.excel.annotation.ExcelDictFormat;
+import org.smartlink.common.excel.convert.ExcelDictConvert;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -26,51 +26,89 @@ public class SysUserImportVo implements Serializable {
     /**
      * 用户ID
      */
+//    @ExcelProperty(value = "用户序号")
+//    private Long userId;
+//
+//    /**
+//     * 部门ID
+//     */
+//    @ExcelProperty(value = "部门编号")
+//    private Long deptId;
+//
+//    /**
+//     * 用户账号
+//     */
+//    @ExcelProperty(value = "登录名称")
+//    private String userName;
+//
+//    /**
+//     * 用户昵称
+//     */
+//    @ExcelProperty(value = "用户名称")
+//    private String nickName;
+//
+//    /**
+//     * 用户邮箱
+//     */
+//    @ExcelProperty(value = "用户邮箱")
+//    private String email;
+//
+//    /**
+//     * 手机号码
+//     */
+//    @ExcelProperty(value = "手机号码")
+//    private String phonenumber;
+//
+//    /**
+//     * 用户性别
+//     */
+//    @ExcelProperty(value = "用户性别", converter = ExcelDictConvert.class)
+//    @ExcelDictFormat(dictType = "sys_user_sex")
+//    private String sex;
+//
+//    /**
+//     * 帐号状态（0正常 1停用）
+//     */
+//    @ExcelProperty(value = "帐号状态", converter = ExcelDictConvert.class)
+//    @ExcelDictFormat(dictType = "sys_normal_disable")
+//    private String status;
+
+    /** 用户序号 */
     @ExcelProperty(value = "用户序号")
-    private Long userId;
+    private Long userSerial;
 
-    /**
-     * 部门ID
-     */
-    @ExcelProperty(value = "部门编号")
-    private Long deptId;
+    /** 班级名称（对应部门名称） */
+    @ExcelProperty(value = "班级名称")
+    private String className;
 
-    /**
-     * 用户账号
-     */
-    @ExcelProperty(value = "登录名称")
+    /** 登录名称（建议手机号） */
+    @ExcelProperty(value = "登录名称（建议统一设置为手机号）")
     private String userName;
 
-    /**
-     * 用户昵称
-     */
+    /** 用户名称 */
     @ExcelProperty(value = "用户名称")
     private String nickName;
 
-    /**
-     * 用户邮箱
-     */
+    /** 用户邮箱 */
     @ExcelProperty(value = "用户邮箱")
     private String email;
 
-    /**
-     * 手机号码
-     */
+    /** 手机号码 */
     @ExcelProperty(value = "手机号码")
     private String phonenumber;
 
-    /**
-     * 用户性别
-     */
+    /** 用户性别（0男 1女 2未知） */
     @ExcelProperty(value = "用户性别", converter = ExcelDictConvert.class)
     @ExcelDictFormat(dictType = "sys_user_sex")
     private String sex;
 
-    /**
-     * 帐号状态（0正常 1停用）
-     */
+    /** 帐号状态（正常 1停用） */
     @ExcelProperty(value = "帐号状态", converter = ExcelDictConvert.class)
     @ExcelDictFormat(dictType = "sys_normal_disable")
     private String status;
+
+    /** 角色*/
+    @ExcelProperty(value = "角色")
+    private String roleName;
 
 }

@@ -6,7 +6,6 @@ import org.smartlink.business.doman.dto.StructureDataDTO;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
-import org.smartlink.system.domain.SysUser;
 import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
@@ -81,4 +80,6 @@ public interface ITestExpenseReimbursementService {
     R<List<StructureDataDTO>> selectStructureData(List<String> workIds);
 
     List<Map<String,String>> selectList();
+
+    R<Void> dataRinse(List<String> userIds);
 }
