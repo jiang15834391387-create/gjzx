@@ -1,5 +1,6 @@
 package org.smartlink.business.util;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -57,7 +58,10 @@ public class PdfInvoiceTemplateUtil {
                     PDTextField field = (PDTextField) acroForm.getField(key);
                     if (field != null) {
                         field.setDefaultAppearance(chineseDefaultAppearanceString);
-                        field.setValue(replacements.get(key).toString());
+                        Object value = replacements.get(key);
+                        if (ObjectUtil.isNotNull(value)) {
+                            field.setValue(value.toString());
+                        }
                     }
                 }
             }
