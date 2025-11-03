@@ -1,5 +1,7 @@
-package org.smartlink.system.listener;
+package org.smartlink.business.listener;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.BCrypt;
@@ -11,6 +13,10 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.SpringUtils;
+import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrInfoMapper;
 import org.smartlink.common.excel.core.ExcelListener;
 import org.smartlink.common.excel.core.ExcelResult;
 import org.smartlink.common.satoken.utils.LoginHelper;
@@ -26,25 +32,21 @@ import org.smartlink.system.mapper.SysUserRoleMapper;
 import org.smartlink.system.service.ISysConfigService;
 import org.smartlink.system.service.ISysUserService;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 系统用户自定义导入
+ * 用户自定义导入
  *
  * @author Lion Li
  */
 @Slf4j
-public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo> implements ExcelListener<SysUserImportVo> {
-
+public class UserImportListener extends AnalysisEventListener<SysUserImportVo> implements ExcelListener<SysUserImportVo> {
     private final ISysUserService userService;
-
-    private final String password;
 
     private final Boolean isUpdateSupport;
 
-    private final Long operUserId;
+    private final String password;
 
     private final SysUserRoleMapper sysUserRoleMapper;
 
@@ -54,12 +56,18 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
 
     private final SysUserMapper sysUserMapper;
 
+    private final DataImageFilesInfoMapper imageFilesInfoMapper;
+
+    private final DataOcrInfoMapper dataOcrInfoMapper;
+
     private int successNum = 0;
     private int failureNum = 0;
     private final StringBuilder successMsg = new StringBuilder();
     private final StringBuilder failureMsg = new StringBuilder();
 
-    public SysUserImportListener(Boolean isUpdateSupport) {
+    public UserImportListener(Boolean isUpdateSupport) {
+        this.imageFilesInfoMapper =  SpringUtils.getBean(DataImageFilesInfoMapper.class);
+        this.dataOcrInfoMapper =SpringUtils.getBean(DataOcrInfoMapper.class);
         this.sysUserRoleMapper = SpringUtils.getBean(SysUserRoleMapper.class);
         this.sysRoleMapper = SpringUtils.getBean(SysRoleMapper.class);
         this.sysDeptMapper = SpringUtils.getBean(SysDeptMapper.class);
@@ -68,7 +76,6 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
         this.userService = SpringUtils.getBean(ISysUserService.class);
         this.password = BCrypt.hashpw(initPassword);
         this.isUpdateSupport = isUpdateSupport;
-        this.operUserId = LoginHelper.getUserId();
     }
 
     @Override
@@ -81,8 +88,8 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
             if (dept == null) {
                 dept = new SysDept();
                 dept.setDeptName(userVo.getClassName());
-                dept.setParentId(1L); // 根部门ID
-                dept.setStatus("0"); // 启用状态
+                dept.setParentId(1L);
+                dept.setStatus("0");
                 sysDeptMapper.insert(dept);
             }
         } else {
@@ -99,13 +106,13 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
             if (role == null) {
                 failureNum++;
                 failureMsg.append("第" + context.readRowHolder().getRowIndex() + "行：角色【" + userVo.getRoleName() + "】不存在<br/>");
-                return;  // 角色不存在则终止当前行处理
+                return;
             }
             roleId = role.getRoleId();
         } else {
             failureNum++;
             failureMsg.append("第" + context.readRowHolder().getRowIndex() + "行：角色不能为空<br/>");
-            return;  // 角色为空则终止当前行处理
+            return;
         }
 
         // 用户新增
@@ -133,12 +140,15 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
                     userRole.setRoleId(roleId);
                     sysUserRoleMapper.insert(userRole);
                 }
+                //分配管理员导入的发票数据（先图片表，后结构化表）
+                assignAdminInvoiceData(user);
                 successNum++;
                 successMsg.append("第" + context.readRowHolder().getRowIndex() + "行：用户【" + userVo.getNickName() + "】导入成功<br/>");
             } else {
                 successNum++;
                 successMsg.append("第" + context.readRowHolder().getRowIndex() + "行：用户【" + userVo.getNickName() + "】已经存在不能重复导入<br/>");
             }
+
         } catch (Exception e) {
             failureNum++;
             String msg = "第" + context.readRowHolder().getRowIndex() + "行：用户【" + userVo.getNickName() + "】导入失败：";
@@ -153,6 +163,7 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
             log.error(msg, e);
         }
     }
+
 
     @Override
     public void doAfterAllAnalysed(AnalysisContext context) {
@@ -169,7 +180,7 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
                     failureMsg.insert(0, "很抱歉，导入失败！共 " + failureNum + " 条数据格式不正确，错误如下：");
                     throw new ServiceException(failureMsg.toString());
                 } else {
-                    successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
+                    successMsg.insert(0, "恭喜您，数据已导入成功！共 " + successNum + " 条，数据如下：");
                 }
                 return successMsg.toString();
             }
@@ -184,5 +195,58 @@ public class SysUserImportListener extends AnalysisEventListener<SysUserImportVo
                 return null;
             }
         };
+    }
+    // 分配管理员的发票数据
+    private void assignAdminInvoiceData(SysUser user) {
+        List<DataImageFilesInfo> adminImages = imageFilesInfoMapper.selectList(
+            new LambdaQueryWrapper<DataImageFilesInfo>()
+                .eq(DataImageFilesInfo::getCreateBy, "1")
+        );
+
+        // 批量插入图片表
+        List<DataImageFilesInfo> userImageBatch = new ArrayList<>();
+        List<String> adminFileIds = new ArrayList<>();
+        for (DataImageFilesInfo adminImage : adminImages) {
+            DataImageFilesInfo userImage = new DataImageFilesInfo();
+            BeanUtil.copyProperties(adminImage, userImage);
+            BeanUtil.toBean(adminImage, DataImageFilesInfo.class);
+            userImage.setFileId(IdUtil.simpleUUID());
+            userImage.setCreateBy(user.getUserId());
+            userImage.setCreateTime(new Date());
+            userImageBatch.add(userImage);
+            adminFileIds.add(adminImage.getFileId());
+        }
+        imageFilesInfoMapper.insertBatch(userImageBatch);
+
+        // 批量查询所有管理员的结构化数据
+        List<DataOcrInfo> allAdminOcrList = dataOcrInfoMapper.selectList(
+            new LambdaQueryWrapper<DataOcrInfo>()
+                .eq(DataOcrInfo::getCreateBy, "1")
+        );
+
+        //file_id到结构化数据的映射
+        Map<String, List<DataOcrInfo>> ocrMap = allAdminOcrList.stream()
+            .collect(Collectors.groupingBy(DataOcrInfo::getFileId));
+
+        // 5. 遍历图片，内存中匹配结构化数据
+        List<DataOcrInfo> userOcrBatch = new ArrayList<>();
+        for (int i = 0; i < adminImages.size(); i++) {
+            DataImageFilesInfo adminImage = adminImages.get(i);
+            DataImageFilesInfo userImage = userImageBatch.get(i);
+
+            //获取对应的结构化数据
+            List<DataOcrInfo> adminOcrList = ocrMap.getOrDefault(adminImage.getFileId(), Collections.emptyList());
+
+            for (DataOcrInfo adminOcr : adminOcrList) {
+                DataOcrInfo userOcr = new DataOcrInfo();
+                BeanUtil.copyProperties(adminOcr, userOcr);
+                userOcr.setId(IdUtil.simpleUUID());
+                userOcr.setFileId(userImage.getFileId());
+                userOcr.setCreateBy(user.getUserId());
+                userOcr.setCreateTime(new Date());
+                userOcrBatch.add(userOcr);
+            }
+        }
+        dataOcrInfoMapper.insertBatch(userOcrBatch);
     }
 }

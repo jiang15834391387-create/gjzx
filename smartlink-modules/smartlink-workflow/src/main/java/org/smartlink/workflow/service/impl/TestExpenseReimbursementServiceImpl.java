@@ -3,6 +3,7 @@ package org.smartlink.workflow.service.impl;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.smartlink.common.core.domain.event.ProcessEvent;
 import org.smartlink.common.core.domain.event.ProcessTaskEvent;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.BusinessStatusEnum;
+import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.service.WorkflowService;
 import org.smartlink.common.core.utils.MapstructUtils;
@@ -95,6 +97,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final DataElectronicTransportationGoodsMapper paymentMapper;
     private final DataOcrInfoMapper ocrInfoMapper;
     private final DataOcrDetailsMapper ocrDetailsMapper;
+    private final OtherAttachmentsMapper otherAttachmentsMapper;
     /**
      * 查询费用报销申请
      *
@@ -701,6 +704,33 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 return new InvoiceDataDTO(null,null);
             }
         }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R<Void> dataRinse(List<String> userIds) {
+        if (CollectionUtils.isEmpty(userIds)) {
+            return R.fail("请选择要清洗的用户");
+        }
+
+        //清除附件
+        filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>()
+            .in(DataImageFilesInfo::getCreateBy, userIds)
+            .set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode())
+            .set(DataImageFilesInfo::getDeleteFlag, "1"));
+        //清除发票
+        ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>()
+            .in(DataOcrInfo::getCreateBy, userIds)
+            .set(DataOcrInfo::getDeleteFlag,"1"));
+        //清除单据
+        baseMapper.update(new LambdaUpdateWrapper<TestExpenseReimbursement>()
+            .in(TestExpenseReimbursement::getCreateBy, userIds)
+            .set(TestExpenseReimbursement::getIsDeleted,"1"));
+        //清除其他附件
+        otherAttachmentsMapper.update(new LambdaUpdateWrapper<OtherAttachments>()
+            .in(OtherAttachments::getCreateBy, userIds)
+            .set(OtherAttachments::getDelFlag, "1"));
+        return R.ok();
     }
 
 

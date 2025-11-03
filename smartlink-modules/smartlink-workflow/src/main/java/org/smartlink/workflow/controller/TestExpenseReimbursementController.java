@@ -2,7 +2,6 @@ package org.smartlink.workflow.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +15,6 @@ import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.web.core.BaseController;
-import org.smartlink.system.domain.SysUser;
-import org.smartlink.system.mapper.SysUserMapper;
 import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
@@ -149,6 +146,14 @@ public class TestExpenseReimbursementController extends BaseController {
     public R<List<Map<String,String>>> getUserInfo(){
         List<Map<String,String>> sysUsers = testExpenseReimbursementService.selectList();
         return R.ok(sysUsers);
+    }
+
+    /**
+     * 用户数据清洗
+     */
+    @PostMapping("/dataRinse")
+    public R<Void> dataRinse(@RequestBody String[] userIds) {
+        return testExpenseReimbursementService.dataRinse(List.of(userIds));
     }
 
 }
