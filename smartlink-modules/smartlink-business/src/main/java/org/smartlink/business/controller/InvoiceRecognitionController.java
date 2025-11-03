@@ -1,7 +1,5 @@
 package org.smartlink.business.controller;
 
-import cn.dev33.satoken.annotation.SaCheckPermission;
-import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.annotation.SaIgnore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +10,10 @@ import org.smartlink.business.service.ScanImageService;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.enums.FileStatusEnumd;
 import org.smartlink.common.entity.domain.business.domain.OtherAttachments;
-import org.smartlink.common.entity.domain.business.domain.bo.DataUsedCarSalesBo;
-import org.smartlink.common.entity.domain.business.domain.vo.DataUsedCarSalesVo;
 import org.smartlink.common.entity.domain.business.service.IOtherAttachmentsService;
 import org.smartlink.common.excel.core.ExcelResult;
 import org.smartlink.common.excel.utils.ExcelUtil;
-import org.smartlink.common.entity.domain.business.service.IOtherAttachmentsService;
 import org.smartlink.common.log.annotation.Log;
-import org.smartlink.common.mybatis.core.page.PageQuery;
-import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.log.enums.BusinessType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -61,7 +54,7 @@ public class InvoiceRecognitionController {
         R<T> res = null;
         if (uploadType.equals("0")){
             List<MultipartFile> fetchFilesFromEmail = scanImageService.fetchFilesFromEmail();
-            if (fetchFilesFromEmail.size()!= 0){
+            if (!fetchFilesFromEmail.isEmpty()){
                 for (MultipartFile multipart : fetchFilesFromEmail) {
                     res = scanImageService.uploadImage(multipart, uploadType);
                 }
@@ -117,8 +110,12 @@ public class InvoiceRecognitionController {
     @PostMapping(value = "/lhdxImportInvoice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<Void> lhdxImportInvoice(@RequestPart("file") MultipartFile file) throws Exception {
         ExcelResult<LhdxInvoiceVo> result = ExcelUtil.importExcel(file.getInputStream(), LhdxInvoiceVo.class, new LhdxInvoiceImportListener());
-        scanImageService.lhdxImportInvoice(result.getList(),mergedFilePath);
-        return R.ok("发票数据导入任务已开始，请稍后查询进度。");
+        if (!result.getList().isEmpty()){
+            scanImageService.lhdxImportInvoice(result.getList(),mergedFilePath);
+            return R.ok("发票数据导入任务已开始，请稍后查询进度。");
+        }else{
+            return R.ok("表格中所有发票均已入库！");
+        }
     }
 
 }

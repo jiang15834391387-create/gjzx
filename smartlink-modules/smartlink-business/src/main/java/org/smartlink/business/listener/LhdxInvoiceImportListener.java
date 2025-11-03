@@ -4,10 +4,18 @@ package org.smartlink.business.listener;
 import com.alibaba.excel.event.AnalysisEventListener;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.business.doman.vo.LhdxInvoiceVo;
+import org.smartlink.business.service.IDataOcrService;
+import org.smartlink.common.core.utils.SpringUtils;
+import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
+import org.smartlink.common.entity.domain.business.domain.bo.DataOcrInfoBo;
+import org.smartlink.common.entity.domain.business.domain.vo.DataOcrInfoVo;
+import org.smartlink.common.entity.domain.business.service.IDataOcrInfoService;
 import org.smartlink.common.excel.core.ExcelListener;
 import org.smartlink.common.excel.core.ExcelResult;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,6 +27,12 @@ import java.util.List;
 public class LhdxInvoiceImportListener extends AnalysisEventListener<LhdxInvoiceVo> implements ExcelListener<LhdxInvoiceVo> {
 
     private List<LhdxInvoiceVo> lhdxInvoiceVoList = new ArrayList<>();
+    private final IDataOcrInfoService iDataOcrInfoService;
+
+    public LhdxInvoiceImportListener() {
+        this.iDataOcrInfoService = SpringUtils.getBean(IDataOcrInfoService.class);
+    }
+
 
     @Override
     public ExcelResult<LhdxInvoiceVo> getExcelResult() {
@@ -44,7 +58,11 @@ public class LhdxInvoiceImportListener extends AnalysisEventListener<LhdxInvoice
     @Override
     public void invoke(LhdxInvoiceVo lhdxInvoiceVo, com.alibaba.excel.context.AnalysisContext analysisContext) {
         lhdxInvoiceVo.setInvoiceNumberCode(lhdxInvoiceVo.getInvoiceNumber() + lhdxInvoiceVo.getInvoiceCode());
-        lhdxInvoiceVoList.add(lhdxInvoiceVo);
+        DataOcrInfoBo dataOcrInfo = new DataOcrInfoBo();
+        dataOcrInfo.setInvoiceCode(lhdxInvoiceVo.getInvoiceCode());
+        dataOcrInfo.setInvoiceNumber(lhdxInvoiceVo.getInvoiceNumber());
+        List<DataOcrInfoVo> dataOcrInfoVos = iDataOcrInfoService.queryList(dataOcrInfo);
+        if (CollectionUtils.isEmpty(dataOcrInfoVos)) lhdxInvoiceVoList.add(lhdxInvoiceVo);
     }
 
     @Override
