@@ -81,7 +81,7 @@ public class InvoiceRecognitionController {
      *
      * @param files 多文件对象
      */
-    @SaIgnore
+//    @SaIgnore
     @Log(title = "其他附件上传", businessType = BusinessType.INSERT)
     @PostMapping("/uploadAttachments")
     public R<T> uploadAttachments(@RequestParam(value = "files", required = false) MultipartFile[] files) throws Exception {
@@ -98,7 +98,7 @@ public class InvoiceRecognitionController {
     /**
      * 查询其他附件
      */
-    @SaIgnore
+//    @SaIgnore
     @GetMapping("/otherAttachmentsList")
     public List<OtherAttachments> otherAttachmentsList(OtherAttachments otherAttachments) {
         return iOtherAttachmentsService.queryList(otherAttachments);
