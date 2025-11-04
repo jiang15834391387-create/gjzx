@@ -91,4 +91,13 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
 
     @Update("UPDATE sys_user SET password = #{password} WHERE user_id = #{userId}")
     int updaUserPassword(Long userId, String password);
+
+    @Update("UPDATE sys_user " +
+        " SET del_flag = #{delFlagRemoved}, status = #{exception}, " +
+        "     user_name = '', phonenumber = '', nick_name = '', " +  // 用空字符串替代NULL
+        "     email = '', password = '' " +
+        " WHERE user_id = #{userId}")
+    int customLogout(@Param("userId") Long userId,
+                     @Param("delFlagRemoved") String delFlagRemoved,
+                     @Param("exception") String exception);
 }

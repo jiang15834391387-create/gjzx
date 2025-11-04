@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.constant.CacheNames;
 import org.smartlink.common.core.constant.UserConstants;
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.dto.UserDTO;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.service.UserService;
@@ -559,6 +560,7 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
         return baseMapper.selectVoList(lqw);
     }
 
+
     /**
      * 通过用户ID查询用户账户
      *
@@ -703,5 +705,18 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
             .eq(SysUser::getStatus, UserConstants.USER_NORMAL)
             .in(SysUser::getDeptId, deptIds));
         return BeanUtil.copyToList(list, UserDTO.class);
+    }
+    @Override
+    public R<Void> cancellation() {
+        Long userId = LoginHelper.getUserId();
+        int update = baseMapper.customLogout(
+            userId,
+            UserConstants.DEL_FLAG_REMOVED,
+            UserConstants.EXCEPTION
+        );
+        if (update<=0){
+            return R.fail("注销失败");
+        }
+        return R.ok();
     }
 }
