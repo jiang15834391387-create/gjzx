@@ -781,6 +781,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         dataImageFilesInfoSm.setFileStatus(FileStatusEnumd.UPLOADED_SUCCESSFUL_CODE.getCode());
         dataImageFilesInfoSm.setFileName(pdfUpload.getFileName());
         dataImageFilesInfoSm.setPurl(pdfUpload.getUrl());
+        dataImageFilesInfoSm.setIurl(pdfUpload.getUrl());
         dataImageFilesInfoSm.setSurl(pdfUpload.getUrl());
         dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
         iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
