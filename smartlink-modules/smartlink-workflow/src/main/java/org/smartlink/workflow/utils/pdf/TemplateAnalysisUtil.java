@@ -46,20 +46,20 @@ public class TemplateAnalysisUtil {
      * @param
      * @return
      */
-    public List<String> getPdfTemplateFileName(TemplateInfo voucherPdf) throws IOException {
-        if (voucherPdf != null) {
-            String templateStoragePath = voucherPdf.getTemplateStoragePath();
-            String templateType = voucherPdf.getTemplateType();
-            if (!StringUtils.isEmpty(templateStoragePath) && !StringUtils.isEmpty(templateType)) {
-                ResourcePathType type = ResourcePathType.fromValue(templateType);
-                List<String> stringList = PdfProcessUtil.extractPdfFieldNames(templateStoragePath, type);
-                if (!CollectionUtils.isEmpty(stringList)) {
-                    return stringList;
-                }
-            }
-        }
-        return null;
-    }
+//    public List<String> getPdfTemplateFileName(TemplateInfo voucherPdf) throws IOException {
+//        if (voucherPdf != null) {
+//            String templateStoragePath = voucherPdf.getTemplateStoragePath();
+//            String templateType = voucherPdf.getTemplateType();
+//            if (!StringUtils.isEmpty(templateStoragePath) && !StringUtils.isEmpty(templateType)) {
+//                ResourcePathType type = ResourcePathType.fromValue(templateType);
+//                List<String> stringList = PdfProcessUtil.extractPdfFieldNames(templateStoragePath, type);
+//                if (!CollectionUtils.isEmpty(stringList)) {
+//                    return stringList;
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * 上传PDF文件
@@ -80,9 +80,9 @@ public class TemplateAnalysisUtil {
      * @return
      * @throws Exception
      */
-    public byte[] assemblyTemplate(String  url,Map<String, Object> fillMap) throws Exception {
-        return PdfProcessUtil.generatePdf(url, ResourcePathType.URL, fillMap);
-    }
+//    public byte[] assemblyTemplate(String  url,Map<String, Object> fillMap) throws Exception {
+//        return PdfProcessUtil.generatePdf(url, ResourcePathType.URL, fillMap);
+//    }
 
     /**
      * 汇总模板字段

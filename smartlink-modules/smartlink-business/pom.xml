@@ -16,7 +16,22 @@
     </description>
 
     <dependencies>
-
+        <!-- Optional for you ; just to avoid the same error with JBIG2 images -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>jbig2-imageio</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>x-easypdf</artifactId>
+            <version>3.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dromara</groupId>
+            <artifactId>x-easypdf-pdfbox</artifactId>
+            <version>3.3.0</version>
+        </dependency>
         <!-- 通用工具-->
         <dependency>
             <groupId>org.smartlink</groupId>

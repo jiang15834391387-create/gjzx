@@ -23,12 +23,13 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.tika.Tika;
+import org.smartlink.business.doman.entity.Invoice;
 import org.smartlink.business.doman.vo.LhdxInvoiceVo;
 import org.smartlink.business.invoice.check.CheckInvoice;
 import org.smartlink.business.service.IDataOcrService;
 import org.smartlink.business.service.ScanImageService;
+import org.smartlink.business.util.InvoiceGeneratorXEasyPdf;
 import org.smartlink.business.util.MoneyToChineseUtil;
-import org.smartlink.business.util.PdfInvoiceTemplateUtil;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
@@ -752,36 +753,46 @@ public class ScanImageServiceImpl implements ScanImageService {
 
     @Override
     public void lhdxImportInvoice(List<LhdxInvoiceVo> list,String mergedFilePath) {
+        InvoiceGeneratorXEasyPdf invoiceGeneratorXEasyPdf = new InvoiceGeneratorXEasyPdf();
+
         Map<String, List<LhdxInvoiceVo>> collect = list.stream().collect(Collectors.groupingBy(LhdxInvoiceVo::getInvoiceNumberCode));
         for (String key : collect.keySet()) {
             List<LhdxInvoiceVo> lhdxInvoiceVoList = collect.get(key);
+            Invoice sampleInvoice = InvoiceGeneratorXEasyPdf.createSampleInvoice(lhdxInvoiceVoList);
+
             String labelName = lhdxInvoiceVoList.get(0).getInvoiceType();
-            Map<String, Object> stringObjectMap = setMap(lhdxInvoiceVoList);
-            String templateName = "Invoice_template.pdf";
-            if (labelName.contains("增值税")) templateName = "zzs_Invoice_template.pdf";
-            String output = mergedFilePath + UUID.randomUUID() + ".pdf";
+            String invoiceType = labelName.contains("增值税") ? "10100" : "10108";//发票类型
 
-            PdfInvoiceTemplateUtil.generatePdfFromTemplate(output, stringObjectMap,templateName);
+            UUID uuid = UUID.randomUUID();
+            String outputPdfPath = mergedFilePath + uuid + ".pdf";
+            int pageNum = lhdxInvoiceVoList.size() / 24 + 1;
+            InvoiceGeneratorXEasyPdf.generateInvoice(sampleInvoice,outputPdfPath,pageNum,invoiceType);
 
+            DataImageFilesInfo dataImageFilesInfoSm = dataImageFilesInsert(outputPdfPath, invoiceType);//插入发票文件
 
-            String invoiceType = labelName.contains("增值税") ? "10100" : "10108";
-            SysOssVo pdfUpload = iSysOssService.upload(new File(output));
-            DataImageFilesInfo dataImageFilesInfoSm = new DataImageFilesInfo();
-            dataImageFilesInfoSm.setInvoice(invoiceType);
-            dataImageFilesInfoSm.setFileStatus(FileStatusEnumd.UPLOADED_SUCCESSFUL_CODE.getCode());
-            dataImageFilesInfoSm.setFileName(pdfUpload.getFileName());
-            dataImageFilesInfoSm.setPurl(pdfUpload.getUrl());
-            dataImageFilesInfoSm.setSurl(pdfUpload.getUrl());
-            dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-            iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
+            ocrInsert(lhdxInvoiceVoList, dataImageFilesInfoSm, invoiceType);//插入发票信息
+        }
+    }
 
-            DataOcrInfo dataOcrInfo = setDataOcrInfo(lhdxInvoiceVoList,dataImageFilesInfoSm.getFileId());
-            try{
-                dataOcrService.ocrInsert(invoiceType, dataOcrInfo);
-            }catch (Exception e){
-                log.error("处理发票信息时出错",e);
-            }
+    public DataImageFilesInfo dataImageFilesInsert(String output, String invoiceType){
+        SysOssVo pdfUpload = iSysOssService.upload(new File(output));
+        DataImageFilesInfo dataImageFilesInfoSm = new DataImageFilesInfo();
+        dataImageFilesInfoSm.setInvoice(invoiceType);
+        dataImageFilesInfoSm.setFileStatus(FileStatusEnumd.UPLOADED_SUCCESSFUL_CODE.getCode());
+        dataImageFilesInfoSm.setFileName(pdfUpload.getFileName());
+        dataImageFilesInfoSm.setPurl(pdfUpload.getUrl());
+        dataImageFilesInfoSm.setSurl(pdfUpload.getUrl());
+        dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
+        iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
+        return dataImageFilesInfoSm;
+    }
 
+    private void ocrInsert(List<LhdxInvoiceVo> lhdxInvoiceVoList, DataImageFilesInfo dataImageFilesInfoSm, String invoiceType) {
+        try{
+            DataOcrInfo dataOcrInfo = setDataOcrInfo(lhdxInvoiceVoList, dataImageFilesInfoSm.getFileId());
+            dataOcrService.ocrInsert(invoiceType, dataOcrInfo);
+        }catch (Exception e){
+            log.error("处理发票信息时出错",e);
         }
     }
 
