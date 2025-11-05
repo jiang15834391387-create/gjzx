@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 发票识别
@@ -104,6 +106,7 @@ public class InvoiceRecognitionController {
         return iOtherAttachmentsService.queryList(otherAttachments);
     }
 
+    ExecutorService executor = Executors.newFixedThreadPool(4); // 创建一个固定大小的线程池
     /**
      * 联合大学发票导入
      */
@@ -111,11 +114,25 @@ public class InvoiceRecognitionController {
     @PostMapping(value = "/lhdxImportInvoice", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<Void> lhdxImportInvoice(@RequestPart("file") MultipartFile file) throws Exception {
         ExcelResult<LhdxInvoiceVo> result = ExcelUtil.importExcel(file.getInputStream(), LhdxInvoiceVo.class, new LhdxInvoiceImportListener());
-        if (!result.getList().isEmpty()){
-            scanImageService.lhdxImportInvoice(result.getList(),mergedFilePath);
-            return R.ok("发票数据导入任务已开始，请稍后查询进度。");
+
+        if (result.getList().isEmpty() && result.getErrorList().isEmpty()) return R.ok("表格中所有发票均已入库，请误重复导入！");
+
+        if (!result.getErrorList().isEmpty()) {
+            StringBuilder errorMsg = new StringBuilder();
+            errorMsg.append("表格中存在错误数据,请检查：\n");
+            for (String string : result.getErrorList()) {
+                errorMsg.append(string).append("\n");
+            }
+            if (result.getList().isEmpty()) {
+                errorMsg.append(",除上述错误数据行外，其余数据皆为已入库数据，请误重复导入！");
+            }else{
+                executor.execute(() -> scanImageService.lhdxImportInvoice(result.getList(),mergedFilePath));
+                errorMsg.append(",除上述错误数据行外，其余数据正在导入中，请等待！");
+            }
+            return R.fail(errorMsg.toString());
         }else{
-            return R.ok("表格中所有发票均已入库！");
+            executor.execute(() -> scanImageService.lhdxImportInvoice(result.getList(),mergedFilePath));
+            return R.ok("发票数据导入中，请等待！");
         }
     }
 

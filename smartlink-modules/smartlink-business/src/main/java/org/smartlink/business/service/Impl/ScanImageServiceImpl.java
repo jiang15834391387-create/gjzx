@@ -872,6 +872,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         dataOcrInfo.setPayee(invoiceVo.getPayee());//收款人
         dataOcrInfo.setIssuer(invoiceVo.getDrawer());//开票人
         dataOcrInfo.setRemark(invoiceVo.getRemarks());//备注
+        dataOcrInfo.setInvoiceTotal(invoiceVo.getTotalAmount());//价税合计
 
         List<DataOcrDetails> details = new ArrayList<>();
         for (LhdxInvoiceVo lhdxInvoiceVo : list) {
