@@ -72,16 +72,18 @@ public class LhdxInvoiceImportListener extends AnalysisEventListener<LhdxInvoice
         if (CollectionUtils.isEmpty(dataOcrInfoVos)) {
             String invoiceDate = lhdxInvoiceVo.getInvoiceDate();
             if (!isValidDate(invoiceDate)){
-                lhdxErrorList.add("序号：【"+lhdxInvoiceVo.getSellerName() + "】行数据，日期格式错误，已经跳过，请调整格式后重新导入！");
+                lhdxErrorList.add("序号：【"+lhdxInvoiceVo.getSerialNumber() + "】行数据，日期格式错误，已经跳过，请调整格式后重新导入！");
                 return;
             }
 
             String invoiceType = lhdxInvoiceVo.getInvoiceType();
             if (invoiceType == null || (!invoiceType.equals("电子发票（增值税专用发票）") && !invoiceType.equals("电子发票（普通发票）"))){
-                lhdxErrorList.add("序号：【"+lhdxInvoiceVo.getSellerName() + "】行数据，发票类型错误，已经跳过，发票类型为（电子发票（增值税专用发票） 或者 电子发票（普通发票））请调整格式后重新导入！");
+                lhdxErrorList.add("序号：【"+lhdxInvoiceVo.getSerialNumber() + "】行数据，发票类型错误，已经跳过，发票类型为（电子发票（增值税专用发票） 或者 电子发票（普通发票））请调整格式后重新导入！");
                 return;
             }
             lhdxInvoiceVoList.add(lhdxInvoiceVo);
+        }else{
+            lhdxErrorList.add("序号：【"+lhdxInvoiceVo.getSerialNumber() + "】行数据，发票已入库，请勿重复导入！");
         }
     }
 

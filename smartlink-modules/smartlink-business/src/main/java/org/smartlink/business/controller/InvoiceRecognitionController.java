@@ -35,7 +35,7 @@ import java.util.concurrent.Executors;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@SaIgnore
+//@SaIgnore
 @RequestMapping("/business/InvoiceRecognition")
 public class InvoiceRecognitionController {
 
@@ -115,17 +115,13 @@ public class InvoiceRecognitionController {
     public R<Void> lhdxImportInvoice(@RequestPart("file") MultipartFile file) throws Exception {
         ExcelResult<LhdxInvoiceVo> result = ExcelUtil.importExcel(file.getInputStream(), LhdxInvoiceVo.class, new LhdxInvoiceImportListener());
 
-        if (result.getList().isEmpty() && result.getErrorList().isEmpty()) return R.ok("表格中所有发票均已入库，请误重复导入！");
-
         if (!result.getErrorList().isEmpty()) {
             StringBuilder errorMsg = new StringBuilder();
             errorMsg.append("表格中存在错误数据,请检查：\n");
             for (String string : result.getErrorList()) {
                 errorMsg.append(string).append("\n");
             }
-            if (result.getList().isEmpty()) {
-                errorMsg.append(",除上述错误数据行外，其余数据皆为已入库数据，请误重复导入！");
-            }else{
+            if (!result.getList().isEmpty()) {
                 executor.execute(() -> scanImageService.lhdxImportInvoice(result.getList(),mergedFilePath));
                 errorMsg.append(",除上述错误数据行外，其余数据正在导入中，请等待！");
             }
