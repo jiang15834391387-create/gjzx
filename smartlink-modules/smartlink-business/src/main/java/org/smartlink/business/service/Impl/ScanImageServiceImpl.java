@@ -49,6 +49,7 @@ import org.smartlink.common.ocr.factory.OcrFactory;
 import org.smartlink.common.oss.entity.UploadResult;
 import org.smartlink.common.oss.factory.OssFactory;
 import org.smartlink.common.redis.utils.RedisUtils;
+import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.system.domain.vo.SysOssVo;
 import org.smartlink.system.domain.vo.SysUserVo;
 import org.smartlink.system.service.ISysOssService;
@@ -787,6 +788,8 @@ public class ScanImageServiceImpl implements ScanImageService {
         dataImageFilesInfoSm.setIurl(pdfUpload.getUrl());
         dataImageFilesInfoSm.setSurl(pdfUpload.getUrl());
         dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
+        dataImageFilesInfoSm.setCreateBy(LoginHelper.getUserId());
+        dataImageFilesInfoSm.setTenantId("000000");
         iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
         return dataImageFilesInfoSm;
     }
@@ -873,6 +876,8 @@ public class ScanImageServiceImpl implements ScanImageService {
         dataOcrInfo.setIssuer(invoiceVo.getDrawer());//开票人
         dataOcrInfo.setRemark(invoiceVo.getRemarks());//备注
         dataOcrInfo.setInvoiceTotal(invoiceVo.getTotalAmount());//价税合计
+        dataOcrInfo.setCreateBy(LoginHelper.getUserId());
+        dataOcrInfo.setTenantId("000000");
 
         List<DataOcrDetails> details = new ArrayList<>();
         for (LhdxInvoiceVo lhdxInvoiceVo : list) {
@@ -884,6 +889,8 @@ public class ScanImageServiceImpl implements ScanImageService {
             dataOcrDetails.setTaxRate(lhdxInvoiceVo.getTaxRate());
             dataOcrDetails.setTax(lhdxInvoiceVo.getTaxAmount());
             dataOcrDetails.setDetailAmount(lhdxInvoiceVo.getTotalAmount());
+            dataOcrDetails.setCreateBy(LoginHelper.getUserId());
+            dataOcrDetails.setTenantId("000000");
             details.add(dataOcrDetails);
         }
         dataOcrInfo.setDetails(details);
