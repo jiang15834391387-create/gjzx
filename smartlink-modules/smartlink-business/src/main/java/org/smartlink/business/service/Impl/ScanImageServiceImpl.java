@@ -756,8 +756,11 @@ public class ScanImageServiceImpl implements ScanImageService {
         InvoiceGeneratorXEasyPdf invoiceGeneratorXEasyPdf = new InvoiceGeneratorXEasyPdf();
 
         Map<String, List<LhdxInvoiceVo>> collect = list.stream().collect(Collectors.groupingBy(LhdxInvoiceVo::getInvoiceNumberCode));
+        System.out.println("发票数据量：" + collect.size() + "-----------------------------------------------");
         for (String key : collect.keySet()) {
+
             List<LhdxInvoiceVo> lhdxInvoiceVoList = collect.get(key);
+            System.out.println("正在处理第发票编号：" + key + "的数据-----------------------------------------------");
             Invoice sampleInvoice = InvoiceGeneratorXEasyPdf.createSampleInvoice(lhdxInvoiceVoList);
 
             String labelName = lhdxInvoiceVoList.get(0).getInvoiceType();
@@ -791,6 +794,7 @@ public class ScanImageServiceImpl implements ScanImageService {
     private void ocrInsert(List<LhdxInvoiceVo> lhdxInvoiceVoList, DataImageFilesInfo dataImageFilesInfoSm, String invoiceType) {
         try{
             DataOcrInfo dataOcrInfo = setDataOcrInfo(lhdxInvoiceVoList, dataImageFilesInfoSm.getFileId());
+            System.out.println("正在处理第" + dataOcrInfo.getBusinessSerialNo() + "条发票数据数据-----------------------------------------------");
             dataOcrService.ocrInsert(invoiceType, dataOcrInfo);
         }catch (Exception e){
             log.error("处理发票信息时出错",e);

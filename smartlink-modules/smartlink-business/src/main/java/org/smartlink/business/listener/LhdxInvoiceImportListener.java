@@ -54,10 +54,15 @@ public class LhdxInvoiceImportListener extends AnalysisEventListener<LhdxInvoice
 
     @Override
     public void invoke(LhdxInvoiceVo lhdxInvoiceVo, com.alibaba.excel.context.AnalysisContext analysisContext) {
-        lhdxInvoiceVo.setInvoiceNumberCode(lhdxInvoiceVo.getInvoiceNumber() + lhdxInvoiceVo.getInvoiceCode());
+
         DataOcrInfoBo dataOcrInfo = new DataOcrInfoBo();
-        dataOcrInfo.setInvoiceCode(lhdxInvoiceVo.getInvoiceCode());
-        dataOcrInfo.setInvoiceNumber(lhdxInvoiceVo.getInvoiceNumber());
+
+        String invoiceCode = lhdxInvoiceVo.getInvoiceCode().replace("'", "");
+        String invoiceNumber = lhdxInvoiceVo.getInvoiceNumber().replace("'", "");
+
+        dataOcrInfo.setInvoiceCode(invoiceCode);
+        dataOcrInfo.setInvoiceNumber(invoiceNumber);
+        lhdxInvoiceVo.setInvoiceNumberCode(invoiceCode + invoiceNumber);
         List<DataOcrInfoVo> dataOcrInfoVos = iDataOcrInfoService.queryList(dataOcrInfo);
         if (CollectionUtils.isEmpty(dataOcrInfoVos)) lhdxInvoiceVoList.add(lhdxInvoiceVo);
     }
