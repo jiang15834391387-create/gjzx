@@ -717,11 +717,14 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         filesInfoMapper.update(new LambdaUpdateWrapper<DataImageFilesInfo>()
             .in(DataImageFilesInfo::getCreateBy, userIds)
             .set(DataImageFilesInfo::getFileFlowStatus, FileStatusEnumd.DELETED.getCode())
-            .set(DataImageFilesInfo::getDeleteFlag, "1"));
+            .set(DataImageFilesInfo::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         //清除发票
         ocrInfoMapper.update(new LambdaUpdateWrapper<DataOcrInfo>()
             .in(DataOcrInfo::getCreateBy, userIds)
-            .set(DataOcrInfo::getDeleteFlag,"1"));
+            .set(DataOcrInfo::getDeleteFlag,FileStatusEnumd.DELETED.getCode()));
+        //清除发票明细
+        ocrDetailsMapper.update(new LambdaUpdateWrapper<DataOcrDetails>()
+            .in(DataOcrDetails::getCreateBy, userIds).set(DataOcrDetails::getDeleteFlag, FileStatusEnumd.DELETED.getCode()));
         //清除单据
         baseMapper.update(new LambdaUpdateWrapper<TestExpenseReimbursement>()
             .in(TestExpenseReimbursement::getCreateBy, userIds)

@@ -14,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.SpringUtils;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
+import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.entity.domain.business.mapper.DataImageFilesInfoMapper;
+import org.smartlink.common.entity.domain.business.mapper.DataOcrDetailsMapper;
 import org.smartlink.common.entity.domain.business.mapper.DataOcrInfoMapper;
 import org.smartlink.common.excel.core.ExcelListener;
 import org.smartlink.common.excel.core.ExcelResult;
@@ -60,6 +62,8 @@ public class UserImportListener extends AnalysisEventListener<SysUserImportVo> i
 
     private final DataOcrInfoMapper dataOcrInfoMapper;
 
+    private final DataOcrDetailsMapper detailsMapper;
+
     private int successNum = 0;
     private int failureNum = 0;
     private final StringBuilder successMsg = new StringBuilder();
@@ -72,6 +76,7 @@ public class UserImportListener extends AnalysisEventListener<SysUserImportVo> i
         this.sysRoleMapper = SpringUtils.getBean(SysRoleMapper.class);
         this.sysDeptMapper = SpringUtils.getBean(SysDeptMapper.class);
         this.sysUserMapper = SpringUtils.getBean(SysUserMapper.class);
+        this.detailsMapper = SpringUtils.getBean(DataOcrDetailsMapper.class);
         String initPassword = SpringUtils.getBean(ISysConfigService.class).selectConfigByKey("sys.user.initPassword");
         this.userService = SpringUtils.getBean(ISysUserService.class);
         this.password = BCrypt.hashpw(initPassword);
@@ -223,6 +228,11 @@ public class UserImportListener extends AnalysisEventListener<SysUserImportVo> i
             new LambdaQueryWrapper<DataOcrInfo>()
                 .eq(DataOcrInfo::getCreateBy, "1")
         );
+        // 批量查询所有管理员的结构化详情数据
+        List<DataOcrDetails> dataOcrDetails = detailsMapper.selectList(
+            new LambdaQueryWrapper<DataOcrDetails>()
+                .eq(DataOcrDetails::getCreateBy, "1")
+        );
 
         //file_id到结构化数据的映射
         Map<String, List<DataOcrInfo>> ocrMap = allAdminOcrList.stream()
@@ -248,5 +258,34 @@ public class UserImportListener extends AnalysisEventListener<SysUserImportVo> i
             }
         }
         dataOcrInfoMapper.insertBatch(userOcrBatch);
+        //添加明细
+        addInvoiceDetails(dataOcrDetails,adminImages,userImageBatch,user);
+    }
+
+    private void addInvoiceDetails(List<DataOcrDetails> dataOcrDetails, List<DataImageFilesInfo> adminImages, List<DataImageFilesInfo> userImageBatch, SysUser user) {
+        //file_id到结构化数据的映射
+        Map<String, List<DataOcrDetails>> ocrMap = dataOcrDetails.stream()
+            .collect(Collectors.groupingBy(DataOcrDetails::getFileId));
+
+        // 遍历图片，内存中匹配结构化数据
+        List<DataOcrDetails> userDetailsList = new ArrayList<>();
+        for (int i = 0; i < adminImages.size(); i++) {
+            DataImageFilesInfo adminImage = adminImages.get(i);
+            DataImageFilesInfo userImage = userImageBatch.get(i);
+
+            //获取对应的结构化数据
+            List<DataOcrDetails> adminOcrList = ocrMap.getOrDefault(adminImage.getFileId(), Collections.emptyList());
+
+            for (DataOcrDetails details : adminOcrList) {
+                DataOcrDetails ocrDetails = new DataOcrDetails();
+                BeanUtil.copyProperties(details, ocrDetails);
+                ocrDetails.setId(IdUtil.simpleUUID());
+                ocrDetails.setFileId(userImage.getFileId());
+                ocrDetails.setCreateBy(user.getUserId());
+                ocrDetails.setCreateTime(new Date());
+                userDetailsList.add(ocrDetails);
+            }
+        }
+        detailsMapper.insertBatch(userDetailsList);
     }
 }
