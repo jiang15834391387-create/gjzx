@@ -1,5 +1,6 @@
 package org.smartlink.business.util;
 
+import com.alibaba.excel.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.pdf.pdfbox.core.base.Document;
 import org.dromara.pdf.pdfbox.core.base.Page;
@@ -17,6 +18,10 @@ import org.smartlink.business.doman.vo.LhdxInvoiceVo;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -496,18 +501,51 @@ public class InvoiceGeneratorXEasyPdf {
         List<InvoiceItem> items = new ArrayList<>();
 
         for (LhdxInvoiceVo lhdxInvoiceVo : lhdxInvoiceVoList) {
-            String unitPrice = lhdxInvoiceVo.getUnitPrice().replace(",", "");
-            String taxAmount = lhdxInvoiceVo.getTaxAmount().replace(",", "");
-            items.add( new InvoiceItem(Integer.parseInt(lhdxInvoiceVo.getInvoiceDetailLine()), lhdxInvoiceVo.getInvoiceItemName(),
-                new BigDecimal(unitPrice), new BigDecimal(unitPrice), lhdxInvoiceVo.getTaxRate(), new BigDecimal(taxAmount)));
+            BigDecimal unitPriceDecimal = null; BigDecimal taxAmountDecimal = null;
+            if (StringUtils.isNotBlank(lhdxInvoiceVo.getUnitPrice())) unitPriceDecimal = new BigDecimal(lhdxInvoiceVo.getUnitPrice().replace(",", ""));
+            if (StringUtils.isNotBlank(lhdxInvoiceVo.getTaxAmount())) taxAmountDecimal = new BigDecimal(lhdxInvoiceVo.getTaxAmount().replace(",", ""));
+            items.add( new InvoiceItem(Integer.parseInt(lhdxInvoiceVo.getInvoiceDetailLine()), lhdxInvoiceVo.getInvoiceItemName(), unitPriceDecimal, unitPriceDecimal, lhdxInvoiceVo.getTaxRate(), taxAmountDecimal));
         }
 
         String totalAmount = invoiceVo.getTotalAmount().replace(",", "");
+
+        LocalDate invoiceDate = null;
+        Date parse = null;
+        try {
+            // 尝试多种日期格式解析
+            DateTimeFormatter[] formatters = {
+                DateTimeFormatter.ISO_LOCAL_DATE,              // yyyy-MM-dd
+                DateTimeFormatter.ofPattern("yyyy/MM/dd"),     // yyyy/MM/dd
+                DateTimeFormatter.ofPattern("yyyy/M/d"),       // yyyy/M/d
+                DateTimeFormatter.ofPattern("yyyy/MM/d"),      // yyyy/MM/d
+                DateTimeFormatter.ofPattern("yyyy/M/dd"),      // yyyy/M/dd
+                DateTimeFormatter.ofPattern("yyyy年MM月dd日"),    // yyyy年MM月dd日
+                DateTimeFormatter.ofPattern("yyyy年M月d日"),      // yyyy年M月d日
+                DateTimeFormatter.ofPattern("yyyy年MM月d日"),     // yyyy年MM月d日
+                DateTimeFormatter.ofPattern("yyyy年M月dd日")      // yyyy年M月dd日
+            };
+
+            for (DateTimeFormatter formatter : formatters) {
+                try {
+                    invoiceDate = LocalDate.parse(invoiceVo.getInvoiceDate(), formatter);
+                    parse = Date.from(invoiceDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    break;
+                } catch (DateTimeParseException ignored) {
+                    // 继续尝试下一个格式
+                }
+            }
+
+            if (parse == null) {
+                throw new DateTimeParseException("Unable to parse date", invoiceVo.getInvoiceDate(), 0);
+            }
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException("Invalid invoice date format: " + invoiceVo.getInvoiceDate(), e);
+        }
         // 创建发票
-        return new Invoice(invoiceVo.getInvoiceCode(), invoiceVo.getInvoiceNumber(), new Date(invoiceVo.getInvoiceDate()),
+        System.out.println(invoiceVo.getInvoiceCode() + " " + invoiceVo.getInvoiceDate());
+        return new Invoice(invoiceVo.getInvoiceCode(), invoiceVo.getInvoiceNumber(), parse,
             buyer, seller, items, new BigDecimal(totalAmount), MoneyToChineseUtil.convert(new BigDecimal(totalAmount)),
-            invoiceVo.getRemarks(), invoiceVo.getDrawer(), invoiceVo.getPayee()
-        );
+            invoiceVo.getRemarks(), invoiceVo.getDrawer(), invoiceVo.getPayee());
     }
 
 }

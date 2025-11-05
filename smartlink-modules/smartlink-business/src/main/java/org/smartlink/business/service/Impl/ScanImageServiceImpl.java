@@ -856,6 +856,7 @@ public class ScanImageServiceImpl implements ScanImageService {
     public DataOcrInfo setDataOcrInfo(List<LhdxInvoiceVo> list,String fileId) {
         DataOcrInfo dataOcrInfo = new DataOcrInfo();
         LhdxInvoiceVo invoiceVo = list.get(0);
+        dataOcrInfo.setBusinessSerialNo(invoiceVo.getSerialNumber());
         dataOcrInfo.setFileId(fileId);
         dataOcrInfo.setInvoiceDate(invoiceVo.getInvoiceDate());//发票日期
         dataOcrInfo.setInvoiceNumber(invoiceVo.getInvoiceNumber());//发票号码
