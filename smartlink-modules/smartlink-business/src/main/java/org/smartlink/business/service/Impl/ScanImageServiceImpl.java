@@ -790,6 +790,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
         dataImageFilesInfoSm.setCreateBy(LoginHelper.getUserId());
         dataImageFilesInfoSm.setTenantId("000000");
+        dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
         iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
         return dataImageFilesInfoSm;
     }
