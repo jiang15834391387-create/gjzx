@@ -788,7 +788,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         dataImageFilesInfoSm.setIurl(pdfUpload.getUrl());
         dataImageFilesInfoSm.setSurl(pdfUpload.getUrl());
         dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
-        dataImageFilesInfoSm.setCreateBy(LoginHelper.getUserId());
+        dataImageFilesInfoSm.setCreateBy(1L);
         dataImageFilesInfoSm.setTenantId("000000");
         dataImageFilesInfoSm.setCheckStatus(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode());
         iDataImageFilesInfoService.insert(dataImageFilesInfoSm);
@@ -877,7 +877,7 @@ public class ScanImageServiceImpl implements ScanImageService {
         dataOcrInfo.setIssuer(invoiceVo.getDrawer());//开票人
         dataOcrInfo.setRemark(invoiceVo.getRemarks());//备注
         dataOcrInfo.setInvoiceTotal(invoiceVo.getTotalAmount());//价税合计
-        dataOcrInfo.setCreateBy(LoginHelper.getUserId());
+        dataOcrInfo.setCreateBy(1L);
         dataOcrInfo.setTenantId("000000");
 
         List<DataOcrDetails> details = new ArrayList<>();
@@ -890,7 +890,7 @@ public class ScanImageServiceImpl implements ScanImageService {
             dataOcrDetails.setTaxRate(lhdxInvoiceVo.getTaxRate());
             dataOcrDetails.setTax(lhdxInvoiceVo.getTaxAmount());
             dataOcrDetails.setDetailAmount(lhdxInvoiceVo.getTotalAmount());
-            dataOcrDetails.setCreateBy(LoginHelper.getUserId());
+            dataOcrDetails.setCreateBy(1L);
             dataOcrDetails.setTenantId("000000");
             details.add(dataOcrDetails);
         }
