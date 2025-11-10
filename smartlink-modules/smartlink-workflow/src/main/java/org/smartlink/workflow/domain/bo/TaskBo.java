@@ -56,4 +56,13 @@ public class TaskBo implements Serializable {
      * 模型分类
      */
     private String categoryCode;
+
+    /**
+     *  提单人id
+     */
+    private String createBy;
+    /**
+     * 流程定义id
+     */
+    private String processDefinitionId;
 }

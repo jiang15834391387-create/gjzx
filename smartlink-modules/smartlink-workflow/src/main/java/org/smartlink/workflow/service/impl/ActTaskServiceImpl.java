@@ -40,6 +40,7 @@ import org.smartlink.common.tenant.helper.TenantHelper;
 import org.smartlink.workflow.common.constant.FlowConstant;
 import org.smartlink.workflow.common.enums.TaskStatusEnum;
 import org.smartlink.workflow.domain.ActHiTaskinst;
+import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.WfTaskBackNode;
 import org.smartlink.workflow.domain.bo.*;
 import org.smartlink.workflow.domain.vo.*;
@@ -47,6 +48,7 @@ import org.smartlink.workflow.flowable.cmd.*;
 import org.smartlink.workflow.flowable.handler.FlowProcessEventHandler;
 import org.smartlink.workflow.mapper.ActHiTaskinstMapper;
 import org.smartlink.workflow.mapper.ActTaskMapper;
+import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
 import org.smartlink.workflow.service.IActTaskService;
 import org.smartlink.workflow.service.IWfDefinitionConfigService;
 import org.smartlink.workflow.service.IWfNodeConfigService;
@@ -93,7 +95,7 @@ public class ActTaskServiceImpl implements IActTaskService {
     private final FlowProcessEventHandler flowProcessEventHandler;
     private final UserService userService;
     private final OssService ossService;
-
+    private final TestExpenseReimbursementMapper reimbursementMapper;
     /**
      * 启动任务
      *
@@ -287,7 +289,14 @@ public class ActTaskServiceImpl implements IActTaskService {
         if (StringUtils.isNotBlank(taskBo.getProcessDefinitionKey())) {
             queryWrapper.eq("t.processDefinitionKey", taskBo.getProcessDefinitionKey());
         }
+        if(StringUtils.isNotBlank(taskBo.getProcessDefinitionId())){
+            queryWrapper.like("t.processDefinitionId", taskBo.getProcessDefinitionId());
+        }
         queryWrapper.orderByDesc("t.CREATE_TIME_");
+        String createBy = taskBo.getCreateBy();
+        if (StringUtils.isNotBlank(createBy)) {
+            queryWrapper.in("t.create_by ", Arrays.asList(createBy.split(",")));
+        }
         Page<TaskVo> page = actTaskMapper.getTaskWaitByPage(pageQuery.build(), queryWrapper);
 
         List<TaskVo> taskList = page.getRecords();
@@ -324,8 +333,13 @@ public class ActTaskServiceImpl implements IActTaskService {
         if (StringUtils.isNotBlank(taskBo.getProcessDefinitionKey())) {
             query.processDefinitionKey(taskBo.getProcessDefinitionKey());
         }
+        if(StringUtils.isNotBlank(taskBo.getProcessDefinitionId())){
+            query.processDefinitionId("%" + taskBo.getProcessDefinitionId() + "%");
+        }
+
         query.orderByTaskCreateTime().desc();
         List<Task> taskList = query.listPage(pageQuery.getFirstNum(), pageQuery.getPageSize());
+
         List<ProcessInstance> processInstanceList = null;
         if (CollUtil.isNotEmpty(taskList)) {
             Set<String> processInstanceIds = StreamUtils.toSet(taskList, Task::getProcessInstanceId);
@@ -351,17 +365,47 @@ public class ActTaskServiceImpl implements IActTaskService {
                 taskVo.setParticipantVo(WorkflowUtils.getCurrentTaskParticipant(task.getId(), userService));
                 taskVo.setMultiInstance(WorkflowUtils.isMultiInstance(task.getProcessDefinitionId(), task.getTaskDefinitionKey()) != null);
                 if (CollUtil.isNotEmpty(wfNodeConfigVoList)) {
-                    wfNodeConfigVoList.stream().filter(e -> e.getDefinitionId().equals(task.getProcessDefinitionId()) && FlowConstant.TRUE.equals(e.getApplyUserTask())).findFirst().ifPresent(taskVo::setWfNodeConfigVo);
-                    wfNodeConfigVoList.stream().filter(e -> e.getDefinitionId().equals(task.getProcessDefinitionId()) && e.getNodeId().equals(task.getTaskDefinitionKey()) && FlowConstant.FALSE.equals(e.getApplyUserTask())).findFirst().ifPresent(taskVo::setWfNodeConfigVo);
+                    wfNodeConfigVoList.stream().filter(e -> e.getDefinitionId().equals(task.getProcessDefinitionId()) && TRUE.equals(e.getApplyUserTask())).findFirst().ifPresent(taskVo::setWfNodeConfigVo);
+                    wfNodeConfigVoList.stream().filter(e -> e.getDefinitionId().equals(task.getProcessDefinitionId()) && e.getNodeId().equals(task.getTaskDefinitionKey()) && FALSE.equals(e.getApplyUserTask())).findFirst().ifPresent(taskVo::setWfNodeConfigVo);
                 }
+                getMessageInfo(taskVo);
                 list.add(taskVo);
             }
         }
-        long count = query.count();
+
+        String createBy = taskBo.getCreateBy();
+        if (StringUtils.isNotBlank(createBy)) {
+            List<String> createBys = Arrays.asList(createBy.split(","));
+            if(CollUtil.isNotEmpty(createBys)){
+                list = list.stream().filter(e -> createBys.contains(e.getCreateBy())).collect(Collectors.toList());
+            }
+        }
+
+        long count = list.size();
         TableDataInfo<TaskVo> build = TableDataInfo.build();
         build.setRows(list);
         build.setTotal(count);
         return build;
+    }
+
+    public void getMessageInfo(TaskVo taskVo){
+        if(taskVo!=null){
+            String id = taskVo.getBusinessKey();
+            if(StringUtils.isNotEmpty(id)){
+                TestExpenseReimbursement testExpenseReimbursement = reimbursementMapper.selectById(Long.valueOf(id));
+                if(testExpenseReimbursement!=null){
+                    Long createBy = testExpenseReimbursement.getCreateBy();
+                    if(createBy!=null){
+                        taskVo.setCreateBy(createBy+"");
+                        taskVo.setApplyTime(testExpenseReimbursement.getCreateTime());
+                        String s = userService.selectUserNameById(createBy);
+                        if(s!=null){
+                            taskVo.setUserName(s);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -378,6 +422,13 @@ public class ActTaskServiceImpl implements IActTaskService {
         queryWrapper.eq(StringUtils.isNotBlank(taskBo.getProcessDefinitionKey()), "t.processDefinitionKey", taskBo.getProcessDefinitionKey());
         queryWrapper.eq("t.assignee_", userId);
         queryWrapper.orderByDesc("t.START_TIME_");
+        if(StringUtils.isNotBlank(taskBo.getProcessDefinitionId())){
+            queryWrapper.like("t.processDefinitionId", taskBo.getProcessDefinitionId());
+        }
+        String createBy = taskBo.getCreateBy();
+        if (StringUtils.isNotBlank(createBy)) {
+            queryWrapper.in("t.create_by ", Arrays.asList(createBy.split(",")));
+        }
         Page<TaskVo> page = actTaskMapper.getTaskFinishByPage(pageQuery.build(), queryWrapper);
 
         List<TaskVo> taskList = page.getRecords();
@@ -413,8 +464,15 @@ public class ActTaskServiceImpl implements IActTaskService {
         if (StringUtils.isNotBlank(taskBo.getProcessDefinitionKey())) {
             queryWrapper.eq("t.processDefinitionKey", taskBo.getProcessDefinitionKey());
         }
+        if(StringUtils.isNotBlank(taskBo.getProcessDefinitionId())){
+            queryWrapper.like("t.processDefinitionId", taskBo.getProcessDefinitionId());
+        }
         queryWrapper.eq("t.assignee_", userId);
         queryWrapper.orderByDesc("t.START_TIME_");
+        String createBy = taskBo.getCreateBy();
+        if (StringUtils.isNotBlank(createBy)) {
+            queryWrapper.in("t.create_by ", Arrays.asList(createBy.split(",")));
+        }
         Page<TaskVo> page = actTaskMapper.getTaskCopyByPage(pageQuery.build(), queryWrapper);
 
         List<TaskVo> taskList = page.getRecords();
@@ -443,6 +501,13 @@ public class ActTaskServiceImpl implements IActTaskService {
         queryWrapper.like(StringUtils.isNotBlank(taskBo.getName()), "t.name_", taskBo.getName());
         queryWrapper.like(StringUtils.isNotBlank(taskBo.getProcessDefinitionName()), "t.processDefinitionName", taskBo.getProcessDefinitionName());
         queryWrapper.eq(StringUtils.isNotBlank(taskBo.getProcessDefinitionKey()), "t.processDefinitionKey", taskBo.getProcessDefinitionKey());
+        String createBy = taskBo.getCreateBy();
+        if (StringUtils.isNotBlank(createBy)) {
+            queryWrapper.in("t.create_by ", Arrays.asList(createBy.split(",")));
+        }
+        if(StringUtils.isNotBlank(taskBo.getProcessDefinitionId())){
+            queryWrapper.like("t.processDefinitionId", taskBo.getProcessDefinitionId());
+        }
         Page<TaskVo> page = actTaskMapper.getTaskFinishByPage(pageQuery.build(), queryWrapper);
 
         List<TaskVo> taskList = page.getRecords();
@@ -868,4 +933,19 @@ public class ActTaskServiceImpl implements IActTaskService {
         }
         return List.of();
     }
+    /**
+     * 获取消息信息
+     * @param taskVo
+     */
+    /*public void getMessageInfo(TaskVo taskVo){
+        if(taskVo!=null){
+            String createBy = taskVo.getApplyUserId();
+            if(createBy!=null){
+                String s = userService.selectUserNameById(Long.valueOf(createBy));
+                if(s!=null){
+                    taskVo.setApplyUserName(s);
+                }
+            }
+        }
+    }*/
 }
