@@ -69,7 +69,7 @@ public class TestExpenseReimbursementController extends BaseController {
      */
     @SaCheckPermission("system:expenseReimbursement:add")
     @Log(title = "费用报销申请", businessType = BusinessType.INSERT)
-    @RepeatSubmit()
+    @RepeatSubmit(interval = 70000, message = "请勿重复提交")
     @PostMapping()
     public R<TestExpenseReimbursementVo> add(@Validated(AddGroup.class) @RequestBody TestExpenseReimbursementBo bo) {
         return R.ok(testExpenseReimbursementService.insertByBo(bo));
