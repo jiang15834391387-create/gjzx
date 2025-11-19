@@ -159,4 +159,19 @@ public interface IActTaskService {
      * @return 结果
      */
     List<TaskVo> getListByDeleteMultiInstance(String taskId);
+
+    /*public void getMessageInfo(TaskVo taskVo){
+            if(taskVo!=null){
+                String createBy = taskVo.getApplyUserId();
+                if(createBy!=null){
+                    String s = userService.selectUserNameById(Long.valueOf(createBy));
+                    if(s!=null){
+                        taskVo.setApplyUserName(s);
+                    }
+                }
+            }
+        }*/
+
+
+    TableDataInfo<TaskVo> getPageByTask(TaskBo taskBo, PageQuery pageQuery);
 }

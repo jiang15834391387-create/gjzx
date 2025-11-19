@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 任务请求对象
@@ -65,4 +66,6 @@ public class TaskBo implements Serializable {
      * 流程定义id
      */
     private String processDefinitionId;
+
+    private String pageType;
 }

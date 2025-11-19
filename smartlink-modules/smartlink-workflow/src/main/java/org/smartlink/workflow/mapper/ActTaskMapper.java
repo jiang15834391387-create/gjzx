@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Param;
 import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
 import org.smartlink.workflow.domain.vo.TaskVo;
 
+import java.util.List;
+
 
 /**
  * 任务信息Mapper接口
@@ -44,4 +46,7 @@ public interface ActTaskMapper extends BaseMapperPlus<TaskVo, TaskVo> {
      * @return 结果
      */
     Page<TaskVo> getTaskCopyByPage(@Param("page") Page<TaskVo> page, @Param(Constants.WRAPPER) QueryWrapper<TaskVo> queryWrapper);
+
+    Page<TaskVo> getTaskMergeByPage(@Param("page") Page<TaskVo> page, @Param("types") List<String> types, @Param(Constants.WRAPPER) Wrapper<TaskVo> wrapper);
+
 }
