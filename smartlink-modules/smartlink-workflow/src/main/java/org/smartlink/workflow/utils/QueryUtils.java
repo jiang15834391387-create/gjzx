@@ -166,4 +166,27 @@ public class QueryUtils {
         taskVo.setBusinessStatus(businessStatus);
         return taskVo;
     }
+
+
+
+   /* public static StringBuilder parseValue(List<TestFormConfig> list) {
+
+        StringBuilder formBuilder = new StringBuilder();
+        formBuilder.append("<form>\n");
+        for (TestFormConfig field : list) {
+            formBuilder.append("<label>")
+                .append(field.getFieldName())
+                .append("</label>\n");
+            formBuilder.append(" <input type=\"")
+                .append(field.getFieldType())
+                .append("\" name=\"")
+                .append(field.getFieldName()).append("\"");
+            if (field.getFieldRequired() != null) {
+                formBuilder.append(" required");
+            }
+            formBuilder.append("/>\n");
+            formBuilder.append("</form>");
+        }
+        return formBuilder;
+    }*/
 }

@@ -243,7 +243,7 @@ public class OssClient {
 
             // 等待文件上传操作完成
             CompletedUpload uploadResult = upload.completionFuture().join();
-            String eTag = uploadResult.response().eTag();
+            String eTag = uploadResult.response().eTag().replaceAll("^\"+|\"+$", "");
 
             // 提取上传结果中的 ETag，并构建一个自定义的 UploadResult 对象
             return UploadResult.builder().url(getUrl() + StringUtils.SLASH + key).filename(key).eTag(eTag).build();

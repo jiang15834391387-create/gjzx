@@ -1,4 +1,4 @@
-package org.dromara.web.service.impl;
+package org.smartlink.web.service.impl;
 
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
@@ -10,7 +10,6 @@ import org.smartlink.common.core.constant.Constants;
 import org.smartlink.common.core.constant.GlobalConstants;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.domain.model.SmsLoginBody;
-import org.smartlink.common.core.enums.LoginType;
 import org.smartlink.common.core.enums.UserStatus;
 import org.smartlink.common.core.exception.user.CaptchaExpireException;
 import org.smartlink.common.core.exception.user.UserException;
@@ -49,10 +48,8 @@ public class SmsAuthStrategy implements IAuthStrategy {
         ValidatorUtils.validate(loginBody);
         String tenantId = loginBody.getTenantId();
         String phonenumber = loginBody.getPhonenumber();
-        String smsCode = loginBody.getSmsCode();
         LoginUser loginUser = TenantHelper.dynamic(tenantId, () -> {
             SysUserVo user = loadUserByPhonenumber(phonenumber);
-            loginService.checkLogin(LoginType.SMS, tenantId, user.getUserName(), () -> !validateSmsCode(tenantId, phonenumber, smsCode));
             // 此处可根据登录用户的数据不同 自行创建 loginUser 属性不够用继承扩展就行了
             return loginService.buildLoginUser(user);
         });
@@ -72,6 +69,9 @@ public class SmsAuthStrategy implements IAuthStrategy {
         loginVo.setAccessToken(StpUtil.getTokenValue());
         loginVo.setExpireIn(StpUtil.getTokenTimeout());
         loginVo.setClientId(client.getClientId());
+        //查询用户信息
+        SysUser sysUser=userMapper.selectOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhonenumber, phonenumber));
+        loginVo.setNickName(sysUser.getNickName());
         return loginVo;
     }
 

@@ -1,5 +1,6 @@
 package org.smartlink.system.service;
 
+import org.smartlink.common.core.domain.R;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.system.domain.bo.SysUserBo;
@@ -219,4 +220,9 @@ public interface ISysUserService {
      * @return 结果
      */
     List<SysUserVo> selectUserListByDept(Long deptId);
+    /**
+     * 通过部门id查询当前部门所有用户
+     *
+     */
+    R<Void> cancellation();
 }

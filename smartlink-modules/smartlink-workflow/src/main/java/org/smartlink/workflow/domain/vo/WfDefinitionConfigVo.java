@@ -36,6 +36,7 @@ public class WfDefinitionConfigVo implements Serializable {
     @ExcelProperty(value = "表名")
     private String tableName;
 
+
     /**
      * 流程定义ID
      */

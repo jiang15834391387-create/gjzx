@@ -113,6 +113,25 @@
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-system</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.83</version>
+        </dependency>
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-entity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-business</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>

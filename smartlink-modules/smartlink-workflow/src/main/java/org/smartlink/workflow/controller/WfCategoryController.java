@@ -38,7 +38,7 @@ public class WfCategoryController extends BaseController {
     /**
      * 查询流程分类列表
      */
-    @SaCheckPermission("workflow:category:list")
+    //@SaCheckPermission("workflow:category:list")
     @GetMapping("/list")
     public R<List<WfCategoryVo>> list(WfCategoryBo bo) {
         List<WfCategoryVo> list = wfCategoryService.queryList(bo);
@@ -49,7 +49,7 @@ public class WfCategoryController extends BaseController {
     /**
      * 导出流程分类列表
      */
-    @SaCheckPermission("workflow:category:export")
+    //@SaCheckPermission("workflow:category:export")
     @Log(title = "流程分类", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(WfCategoryBo bo, HttpServletResponse response) {
@@ -62,7 +62,7 @@ public class WfCategoryController extends BaseController {
      *
      * @param id 主键
      */
-    @SaCheckPermission("workflow:category:query")
+    //@SaCheckPermission("workflow:category:query")
     @GetMapping("/{id}")
     public R<WfCategoryVo> getInfo(@NotNull(message = "主键不能为空")
                                    @PathVariable Long id) {

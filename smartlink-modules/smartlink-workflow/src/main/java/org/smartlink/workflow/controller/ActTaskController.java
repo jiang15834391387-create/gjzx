@@ -5,6 +5,7 @@ import cn.hutool.core.convert.Convert;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.core.validate.AddGroup;
 import org.smartlink.common.idempotent.annotation.RepeatSubmit;
 import org.smartlink.common.log.annotation.Log;
@@ -15,9 +16,9 @@ import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.common.web.core.BaseController;
 import org.smartlink.workflow.domain.WfTaskBackNode;
 import org.smartlink.workflow.domain.bo.*;
-import org.smartlink.workflow.domain.bo.*;
 import org.smartlink.workflow.domain.vo.TaskVo;
 import org.smartlink.workflow.domain.vo.VariableVo;
+import org.smartlink.workflow.service.IActProcessInstanceService;
 import org.smartlink.workflow.service.IActTaskService;
 import org.smartlink.workflow.service.IWfTaskBackNodeService;
 import org.smartlink.workflow.utils.QueryUtils;
@@ -26,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +47,7 @@ public class ActTaskController extends BaseController {
     private TaskService taskService;
     private final IActTaskService actTaskService;
     private final IWfTaskBackNodeService wfTaskBackNodeService;
-
+    private final IActProcessInstanceService actProcessInstanceService;
 
     /**
      * 启动任务
@@ -72,16 +75,6 @@ public class ActTaskController extends BaseController {
     }
 
     /**
-     * 查询当前用户的待办任务
-     *
-     * @param taskBo 参数
-     */
-    @GetMapping("/getPageByTaskWait")
-    public TableDataInfo<TaskVo> getPageByTaskWait(TaskBo taskBo, PageQuery pageQuery) {
-        return actTaskService.getPageByTaskWait(taskBo, pageQuery);
-    }
-
-    /**
      * 查询当前租户所有待办任务
      *
      * @param taskBo 参数
@@ -89,6 +82,16 @@ public class ActTaskController extends BaseController {
     @GetMapping("/getPageByAllTaskWait")
     public TableDataInfo<TaskVo> getPageByAllTaskWait(TaskBo taskBo, PageQuery pageQuery) {
         return actTaskService.getPageByAllTaskWait(taskBo, pageQuery);
+    }
+
+    /**
+     * 查询当前用户的待办任务
+     *
+     * @param taskBo 参数
+     */
+    @GetMapping("/getPageByTaskWait")
+    public TableDataInfo<TaskVo> getPageByTaskWait(TaskBo taskBo, PageQuery pageQuery) {
+        return actTaskService.getPageByTaskWait(taskBo, pageQuery);
     }
 
     /**
@@ -109,6 +112,11 @@ public class ActTaskController extends BaseController {
     @GetMapping("/getPageByTaskCopy")
     public TableDataInfo<TaskVo> getPageByTaskCopy(TaskBo taskBo, PageQuery pageQuery) {
         return actTaskService.getPageByTaskCopy(taskBo, pageQuery);
+    }
+
+    @GetMapping("/getPageByTask")
+    public TableDataInfo<TaskVo> getPageByTask(TaskBo taskBo,PageQuery pageQuery) {
+        return actTaskService.getPageByTask(taskBo,pageQuery);
     }
 
     /**
@@ -292,5 +300,4 @@ public class ActTaskController extends BaseController {
     public R<List<TaskVo>> getListByDeleteMultiInstance(@PathVariable String taskId) {
         return R.ok(actTaskService.getListByDeleteMultiInstance(taskId));
     }
-
 }

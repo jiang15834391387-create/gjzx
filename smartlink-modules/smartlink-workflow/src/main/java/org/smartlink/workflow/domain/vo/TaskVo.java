@@ -170,4 +170,20 @@ public class TaskVo implements Serializable {
      * 节点配置
      */
     private WfNodeConfigVo wfNodeConfigVo;
+
+    /**
+     *  提单人id
+     */
+    private String createBy;
+
+    /**
+     *  提单人名称
+     *
+     */
+    private String userName;
+
+    /**
+     *  提单创建时间
+     */
+    private Date applyTime;
 }

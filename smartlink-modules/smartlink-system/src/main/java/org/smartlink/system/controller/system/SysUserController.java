@@ -28,9 +28,7 @@ import org.smartlink.system.domain.bo.SysPostBo;
 import org.smartlink.system.domain.bo.SysRoleBo;
 import org.smartlink.system.domain.bo.SysUserBo;
 import org.smartlink.system.domain.vo.*;
-import org.smartlink.system.domain.vo.*;
 import org.smartlink.system.listener.SysUserImportListener;
-import org.smartlink.system.service.*;
 import org.smartlink.system.service.*;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -297,6 +295,14 @@ public class SysUserController extends BaseController {
     @GetMapping("/list/dept/{deptId}")
     public R<List<SysUserVo>> listByDept(@PathVariable @NotNull Long deptId) {
         return R.ok(userService.selectUserListByDept(deptId));
+    }
+
+    /**
+     * 用户注销
+     */
+    @GetMapping("/cancellation")
+    public R<Void> cancellation() {
+      return userService.cancellation();
     }
 
 }

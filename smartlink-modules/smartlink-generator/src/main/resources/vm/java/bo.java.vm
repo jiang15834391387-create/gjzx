@@ -6,6 +6,8 @@ import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import jakarta.validation.constraints.*;
+import org.smartlink.common.core.validate.AddGroup;
+import org.smartlink.common.core.validate.EditGroup;
 #foreach ($import in $importList)
 import ${import};
 #end

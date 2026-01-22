@@ -1,4 +1,4 @@
-# 项目相关配置
+ # 项目相关配置
 smartlink:
   # 名称
   name: smartlink
@@ -8,7 +8,7 @@ smartlink:
   copyrightYear: 2024
 
 captcha:
-  enable: true
+  enable: false
   # 页面 <参数设置> 可开启关闭 验证码校验
   # 验证码类型 math 数组计算 char 字符验证
   type: MATH
@@ -121,6 +121,9 @@ security:
     # swagger 文档配置
     - /*/api-docs
     - /*/api-docs/**
+    # 接口路径
+    - /resource/oss/upload
+
 
 # 多租户配置
 tenant:
@@ -217,6 +220,9 @@ springdoc:
       packages-to-scan: org.smartlink.system
     - group: 4.代码生成模块
       packages-to-scan: org.smartlink.generator
+    - group: 5.工作流模块
+      packages-to-scan: org.smartlink.workflow
+
 
 # 防止XSS攻击
 xss:
@@ -227,6 +233,7 @@ xss:
     - /system/notice
     - /workflow/model/save
     - /workflow/model/editModelXml
+    - /resource/oss/upload
 
 # 全局线程池相关配置
 # 如使用JDK21请直接使用虚拟线程 不要开启此配置
@@ -292,3 +299,7 @@ flowable:
     enabled: false
   app:
     enabled: false
+
+
+file-path:
+  merged: F://data/pdf

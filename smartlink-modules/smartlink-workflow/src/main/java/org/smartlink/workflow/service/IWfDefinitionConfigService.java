@@ -1,5 +1,6 @@
 package org.smartlink.workflow.service;
 
+import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.vo.WfDefinitionConfigVo;
 import org.smartlink.workflow.domain.bo.WfDefinitionConfigBo;
 
@@ -46,7 +47,8 @@ public interface IWfDefinitionConfigService {
      * @param tableName    表名
      * @return 结果
      */
-    List<WfDefinitionConfigVo> getByTableNameNotDefId(String tableName, String definitionId);
+    List<WfDefinitionConfigVo> getByTableNameNotDefId(String tableName
+        ,String definitionId);
 
     /**
      * 查询流程定义配置列表
@@ -80,4 +82,6 @@ public interface IWfDefinitionConfigService {
      * @return 结果
      */
     Boolean deleteByDefIds(Collection<String> ids);
+
+    List<WfDefinitionConfig> selectTableName(String formType);
 }

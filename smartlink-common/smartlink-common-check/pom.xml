@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <groupId>org.smartlink</groupId>
+        <artifactId>smartlink-common</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>smartlink-common-check</artifactId>
+
+    <description>
+        smartlink-common-checkinvoice 发票查验
+    </description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-mybatis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-system</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.smartlink</groupId>
+            <artifactId>smartlink-common-json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor.netty</groupId>
+            <artifactId>reactor-netty-http</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>1.13.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

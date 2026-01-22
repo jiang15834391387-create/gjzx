@@ -87,6 +87,18 @@ public class PasswordAuthStrategy implements IAuthStrategy {
         return loginVo;
     }
 
+    private SysUserVo loadUserByPhone(String username) {
+        SysUserVo user = userMapper.selectVoOne(new LambdaQueryWrapper<SysUser>().eq(SysUser::getPhonenumber, username));
+        if (ObjectUtil.isNull(user)) {
+            log.info("登录用户：{} 不存在.", username);
+            throw new UserException("user.not.exists", username);
+        } else if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
+            log.info("登录用户：{} 已被停用.", username);
+            throw new UserException("user.blocked", username);
+        }
+        return user;
+    }
+
     /**
      * 校验验证码
      *

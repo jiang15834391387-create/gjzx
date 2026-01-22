@@ -77,4 +77,8 @@ public interface ISysOssService {
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
+
+
+    SysOssVo upload(byte[] bytes, String originalFileName, String contentType);
+
 }

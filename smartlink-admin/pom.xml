@@ -51,6 +51,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>DmJdbcDriver8</artifactId>
+            <version>8.1.4.6</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.smartlink</groupId>
             <artifactId>smartlink-common-social</artifactId>
         </dependency>

@@ -1,5 +1,6 @@
 package org.smartlink.workflow.service;
 
+import jakarta.validation.constraints.NotBlank;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.workflow.domain.bo.ProcessDefinitionBo;
@@ -88,4 +89,13 @@ public interface IActProcessDefinitionService {
      * @param categoryCode 分类
      */
     void deployByFile(MultipartFile file, String categoryCode);
+
+    /**
+     *
+     * @param tableName
+     * @return
+     */
+    String definitionXmlByTableName( String tableName);
+
+    String definitionXmlByType( String type);
 }

@@ -27,4 +27,13 @@ public interface CacheConstants {
      */
     String PWD_ERR_CNT_KEY = "pwd_err_cnt:";
 
+    /**
+     * 验证码 参数管理
+     */
+     String CAPTCHA_CODE_KEY = ":sys_config";
+
+
+    // redis缓存配置
+    String SYS_CONFIG_KEYS = "sys_config";
+
 }

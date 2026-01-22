@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.smartlink.workflow.mapper.TestFormManageMapper">
+    <update id="deletedFromManage" >
+        update `test_form_manage`
+        set `is_deleted` = 1,update_by=#{userId},update_time=NOW()
+        where tenant_id=#{tenantId} and id in
+        <foreach collection="list" item="val" separator="," open="(" close=")">
+            #{val}
+        </foreach>
+    </update>
+    <select id="selectBy" parameterType="java.lang.String" resultType="java.lang.Long">
+        select id from test_form_manage where form_purpose_type=#{type} and tenant_id=#{tenantId}
+    </select>
+
+    <select id="selectCategory" resultType="org.smartlink.workflow.domain.TestFormManage">
+        SELECT id, form_name, form_logo, form_type, form_bind_id, form_bind_name, category_id, category_name, category_type, remark, is_deleted, is_bind_model, model_id, sort, tenant_id, create_dept, create_by, create_time, update_by, update_time
+        FROM test_form_manage
+        WHERE is_deleted = 0
+        AND is_bind_model = 1
+        AND tenant_id = '000000'
+
+    </select>
+</mapper>

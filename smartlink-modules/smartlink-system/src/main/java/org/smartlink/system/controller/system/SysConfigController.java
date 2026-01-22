@@ -52,6 +52,18 @@ public class SysConfigController extends BaseController {
     }
 
     /**
+     * 查询参数信息
+     *
+     * @param
+     */
+    @SaCheckPermission("system:config:getInfos")
+    @GetMapping(value = "/getInfos")
+    public R<List<SysConfigVo>> getInfos(@RequestBody SysConfigBo config) {
+        List<SysConfigVo> list = configService.selectConfigList(config);
+        return R.ok(list);
+    }
+
+    /**
      * 根据参数编号获取详细信息
      *
      * @param configId 参数ID
