@@ -1,5 +1,6 @@
 package org.smartlink.workflow.domain.vo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 import org.smartlink.common.translation.annotation.Translation;
 import org.smartlink.common.translation.constant.TransConstant;
@@ -31,26 +32,32 @@ public class ActHistoryInfoVo implements Serializable {
     /**
      * 任务名称
      */
+    @ExcelProperty(value = "任务名称")
     private String name;
     /**
      * 流程实例id
      */
+    @ExcelProperty(value = "流程实例id")
     private String processInstanceId;
     /**
      * 版本
      */
+    @ExcelProperty(value = "版本")
     private Integer version;
     /**
      * 开始时间
      */
+    @ExcelProperty(value = "开始时间")
     private Date startTime;
     /**
      * 结束时间
      */
+    @ExcelProperty(value = "结束时间")
     private Date endTime;
     /**
      * 运行时长
      */
+    @ExcelProperty(value = "运行时长")
     private String runDuration;
     /**
      * 状态
@@ -59,6 +66,7 @@ public class ActHistoryInfoVo implements Serializable {
     /**
      * 状态
      */
+    @ExcelProperty(value = "状态")
     private String statusName;
     /**
      * 办理人id
@@ -84,6 +92,7 @@ public class ActHistoryInfoVo implements Serializable {
     /**
      * 审批信息
      */
+    @ExcelProperty(value = "审批信息")
     private String comment;
 
     /**

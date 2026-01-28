@@ -8,6 +8,7 @@ import org.smartlink.workflow.domain.bo.TaskUrgingBo;
 import org.smartlink.workflow.domain.vo.ActHistoryInfoVo;
 import org.smartlink.workflow.domain.vo.ProcessInstanceVo;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +59,14 @@ public interface IActProcessInstanceService {
      * @return 结果
      */
     List<ActHistoryInfoVo> getHistoryRecord(String businessKey);
+
+    /**
+     * 获取审批记录
+     *
+     * @param list 业务id
+     * @return 结果
+     */
+    List<ActHistoryInfoVo> getHistoryRecordList(ArrayList<String> list);
 
     /**
      * 作废流程实例，不会删除历史记录(删除运行中的实例)

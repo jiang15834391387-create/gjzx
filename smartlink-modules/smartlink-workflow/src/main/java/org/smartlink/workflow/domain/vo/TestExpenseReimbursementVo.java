@@ -95,4 +95,6 @@ public class TestExpenseReimbursementVo implements Serializable {
     private String detailsData;
 
     private String  receiptUrl;
+
+    private String  auditDetail;
 }

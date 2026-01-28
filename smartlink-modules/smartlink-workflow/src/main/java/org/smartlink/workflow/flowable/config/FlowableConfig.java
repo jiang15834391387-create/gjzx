@@ -7,6 +7,7 @@ import org.flowable.spring.boot.EngineConfigurationConfigurer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 
@@ -22,11 +23,16 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
     private GlobalFlowableListener globalFlowableListener;
     @Autowired
     private IdentifierGenerator identifierGenerator;
+    @Autowired
+    private AutoSkipFlowableListener autoSkipFlowableListener;
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
         processEngineConfiguration.setIdGenerator(() -> identifierGenerator.nextId(null).toString());
-        processEngineConfiguration.setEventListeners(Collections.singletonList(globalFlowableListener));
+        //processEngineConfiguration.setEventListeners(Collections.singletonList(globalFlowableListener));
+        processEngineConfiguration.setEventListeners(
+            Arrays.asList(globalFlowableListener, autoSkipFlowableListener)
+        );
         processEngineConfiguration.addCustomJobHandler(new TaskTimeoutJobHandler());
     }
 }

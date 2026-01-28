@@ -1,16 +1,21 @@
 package org.smartlink.workflow.controller;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.validate.AddGroup;
+import org.smartlink.common.excel.utils.ExcelUtil;
 import org.smartlink.common.idempotent.annotation.RepeatSubmit;
 import org.smartlink.common.log.annotation.Log;
 import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.web.core.BaseController;
+import org.smartlink.system.domain.bo.SysUserBo;
+import org.smartlink.system.domain.vo.SysUserExportVo;
 import org.smartlink.workflow.domain.bo.ProcessInstanceBo;
 import org.smartlink.workflow.domain.bo.ProcessInvalidBo;
 import org.smartlink.workflow.domain.bo.TaskUrgingBo;
@@ -20,6 +25,7 @@ import org.smartlink.workflow.service.IActProcessInstanceService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +76,7 @@ public class ActProcessInstanceController extends BaseController {
     /**
      * 通过业务id获取历史流程图运行中，历史等节点
      *
-     * @param businessKey 业务id
+     businessKey     * @param businessKey 业务id
      */
     @GetMapping("/getHistoryList/{businessKey}")
     public R<Map<String, Object>> getHistoryList(@NotBlank(message = "业务id不能为空") @PathVariable String businessKey) {
@@ -85,6 +91,17 @@ public class ActProcessInstanceController extends BaseController {
     @GetMapping("/getHistoryRecord/{businessKey}")
     public R<List<ActHistoryInfoVo>> getHistoryRecord(@NotBlank(message = "业务id不能为空") @PathVariable String businessKey) {
         return R.ok(actProcessInstanceService.getHistoryRecord(businessKey));
+    }
+
+    /**
+     * 导出审批记录
+     *
+     * @param list 业务id
+     */
+    @PostMapping("/getHistoryRecord/export")
+    public void export(ArrayList<String> list, HttpServletResponse response) {
+        List<ActHistoryInfoVo> actHistoryInfoVos = actProcessInstanceService.getHistoryRecordList(list);
+        ExcelUtil.exportExcel(actHistoryInfoVos, "审批记录", ActHistoryInfoVo.class, response);
     }
 
     /**

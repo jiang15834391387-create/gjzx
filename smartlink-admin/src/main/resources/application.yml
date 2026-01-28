@@ -140,6 +140,7 @@ tenant:
     - sys_user_role
     - sys_client
     - sys_oss_config
+    - test_act_history
 
 # MyBatisPlus配置
 # https://baomidou.com/config/

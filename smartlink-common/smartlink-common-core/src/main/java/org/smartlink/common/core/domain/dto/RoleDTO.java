@@ -29,6 +29,8 @@ public class RoleDTO implements Serializable {
      */
     private String roleName;
 
+    private String auditStatus;
+
     /**
      * 角色权限
      */

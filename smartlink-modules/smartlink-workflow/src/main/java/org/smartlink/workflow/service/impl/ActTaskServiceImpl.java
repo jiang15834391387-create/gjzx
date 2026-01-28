@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.flowable.common.engine.api.FlowableObjectNotFoundException;
 import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.*;
@@ -191,8 +192,9 @@ public class ActTaskServiceImpl implements IActTaskService {
             }
 
             //附件上传
-            AttachmentCmd attachmentCmd = new AttachmentCmd(completeTaskBo.getFileId(), task.getId(), task.getProcessInstanceId(), ossService);
-            managementService.executeCommand(attachmentCmd);
+            /*AttachmentCmd attachmentCmd = new AttachmentCmd(completeTaskBo.getFileId(), task.getId(), task.getProcessInstanceId(), ossService);
+            managementService.executeCommand(attachmentCmd);*/
+            handleAttachments(completeTaskBo.getFileId(), task);
             String businessStatus = WorkflowUtils.getBusinessStatus(processInstance.getBusinessKey());
             //流程提交监听
             if (BusinessStatusEnum.DRAFT.getStatus().equals(businessStatus) || BusinessStatusEnum.BACK.getStatus().equals(businessStatus) || BusinessStatusEnum.CANCEL.getStatus().equals(businessStatus)) {
@@ -251,6 +253,31 @@ public class ActTaskServiceImpl implements IActTaskService {
             throw new ServiceException(e.getMessage());
         }
     }
+
+    /**
+     * 处理逗号分隔的附件ID，并逐个执行附件命令
+     *
+     * @param fileIds 逗号分隔的附件id字符串
+     * @param task    当前任务
+     */
+    private void handleAttachments(List<HashMap<String, String>> fileIds, Task task) {
+        if (CollectionUtils.isEmpty(fileIds)) {
+            return;
+        }
+
+        for (HashMap<String, String> fid : fileIds) {
+            // 3. 构建并执行附件命令
+            AttachmentCmd attachmentCmd = new AttachmentCmd(
+                fid.get("fileType"),
+                fid.get("fileId"),
+                task.getId(),
+                task.getProcessInstanceId(),
+                ossService
+            );
+            managementService.executeCommand(attachmentCmd);
+        }
+    }
+
 
     /**
      * 发送消息

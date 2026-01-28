@@ -25,12 +25,15 @@ public class AttachmentCmd implements Command<Boolean> {
 
     private final String taskId;
 
+    private final String fileType;
+
     private final String processInstanceId;
 
     private final OssService ossService;
 
-    public AttachmentCmd(String fileId, String taskId, String processInstanceId, OssService ossService) {
+    public AttachmentCmd(String fileType,String fileId, String taskId, String processInstanceId, OssService ossService) {
         this.fileId = fileId;
+        this.fileType= fileType;
         this.taskId = taskId;
         this.processInstanceId = processInstanceId;
         this.ossService = ossService;
@@ -54,6 +57,7 @@ public class AttachmentCmd implements Command<Boolean> {
                         attachmentEntity.setProcessInstanceId(processInstanceId);
                         attachmentEntity.setContentId(oss.getOssId().toString());
                         attachmentEntity.setTime(new Date());
+                        attachmentEntity.setUrl(fileType);
                         attachmentEntityManager.insert(attachmentEntity);
                     }
                 }

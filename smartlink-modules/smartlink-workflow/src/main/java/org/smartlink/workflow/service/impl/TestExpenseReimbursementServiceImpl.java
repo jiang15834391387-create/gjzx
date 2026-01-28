@@ -1,5 +1,6 @@
 package org.smartlink.workflow.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -30,14 +31,17 @@ import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.mapper.SysDictDataMapper;
 import org.smartlink.system.mapper.SysUserMapper;
+import org.smartlink.workflow.domain.TestActHistory;
 import org.smartlink.workflow.domain.TestExpenseReimbursement;
 import org.smartlink.workflow.domain.TestFormManage;
 import org.smartlink.workflow.domain.WfDefinitionConfig;
 import org.smartlink.workflow.domain.bo.TestExpenseReimbursementBo;
+import org.smartlink.workflow.domain.vo.ActHistoryInfoVo;
 import org.smartlink.workflow.domain.vo.ConsumptionDetailsVo;
 import org.smartlink.workflow.domain.vo.DetailsVo;
 import org.smartlink.workflow.domain.vo.TestExpenseReimbursementVo;
 import org.smartlink.workflow.domain.vo.form.BpmFormVo;
+import org.smartlink.workflow.mapper.TestActHistoryMapper;
 import org.smartlink.workflow.mapper.TestExpenseReimbursementMapper;
 import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
@@ -48,6 +52,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -69,6 +76,8 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final SysUserMapper userMapper;
     private final IDataImageFilesInfoService dataImageFilesInfoService;
     private final WorkflowService workflowService;
+    private final TestActHistoryMapper actHistoryMapper;
+    private final TestActHistoryMapper testActHistoryMapper;
     /**
      * 查询费用报销申请
      *
@@ -215,6 +224,18 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             /*if(CollectionUtils.isNotEmpty(list)){
                 dataImageFilesInfoService.bindAndRelieve(add.getId().toString(), list, true);
             }*/
+            TestActHistory testActHistory = new TestActHistory();
+            testActHistory.setName("草稿");
+            testActHistory.setProcessInstanceId(add.getId().toString());
+            testActHistory.setStatus("draft");
+            testActHistory.setStatusName("草稿");
+            testActHistory.setProcessInstanceId(add.getId().toString());
+            testActHistory.setAssignee(LoginHelper.getUserId().toString());
+            testActHistory.setStartTime(new Date());
+            testActHistory.setEndTime(new Date());
+            testActHistory.setRunDuration("0");
+
+            actHistoryMapper.insert(testActHistory);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -310,12 +331,56 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         update.setFromManageId(byType.getId());
         try {
             int i = baseMapper.updateById(update);
+            if(i>0){
+                String status = update.getStatus();
+                if(status.equals("draft")){
+                    List<TestActHistory> cg = testActHistoryMapper.selectList(new LambdaQueryWrapper<TestActHistory>().eq(TestActHistory::getProcessInstanceId,bo.getId()).eq(TestActHistory::getStatus, "draft"));
+                    if(CollectionUtils.isNotEmpty(cg)){
+                        TestActHistory testActHistory = cg.get(0);
+                        Date startTime = testActHistory.getStartTime();
+                        String duration = getDuration(System.currentTimeMillis() - startTime.getTime());
+                        TestActHistory updateData = new TestActHistory();
+                        updateData.setName("修改");
+                        updateData.setProcessInstanceId(String.valueOf(bo.getId()));
+                        updateData.setStatus("update");
+                        updateData.setStatusName("修改");
+                        updateData.setAssignee(LoginHelper.getUserId().toString());
+                        updateData.setStartTime(new Date());
+                        updateData.setEndTime(new Date());
+                        updateData.setRunDuration("0");
+                        testActHistoryMapper.insert(updateData);
+                    }
+                }
+            }
             return MapstructUtils.convert(update, TestExpenseReimbursementVo.class);
         } catch (Exception e) {
             log.error("修改失败，执行回滚{}",e);
             throw new RuntimeException("失败");
         }
 
+    }
+
+    private String getDuration(long time) {
+
+        long day = time / (24 * 60 * 60 * 1000);
+        long hour = (time / (60 * 60 * 1000) - day * 24);
+        long minute = ((time / (60 * 1000)) - day * 24 * 60 - hour * 60);
+        long second = (time / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - minute * 60);
+
+        if (day > 0) {
+            return day + "天" + hour + "小时" + minute + "分钟";
+        }
+        if (hour > 0) {
+            return hour + "小时" + minute + "分钟";
+        }
+        if (minute > 0) {
+            return minute + "分钟";
+        }
+        if (second > 0) {
+            return second + "秒";
+        } else {
+            return 0 + "秒";
+        }
     }
 
     /**

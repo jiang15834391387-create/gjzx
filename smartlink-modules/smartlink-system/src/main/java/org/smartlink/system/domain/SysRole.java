@@ -37,6 +37,12 @@ public class SysRole extends TenantEntity {
     private String roleKey;
 
     /**
+     * 财务稽核
+     * 0否  1是
+     */
+    private String  auditStatus;
+
+    /**
      * 角色排序
      */
     private Integer roleSort;

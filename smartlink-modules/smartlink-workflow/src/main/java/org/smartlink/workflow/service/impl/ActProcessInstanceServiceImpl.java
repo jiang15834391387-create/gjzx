@@ -6,9 +6,11 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.smartlink.common.core.enums.BusinessStatusEnum;
 import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.service.UserService;
@@ -20,6 +22,7 @@ import org.smartlink.common.satoken.utils.LoginHelper;
 import org.smartlink.workflow.common.constant.FlowConstant;
 import org.smartlink.workflow.common.enums.TaskStatusEnum;
 import org.smartlink.workflow.domain.ActHiProcinst;
+import org.smartlink.workflow.domain.TestActHistory;
 import org.smartlink.workflow.domain.bo.ProcessInstanceBo;
 import org.smartlink.workflow.domain.bo.ProcessInvalidBo;
 import org.smartlink.workflow.domain.bo.TaskUrgingBo;
@@ -28,6 +31,7 @@ import org.smartlink.workflow.flowable.CustomDefaultProcessDiagramGenerator;
 import org.smartlink.workflow.flowable.cmd.DeleteExecutionCmd;
 import org.smartlink.workflow.flowable.cmd.ExecutionChildByExecutionIdCmd;
 import org.smartlink.workflow.flowable.handler.FlowProcessEventHandler;
+import org.smartlink.workflow.mapper.TestActHistoryMapper;
 import org.smartlink.workflow.service.IActHiProcinstService;
 import org.smartlink.workflow.service.IActProcessInstanceService;
 import org.smartlink.workflow.service.IWfNodeConfigService;
@@ -84,6 +88,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
     private final IWfNodeConfigService wfNodeConfigService;
     private final FlowProcessEventHandler flowProcessEventHandler;
     private final UserService userService;
+    private final TestActHistoryMapper testActHistoryMapper;
 
     @Value("${flowable.activity-font-name}")
     private String activityFontName;
@@ -431,6 +436,26 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
         // 已办理
         recordList.addAll(StreamUtils.filter(actHistoryInfoVoList, e -> e.getEndTime() != null));
 
+        List<TestActHistory> cg = testActHistoryMapper.selectList(new LambdaQueryWrapper<TestActHistory>().eq(TestActHistory::getProcessInstanceId, businessKey).orderByDesc(TestActHistory::getStartTime));
+        if(CollectionUtils.isNotEmpty(cg)){
+            cg.forEach(value -> {
+                recordList.add(BeanUtil.toBean(value, ActHistoryInfoVo.class));
+            });
+        }
+        return recordList;
+    }
+
+    @Override
+    public List<ActHistoryInfoVo> getHistoryRecordList(ArrayList<String> list) {
+        List<ActHistoryInfoVo> recordList = new ArrayList<>();
+        if(CollectionUtils.isNotEmpty( list)){
+            list.forEach(value -> {
+                List<ActHistoryInfoVo> historyRecord = getHistoryRecord(value);
+                if (CollectionUtils.isNotEmpty(historyRecord)){
+                    recordList.addAll(historyRecord);
+                }
+            });
+        }
         return recordList;
     }
 

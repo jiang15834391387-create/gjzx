@@ -18,7 +18,8 @@
                         r.status,
                         r.del_flag,
                         r.create_time,
-                        r.remark
+                        r.remark,
+                        r.audit_status
         from sys_role r
                  left join sys_user_role sur on sur.role_id = r.role_id
                  left join sys_user u on u.user_id = sur.user_id
@@ -46,7 +47,8 @@
                r.role_key,
                r.role_sort,
                r.data_scope,
-               r.status
+               r.status,
+               r.audit_status
         from sys_role r
         WHERE r.del_flag = '0' and r.role_id in (select role_id from sys_user_role where user_id = #{userId})
     </select>

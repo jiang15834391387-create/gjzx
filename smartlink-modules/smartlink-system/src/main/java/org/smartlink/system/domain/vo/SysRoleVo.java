@@ -43,6 +43,11 @@ public class SysRoleVo implements Serializable {
      */
     @ExcelProperty(value = "角色权限")
     private String roleKey;
+    /**
+     * 财务稽核
+     * 0否  1是
+     */
+    private String  auditStatus;
 
     /**
      * 显示顺序

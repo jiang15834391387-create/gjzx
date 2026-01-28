@@ -31,8 +31,19 @@ public class CompleteTaskBo implements Serializable {
 
     /**
      * 附件id
+     * [
+     * {
+     *     "fileId": "1",
+     *     "fileType": "DZQM"
+     * },{
+     *     "fileId": "1",
+     *     "fileType": "CARZ"
+     * },{
+     *     "fileId": "1"
+     * }
+     * ]
      */
-    private String fileId;
+    private List<HashMap<String, String>> fileId;
 
     /**
      * 抄送人员

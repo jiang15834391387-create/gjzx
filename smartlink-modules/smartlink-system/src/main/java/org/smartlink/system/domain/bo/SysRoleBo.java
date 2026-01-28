@@ -67,7 +67,11 @@ public class SysRoleBo extends BaseEntity {
      * 角色状态（0正常 1停用）
      */
     private String status;
-
+    /**
+     * 财务稽核
+     * 0否  1是
+     */
+    private String  auditStatus;
     /**
      * 备注
      */

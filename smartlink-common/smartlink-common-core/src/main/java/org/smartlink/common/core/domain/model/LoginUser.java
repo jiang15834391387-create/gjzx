@@ -116,6 +116,7 @@ public class LoginUser implements Serializable {
      */
     private Long roleId;
 
+    private Long auditStatus;
     /**
      * 客户端
      */
