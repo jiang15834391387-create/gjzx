@@ -13,6 +13,7 @@ import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.identitylink.api.IdentityLink;
 import org.flowable.task.api.Task;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -27,19 +28,19 @@ import java.util.*;
 public class AutoSkipFlowableListener implements FlowableEventListener {
 
     @Lazy
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     private TaskService taskService;
 
     @Lazy
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     private RuntimeService runtimeService;
 
     @Lazy
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     private IdentityService identityService;
 
     @Lazy
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     private org.smartlink.common.core.service.UserService userService;
 
     private static final String AUTO_SKIP_COUNT = "AUTO_SKIP_COUNT";
