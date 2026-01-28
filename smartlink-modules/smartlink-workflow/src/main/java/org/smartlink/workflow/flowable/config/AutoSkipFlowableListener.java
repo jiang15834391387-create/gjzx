@@ -26,12 +26,21 @@ import java.util.*;
 @Component
 public class AutoSkipFlowableListener implements FlowableEventListener {
 
-    private final TaskService taskService;
-    private final RuntimeService runtimeService;
-    private final IdentityService identityService;
+    @Lazy
+    @org.springframework.beans.factory.annotation.Autowired
+    private TaskService taskService;
 
     @Lazy
-    private final org.smartlink.common.core.service.UserService userService;
+    @org.springframework.beans.factory.annotation.Autowired
+    private RuntimeService runtimeService;
+
+    @Lazy
+    @org.springframework.beans.factory.annotation.Autowired
+    private IdentityService identityService;
+
+    @Lazy
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.smartlink.common.core.service.UserService userService;
 
     private static final String AUTO_SKIP_COUNT = "AUTO_SKIP_COUNT";
     private static final int AUTO_SKIP_MAX = 20;
