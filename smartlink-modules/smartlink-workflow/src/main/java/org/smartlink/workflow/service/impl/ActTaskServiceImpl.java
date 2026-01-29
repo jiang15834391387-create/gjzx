@@ -20,6 +20,7 @@ import org.flowable.engine.impl.bpmn.behavior.SequentialMultiInstanceBehavior;
 import org.flowable.engine.impl.persistence.entity.ExecutionEntity;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.runtime.ProcessInstanceQuery;
+import org.flowable.identitylink.api.IdentityLink;
 import org.flowable.identitylink.api.history.HistoricIdentityLink;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.TaskQuery;
@@ -182,6 +183,7 @@ public class ActTaskServiceImpl implements IActTaskService {
                 throw new ServiceException(FlowConstant.MESSAGE_SUSPENDED);
             }
             ProcessInstance processInstance = QueryUtils.instanceQuery(task.getProcessInstanceId()).singleResult();
+
             //办理委托任务
             if (ObjectUtil.isNotEmpty(task.getDelegationState()) && FlowConstant.PENDING.equals(task.getDelegationState().name())) {
                 taskService.resolveTask(completeTaskBo.getTaskId());
@@ -189,6 +191,59 @@ public class ActTaskServiceImpl implements IActTaskService {
                 taskService.addComment(newTask.getId(), task.getProcessInstanceId(), TaskStatusEnum.PASS.getStatus(), StringUtils.isNotBlank(completeTaskBo.getMessage()) ? completeTaskBo.getMessage() : StrUtil.EMPTY);
                 taskService.complete(newTask.getId());
                 return true;
+            }
+
+            HistoricTaskInstance firstTask = historyService.createHistoricTaskInstanceQuery()
+                .processInstanceId(task.getProcessInstanceId())
+                .orderByHistoricTaskInstanceStartTime()
+                .asc()
+                .listPage(0, 1)
+                .stream().findFirst().orElse(null);
+
+            boolean isFirstUserTask = (firstTask != null)
+                && StringUtils.isNotBlank(firstTask.getTaskDefinitionKey())
+                && firstTask.getTaskDefinitionKey().equals(task.getTaskDefinitionKey());
+            if (!isFirstUserTask) {
+                HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
+                    .processInstanceId(task.getProcessInstanceId())
+                    .singleResult();
+
+                // 当前操作人是流程发起人（提交人）
+                if (hpi != null && StringUtils.isNotBlank(hpi.getStartUserId())
+                    && hpi.getStartUserId().equals(userId)) {
+
+                    // 只在“当前用户确实是该任务候选人/候选组成员”的情况下拦截，避免误伤特殊任务
+                    List<IdentityLink> identityLinks = taskService.getIdentityLinksForTask(task.getId());
+                    boolean isCandidate = false;
+
+                    if (CollUtil.isNotEmpty(identityLinks)) {
+                        // 1) 候选用户就是本人
+                        isCandidate = identityLinks.stream().anyMatch(l ->
+                            "candidate".equals(l.getType()) && userId.equals(l.getUserId())
+                        );
+
+                        // 2) 或候选组包含本人角色
+                        if (!isCandidate) {
+                            List<RoleDTO> roles = LoginHelper.getLoginUser().getRoles();
+                            Set<String> roleIdSet = new HashSet<>();
+                            if (CollUtil.isNotEmpty(roles)) {
+                                for (RoleDTO r : roles) {
+                                    roleIdSet.add(String.valueOf(r.getRoleId()));
+                                }
+                            }
+
+                            isCandidate = identityLinks.stream().anyMatch(l ->
+                                "candidate".equals(l.getType())
+                                    && StringUtils.isNotBlank(l.getGroupId())
+                                    && roleIdSet.contains(l.getGroupId())
+                            );
+                        }
+                    }
+
+                    if (isCandidate) {
+                        throw new ServiceException("提交人不能审批本人发起的单据，请由同角色其他人员处理");
+                    }
+                }
             }
 
             //附件上传
@@ -400,7 +455,10 @@ public class ActTaskServiceImpl implements IActTaskService {
         queryWrapper.eq("t.business_status_", BusinessStatusEnum.WAITING.getStatus());
         queryWrapper.eq(TenantHelper.isEnable(), "t.tenant_id_", TenantHelper.getTenantId());
         String ids = StreamUtils.join(roleIds, x -> "'" + x + "'");
-        queryWrapper.and(w1 -> w1.eq("t.assignee_", userId).or(w2 -> w2.isNull("t.assignee_").apply("exists ( select LINK.ID_ from ACT_RU_IDENTITYLINK LINK where LINK.TASK_ID_ = t.ID_ and LINK.TYPE_ = 'candidate' and (LINK.USER_ID_ = {0} or ( LINK.GROUP_ID_ IN (" + ids + ") ) ))", userId)));
+        queryWrapper.and(w1 -> w1.eq("t.assignee_", userId)
+            .or(w2 -> w2.isNull("t.assignee_")
+                //.ne("t.startUserId", userId)
+                .apply("exists ( select LINK.ID_ from ACT_RU_IDENTITYLINK LINK where LINK.TASK_ID_ = t.ID_ and LINK.TYPE_ = 'candidate' and (LINK.USER_ID_ = {0} or ( LINK.GROUP_ID_ IN (" + ids + ") ) ))", userId)));
         if (StringUtils.isNotBlank(taskBo.getName())) {
             queryWrapper.like("t.name_", taskBo.getName());
         }
@@ -965,7 +1023,7 @@ public class ActTaskServiceImpl implements IActTaskService {
     }
     /**
      * 获取消息信息
-     * @param taskVo
+     * @param
      */
     /*public void getMessageInfo(TaskVo taskVo){
         if(taskVo!=null){

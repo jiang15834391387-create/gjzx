@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -29,7 +27,7 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
     private IdentifierGenerator identifierGenerator;
 
     @Autowired
-    private ObjectProvider<AutoSkipFlowableListener> autoSkipFlowableListenerProvider;
+    private ObjectProvider<AutoSkipFlowableListener11> autoSkipFlowableListenerProvider;
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
@@ -38,7 +36,7 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
         List<FlowableEventListener> listeners = new ArrayList<>();
         listeners.add(globalFlowableListener);
 
-        AutoSkipFlowableListener autoSkip = autoSkipFlowableListenerProvider.getIfAvailable();
+        AutoSkipFlowableListener11 autoSkip = autoSkipFlowableListenerProvider.getIfAvailable();
         if (autoSkip != null) {
             listeners.add(autoSkip);
         }

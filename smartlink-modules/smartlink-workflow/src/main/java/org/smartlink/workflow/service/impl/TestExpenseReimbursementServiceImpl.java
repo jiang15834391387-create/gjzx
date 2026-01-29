@@ -233,7 +233,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             testActHistory.setAssignee(LoginHelper.getUserId().toString());
             testActHistory.setStartTime(new Date());
             testActHistory.setEndTime(new Date());
-            testActHistory.setRunDuration("0");
+            testActHistory.setRunDuration("0秒");
 
             actHistoryMapper.insert(testActHistory);
         } catch (Exception e) {
@@ -347,7 +347,7 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                         updateData.setAssignee(LoginHelper.getUserId().toString());
                         updateData.setStartTime(new Date());
                         updateData.setEndTime(new Date());
-                        updateData.setRunDuration("0");
+                        updateData.setRunDuration("0秒");
                         testActHistoryMapper.insert(updateData);
                     }
                 }

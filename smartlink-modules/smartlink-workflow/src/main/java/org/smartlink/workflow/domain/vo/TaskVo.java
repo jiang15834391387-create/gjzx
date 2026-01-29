@@ -186,4 +186,6 @@ public class TaskVo implements Serializable {
      *  提单创建时间
      */
     private Date applyTime;
+
+    private String startUserId;
 }

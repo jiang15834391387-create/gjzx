@@ -31,6 +31,7 @@
         <result property="createBy" column="create_by"/>
         <result property="userName" column="userName"/>
         <result property="applyTime" column="applyTime"/>
+        <result property="startUserId" column="START_USER_ID_"/>
 
     </resultMap>
     <!--<select id="getTaskWaitByPage" resultMap="TaskVoResult">
@@ -59,6 +60,7 @@
                      ARP.VERSION_ AS processDefinitionVersion,
                      ter.create_by,
                      ter.create_time as applyTime,
+                     AHP.START_USER_ID_ AS startUserId,
                      us.user_name as userName
                  FROM
                      ACT_RU_TASK RES

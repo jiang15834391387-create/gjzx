@@ -22,10 +22,11 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 /**
- * 自动跳过监听器
+ * 无人自动跳过监听器（事务提交后触发）
+ * 重点：使用 ObjectProvider 延迟获取 Flowable Service，避免 processEngine 创建时循环依赖
  */
 @Component
-public class AutoSkipFlowableListener implements FlowableEventListener {
+public class AutoSkipFlowableListener11 implements FlowableEventListener {
 
     private final ObjectProvider<TaskService> taskServiceProvider;
     private final ObjectProvider<RuntimeService> runtimeServiceProvider;
@@ -36,18 +37,18 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
     private static final String AUTO_SKIP_COUNT = "AUTO_SKIP_COUNT";
     private static final int AUTO_SKIP_MAX = 20;
 
-    public AutoSkipFlowableListener(
+    public AutoSkipFlowableListener11(
         ObjectProvider<TaskService> taskServiceProvider,
         ObjectProvider<RuntimeService> runtimeServiceProvider,
         ObjectProvider<IdentityService> identityServiceProvider,
         ObjectProvider<HistoryService> historyServiceProvider,
-        ObjectProvider<org.smartlink.common.core.service.UserService> userServiceProvider
-    ) {
+        ObjectProvider<org.smartlink.common.core.service.UserService> userServiceProvider) {
         this.taskServiceProvider = taskServiceProvider;
         this.runtimeServiceProvider = runtimeServiceProvider;
         this.identityServiceProvider = identityServiceProvider;
         this.historyServiceProvider = historyServiceProvider;
         this.userServiceProvider = userServiceProvider;
+
     }
 
     @Override
@@ -60,27 +61,30 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             return;
         }
 
+        // 事件真正触发时再取 service（此时 processEngine 已经创建完成）
         TaskService taskService = taskServiceProvider.getIfAvailable();
         RuntimeService runtimeService = runtimeServiceProvider.getIfAvailable();
         IdentityService identityService = identityServiceProvider.getIfAvailable();
-        HistoryService historyService = historyServiceProvider.getIfAvailable();
         org.smartlink.common.core.service.UserService userService = userServiceProvider.getIfAvailable();
+        HistoryService historyService = historyServiceProvider.getIfAvailable();
 
-        if (taskService == null || runtimeService == null || identityService == null || historyService == null || userService == null) {
+        if (taskService == null || runtimeService == null || identityService == null || userService == null) {
+            // 服务还未就绪，直接跳过（一般不会发生）
             return;
         }
 
+        // COMMITTED 后再查一遍最新任务，避免半成品
         Task task = taskService.createTaskQuery().taskId(taskEntity.getId()).singleResult();
         if (task == null) {
             return;
         }
-        // 已有办理人不处理
         if (StringUtils.isNotBlank(task.getAssignee())) {
             return;
         }
 
         List<IdentityLink> links = taskService.getIdentityLinksForTask(task.getId());
         if (CollUtil.isEmpty(links)) {
+            // links 为空不跳，避免误判
             return;
         }
 
@@ -99,18 +103,17 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             }
         }
 
-        // 配置了候选用户，就不走“角色无人跳过”逻辑
         if (CollUtil.isNotEmpty(candidateUsers)) {
             return;
         }
 
-        // 没有候选用户也没有候选组 -> 直接跳过
         if (candidateGroups.isEmpty()) {
             doSkip(taskService, runtimeService, identityService, task,
                 "自动跳过：节点【" + task.getName() + "】无候选用户/候选组");
             return;
         }
 
+        // 你们系统 GROUP_ID_ = roleId（数字字符串），因为待办是 GROUP_ID_ IN (roleIds)
         List<Long> roleIds = new ArrayList<>();
         for (String gid : candidateGroups) {
             try {
@@ -121,64 +124,98 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             }
         }
 
-        // 角色下的所有用户
-        List<Long> roleUserIds = userService.selectUserIdsByRoleIds(roleIds);
+        List<Long> userIds = userService.selectUserIdsByRoleIds(roleIds);
 
-        // 取提交流程发起人
-        Long starterId = getStarterId(runtimeService, historyService, task.getProcessInstanceId());
+        // 取流程提交人（发起人）
+        String starterIdStr = runtimeService.getVariable(task.getProcessInstanceId(), FlowConstant.INITIATOR) == null
+            ? null
+            : String.valueOf(runtimeService.getVariable(task.getProcessInstanceId(), FlowConstant.INITIATOR));
 
-        // 2.1 角色下完全无人 -> 跳过
-        if (CollUtil.isEmpty(roleUserIds)) {
-            String roleDesc = buildRoleDesc(userService, roleIds);
+      /*  if (StringUtils.isBlank(starterIdStr)) {
+            // 兜底：用历史流程实例的 startUserId
+            HistoricProcessInstance hpi = historyService.getProcessEngineServices()
+                .getHistoryService()
+                .createHistoricProcessInstanceQuery()
+                .processInstanceId(task.getProcessInstanceId())
+                .singleResult();
+            if (hpi != null) {
+                starterIdStr = hpi.getStartUserId();
+            }
+        }*/
+
+        Long starterId = null;
+        try {
+            if (StringUtils.isNotBlank(starterIdStr)) {
+                starterId = Long.valueOf(starterIdStr);
+            }
+        } catch (Exception ignored) {}
+
+        // 如果角色下有人，但只有提交人一个人 → 也要跳过
+        if (CollUtil.isNotEmpty(userIds) && starterId != null) {
+            // 排除提交人
+            Long finalStarterId = starterId;
+            List<Long> others = userIds.stream()
+                .filter(uid -> uid != null && !uid.equals(finalStarterId))
+                .toList();
+
+            if (CollUtil.isNotEmpty(others)) {
+                // 角色下除了提交人还有其他人：不跳过（后续如果你要“顺延”，可以在这里做候选人替换）
+                return;
+            }
+
+            // 只有提交人一个人：需要跳过
+            List<String> roleNames = userService.selectRoleName(roleIds);
+            String roleDesc = roleNames.isEmpty() ? roleIds.toString() : String.join("、", roleNames);
+
             doSkip(taskService, runtimeService, identityService, task,
-                "自动跳过：节点【" + task.getName() + "】候选角色无人（角色：" + roleDesc + "）");
+                "自动跳过：节点【" + task.getName() + "】候选角色仅提交人（角色：" + roleDesc + "）");
             return;
         }
 
-        // 2.2 角色下有人，但只有提交人一个 -> 跳过
-        if (starterId != null) {
-            boolean hasOtherApprover = roleUserIds.stream().anyMatch(uid -> uid != null && !uid.equals(starterId));
+        // 原来的逻辑：角色下完全无人 → 跳过
+        if (CollUtil.isNotEmpty(userIds)) {
+            return;
+        }
+
+
+        String roleDesc = buildRoleDesc(userService, roleIds);
+
+        doSkip(taskService, runtimeService, identityService, task,
+            "自动跳过：节点【" + task.getName() + "】候选角色无人（角色：" + roleDesc + "）");
+
+        String starterUserId = null;
+        try {
+            HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
+                .processInstanceId(task.getProcessInstanceId())
+                .singleResult();
+            if (hpi != null && StringUtils.isNotBlank(hpi.getStartUserId())) {
+                starterUserId = hpi.getStartUserId();
+            }
+        } catch (Exception ignore) {
+        }
+
+        Long starterLong = null;
+        try {
+            if (StringUtils.isNotBlank(starterUserId)) {
+                starterLong = Long.valueOf(starterUserId);
+            }
+        } catch (Exception ignore) {
+        }
+
+        List<Long> roleUserIds = userService.selectUserIdsByRoleIds(roleIds);
+
+        if (starterLong != null && roleUserIds.contains(starterLong)) {
+
+            Long finalStarterLong = starterLong;
+            boolean hasOtherApprover = roleUserIds.stream()
+                .anyMatch(uid -> uid != null && !uid.equals(finalStarterLong));
             if (!hasOtherApprover) {
-                String roleDesc = buildRoleDesc(userService, roleIds);
+                String roleDescs = buildRoleDesc(userService, roleIds);
                 doSkip(taskService, runtimeService, identityService, task,
-                    "自动跳过：节点【" + task.getName() + "】候选角色仅提交人（角色：" + roleDesc + "）");
+                    "自动跳过：节点【" + task.getName() + "】提交人与审批角色重叠且无其他审批人（角色：" + roleDescs + "）");
                 return;
             }
         }
-
-        // 2.3 角色下有除提交人外其他人
-    }
-
-    private Long getStarterId(RuntimeService runtimeService, HistoryService historyService, String processInstanceId) {
-        String starterIdStr = null;
-
-        try {
-            Object starterVar = runtimeService.getVariable(processInstanceId, FlowConstant.INITIATOR);
-            if (starterVar != null) {
-                starterIdStr = String.valueOf(starterVar);
-            }
-        } catch (Exception ignore) {
-        }
-
-        if (StringUtils.isBlank(starterIdStr)) {
-            try {
-                HistoricProcessInstance hpi = historyService.createHistoricProcessInstanceQuery()
-                    .processInstanceId(processInstanceId)
-                    .singleResult();
-                if (hpi != null && StringUtils.isNotBlank(hpi.getStartUserId())) {
-                    starterIdStr = hpi.getStartUserId();
-                }
-            } catch (Exception ignore) {
-            }
-        }
-
-        try {
-            if (StringUtils.isNotBlank(starterIdStr)) {
-                return Long.valueOf(starterIdStr);
-            }
-        } catch (Exception ignore) {
-        }
-        return null;
     }
 
     private String buildRoleDesc(org.smartlink.common.core.service.UserService userService, List<Long> roleIds) {
@@ -209,6 +246,7 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
 
         identityService.setAuthenticatedUserId("system");
         taskService.addComment(task.getId(), task.getProcessInstanceId(), "AUTO_SKIP", reason);
+
 
         Map<String, Object> vars = new HashMap<>();
         vars.put("AUTO_SKIPPED", true);
