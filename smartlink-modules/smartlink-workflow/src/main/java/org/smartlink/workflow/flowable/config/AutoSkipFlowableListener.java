@@ -1,10 +1,8 @@
 package org.smartlink.workflow.flowable.config;
 
 import cn.hutool.core.collection.CollUtil;
-import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
-import org.flowable.task.service.impl.persistence.entity.TaskEntity;
-import org.smartlink.common.core.utils.StringUtils;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
+import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
 import org.flowable.common.engine.impl.cfg.TransactionState;
@@ -13,47 +11,38 @@ import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.identitylink.api.IdentityLink;
 import org.flowable.task.api.Task;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+import org.flowable.task.service.impl.persistence.entity.TaskEntity;
+import org.smartlink.common.core.utils.StringUtils;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 
 /**
- * 无人自动跳过（只处理 TASK_CREATED）
- * - 事务提交后(COMMITTED)触发，避免 TASK_CREATED 太早导致 identityLink 还没落库的误判
- * - 无 assignee 且无 candidateUser，candidateGroup(角色)下也无人 -> addComment + complete
+ * 无人自动跳过监听器（事务提交后触发）
+ * 重点：使用 ObjectProvider 延迟获取 Flowable Service，避免 processEngine 创建时循环依赖
  */
 @Component
 public class AutoSkipFlowableListener implements FlowableEventListener {
 
-    @Lazy
-    @Autowired
-    private TaskService taskService;
-
-    @Lazy
-    @Autowired
-    private RuntimeService runtimeService;
-
-    @Lazy
-    @Autowired
-    private IdentityService identityService;
-
-    @Lazy
-    @Autowired
-    private org.smartlink.common.core.service.UserService userService;
+    private final ObjectProvider<TaskService> taskServiceProvider;
+    private final ObjectProvider<RuntimeService> runtimeServiceProvider;
+    private final ObjectProvider<IdentityService> identityServiceProvider;
+    private final ObjectProvider<org.smartlink.common.core.service.UserService> userServiceProvider;
 
     private static final String AUTO_SKIP_COUNT = "AUTO_SKIP_COUNT";
     private static final int AUTO_SKIP_MAX = 20;
 
-    public AutoSkipFlowableListener(TaskService taskService,
-                                    RuntimeService runtimeService,
-                                    IdentityService identityService,
-                                    @Lazy org.smartlink.common.core.service.UserService userService) {
-        this.taskService = taskService;
-        this.runtimeService = runtimeService;
-        this.identityService = identityService;
-        this.userService = userService;
+    public AutoSkipFlowableListener(
+        ObjectProvider<TaskService> taskServiceProvider,
+        ObjectProvider<RuntimeService> runtimeServiceProvider,
+        ObjectProvider<IdentityService> identityServiceProvider,
+        ObjectProvider<org.smartlink.common.core.service.UserService> userServiceProvider) {
+        this.taskServiceProvider = taskServiceProvider;
+        this.runtimeServiceProvider = runtimeServiceProvider;
+        this.identityServiceProvider = identityServiceProvider;
+        this.userServiceProvider = userServiceProvider;
+
     }
 
     @Override
@@ -66,26 +55,34 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             return;
         }
 
-        // COMMITTED 后再查一遍最新 task（避免拿到“创建瞬间的半成品”）
+        // 事件真正触发时再取 service（此时 processEngine 已经创建完成）
+        TaskService taskService = taskServiceProvider.getIfAvailable();
+        RuntimeService runtimeService = runtimeServiceProvider.getIfAvailable();
+        IdentityService identityService = identityServiceProvider.getIfAvailable();
+        org.smartlink.common.core.service.UserService userService = userServiceProvider.getIfAvailable();
+
+        if (taskService == null || runtimeService == null || identityService == null || userService == null) {
+            // 服务还未就绪，直接跳过（一般不会发生）
+            return;
+        }
+
+        // COMMITTED 后再查一遍最新任务，避免半成品
         Task task = taskService.createTaskQuery().taskId(taskEntity.getId()).singleResult();
         if (task == null) {
             return;
         }
-
-        // 已分配办理人：不跳
         if (StringUtils.isNotBlank(task.getAssignee())) {
             return;
         }
 
-        // identityLinks：候选用户/候选组
         List<IdentityLink> links = taskService.getIdentityLinksForTask(task.getId());
         if (CollUtil.isEmpty(links)) {
-            // links 为空时不跳，避免误判（有些分配逻辑可能稍后才写入）
+            // links 为空不跳，避免误判
             return;
         }
 
         List<String> candidateUsers = new ArrayList<>();
-        List<String> candidateGroups = new ArrayList<>();
+        Set<String> candidateGroups = new HashSet<>();
 
         for (IdentityLink link : links) {
             if (!"candidate".equals(link.getType())) {
@@ -99,43 +96,49 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             }
         }
 
-        // 有候选用户：不跳
         if (CollUtil.isNotEmpty(candidateUsers)) {
             return;
         }
 
-        // 没候选用户、也没候选组：确定无人 -> 跳
-        if (CollUtil.isEmpty(candidateGroups)) {
-            doSkip(task, "自动跳过：节点【" + task.getName() + "】无候选用户/候选组");
+        if (candidateGroups.isEmpty()) {
+            doSkip(taskService, runtimeService, identityService, task,
+                "自动跳过：节点【" + task.getName() + "】无候选用户/候选组");
             return;
         }
 
-        // 候选组 = 角色 roleId（你们待办就是按 GROUP_ID_ IN (roleIds) 过滤）
+        // 你们系统 GROUP_ID_ = roleId（数字字符串），因为待办是 GROUP_ID_ IN (roleIds)
         List<Long> roleIds = new ArrayList<>();
-        for (String gid : new HashSet<>(candidateGroups)) {
+        for (String gid : candidateGroups) {
             try {
                 roleIds.add(Long.valueOf(gid));
             } catch (Exception e) {
-                // gid 不是数字：为了安全，直接不跳（避免误伤）
+                // 不可解析：不跳过，避免误伤
                 return;
             }
         }
 
-        if (CollUtil.isEmpty(roleIds)) {
-            return;
-        }
-
         List<Long> userIds = userService.selectUserIdsByRoleIds(roleIds);
         if (CollUtil.isNotEmpty(userIds)) {
-            return; // 角色下有人，不跳
+            return;
         }
+        List<String> roleNames = userService.selectRoleName(roleIds);
 
-        // 角色下无人：跳过
-        doSkip(task, "自动跳过：节点【" + task.getName() + "】候选角色无人（roleIds=" + roleIds + "）");
+
+        String roleDesc = roleNames.isEmpty()
+            ? roleIds.toString()
+            : String.join("、", roleNames);
+
+        doSkip(taskService, runtimeService, identityService, task,
+            "自动跳过：节点【" + task.getName() + "】候选角色无人（角色：" + roleDesc + "）");
+
     }
 
-    private void doSkip(Task task, String reason) {
-        // 防无限跳（极端：后面所有节点都没人）
+    private void doSkip(TaskService taskService,
+                        RuntimeService runtimeService,
+                        IdentityService identityService,
+                        Task task,
+                        String reason) {
+
         Integer cnt = (Integer) runtimeService.getVariable(task.getProcessInstanceId(), AUTO_SKIP_COUNT);
         if (cnt == null) {
             cnt = 0;
@@ -145,7 +148,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
         }
         runtimeService.setVariable(task.getProcessInstanceId(), AUTO_SKIP_COUNT, cnt + 1);
 
-        // 写审批意见 + complete（会进入历史审批信息）
         identityService.setAuthenticatedUserId("system");
         taskService.addComment(task.getId(), task.getProcessInstanceId(), "AUTO_SKIP", reason);
 
@@ -156,19 +158,16 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
 
     @Override
     public boolean isFailOnException() {
-        // 建议 false：自动跳过异常不影响引擎主流程（你也可以保持 true）
         return false;
     }
 
     @Override
     public boolean isFireOnTransactionLifecycleEvent() {
-        // ✅ 关键：事务生命周期触发
         return true;
     }
 
     @Override
     public String getOnTransaction() {
-        // ✅ 提交后触发
         return TransactionState.COMMITTED.name();
     }
 

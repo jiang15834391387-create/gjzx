@@ -1,14 +1,18 @@
 package org.smartlink.workflow.flowable.config;
 
 import com.baomidou.mybatisplus.core.incrementer.IdentifierGenerator;
+import org.flowable.common.engine.api.delegate.event.FlowableEventListener;
 import org.smartlink.workflow.flowable.handler.TaskTimeoutJobHandler;
 import org.flowable.spring.SpringProcessEngineConfiguration;
 import org.flowable.spring.boot.EngineConfigurationConfigurer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -23,16 +27,24 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
     private GlobalFlowableListener globalFlowableListener;
     @Autowired
     private IdentifierGenerator identifierGenerator;
+
     @Autowired
-    private AutoSkipFlowableListener autoSkipFlowableListener;
+    private ObjectProvider<AutoSkipFlowableListener> autoSkipFlowableListenerProvider;
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
         processEngineConfiguration.setIdGenerator(() -> identifierGenerator.nextId(null).toString());
-        //processEngineConfiguration.setEventListeners(Collections.singletonList(globalFlowableListener));
-        processEngineConfiguration.setEventListeners(
-            Arrays.asList(globalFlowableListener, autoSkipFlowableListener)
-        );
+
+        List<FlowableEventListener> listeners = new ArrayList<>();
+        listeners.add(globalFlowableListener);
+
+        AutoSkipFlowableListener autoSkip = autoSkipFlowableListenerProvider.getIfAvailable();
+        if (autoSkip != null) {
+            listeners.add(autoSkip);
+        }
+
+        processEngineConfiguration.setEventListeners(listeners);
         processEngineConfiguration.addCustomJobHandler(new TaskTimeoutJobHandler());
+
     }
 }

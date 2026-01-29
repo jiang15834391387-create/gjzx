@@ -82,4 +82,6 @@ public interface UserService {
      * @return 用户
      */
     List<UserDTO> selectUsersByDeptIds(List<Long> deptIds);
+
+    List<String> selectRoleName(List<Long> roleIds);
 }

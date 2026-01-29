@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 用户 业务层处理
@@ -706,6 +707,16 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
             .in(SysUser::getDeptId, deptIds));
         return BeanUtil.copyToList(list, UserDTO.class);
     }
+
+    @Override
+    public List<String> selectRoleName(List<Long> roleIds) {
+        List<SysRole> sysRoles = roleMapper.selectList(new LambdaQueryWrapper<SysRole>()
+            .select(SysRole::getRoleName).in(SysRole::getRoleId, roleIds));
+        return sysRoles.stream()
+            .map(SysRole::getRoleName)
+            .collect(Collectors.toList());
+    }
+
     @Override
     public R<Void> cancellation() {
         Long userId = LoginHelper.getUserId();

@@ -23,6 +23,9 @@ public enum TaskStatusEnum {
      * 通过
      */
     PASS("pass", "通过"),
+    SKIP("skip", "跳过"),
+
+    AUTO_SKIP("AUTO_SKIP", "跳过"),
     /**
      * 待审核
      */
