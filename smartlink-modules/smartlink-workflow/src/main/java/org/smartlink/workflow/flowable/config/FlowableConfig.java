@@ -7,12 +7,14 @@ import org.flowable.spring.SpringProcessEngineConfiguration;
 import org.flowable.spring.boot.EngineConfigurationConfigurer;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import org.springframework.context.annotation.Bean;
 /**
  * flowable配置
  *
@@ -27,7 +29,11 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
     private IdentifierGenerator identifierGenerator;
 
     @Autowired
-    private ObjectProvider<AutoSkipFlowableListener11> autoSkipFlowableListenerProvider;
+    private ObjectProvider<AutoSkipFlowableListener> autoSkipFlowableListenerProvider;
+    @Bean("wfSkipExecutor")
+    public Executor wfSkipExecutor() {
+        return Executors.newSingleThreadExecutor();
+    }
 
     @Override
     public void configure(SpringProcessEngineConfiguration processEngineConfiguration) {
@@ -36,7 +42,7 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
         List<FlowableEventListener> listeners = new ArrayList<>();
         listeners.add(globalFlowableListener);
 
-        AutoSkipFlowableListener11 autoSkip = autoSkipFlowableListenerProvider.getIfAvailable();
+        AutoSkipFlowableListener autoSkip = autoSkipFlowableListenerProvider.getIfAvailable();
         if (autoSkip != null) {
             listeners.add(autoSkip);
         }

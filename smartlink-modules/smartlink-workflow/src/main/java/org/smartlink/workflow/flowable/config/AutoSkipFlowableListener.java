@@ -1,6 +1,7 @@
 package org.smartlink.workflow.flowable.config;
 
 import cn.hutool.core.collection.CollUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEngineEventType;
 import org.flowable.common.engine.api.delegate.event.FlowableEntityEvent;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -18,13 +19,16 @@ import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.workflow.common.constant.FlowConstant;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
-
+import org.springframework.beans.factory.annotation.Autowired;          // ✅ 修改点1：新增 import
+import org.springframework.beans.factory.annotation.Qualifier;
+import java.util.concurrent.Executor;
 import java.util.*;
 
 /**
  * 自动跳过监听器
  */
 @Component
+@Slf4j
 public class AutoSkipFlowableListener implements FlowableEventListener {
 
     private final ObjectProvider<TaskService> taskServiceProvider;
@@ -35,6 +39,10 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
 
     private static final String AUTO_SKIP_COUNT = "AUTO_SKIP_COUNT";
     private static final int AUTO_SKIP_MAX = 20;
+
+    @Autowired
+    @Qualifier("wfSkipExecutor")
+    private Executor wfSkipExecutor;
 
     public AutoSkipFlowableListener(
         ObjectProvider<TaskService> taskServiceProvider,
@@ -206,13 +214,22 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             throw new RuntimeException("自动跳过超过上限(" + AUTO_SKIP_MAX + ")，疑似流程配置/组织架构异常");
         }
         runtimeService.setVariable(task.getProcessInstanceId(), AUTO_SKIP_COUNT, cnt + 1);
+        final String taskId = task.getId();
+        final String procInstId = task.getProcessInstanceId();
+        final String finalReason = reason;
+        wfSkipExecutor.execute(() -> {
+            try {
+                identityService.setAuthenticatedUserId("system");
+                taskService.addComment(taskId, procInstId, "AUTO_SKIP", finalReason);
 
-        identityService.setAuthenticatedUserId("system");
-        taskService.addComment(task.getId(), task.getProcessInstanceId(), "AUTO_SKIP", reason);
+                Map<String, Object> vars = new HashMap<>();
+                vars.put("AUTO_SKIPPED", true);
 
-        Map<String, Object> vars = new HashMap<>();
-        vars.put("AUTO_SKIPPED", true);
-        taskService.complete(task.getId(), vars);
+                taskService.complete(taskId, vars);
+            } catch (Exception e) {
+                log.error("Auto skip failed, taskId={}, reason={}", taskId, finalReason, e);
+            }
+        });
     }
 
     @Override
