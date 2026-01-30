@@ -22,6 +22,7 @@ import org.smartlink.workflow.domain.bo.TaskUrgingBo;
 import org.smartlink.workflow.domain.vo.ActHistoryInfoVo;
 import org.smartlink.workflow.domain.vo.ProcessInstanceVo;
 import org.smartlink.workflow.service.IActProcessInstanceService;
+import org.smartlink.workflow.utils.pdf.PdfUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -99,10 +100,24 @@ public class ActProcessInstanceController extends BaseController {
      * @param list 业务id
      */
     @PostMapping("/getHistoryRecord/export")
-    public void export(ArrayList<String> list, HttpServletResponse response) {
+    public void export(@RequestBody ArrayList<String> list, HttpServletResponse response) {
         List<ActHistoryInfoVo> actHistoryInfoVos = actProcessInstanceService.getHistoryRecordList(list);
         ExcelUtil.exportExcel(actHistoryInfoVos, "审批记录", ActHistoryInfoVo.class, response);
     }
+
+    @PostMapping("/getHistoryRecord/exportPdf")
+    public void exportPdf(@RequestBody ArrayList<String> list, HttpServletResponse response) throws Exception {
+        List<ActHistoryInfoVo> data = actProcessInstanceService.getHistoryRecordList(list);
+
+        String fileName = "审批记录.pdf";
+        response.setContentType("application/pdf");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-Disposition",
+            "attachment; filename*=UTF-8''" + java.net.URLEncoder.encode(fileName, "UTF-8"));
+
+        PdfUtil.exportHistoryRecordPdf(data, response.getOutputStream());
+    }
+
 
     /**
      * 作废流程实例，不会删除历史记录(删除运行中的实例)
