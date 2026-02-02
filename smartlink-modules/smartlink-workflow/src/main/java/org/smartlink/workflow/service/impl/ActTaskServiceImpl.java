@@ -217,12 +217,13 @@ public class ActTaskServiceImpl implements IActTaskService {
                     boolean isCandidate = false;
 
                     if (CollUtil.isNotEmpty(identityLinks)) {
-
-                        boolean hasCandidateGroup = identityLinks.stream().anyMatch(l ->
-                            "candidate".equals(l.getType()) && StringUtils.isNotBlank(l.getGroupId())
+                        // 1) 候选用户就是本人
+                        isCandidate = identityLinks.stream().anyMatch(l ->
+                            "candidate".equals(l.getType()) && userId.equals(l.getUserId())
                         );
 
-                        if (hasCandidateGroup) {
+                        // 2) 或候选组包含本人角色
+                        if (!isCandidate) {
                             List<RoleDTO> roles = LoginHelper.getLoginUser().getRoles();
                             Set<String> roleIdSet = new HashSet<>();
                             if (CollUtil.isNotEmpty(roles)) {

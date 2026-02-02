@@ -19,7 +19,7 @@ import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.workflow.common.constant.FlowConstant;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Autowired;          // ✅ 修改点1：新增 import
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.concurrent.Executor;
 import java.util.*;
@@ -82,6 +82,27 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
         if (task == null) {
             return;
         }
+
+        //强制不处理流程第一个用户任务（提交节点）
+        Task firstTask = taskService.createTaskQuery()
+            .processInstanceId(task.getProcessInstanceId())
+            .orderByTaskCreateTime()
+            .asc()
+            .listPage(0, 1)   // 只查第一个，性能更好
+            .stream()
+            .findFirst()
+            .orElse(null);
+
+        boolean isFirstUserTask = (firstTask != null)
+            && StringUtils.isNotBlank(firstTask.getId())
+            && firstTask.getId().equals(task.getId());
+
+        if (isFirstUserTask) {
+            log.debug("AutoSkipFlowableListener：首个用户任务不处理，taskId={}, name={}", task.getId(), task.getName());
+            return;
+        }
+
+
         // 已有办理人不处理
         if (StringUtils.isNotBlank(task.getAssignee())) {
             return;
@@ -107,9 +128,63 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             }
         }
 
-        // 配置了候选用户，就不走“角色无人跳过”逻辑
+        // 取提交流程发起人
+        Long starterId = getStarterId(runtimeService, historyService, task.getProcessInstanceId());
+
         if (CollUtil.isNotEmpty(candidateUsers)) {
-            return;
+
+            // 1) 把 candidateUsers 转成 Long（过滤非数字）
+            List<Long> candidateUserIds = new ArrayList<>();
+            for (String uid : candidateUsers) {
+                try {
+                    candidateUserIds.add(Long.valueOf(uid));
+                } catch (Exception ignore) {
+                }
+            }
+
+            // 2) 查真实存在的用户（避免配置了用户但用户已被删除）
+            List<org.smartlink.common.core.domain.dto.UserDTO> userList = CollUtil.isEmpty(candidateUserIds)
+                ? Collections.emptyList()
+                : userService.selectListByIds(candidateUserIds);
+
+            Set<Long> realUserIds = new HashSet<>();
+            if (CollUtil.isNotEmpty(userList)) {
+                for (org.smartlink.common.core.domain.dto.UserDTO u : userList) {
+                    if (u != null && u.getUserId() != null) {
+                        realUserIds.add(u.getUserId());
+                    }
+                }
+            }
+
+            // 3) 候选用户无人（真实用户为空） -> 先尝试候选组；若也没有组就直接跳过
+            if (CollUtil.isEmpty(realUserIds)) {
+                // 有候选组：继续走候选组判断（不要直接 return/skip）
+                if (CollUtil.isEmpty(candidateGroups)) {
+                    doSkip(taskService, runtimeService, identityService, task,
+                        "自动跳过：节点【" + task.getName() + "】候选用户无人");
+                    return;
+                }
+                // 继续往下走候选组逻辑
+            } else {
+                // 4) 只有提交人一个候选用户 -> 先尝试候选组；若也没有组就跳过
+                if (starterId != null) {
+                    boolean hasOtherApprover = realUserIds.stream().anyMatch(uid -> uid != null && !uid.equals(starterId));
+                    if (!hasOtherApprover) {
+                        if (CollUtil.isEmpty(candidateGroups)) {
+                            doSkip(taskService, runtimeService, identityService, task,
+                                "自动跳过：节点【" + task.getName() + "】候选用户仅提交人（userId=" + starterId + "）");
+                            return;
+                        }
+                        // 有候选组：继续走候选组逻辑（别直接 return）
+                    } else {
+                        // 候选用户里存在除提交人外其他人：不跳过（结束）
+                        return;
+                    }
+                } else {
+                    // 没拿到提交人id，且候选用户存在：按“有人”处理，不跳过
+                    return;
+                }
+            }
         }
 
         // 没有候选用户也没有候选组 -> 直接跳过
@@ -131,9 +206,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
 
         // 角色下的所有用户
         List<Long> roleUserIds = userService.selectUserIdsByRoleIds(roleIds);
-
-        // 取提交流程发起人
-        Long starterId = getStarterId(runtimeService, historyService, task.getProcessInstanceId());
 
         // 2.1 角色下完全无人 -> 跳过
         if (CollUtil.isEmpty(roleUserIds)) {
