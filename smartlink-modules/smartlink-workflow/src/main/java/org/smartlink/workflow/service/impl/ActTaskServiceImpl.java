@@ -458,7 +458,7 @@ public class ActTaskServiceImpl implements IActTaskService {
         String ids = StreamUtils.join(roleIds, x -> "'" + x + "'");
         queryWrapper.and(w1 -> w1.eq("t.assignee_", userId)
             .or(w2 -> w2.isNull("t.assignee_")
-                //.ne("t.startUserId", userId)
+                .ne("t.startUserId", userId)
                 .apply("exists ( select LINK.ID_ from ACT_RU_IDENTITYLINK LINK where LINK.TASK_ID_ = t.ID_ and LINK.TYPE_ = 'candidate' and (LINK.USER_ID_ = {0} or ( LINK.GROUP_ID_ IN (" + ids + ") ) ))", userId)));
         if (StringUtils.isNotBlank(taskBo.getName())) {
             queryWrapper.like("t.name_", taskBo.getName());
