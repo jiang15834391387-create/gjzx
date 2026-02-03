@@ -14,6 +14,7 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.identitylink.api.IdentityLink;
 import org.flowable.task.api.Task;
+import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.workflow.common.constant.FlowConstant;
@@ -83,25 +84,24 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             return;
         }
 
-        //强制不处理流程第一个用户任务（提交节点）
-        Task firstTask = taskService.createTaskQuery()
+        // 强制不处理流程第一个用户任务（提交节点）
+        HistoricTaskInstance firstHisTask = historyService.createHistoricTaskInstanceQuery()
             .processInstanceId(task.getProcessInstanceId())
-            .orderByTaskCreateTime()
+            .orderByHistoricTaskInstanceStartTime()
             .asc()
-            .listPage(0, 1)   // 只查第一个，性能更好
+            .listPage(0, 1)
             .stream()
             .findFirst()
             .orElse(null);
 
-        boolean isFirstUserTask = (firstTask != null)
-            && StringUtils.isNotBlank(firstTask.getId())
-            && firstTask.getId().equals(task.getId());
+        boolean isFirstUserTask = (firstHisTask != null)
+            && StringUtils.isNotBlank(firstHisTask.getId())
+            && firstHisTask.getId().equals(task.getId());
 
         if (isFirstUserTask) {
             log.debug("AutoSkipFlowableListener：首个用户任务不处理，taskId={}, name={}", task.getId(), task.getName());
             return;
         }
-
 
         // 已有办理人不处理
         if (StringUtils.isNotBlank(task.getAssignee())) {
@@ -110,6 +110,8 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
 
         List<IdentityLink> links = taskService.getIdentityLinksForTask(task.getId());
         if (CollUtil.isEmpty(links)) {
+            doSkip(taskService, runtimeService, identityService, task,
+                "自动跳过：节点【" + task.getName() + "】无候选用户/候选组");
             return;
         }
 

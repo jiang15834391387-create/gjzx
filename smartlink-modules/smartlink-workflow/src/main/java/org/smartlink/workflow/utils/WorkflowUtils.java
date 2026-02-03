@@ -125,7 +125,7 @@ public class WorkflowUtils {
      *
      * @param taskId 任务id
      */
-    public static ParticipantVo getCurrentTaskParticipant(String taskId, UserService userService) {
+    /*public static ParticipantVo getCurrentTaskParticipant(String taskId, UserService userService) {
         ParticipantVo participantVo = new ParticipantVo();
         List<HistoricIdentityLink> linksForTask = PROCESS_ENGINE.getHistoryService().getHistoricIdentityLinksForTask(taskId);
         Task task = QueryUtils.taskQuery().taskId(taskId).singleResult();
@@ -170,7 +170,92 @@ public class WorkflowUtils {
             }
         }
         return participantVo;
+    }*/
+
+    public static ParticipantVo getCurrentTaskParticipant(String taskId, UserService userService) {
+        ParticipantVo participantVo = new ParticipantVo();
+        List<HistoricIdentityLink> linksForTask =
+            PROCESS_ENGINE.getHistoryService().getHistoricIdentityLinksForTask(taskId);
+
+        Task task = QueryUtils.taskQuery().taskId(taskId).singleResult();
+        if (task == null || CollUtil.isEmpty(linksForTask)) {
+            return participantVo;
+        }
+
+        List<HistoricIdentityLink> groupList =
+            StreamUtils.filter(linksForTask, e -> StringUtils.isNotBlank(e.getGroupId()));
+
+        List<HistoricIdentityLink> candidateUserLinks =
+            StreamUtils.filter(linksForTask, e ->
+                FlowConstant.CANDIDATE.equals(e.getType()) && StringUtils.isNotBlank(e.getUserId())
+            );
+
+        Set<Long> mergedUserIdSet = new LinkedHashSet<>();
+
+        // 2.1 候选组 -> 角色用户
+        if (CollUtil.isNotEmpty(groupList)) {
+            List<Long> groupIds = new ArrayList<>();
+            for (HistoricIdentityLink l : groupList) {
+                try {
+                    groupIds.add(Long.valueOf(l.getGroupId()));
+                } catch (Exception ignore) {
+                }
+            }
+
+            if (CollUtil.isNotEmpty(groupIds)) {
+                participantVo.setGroupIds(groupIds);
+                List<Long> roleUserIds = userService.selectUserIdsByRoleIds(groupIds);
+                if (CollUtil.isNotEmpty(roleUserIds)) {
+                    mergedUserIdSet.addAll(roleUserIds);
+                }
+            }
+        }
+
+        if (CollUtil.isNotEmpty(candidateUserLinks)) {
+            for (HistoricIdentityLink l : candidateUserLinks) {
+                try {
+                    mergedUserIdSet.add(Long.valueOf(l.getUserId()));
+                } catch (Exception ignore) {
+                }
+            }
+        }
+
+        if (CollUtil.isNotEmpty(mergedUserIdSet)) {
+            List<Long> mergedUserIds = new ArrayList<>(mergedUserIdSet);
+            List<UserDTO> userList = userService.selectListByIds(mergedUserIds);
+
+            if (CollUtil.isNotEmpty(userList)) {
+                Map<Long, String> id2name = new HashMap<>();
+                for (UserDTO u : userList) {
+                    if (u != null && u.getUserId() != null) {
+                        id2name.put(u.getUserId(), u.getNickName());
+                    }
+                }
+
+                List<Long> finalIds = new ArrayList<>();
+                List<String> finalNames = new ArrayList<>();
+                for (Long uid : mergedUserIds) {
+                    if (uid == null) {
+                        continue;
+                    }
+                    String name = id2name.get(uid);
+                    if (StringUtils.isBlank(name)) {
+                        continue;
+                    }
+                    finalIds.add(uid);
+                    finalNames.add(name);
+                }
+
+                participantVo.setCandidate(finalIds);
+                participantVo.setCandidateName(finalNames);
+
+                participantVo.setClaim(StringUtils.isNotBlank(task.getAssignee()));
+            }
+        }
+
+        return participantVo;
     }
+
 
     /**
      * 判断当前节点是否为会签节点
