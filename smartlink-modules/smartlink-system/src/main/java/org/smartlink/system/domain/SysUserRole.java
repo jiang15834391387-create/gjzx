@@ -26,4 +26,7 @@ public class SysUserRole {
      */
     private Long roleId;
 
+
+    private Integer weight;
+
 }

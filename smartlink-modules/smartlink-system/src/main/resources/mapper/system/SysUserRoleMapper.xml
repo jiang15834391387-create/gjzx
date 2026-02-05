@@ -4,10 +4,99 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.smartlink.system.mapper.SysUserRoleMapper">
 
-    <select id="selectUserIdsByRoleId" resultType="Long">
+    <select id="selectUserIdsByRoleId" resultType="java.lang.Long">
         select u.user_id from sys_user u
         inner join sys_user_role sur
             on u.user_id = sur.user_id and sur.role_id = #{roleId}
+    </select>
+
+    <select id="selectRoleUserWeight" resultType="org.smartlink.system.domain.vo.RoleUserWeightVO">
+
+        SELECT
+            r.role_id       AS roleId,
+            r.role_name     AS roleName,
+            u.user_name      AS userName,
+            u.user_id       AS userId,
+            u.nick_name     AS nickName,
+            u.dept_id       AS deptId,
+            d.dept_name     AS deptName,
+
+            ruw.weight
+        FROM sys_user_role ruw
+                 JOIN sys_role r       ON ruw.role_id = r.role_id
+                 JOIN sys_user u       ON ruw.user_id = u.user_id
+                 LEFT JOIN sys_dept d  ON u.dept_id = d.dept_id
+        WHERE ruw.role_id = #{roleId}
+        ORDER BY ruw.weight DESC
+
+    </select>
+
+    <update id="updateUserRoleWeight">
+    UPDATE sys_user_role
+    SET weight = #{weight}
+    WHERE role_id = #{roleId}
+      AND user_id = #{userId}
+    </update>
+
+        <!-- 给流程自动指派用 -->
+    <select id="selectUserWeightByRoleIds" resultType="org.smartlink.system.domain.vo.RoleUserWeightDTO">
+    SELECT
+    user_id,
+    role_id,
+    COALESCE(weight, 1) AS weight
+    FROM sys_user_role
+    WHERE role_id IN
+    <foreach collection="roleIds" item="rid" open="(" close=")" separator=",">
+        #{rid}
+    </foreach>
+    </select>
+
+
+
+    <select id="selectTaskAuthorizedUserList" resultType="org.smartlink.system.domain.vo.SysUserVo">
+        SELECT DISTINCT
+        u.user_id   AS userId,
+        u.dept_id   AS deptId,
+        u.user_name AS userName,
+        u.nick_name AS nickName,
+        u.email     AS email,
+        u.avatar    AS avatar,
+        u.phonenumber AS phonenumber,
+        u.sex       AS sex,
+        u.status    AS status,
+        u.login_ip  AS loginIp,
+        u.login_date AS loginDate,
+        u.remark    AS remark,
+        u.create_time AS createTime,
+        d.dept_name AS deptName
+        FROM sys_user u
+        LEFT JOIN sys_dept d ON u.dept_id = d.dept_id AND d.tenant_id = '000000'
+        WHERE u.del_flag = '0'
+        AND u.status = '0'
+        AND u.tenant_id = '000000'
+        AND u.user_id IN (
+        -- 候选用户
+        SELECT CAST(ru.USER_ID_ AS SIGNED)
+        FROM act_ru_identitylink ru
+        WHERE ru.TASK_ID_ = #{taskId}
+        AND ru.TYPE_ = 'candidate'
+        AND ru.USER_ID_ IS NOT NULL
+        AND ru.USER_ID_ != ''
+        AND TRIM(ru.USER_ID_) != ''
+
+        UNION
+
+        -- 候选组 -> 角色 -> 用户
+        SELECT sru.user_id
+        FROM act_ru_identitylink rg
+        JOIN sys_user_role sru ON rg.GROUP_ID_ = CAST(sru.role_id AS CHAR)
+        WHERE rg.TASK_ID_ = #{taskId}
+        AND rg.TYPE_ = 'candidate'
+        AND rg.GROUP_ID_ IS NOT NULL
+        AND rg.GROUP_ID_ != ''
+        AND TRIM(rg.GROUP_ID_) != ''
+        );
+
     </select>
 
 </mapper>

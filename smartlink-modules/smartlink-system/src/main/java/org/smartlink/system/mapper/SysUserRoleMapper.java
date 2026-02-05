@@ -2,6 +2,10 @@ package org.smartlink.system.mapper;
 
 import org.smartlink.common.mybatis.core.mapper.BaseMapperPlus;
 import org.smartlink.system.domain.SysUserRole;
+import org.smartlink.system.domain.vo.RoleUserWeightDTO;
+import org.smartlink.system.domain.vo.RoleUserWeightVO;
+import org.smartlink.system.domain.vo.SysUserVo;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -12,6 +16,23 @@ import java.util.List;
  */
 public interface SysUserRoleMapper extends BaseMapperPlus<SysUserRole, SysUserRole> {
 
-    List<Long> selectUserIdsByRoleId(Long roleId);
+     List<SysUserVo> selectTaskAuthorizedUserList(@Param("taskId")String taskId);
 
+    List<Long> selectUserIdsByRoleId(Long roleId);
+    /**
+     * 查询角色下所有用户 + 权重
+     */
+    List<RoleUserWeightVO> selectRoleUserWeight(@Param("roleId") Long roleId);
+
+    /**
+     * 更新用户在角色下的权重
+     */
+    int updateUserRoleWeight(@Param("roleId") Long roleId,
+                             @Param("userId") Long userId,
+                             @Param("weight") Integer weight);
+
+    /**
+     * 方案B：按角色查询用户 + 权重（给流程用）
+     */
+    List<RoleUserWeightDTO> selectUserWeightByRoleIds(@Param("roleIds") List<Long> roleIds);
 }

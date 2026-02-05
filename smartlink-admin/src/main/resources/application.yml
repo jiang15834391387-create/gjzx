@@ -141,6 +141,7 @@ tenant:
     - sys_client
     - sys_oss_config
     - test_act_history
+    - act_ru_identitylink
 
 # MyBatisPlus配置
 # https://baomidou.com/config/
