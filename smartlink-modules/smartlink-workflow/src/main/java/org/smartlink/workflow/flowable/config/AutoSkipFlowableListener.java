@@ -285,7 +285,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             } catch (Exception ignore) {
             }
         }
-
         try {
             if (StringUtils.isNotBlank(starterIdStr)) {
                 return Long.valueOf(starterIdStr);
