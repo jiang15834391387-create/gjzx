@@ -16,7 +16,11 @@ import java.util.List;
  */
 public interface SysUserRoleMapper extends BaseMapperPlus<SysUserRole, SysUserRole> {
 
-     List<SysUserVo> selectTaskAuthorizedUserList(@Param("taskId")String taskId);
+    List<SysUserVo> selectTaskAuthorizedUserList(@Param("taskId") String taskId,
+                                                 @Param("phonenumber") String phonenumber,
+                                                 @Param("email") String email,
+                                                 @Param("userName") String userName,
+                                                 @Param("nickName") String nickName);
 
     List<Long> selectUserIdsByRoleId(Long roleId);
     /**
@@ -35,4 +39,10 @@ public interface SysUserRoleMapper extends BaseMapperPlus<SysUserRole, SysUserRo
      * 方案B：按角色查询用户 + 权重（给流程用）
      */
     List<RoleUserWeightDTO> selectUserWeightByRoleIds(@Param("roleIds") List<Long> roleIds);
+
+    /**
+     * 多角色候选下，选择排除提交人后的权重最高用户（权重取该用户在这些角色中的 MAX(weight)）
+     */
+    Long selectTopUserIdByRoleIds(@Param("roleIds") List<Long> roleIds,
+                                  @Param("starterId") Long starterId);
 }

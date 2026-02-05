@@ -68,14 +68,43 @@
         u.login_date AS loginDate,
         u.remark    AS remark,
         u.create_time AS createTime,
-        d.dept_name AS deptName
+        d.dept_name AS deptName,
+        IFNULL(w.max_weight, 0) AS weight
         FROM sys_user u
         LEFT JOIN sys_dept d ON u.dept_id = d.dept_id AND d.tenant_id = '000000'
+        LEFT JOIN (
+        SELECT
+        ur.user_id,
+        MAX(IFNULL(ur.weight, 0)) AS max_weight
+        FROM act_ru_identitylink rg
+        JOIN sys_user_role ur ON rg.GROUP_ID_ = CAST(ur.role_id AS CHAR)
+        WHERE rg.TASK_ID_ = #{taskId}
+        AND rg.TYPE_ = 'candidate'
+        AND rg.GROUP_ID_ IS NOT NULL
+        AND rg.GROUP_ID_ != ''
+        AND TRIM(rg.GROUP_ID_) != ''
+        GROUP BY ur.user_id
+        ) w ON w.user_id = u.user_id
+
         WHERE u.del_flag = '0'
         AND u.status = '0'
         AND u.tenant_id = '000000'
+
+        <if test="userName != null and userName != ''">
+            AND u.user_name LIKE CONCAT('%', #{userName}, '%')
+        </if>
+        <if test="nickName != null and nickName != ''">
+            AND u.nick_name LIKE CONCAT('%', #{nickName}, '%')
+        </if>
+        <if test="email != null and email != ''">
+            AND u.email LIKE CONCAT('%', #{email}, '%')
+        </if>
+        <if test="phonenumber != null and phonenumber != ''">
+            AND u.phonenumber LIKE CONCAT('%', #{phonenumber}, '%')
+        </if>
+
         AND u.user_id IN (
-        -- 候选用户
+
         SELECT CAST(ru.USER_ID_ AS SIGNED)
         FROM act_ru_identitylink ru
         WHERE ru.TASK_ID_ = #{taskId}
@@ -86,7 +115,6 @@
 
         UNION
 
-        -- 候选组 -> 角色 -> 用户
         SELECT sru.user_id
         FROM act_ru_identitylink rg
         JOIN sys_user_role sru ON rg.GROUP_ID_ = CAST(sru.role_id AS CHAR)
@@ -95,8 +123,28 @@
         AND rg.GROUP_ID_ IS NOT NULL
         AND rg.GROUP_ID_ != ''
         AND TRIM(rg.GROUP_ID_) != ''
-        );
-
+        )
+        ORDER BY IFNULL(w.max_weight, 0) DESC, u.user_id ASC
     </select>
+
+
+
+    <select id="selectTopUserIdByRoleIds" resultType="java.lang.Long">
+            SELECT ur.user_id
+            FROM sys_user_role ur
+            JOIN sys_user u ON u.user_id = ur.user_id
+            WHERE ur.role_id IN
+            <foreach collection="roleIds" item="rid" open="(" close=")" separator=",">
+                #{rid}
+            </foreach>
+            AND u.del_flag = '0'
+            AND u.status = '0'
+            <if test="starterId != null">
+                AND ur.user_id &lt;&gt; #{starterId}
+            </if>
+            GROUP BY ur.user_id
+            ORDER BY MAX(IFNULL(ur.weight, 0)) DESC,MAX(u.update_time) DESC, ur.user_id ASC
+            LIMIT 1
+        </select>
 
 </mapper>

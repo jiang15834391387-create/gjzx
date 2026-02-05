@@ -2,6 +2,7 @@ package org.smartlink.system.controller.system;
 
 import lombok.RequiredArgsConstructor;
 import org.smartlink.common.core.domain.R;
+import org.smartlink.system.domain.bo.ParticipantQueryBo;
 import org.smartlink.system.domain.vo.RoleUserWeightDTO;
 import org.smartlink.system.domain.vo.RoleUserWeightVO;
 import org.smartlink.system.domain.vo.SysUserVo;
@@ -38,7 +39,7 @@ public class RoleUserWeightController {
      * 查询当前节点（taskId）所有有权办理的用户
      */
     @GetMapping("/participants")
-    public R<List<SysUserVo>> listParticipants(@RequestParam String taskId) {
-        return R.ok(roleUserWeightService.listParticipants(taskId));
+    public R<List<SysUserVo>> listParticipants(ParticipantQueryBo bo) {
+        return R.ok(roleUserWeightService.listParticipants(bo));
     }
 }

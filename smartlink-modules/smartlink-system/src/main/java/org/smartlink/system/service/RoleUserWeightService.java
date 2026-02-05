@@ -1,5 +1,6 @@
 package org.smartlink.system.service;
 
+import org.smartlink.system.domain.bo.ParticipantQueryBo;
 import org.smartlink.system.domain.vo.RoleUserWeightDTO;
 import org.smartlink.system.domain.vo.RoleUserWeightVO;
 import org.smartlink.system.domain.vo.SysUserVo;
@@ -23,5 +24,5 @@ public interface RoleUserWeightService {
      */
     List<RoleUserWeightDTO> listUserWeightByRoleIds(List<Long> roleIds);
 
-    List<SysUserVo> listParticipants(String taskId);
+    List<SysUserVo> listParticipants(ParticipantQueryBo bo);
 }

@@ -17,6 +17,7 @@ import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.flowable.task.service.impl.persistence.entity.TaskEntity;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.system.mapper.SysUserRoleMapper;
 import org.smartlink.workflow.common.constant.FlowConstant;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.concurrent.Executor;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 自动跳过监听器
@@ -37,9 +39,11 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
     private final ObjectProvider<IdentityService> identityServiceProvider;
     private final ObjectProvider<HistoryService> historyServiceProvider;
     private final ObjectProvider<org.smartlink.common.core.service.UserService> userServiceProvider;
-
+    private final ObjectProvider<SysUserRoleMapper> sysUserRoleWeightMapperProvider;
     private static final String AUTO_SKIP_COUNT = "AUTO_SKIP_COUNT";
     private static final int AUTO_SKIP_MAX = 20;
+    public static final String VAR_WEIGHT_EXCLUSIVE = "WEIGHT_EXCLUSIVE";
+    public static final String VAR_WEIGHT_ROLE_IDS = "WEIGHT_ROLE_IDS";
 
     @Autowired
     @Qualifier("wfSkipExecutor")
@@ -50,6 +54,7 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
         ObjectProvider<RuntimeService> runtimeServiceProvider,
         ObjectProvider<IdentityService> identityServiceProvider,
         ObjectProvider<HistoryService> historyServiceProvider,
+        ObjectProvider<SysUserRoleMapper> sysUserRoleWeightMapperProvider,
         ObjectProvider<org.smartlink.common.core.service.UserService> userServiceProvider
     ) {
         this.taskServiceProvider = taskServiceProvider;
@@ -57,6 +62,7 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
         this.identityServiceProvider = identityServiceProvider;
         this.historyServiceProvider = historyServiceProvider;
         this.userServiceProvider = userServiceProvider;
+        this.sysUserRoleWeightMapperProvider = sysUserRoleWeightMapperProvider;
     }
 
     @Override
@@ -74,10 +80,17 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
         IdentityService identityService = identityServiceProvider.getIfAvailable();
         HistoryService historyService = historyServiceProvider.getIfAvailable();
         org.smartlink.common.core.service.UserService userService = userServiceProvider.getIfAvailable();
+        SysUserRoleMapper sysUserRoleWeightMapper = sysUserRoleWeightMapperProvider.getIfAvailable();
+
 
         if (taskService == null || runtimeService == null || identityService == null || historyService == null || userService == null) {
             return;
         }
+        if (sysUserRoleWeightMapper == null) {
+            log.warn("AutoSkipFlowableListener：SysUserRoleWeightMapper 未注入，按权重分配功能不生效");
+            return;
+        }
+
 
         Task task = taskService.createTaskQuery().taskId(taskEntity.getId()).singleResult();
         if (task == null) {
@@ -228,7 +241,26 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             }
         }
 
-        // 2.3 角色下有除提交人外其他人
+        // 2.3 角色下有除提交人外其他人—— 按权重分配给最高者
+        Long topUserId = sysUserRoleWeightMapper.selectTopUserIdByRoleIds(roleIds, starterId);
+        if (topUserId == null) {
+            String roleDesc = buildRoleDesc(userService, roleIds);
+            doSkip(taskService, runtimeService, identityService, task,
+                "自动跳过：节点【" + task.getName() + "】候选角色权重分配失败（角色：" + roleDesc + "）");
+            return;
+        }
+
+        // 直接分配给权重最高者：默认待办独占
+        taskService.setAssignee(task.getId(), String.valueOf(topUserId));
+
+        // 打标记：待办查询时需要“候选人不可见，只有assignee可见”
+        taskService.setVariableLocal(task.getId(), VAR_WEIGHT_EXCLUSIVE, true);
+        taskService.setVariableLocal(task.getId(), VAR_WEIGHT_ROLE_IDS,
+            roleIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
+
+        log.info("AutoSkipFlowableListener：按权重分配成功(不删候选，独占标记) taskId={}, name={}, roleIds={}, assignee={}",
+            task.getId(), task.getName(), roleIds, topUserId);
+
     }
 
     private Long getStarterId(RuntimeService runtimeService, HistoryService historyService, String processInstanceId) {

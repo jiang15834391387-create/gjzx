@@ -456,10 +456,28 @@ public class ActTaskServiceImpl implements IActTaskService {
         queryWrapper.eq("t.business_status_", BusinessStatusEnum.WAITING.getStatus());
         queryWrapper.eq(TenantHelper.isEnable(), "t.tenant_id_", TenantHelper.getTenantId());
         String ids = StreamUtils.join(roleIds, x -> "'" + x + "'");
-        queryWrapper.and(w1 -> w1.eq("t.assignee_", userId)
+       /* queryWrapper.and(w1 -> w1.eq("t.assignee_", userId)
             .or(w2 -> w2.isNull("t.assignee_")
                 .ne("t.startUserId", userId)
                 .apply("exists ( select LINK.ID_ from ACT_RU_IDENTITYLINK LINK where LINK.TASK_ID_ = t.ID_ and LINK.TYPE_ = 'candidate' and (LINK.USER_ID_ = {0} or ( LINK.GROUP_ID_ IN (" + ids + ") ) ))", userId)));
+        */
+        String exclusiveFilterSql =
+            "not exists ( " +
+                "  select 1 from ACT_RU_VARIABLE V " +
+                "  where V.TASK_ID_ = t.ID_ " +
+                "    and V.NAME_ = 'WEIGHT_EXCLUSIVE' " +
+                "    and (V.TEXT_ = 'true' or V.LONG_ = 1) " +
+                ")";
+
+        queryWrapper.and(w1 -> w1.eq("t.assignee_", userId)
+            .or(w2 -> w2.isNull("t.assignee_")
+                .ne("t.startUserId", userId)
+                // 关键：独占任务不允许候选人看到
+                .apply(exclusiveFilterSql)
+                .apply("exists ( select LINK.ID_ from ACT_RU_IDENTITYLINK LINK " +
+                    "where LINK.TASK_ID_ = t.ID_ and LINK.TYPE_ = 'candidate' " +
+                    "and (LINK.USER_ID_ = {0} or ( LINK.GROUP_ID_ IN (" + ids + ") ) ))", userId)));
+
         if (StringUtils.isNotBlank(taskBo.getName())) {
             queryWrapper.like("t.name_", taskBo.getName());
         }
@@ -1056,13 +1074,38 @@ public class ActTaskServiceImpl implements IActTaskService {
             queryWrapper.eq("t.business_status_", BusinessStatusEnum.WAITING.getStatus());
             queryWrapper.eq(TenantHelper.isEnable(), "t.tenant_id_", TenantHelper.getTenantId());
 
-            queryWrapper.and(w1 ->
+            /*queryWrapper.and(w1 ->
                 w1.eq("t.assignee_", userId).or(w2 ->
                     w2.isNull("t.assignee_")
                         .apply("exists ( select LINK.ID_ from ACT_RU_IDENTITYLINK LINK " +
                             "where LINK.TASK_ID_ = t.ID_ and LINK.TYPE_ = 'candidate' " +
                             "and (LINK.USER_ID_ = {0} or ( LINK.GROUP_ID_ IN (" + ids + ") ) ))", userId)
-                ));
+                ));*/
+
+            // ===== 权重独占过滤（关键）=====
+            String exclusiveFilterSql =
+                "not exists ( " +
+                    "  select 1 from ACT_RU_VARIABLE V " +
+                    "  where V.TASK_ID_ = t.ID_ " +
+                    "    and V.NAME_ = 'WEIGHT_EXCLUSIVE' " +
+                    "    and (V.TEXT_ = 'true' or V.LONG_ = 1) " +
+                    ")";
+
+            queryWrapper.and(w1 ->
+                // ① assignee 永远能看到
+                w1.eq("t.assignee_", userId)
+
+                    // ② 候选人：只能看到【非权重独占】任务
+                    .or(w2 ->
+                        w2.isNull("t.assignee_")
+                            .apply(exclusiveFilterSql)   // ⭐ 核心新增
+                            .apply("exists ( select LINK.ID_ from ACT_RU_IDENTITYLINK LINK " +
+                                    "where LINK.TASK_ID_ = t.ID_ and LINK.TYPE_ = 'candidate' " +
+                                    "and (LINK.USER_ID_ = {0} or ( LINK.GROUP_ID_ IN (" + ids + ") ) ))",
+                                userId)
+                    )
+            );
+
         }
         if (types.contains("finish")) {
             queryWrapper.eq("t.assignee_", userId);
