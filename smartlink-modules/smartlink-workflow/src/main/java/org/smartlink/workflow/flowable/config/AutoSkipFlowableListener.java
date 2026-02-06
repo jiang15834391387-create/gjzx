@@ -96,8 +96,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
         if (task == null) {
             return;
         }
-
-        // 强制不处理流程第一个用户任务（提交节点）
         HistoricTaskInstance firstHisTask = historyService.createHistoricTaskInstanceQuery()
             .processInstanceId(task.getProcessInstanceId())
             .orderByHistoricTaskInstanceStartTime()
@@ -147,8 +145,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
         Long starterId = getStarterId(runtimeService, historyService, task.getProcessInstanceId());
 
         if (CollUtil.isNotEmpty(candidateUsers)) {
-
-            // 1) 把 candidateUsers 转成 Long（过滤非数字）
             List<Long> candidateUserIds = new ArrayList<>();
             for (String uid : candidateUsers) {
                 try {
@@ -156,8 +152,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
                 } catch (Exception ignore) {
                 }
             }
-
-            // 2) 查真实存在的用户（避免配置了用户但用户已被删除）
             List<org.smartlink.common.core.domain.dto.UserDTO> userList = CollUtil.isEmpty(candidateUserIds)
                 ? Collections.emptyList()
                 : userService.selectListByIds(candidateUserIds);
@@ -170,18 +164,13 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
                     }
                 }
             }
-
-            // 3) 候选用户无人（真实用户为空） -> 先尝试候选组；若也没有组就直接跳过
             if (CollUtil.isEmpty(realUserIds)) {
-                // 有候选组：继续走候选组判断（不要直接 return/skip）
                 if (CollUtil.isEmpty(candidateGroups)) {
                     doSkip(taskService, runtimeService, identityService, task,
                         "自动跳过：节点【" + task.getName() + "】候选用户无人");
                     return;
                 }
-                // 继续往下走候选组逻辑
             } else {
-                // 4) 只有提交人一个候选用户 -> 先尝试候选组；若也没有组就跳过
                 if (starterId != null) {
                     boolean hasOtherApprover = realUserIds.stream().anyMatch(uid -> uid != null && !uid.equals(starterId));
                     if (!hasOtherApprover) {
@@ -190,39 +179,28 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
                                 "自动跳过：节点【" + task.getName() + "】候选用户仅提交人（userId=" + starterId + "）");
                             return;
                         }
-                        // 有候选组：继续走候选组逻辑（别直接 return）
                     } else {
-                        // 候选用户里存在除提交人外其他人：不跳过（结束）
                         return;
                     }
                 } else {
-                    // 没拿到提交人id，且候选用户存在：按“有人”处理，不跳过
                     return;
                 }
             }
         }
-
-        // 没有候选用户也没有候选组 -> 直接跳过
         if (candidateGroups.isEmpty()) {
             doSkip(taskService, runtimeService, identityService, task,
                 "自动跳过：节点【" + task.getName() + "】无候选用户/候选组");
             return;
         }
-
         List<Long> roleIds = new ArrayList<>();
         for (String gid : candidateGroups) {
             try {
                 roleIds.add(Long.valueOf(gid));
             } catch (Exception e) {
-                // 不可解析：不跳过，避免误伤
                 return;
             }
         }
-
-        // 角色下的所有用户
         List<Long> roleUserIds = userService.selectUserIdsByRoleIds(roleIds);
-
-        // 2.1 角色下完全无人 -> 跳过
         if (CollUtil.isEmpty(roleUserIds)) {
             String roleDesc = buildRoleDesc(userService, roleIds);
             doSkip(taskService, runtimeService, identityService, task,
@@ -230,7 +208,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
             return;
         }
 
-        // 2.2 角色下有人，但只有提交人一个 -> 跳过
         if (starterId != null) {
             boolean hasOtherApprover = roleUserIds.stream().anyMatch(uid -> uid != null && !uid.equals(starterId));
             if (!hasOtherApprover) {
@@ -240,8 +217,6 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
                 return;
             }
         }
-
-        // 2.3 角色下有除提交人外其他人—— 按权重分配给最高者
         Long topUserId = sysUserRoleWeightMapper.selectTopUserIdByRoleIds(roleIds, starterId);
         if (topUserId == null) {
             String roleDesc = buildRoleDesc(userService, roleIds);
@@ -249,11 +224,7 @@ public class AutoSkipFlowableListener implements FlowableEventListener {
                 "自动跳过：节点【" + task.getName() + "】候选角色权重分配失败（角色：" + roleDesc + "）");
             return;
         }
-
-        // 直接分配给权重最高者：默认待办独占
         taskService.setAssignee(task.getId(), String.valueOf(topUserId));
-
-        // 打标记：待办查询时需要“候选人不可见，只有assignee可见”
         taskService.setVariableLocal(task.getId(), VAR_WEIGHT_EXCLUSIVE, true);
         taskService.setVariableLocal(task.getId(), VAR_WEIGHT_ROLE_IDS,
             roleIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
