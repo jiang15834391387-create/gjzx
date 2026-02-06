@@ -315,7 +315,6 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
         List<TestFormManageVo> testFormManageVos = baseMapper.selectVoList(lqw);
         return testFormManageVos;
     }
-
     @Override
     public R<Void> updateStatus(Long id, Integer status) {
         baseMapper.update(null,
