@@ -43,6 +43,8 @@ public class TestFormManage extends TenantEntity {
      * 是否删除（0否，1是）
      */
     private Integer isDeleted;
+
+    private Integer status;
     /**
      * 是否绑定工作流程（0否，1是）
      */

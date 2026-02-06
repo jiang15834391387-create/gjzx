@@ -93,6 +93,11 @@ public class TestFormManageController extends BaseController {
         return testFormManageService.updateByBo(bo);
     }
 
+    @GetMapping("/updateStatus")
+    public R<Void> updateStatus(@Param("id") Long id,@Param("status") Integer status) {
+        return testFormManageService.updateStatus(id,status);
+    }
+
     /**
      * 删除单管理
      *

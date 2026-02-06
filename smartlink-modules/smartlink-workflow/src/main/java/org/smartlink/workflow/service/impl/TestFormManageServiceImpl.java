@@ -1,6 +1,7 @@
 package org.smartlink.workflow.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -275,6 +276,7 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
             lqw.eq(TestFormManage::getCategoryId, categoryId);
             lqw.eq(TestFormManage::getIsBindModel, 1);
             lqw.eq(TestFormManage::getIsDeleted, 0);
+            lqw.eq(TestFormManage::getStatus, 1);
             lqw.orderByDesc(TestFormManage::getSort);
             List<TestFormManageVo> testFormManageVos = baseMapper.selectVoList(lqw);
             return testFormManageVos;
@@ -312,5 +314,14 @@ public TableDataInfo<TestFormManageVo> queryPageList(TestFormManageBo bo, PageQu
         lqw.orderByDesc(TestFormManage::getSort);
         List<TestFormManageVo> testFormManageVos = baseMapper.selectVoList(lqw);
         return testFormManageVos;
+    }
+
+    @Override
+    public R<Void> updateStatus(Long id, Integer status) {
+        baseMapper.update(null,
+            new LambdaUpdateWrapper<TestFormManage>()
+                .set(TestFormManage::getStatus, status)
+                .eq(TestFormManage::getId, id));
+        return null;
     }
 }

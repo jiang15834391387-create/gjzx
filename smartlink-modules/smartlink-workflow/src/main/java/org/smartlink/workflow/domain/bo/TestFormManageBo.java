@@ -58,7 +58,7 @@ public class TestFormManageBo extends BaseEntity {
     private String categoryName;
     private String categoryType;
 
-
+    private Integer status;
     /**
      * 单据绑定id
      */

@@ -77,4 +77,6 @@ public interface ITestFormManageService {
     List<WfCategoryVo> selectCategory();
 
     List<TestFormManageVo> selectAllFrom();
+
+    R<Void> updateStatus(Long id, Integer status);
 }

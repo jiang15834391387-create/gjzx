@@ -72,6 +72,7 @@ public class TestFormManageVo implements Serializable {
      * 排序
      */
     private Long sort;
+    private Integer status;
     /**
      * 是否删除（0否，1是）
      */
