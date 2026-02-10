@@ -536,7 +536,7 @@ public class ActTaskServiceImpl implements IActTaskService {
         if (StringUtils.isNotBlank(createBy)) {
             queryWrapper.in("t.create_by ", Arrays.asList(createBy.split(",")));
         }
-        Page<TaskVo> page = actTaskMapper.getTaskFinishByPage(pageQuery.build(), queryWrapper);
+        Page<TaskVo> page = actTaskMapper.getTaskFinishByPage(pageQuery.build(),queryWrapper);
 
         List<TaskVo> taskList = page.getRecords();
         if (CollUtil.isNotEmpty(taskList)) {
