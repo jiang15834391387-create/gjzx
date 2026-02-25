@@ -71,8 +71,8 @@ public class PdfUtil {
                 SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String[] row = {
                     safe(vo.getName()),
-                    safe(vo.getAssignee()),
                     safe(vo.getNickName()),
+                    safe(vo.getComment()),
                     vo.getEndTime() == null ? "" : SDF.format(vo.getEndTime())
                 };
 

@@ -730,4 +730,9 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
         }
         return R.ok();
     }
+
+    @Override
+    public List<SysUser> selectBatchIds(Set<Long> userIds) {
+        return baseMapper.selectBatchIds(userIds);
+    }
 }

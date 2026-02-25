@@ -3,11 +3,13 @@ package org.smartlink.system.service;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.domain.bo.SysUserBo;
 import org.smartlink.system.domain.vo.SysUserExportVo;
 import org.smartlink.system.domain.vo.SysUserVo;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 用户 业务层
@@ -225,4 +227,6 @@ public interface ISysUserService {
      *
      */
     R<Void> cancellation();
+
+    List<SysUser> selectBatchIds(Set<Long> userIds);
 }

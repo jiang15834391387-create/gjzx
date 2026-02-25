@@ -14,8 +14,11 @@ import org.smartlink.common.log.enums.BusinessType;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
 import org.smartlink.common.web.core.BaseController;
+import org.smartlink.system.domain.SysUser;
 import org.smartlink.system.domain.bo.SysUserBo;
 import org.smartlink.system.domain.vo.SysUserExportVo;
+import org.smartlink.system.mapper.SysUserMapper;
+import org.smartlink.system.service.ISysUserService;
 import org.smartlink.workflow.domain.bo.ProcessInstanceBo;
 import org.smartlink.workflow.domain.bo.ProcessInvalidBo;
 import org.smartlink.workflow.domain.bo.TaskUrgingBo;
@@ -26,10 +29,8 @@ import org.smartlink.workflow.utils.pdf.PdfUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 流程实例管理 控制层
@@ -43,6 +44,7 @@ import java.util.Map;
 public class ActProcessInstanceController extends BaseController {
 
     private final IActProcessInstanceService actProcessInstanceService;
+    private final ISysUserService sysUserService;
 
     /**
      * 分页查询正在运行的流程实例
@@ -99,16 +101,16 @@ public class ActProcessInstanceController extends BaseController {
      *
      * @param list 业务id
      */
-    @PostMapping("/getHistoryRecord/export")
+    /*@PostMapping("/getHistoryRecord/export")
     public void export(@RequestBody ArrayList<String> list, HttpServletResponse response) {
         List<ActHistoryInfoVo> actHistoryInfoVos = actProcessInstanceService.getHistoryRecordList(list);
         ExcelUtil.exportExcel(actHistoryInfoVos, "审批记录", ActHistoryInfoVo.class, response);
-    }
+    }*/
 
     @PostMapping("/getHistoryRecord/exportPdf")
     public void exportPdf(@RequestBody ArrayList<String> list, HttpServletResponse response) throws Exception {
         List<ActHistoryInfoVo> data = actProcessInstanceService.getHistoryRecordList(list);
-
+        fillNickName(data);
         String fileName = "审批记录.pdf";
         response.setContentType("application/pdf");
         response.setCharacterEncoding("utf-8");
@@ -117,7 +119,39 @@ public class ActProcessInstanceController extends BaseController {
 
         PdfUtil.exportHistoryRecordPdf(data, response.getOutputStream());
     }
+    private void fillNickName(List<ActHistoryInfoVo> data) {
 
+        if (data == null || data.isEmpty()) {
+            return;
+        }
+        Set<Long> userIds = data.stream()
+            .map(ActHistoryInfoVo::getAssignee)
+            .filter(Objects::nonNull)
+            .filter(s -> !"".equals(s))
+            .map(Long::valueOf)   // 如果assignee是Long，这行删掉
+            .collect(Collectors.toSet());
+
+        if (userIds.isEmpty()) {
+            return;
+        }
+        List<SysUser> users = sysUserService.selectBatchIds(userIds);
+
+        if (users == null || users.isEmpty()) {
+            return;
+        }
+        Map<Long, String> nickNameMap = users.stream()
+            .collect(Collectors.toMap(
+                SysUser::getUserId,
+                SysUser::getNickName
+            ));
+
+        data.forEach(vo -> {
+            if (vo.getAssignee() != null && !"".equals(vo.getAssignee())) {
+                Long uid = Long.valueOf(vo.getAssignee());
+                vo.setNickName(nickNameMap.getOrDefault(uid, ""));
+            }
+        });
+    }
 
     /**
      * 作废流程实例，不会删除历史记录(删除运行中的实例)
