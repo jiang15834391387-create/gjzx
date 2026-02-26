@@ -123,6 +123,7 @@ security:
     - /*/api-docs/**
     # 接口路径
     - /resource/oss/upload
+    - /system/dict/data/type/*
 
 
 # 多租户配置
