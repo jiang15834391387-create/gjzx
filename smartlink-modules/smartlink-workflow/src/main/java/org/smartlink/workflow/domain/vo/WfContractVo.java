@@ -51,7 +51,7 @@ public class WfContractVo implements Serializable {
 
     @ExcelProperty(value = "合同状态")
     private String contractStatus;
-
+    private String contractCounterparty;
     private String signUser;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -72,4 +72,9 @@ public class WfContractVo implements Serializable {
 
     private String remark;
     private Integer isDeleted;
+    /**
+     * 支付节点(JSON数组)
+     */
+    private String paymentNodes;
+    private String email;
 }

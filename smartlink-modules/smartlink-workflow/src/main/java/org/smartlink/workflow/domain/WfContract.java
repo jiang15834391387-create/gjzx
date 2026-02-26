@@ -34,7 +34,7 @@ public class WfContract extends TenantEntity {
     private String contractName;
 
     private String companyName;
-
+    private String contractCounterparty;
     private String contractAmount;
 
     private String paidAmount;
@@ -61,4 +61,10 @@ public class WfContract extends TenantEntity {
 
     private String remark;
     private Integer isDeleted;
+    private String email;
+
+    /**
+     * 支付节点(JSON数组)
+     */
+    private String paymentNodes;
 }

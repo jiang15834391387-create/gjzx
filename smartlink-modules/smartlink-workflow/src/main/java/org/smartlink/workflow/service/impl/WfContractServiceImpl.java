@@ -36,8 +36,7 @@ import java.util.Map;
 public class WfContractServiceImpl implements IWfContractService {
 
     private static final String TYPE_PAY = "1";
-    private static final String TYPE_RECEIVE = "2";
-    private static final String DRAFT = "draft"; // 草稿
+    private static final String TYPE_RECEIVE = "2";// 草稿
     private static final String IN_PROGRESS = "in_progress"; // 履行中
     private static final String INVALID = "invalid"; // 失效
     private static final String SETTLED = "settled"; // 已结清
@@ -52,6 +51,7 @@ public class WfContractServiceImpl implements IWfContractService {
     @Override
     public TableDataInfo<WfContractVo> queryPageList(WfContractBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<WfContract> lqw = buildQueryWrapper(bo);
+        lqw.eq(WfContract::getIsDeleted, 0);
         Page<WfContractVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
@@ -64,12 +64,87 @@ public class WfContractServiceImpl implements IWfContractService {
     @Override
     public List<WfContractTreeVo> treeList(WfContractBo bo) {
         List<WfContractVo> contracts = queryList(bo);
-        List<WfContractTreeVo> roots = new ArrayList<>();
-        roots.add(buildTypeNode(TYPE_PAY, "付款合同", contracts));
-        roots.add(buildTypeNode(TYPE_RECEIVE, "收款合同", contracts));
-        return roots;
-    }
+        List<WfContractVo> sortedContracts = contracts.stream()
+            .sorted(Comparator.comparing(WfContractVo::getSignDate, Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(WfContractVo::getId, Comparator.nullsLast(Comparator.reverseOrder())))
+            .toList();
 
+        Map<Integer, List<WfContractVo>> yearGroup = new LinkedHashMap<>();
+        for (WfContractVo contract : sortedContracts) {
+            LocalDate date = contract.getSignDate() == null
+                ? LocalDate.now()
+                : contract.getSignDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            yearGroup.computeIfAbsent(date.getYear(), k -> new ArrayList<>()).add(contract);
+        }
+
+        List<WfContractTreeVo> yearNodes = new ArrayList<>();
+        for (Map.Entry<Integer, List<WfContractVo>> yearEntry : yearGroup.entrySet()) {
+            Integer year = yearEntry.getKey();
+            String yearId = "year-" + year;
+
+            WfContractTreeVo yearNode = new WfContractTreeVo();
+            yearNode.setId(yearId);
+            yearNode.setParentId("0");
+            yearNode.setNodeType("year");
+            yearNode.setLabel(year + "年");
+            yearNode.setTotal(yearEntry.getValue().size());
+
+            Map<Integer, List<WfContractVo>> monthGroup = new LinkedHashMap<>();
+            for (WfContractVo contract : yearEntry.getValue()) {
+                LocalDate date = contract.getSignDate() == null
+                    ? LocalDate.now()
+                    : contract.getSignDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                monthGroup.computeIfAbsent(date.getMonthValue(), k -> new ArrayList<>()).add(contract);
+            }
+
+            List<WfContractTreeVo> monthNodes = new ArrayList<>();
+            for (Map.Entry<Integer, List<WfContractVo>> monthEntry : monthGroup.entrySet()) {
+                Integer month = monthEntry.getKey();
+                String monthId = yearId + "-month-" + month;
+
+                WfContractTreeVo monthNode = new WfContractTreeVo();
+                monthNode.setId(monthId);
+                monthNode.setParentId(yearId);
+                monthNode.setNodeType("month");
+                monthNode.setLabel(month + "月");
+                monthNode.setTotal(monthEntry.getValue().size());
+
+                List<WfContractTreeVo> typeNodes = new ArrayList<>();
+                typeNodes.add(buildTypeNode(monthEntry.getValue(), TYPE_PAY, "付款合同", monthId));
+                typeNodes.add(buildTypeNode(monthEntry.getValue(), TYPE_RECEIVE, "收款合同", monthId));
+                monthNode.setChildren(typeNodes);
+                monthNodes.add(monthNode);
+            }
+
+            yearNode.setChildren(monthNodes);
+            yearNodes.add(yearNode);
+        }
+        return yearNodes;
+    }
+    private WfContractTreeVo buildTypeNode(List<WfContractVo> contracts, String type, String label, String parentId) {
+        List<WfContractVo> typeContracts = contracts.stream().filter(c -> type.equals(c.getContractType())).toList();
+        WfContractTreeVo typeNode = new WfContractTreeVo();
+        typeNode.setId(parentId + "-type-" + type);
+        typeNode.setParentId(parentId);
+        typeNode.setNodeType("type");
+        typeNode.setLabel(label);
+        typeNode.setTotal(typeContracts.size());
+
+        List<WfContractTreeVo> contractNodes = new ArrayList<>();
+        for (WfContractVo contract : typeContracts) {
+            WfContractTreeVo leaf = new WfContractTreeVo();
+            leaf.setId("contract-" + contract.getId());
+            leaf.setParentId(typeNode.getId());
+            leaf.setNodeType("contract");
+            leaf.setLabel(contract.getContractName());
+            leaf.setContractNo(contract.getContractNo());
+            leaf.setContractId(contract.getId());
+            leaf.setTotal(1);
+            contractNodes.add(leaf);
+        }
+        typeNode.setChildren(contractNodes);
+        return typeNode;
+    }
     private WfContractTreeVo buildTypeNode(String type, String label, List<WfContractVo> contracts) {
         WfContractTreeVo typeNode = new WfContractTreeVo();
         typeNode.setId("type-" + type);
@@ -127,11 +202,12 @@ public class WfContractServiceImpl implements IWfContractService {
         lqw.like(StringUtils.isNotBlank(bo.getContractNo()), WfContract::getContractNo, bo.getContractNo());
         lqw.like(StringUtils.isNotBlank(bo.getContractName()), WfContract::getContractName, bo.getContractName());
         lqw.like(StringUtils.isNotBlank(bo.getCompanyName()), WfContract::getCompanyName, bo.getCompanyName());
+
         lqw.and(StringUtils.isNotBlank(bo.getKeyword()), wrapper -> wrapper
             .like(WfContract::getContractNo, bo.getKeyword())
             .or().like(WfContract::getContractName, bo.getKeyword())
             .or().like(WfContract::getCompanyName, bo.getKeyword()));
-        lqw.orderByDesc(WfContract::getSignDate, WfContract::getCreateTime, WfContract::getId);
+        lqw.orderByDesc(WfContract::getCreateTime);
         return lqw;
     }
 

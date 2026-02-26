@@ -72,4 +72,10 @@ public class WfContractBo extends BaseEntity {
     private String remark;
 
     private Integer isDeleted;
+    /**
+     * 支付节点(JSON数组)
+     */
+    private String paymentNodes;
+    private String email;
+    private String contractCounterparty;
 }
