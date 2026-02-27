@@ -2,31 +2,35 @@ package org.smartlink.workflow.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
+import org.smartlink.common.core.exception.ServiceException;
 import org.smartlink.common.core.utils.MapstructUtils;
 import org.smartlink.common.core.utils.StringUtils;
+import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.mybatis.core.page.PageQuery;
 import org.smartlink.common.mybatis.core.page.TableDataInfo;
+import org.smartlink.common.satoken.utils.LoginHelper;
+import org.smartlink.system.domain.vo.SysDictDataVo;
+import org.smartlink.system.mapper.SysDictDataMapper;
 import org.smartlink.workflow.domain.WfContract;
 import org.smartlink.workflow.domain.bo.WfContractBo;
+import org.smartlink.workflow.domain.vo.WfContractPaymentNodeVo;
 import org.smartlink.workflow.domain.vo.WfContractTreeVo;
 import org.smartlink.workflow.domain.vo.WfContractVo;
 import org.smartlink.workflow.mapper.WfContractMapper;
 import org.smartlink.workflow.service.IWfContractService;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 合同Service业务层处理
@@ -36,12 +40,14 @@ import java.util.Map;
 public class WfContractServiceImpl implements IWfContractService {
 
     private static final String TYPE_PAY = "1";
-    private static final String TYPE_RECEIVE = "2";// 草稿
+    private static final String TYPE_RECEIVE = "2";
+    private static final String DRAFT = "draft"; // 草稿
     private static final String IN_PROGRESS = "in_progress"; // 履行中
     private static final String INVALID = "invalid"; // 失效
     private static final String SETTLED = "settled"; // 已结清
-
+    private static final Pattern TREE_ID_PATTERN = Pattern.compile("^year-(\\d{4})(?:-month-(\\d{1,2})(?:-type-([12]))?)?$");
     private final WfContractMapper baseMapper;
+    private final SysDictDataMapper sysDictDataMapper;
 
     @Override
     public WfContractVo queryById(Long id) {
@@ -52,13 +58,47 @@ public class WfContractServiceImpl implements IWfContractService {
     public TableDataInfo<WfContractVo> queryPageList(WfContractBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<WfContract> lqw = buildQueryWrapper(bo);
         lqw.eq(WfContract::getIsDeleted, 0);
+        String treeId = bo.getTreeId();
+        if(StringUtils.isNotEmpty(treeId)){
+            if(!treeId.contains("-")){
+                lqw.eq(WfContract::getId, treeId);
+            }else {
+                applyTreeIdQuery(treeId, lqw);
+            }
+        }
         Page<WfContractVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
 
+    private void applyTreeIdQuery(String treeId, LambdaQueryWrapper<WfContract> lqw) {
+        if (StringUtils.isBlank(treeId)) {
+            return;
+        }
+        Matcher matcher = TREE_ID_PATTERN.matcher(treeId);
+        if (!matcher.matches()) {
+            return;
+        }
+
+        String year = matcher.group(1);
+        String month = matcher.group(2);
+        String type = matcher.group(3);
+        if (StringUtils.isNotEmpty(month)){
+            String months=month;
+            if (10>Integer.parseInt(month)){
+                months="0"+month;
+            }
+            lqw.likeRight(WfContract::getSignDate, year + "-" + months);
+        }else if (StringUtils.isNotEmpty(year)){
+            lqw.likeRight(WfContract::getSignDate, year);
+        }
+        if (StringUtils.isNotBlank(type)) {
+            lqw.eq(WfContract::getContractType, type);
+        }}
     @Override
     public List<WfContractVo> queryList(WfContractBo bo) {
-        return baseMapper.selectVoList(buildQueryWrapper(bo));
+        LambdaQueryWrapper<WfContract> lqw = buildQueryWrapper(bo);
+        lqw.eq(WfContract::getIsDeleted, 0);
+        return baseMapper.selectVoList(lqw);
     }
 
     @Override
@@ -197,6 +237,7 @@ public class WfContractServiceImpl implements IWfContractService {
 
     private LambdaQueryWrapper<WfContract> buildQueryWrapper(WfContractBo bo) {
         LambdaQueryWrapper<WfContract> lqw = Wrappers.lambdaQuery();
+        lqw.eq(bo.getSignUserId()!=null, WfContract::getSignUserId, bo.getSignUserId());
         lqw.eq(StringUtils.isNotBlank(bo.getContractType()), WfContract::getContractType, bo.getContractType());
         lqw.eq(StringUtils.isNotBlank(bo.getContractStatus()), WfContract::getContractStatus, bo.getContractStatus());
         lqw.like(StringUtils.isNotBlank(bo.getContractNo()), WfContract::getContractNo, bo.getContractNo());
@@ -268,5 +309,107 @@ public class WfContractServiceImpl implements IWfContractService {
             wfContracts.add(wfContract);
         }
         return baseMapper.updateBatchById(wfContracts);
+    }
+
+    @Override
+    public void updateStatus(String key,Long contractId, String nodeId,Long workflowId,String status) {
+        List<SysDictDataVo> sysDictDataVos = sysDictDataMapper.selectDictDataByType("hetong");
+        if(CollectionUtils.isNotEmpty(sysDictDataVos)){
+            AtomicInteger flag= new AtomicInteger();
+            sysDictDataVos.forEach(vo -> {
+                String dictValue = vo.getDictValue();
+                if (dictValue.equals(status)){
+                    flag.set(1);
+                }
+            });
+            if (flag.get()==1){
+                WfContract wfContract = baseMapper.selectById(contractId);
+                if (wfContract != null) {
+                    String paymentNodes = wfContract.getPaymentNodes();
+                    WfContractPaymentNodeVo wfContractPaymentNodeVo = new WfContractPaymentNodeVo();
+                    wfContractPaymentNodeVo.setNodeId(nodeId);
+                    wfContractPaymentNodeVo.setIsUsed(status);
+                    wfContractPaymentNodeVo.setWorkFlowId(String.valueOf(workflowId));
+                    String s = updatePaymentNodesJson(paymentNodes, wfContractPaymentNodeVo);
+                    wfContract.setPaymentNodes(s);
+                    wfContract.setUpdateBy(LoginHelper.getUserId());
+                    wfContract.setUpdateTime(new Date());
+                    baseMapper.updateById(wfContract);
+                }
+            }
+        }
+    }
+    /**
+     * 解析并修改支付节点JSON。
+     *
+     * @param paymentNodesJson 原始节点JSON字符串
+     * @param updateNode       需要更新的节点参数（按nodeId匹配；若nodeId为空则按nodeName匹配）
+     * @return 修改后的节点JSON字符串
+     */
+    private String updatePaymentNodesJson(String paymentNodesJson, WfContractPaymentNodeVo updateNode) {
+        if (updateNode == null) {
+            throw new ServiceException("更新节点不能为空");
+        }
+        List<WfContractPaymentNodeVo> nodes = parsePaymentNodes(paymentNodesJson);
+        if (CollUtil.isEmpty(nodes)) {
+            throw new ServiceException("支付节点不存在");
+        }
+
+        boolean matched = false;
+        for (WfContractPaymentNodeVo node : nodes) {
+            boolean isMatch = StringUtils.isNotBlank(updateNode.getNodeId())
+                ? Objects.equals(node.getNodeId(), updateNode.getNodeId())
+                : Objects.equals(node.getNodeName(), updateNode.getNodeName());
+            if (!isMatch) {
+                continue;
+            }
+            matched = true;
+            if (StringUtils.isNotBlank(updateNode.getNodeId())) {
+                node.setNodeId(updateNode.getNodeId());
+            }
+            if (StringUtils.isNotBlank(updateNode.getNodeName())) {
+                node.setNodeName(updateNode.getNodeName());
+            }
+            if (updateNode.getNodeAmount() != null) {
+                node.setNodeAmount(updateNode.getNodeAmount());
+            }
+            if (StringUtils.isNotBlank(updateNode.getPaymentRatio())) {
+                node.setPaymentRatio(updateNode.getPaymentRatio());
+            }
+            if (StringUtils.isNotBlank(updateNode.getNodeStatus())) {
+                node.setNodeStatus(updateNode.getNodeStatus());
+            }
+            if (updateNode.getPlanDate() != null) {
+                node.setPlanDate(updateNode.getPlanDate());
+            }
+            if (updateNode.getRemark() != null) {
+                node.setRemark(updateNode.getRemark());
+            }
+            if (updateNode.getIsUsed() != null) {
+                node.setIsUsed(updateNode.getIsUsed());
+            }
+            if (updateNode.getWorkFlowId() != null) {
+                node.setWorkFlowId(updateNode.getWorkFlowId());
+            }
+            break;
+        }
+        if (!matched) {
+            throw new ServiceException("支付节点不存在");
+        }
+        return JsonUtils.toJsonString(nodes);
+    }
+
+
+
+    private List<WfContractPaymentNodeVo> parsePaymentNodes(String paymentNodes) {
+        if (StringUtils.isBlank(paymentNodes)) {
+            return new ArrayList<>();
+        }
+        try {
+            return JsonUtils.parseObject(paymentNodes, new TypeReference<List<WfContractPaymentNodeVo>>() {
+            });
+        } catch (RuntimeException e) {
+            throw new ServiceException("支付节点数据格式错误");
+        }
     }
 }

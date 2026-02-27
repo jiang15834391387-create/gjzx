@@ -97,4 +97,9 @@ public class TestExpenseReimbursementVo implements Serializable {
     private String  receiptUrl;
 
     private String  auditDetail;
+
+    private Long contractId;
+
+    private String nodeId;
+
 }

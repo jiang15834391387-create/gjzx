@@ -46,6 +46,7 @@ public class WfContract extends TenantEntity {
     private String contractStatus;
 
     private String signUser;
+    private Long signUserId;
 
     private Date signDate;
 
@@ -67,4 +68,5 @@ public class WfContract extends TenantEntity {
      * 支付节点(JSON数组)
      */
     private String paymentNodes;
+
 }

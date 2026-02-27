@@ -51,7 +51,7 @@ public class WfContractBo extends BaseEntity {
     private String contractStatus;
 
     private String signUser;
-
+    private Long signUserId;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date signDate;
 
@@ -78,4 +78,6 @@ public class WfContractBo extends BaseEntity {
     private String paymentNodes;
     private String email;
     private String contractCounterparty;
+
+    private String treeId;
 }

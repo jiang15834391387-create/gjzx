@@ -41,6 +41,8 @@ public class WfContractPaymentNodeVo implements Serializable {
 
     /**
      * 节点状态
+     *      <el-option label="已支付" value="paid" />
+     *      <el-option label="未支付" value="unpaid" />
      */
     private String nodeStatus;
 
@@ -54,4 +56,8 @@ public class WfContractPaymentNodeVo implements Serializable {
      * 备注
      */
     private String remark;
+
+    private String isUsed;
+
+    private String workFlowId;
 }

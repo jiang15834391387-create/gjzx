@@ -76,6 +76,8 @@ public class TestExpenseReimbursement extends TenantEntity {
 
     private String  receiptUrl;
 
-        private String  auditDetail;
+    private String  auditDetail;
+    private Long contractId;
 
+    private String nodeId;
 }

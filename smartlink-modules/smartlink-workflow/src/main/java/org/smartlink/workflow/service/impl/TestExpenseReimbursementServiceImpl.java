@@ -47,6 +47,7 @@ import org.smartlink.workflow.mapper.TestFormManageMapper;
 import org.smartlink.workflow.mapper.WfDefinitionConfigMapper;
 import org.smartlink.workflow.service.BpmFormService;
 import org.smartlink.workflow.service.ITestExpenseReimbursementService;
+import org.smartlink.workflow.service.IWfContractService;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,6 +79,16 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
     private final WorkflowService workflowService;
     private final TestActHistoryMapper actHistoryMapper;
     private final TestActHistoryMapper testActHistoryMapper;
+    private final IWfContractService iWfContractService;
+    private static final String DRAFT = "draft"; // 草稿
+    private static final String IN_PROGRESS = "in_progress"; // 履行中
+    private static final String INVALID = "invalid"; // 失效
+    private static final String SETTLED = "settled"; // 已结清
+
+    public void contractStatus(String key,Long contractId, String nodeId,Long workflowId,String status){
+        iWfContractService.updateStatus(key,contractId,nodeId,workflowId,status);
+    }
+
     /**
      * 查询费用报销申请
      *
@@ -221,6 +232,13 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             if (flag) {
                 bo.setId(add.getId());
             }
+
+            Long contractId = bo.getContractId();
+            String nodeId = bo.getNodeId();
+            if (contractId != null&&nodeId!=null){
+                contractStatus(bo.getFromType(), contractId,nodeId,add.getId(), "1");
+            }
+
             /*if(CollectionUtils.isNotEmpty(list)){
                 dataImageFilesInfoService.bindAndRelieve(add.getId().toString(), list, true);
             }*/
@@ -240,8 +258,6 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
             throw new RuntimeException(e.getMessage());
         }
         return MapstructUtils.convert(add, TestExpenseReimbursementVo.class);
-
-
     }
 
     private ArrayList<Map<String, String>> joinImageFile(List<Map<String, Object>> maps) {
@@ -331,6 +347,13 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
         update.setFromManageId(byType.getId());
         try {
             int i = baseMapper.updateById(update);
+
+            Long contractId = bo.getContractId();
+            String nodeId = bo.getNodeId();
+            if (contractId != null&&nodeId!=null){
+                contractStatus(bo.getFromType(), contractId,nodeId,update.getId(), "1");
+            }
+
             if(i>0){
                 String status = update.getStatus();
                 if(status.equals("draft")){
@@ -442,6 +465,12 @@ public class TestExpenseReimbursementServiceImpl implements ITestExpenseReimburs
                 if(testExpenseReimbursement!=null){
                     invoiceStatus(testExpenseReimbursement,null);
                 }
+                Long contractId = testExpenseReimbursement.getContractId();
+                String nodeId = testExpenseReimbursement.getNodeId();
+                if (contractId != null&&nodeId!=null){
+                    contractStatus(testExpenseReimbursement.getFromType(), contractId,nodeId,testExpenseReimbursement.getId(), "0");
+                }
+
             }
         } catch (Exception e) {
             log.error("删除失败，执行回滚{}",e);

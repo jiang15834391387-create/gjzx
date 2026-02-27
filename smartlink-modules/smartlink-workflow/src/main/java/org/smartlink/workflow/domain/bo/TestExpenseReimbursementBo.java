@@ -92,4 +92,7 @@ public class TestExpenseReimbursementBo extends BaseEntity {
 
     private String  receiptUrl;
     private String  auditDetail;
+    private Long contractId;
+
+    private String nodeId;
 }

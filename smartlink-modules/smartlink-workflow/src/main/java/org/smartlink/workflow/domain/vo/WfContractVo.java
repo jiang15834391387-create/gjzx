@@ -53,7 +53,7 @@ public class WfContractVo implements Serializable {
     private String contractStatus;
     private String contractCounterparty;
     private String signUser;
-
+    private Long signUserId;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date signDate;
 

@@ -27,4 +27,6 @@ public interface IWfContractService {
     Boolean updateByBo(WfContractBo bo);
 
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    void updateStatus (String key,Long contractId, String nodeId,Long workflowId,String status);
 }
