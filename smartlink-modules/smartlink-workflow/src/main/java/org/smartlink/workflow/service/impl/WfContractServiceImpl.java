@@ -330,9 +330,9 @@ public class WfContractServiceImpl implements IWfContractService {
                     WfContractPaymentNodeVo wfContractPaymentNodeVo = new WfContractPaymentNodeVo();
                     wfContractPaymentNodeVo.setNodeId(nodeId);
                     wfContractPaymentNodeVo.setIsUsed(status);
-                    if(workflowId!=null){
+                    if(status.equals("1")){
                         wfContractPaymentNodeVo.setWorkFlowId(String.valueOf(workflowId));
-                    }else {
+                    }else if(status.equals("0")) {
                         wfContractPaymentNodeVo.setWorkFlowId("");
                     }
                     String s = updatePaymentNodesJson(paymentNodes, wfContractPaymentNodeVo);
