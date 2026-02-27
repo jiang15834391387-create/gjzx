@@ -318,8 +318,9 @@ public class WfContractServiceImpl implements IWfContractService {
             AtomicInteger flag= new AtomicInteger();
             sysDictDataVos.forEach(vo -> {
                 String dictValue = vo.getDictValue();
-                if (dictValue.equals(status)){
+                if (dictValue.equals(key)){
                     flag.set(1);
+
                 }
             });
             if (flag.get()==1){
