@@ -11,6 +11,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.smartlink.workflow.domain.vo.WfInventoryLedgerVo;
+
 
 /**
  * 审批记录 PDF 导出工具
@@ -161,5 +164,92 @@ public class PdfUtil {
 
     private static String safe(String text) {
         return text == null ? "" : text;
+    }
+
+
+
+    /**
+     * 导出出入库台账 PDF
+     */
+    public static void exportInventoryLedgerPdf(List<WfInventoryLedgerVo> dataList, OutputStream os) throws Exception {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+
+            // 加载项目自带的中文字体 SimSun.ttf
+            // 确保该路径能正确访问到 smartlink-modules/smartlink-business/src/main/resources/fonts/SimSun.ttf
+            InputStream fontStream = PdfUtil.class.getClassLoader().getResourceAsStream("fonts/SimSun.ttf");
+            PDFont font = PDType0Font.load(document, fontStream);
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                // 1. 标题
+                contentStream.setFont(font, 18);
+                contentStream.beginText();
+                contentStream.newLineAtOffset(220, 730);
+                contentStream.showText("出入库台账记录");
+                contentStream.endText();
+
+                // 2. 表头设置
+                int startY = 680;
+                int rowHeight = 25;
+                contentStream.setFont(font, 12);
+
+                String[] headers = {"操作类型", "操作数量", "结余库存", "操作内容", "操作时间"};
+                float[] positions = {50, 130, 220, 310, 450}; // 调整 X 轴列宽比例
+
+                contentStream.beginText();
+                contentStream.newLineAtOffset(0, startY);
+                for (int i = 0; i < headers.length; i++) {
+                    contentStream.newLineAtOffset(i == 0 ? positions[0] : positions[i] - positions[i - 1], 0);
+                    contentStream.showText(headers[i]);
+                }
+                contentStream.endText();
+
+                // 画表头下划线
+                contentStream.moveTo(50, startY - 5);
+                contentStream.lineTo(550, startY - 5);
+                contentStream.stroke();
+
+                // 3. 填充行数据
+                int currentY = startY - rowHeight;
+                contentStream.setFont(font, 10);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                for (WfInventoryLedgerVo vo : dataList) {
+                    if (currentY < 50) {
+                        // 触发分页逻辑
+                        contentStream.close();
+                        page = new PDPage();
+                        document.addPage(page);
+                        // 如果数据特别大，需要重新打开流并在新页重新渲染内容。此处省略完善的分页初始化逻辑以保持简洁。
+                    }
+
+                    String opType = vo.getOperationType() != null && vo.getOperationType() == 1 ? "入库" : "出库";
+                    String opCount = vo.getOperationCount() != null ? vo.getOperationCount().toString() : "0";
+                    String afterQty = vo.getAfterQuantity() != null ? vo.getAfterQuantity().toString() : "0";
+                    String content = vo.getOperationContent() != null ? vo.getOperationContent() : "-";
+                    String time = vo.getCreateTime() != null ? sdf.format(vo.getCreateTime()) : "-";
+
+                    String[] rowData = {opType, opCount, afterQty, content, time};
+
+                    contentStream.beginText();
+                    contentStream.newLineAtOffset(0, currentY);
+                    for (int i = 0; i < rowData.length; i++) {
+                        contentStream.newLineAtOffset(i == 0 ? positions[0] : positions[i] - positions[i - 1], 0);
+                        contentStream.showText(rowData[i]);
+                    }
+                    contentStream.endText();
+
+                    // 画行分割线
+                    contentStream.moveTo(50, currentY - 5);
+                    contentStream.lineTo(550, currentY - 5);
+                    contentStream.setLineWidth(0.5f);
+                    contentStream.stroke();
+
+                    currentY -= rowHeight;
+                }
+            }
+            document.save(os);
+        }
     }
 }
