@@ -1,6 +1,6 @@
 package org.smartlink.workflow.utils.pdf;
 
-import org.apache.pdfbox.Loader;
+//import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
@@ -42,7 +42,8 @@ public class PdfProcessUtil {
 
         // 2. 渲染模板并输出为字节数组
         try (InputStream inputStream = getInputStream(resource);
-             PDDocument document = Loader.loadPDF(inputStream.readAllBytes());
+//             PDDocument document = Loader.loadPDF(inputStream.readAllBytes());
+             PDDocument document = PDDocument.load(inputStream);
              ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
 
             fillPdfForm(document, replacements);
@@ -64,7 +65,8 @@ public class PdfProcessUtil {
             merger.setDestinationStream(outputStream);
 
             for (byte[] pdfBytes : pdfsToMerge) {
-                try (PDDocument doc = Loader.loadPDF(pdfBytes)) {
+//                try (PDDocument doc = Loader.loadPDF(pdfBytes)) {
+                try (PDDocument doc = PDDocument.load(pdfBytes)) {
                     merger.appendDocument(doc, doc);
                 }
             }
@@ -226,7 +228,8 @@ public class PdfProcessUtil {
 
         // 2. 加载 PDF 文档并提取字段名
         try (InputStream inputStream = getInputStream(resource);
-             PDDocument document = Loader.loadPDF(inputStream.readAllBytes())) {
+//             PDDocument document = Loader.loadPDF(inputStream.readAllBytes())) {
+             PDDocument document = PDDocument.load(inputStream.readAllBytes())) {
 
             PDAcroForm acroForm = document.getDocumentCatalog().getAcroForm();
 

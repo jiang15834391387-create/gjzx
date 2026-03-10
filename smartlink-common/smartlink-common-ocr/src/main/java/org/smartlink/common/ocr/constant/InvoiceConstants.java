@@ -130,6 +130,10 @@ public class InvoiceConstants {
      * 增值税发票清单
      */
     public static final String DIGITAL_INVOICE_LIST = "10110";
+    /**
+     * 通用手工发票
+     */
+    public static final String GLORITY_MANUAL_INVOICE_CODE = "10903";
    /**
     *区块链标识
     */

@@ -106,4 +106,32 @@ public class OfdUtils {
             return out.toByteArray();
         }
     }
+
+    /**
+     * 从OFD文件中提取XML内容（使用临时文件）
+     * @param ofdBytes OFD文件字节数组
+     * @return XML字符串
+     * @throws IOException 当提取失败时抛出异常
+     */
+    public static String extractXmlFromOfdWithTemp(byte[] ofdBytes) throws IOException {
+        // 创建临时文件
+        java.io.File tempFile = java.io.File.createTempFile("ofd", ".ofd");
+        tempFile.deleteOnExit();
+
+        // 写入OFD内容
+        java.nio.file.Files.write(tempFile.toPath(), ofdBytes);
+
+        // 读取XML内容
+        try (java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(tempFile)) {
+            String xmlPath = "Doc_0/Attachs/original_invoice.xml";
+            java.util.zip.ZipEntry entry = zipFile.getEntry(xmlPath);
+            if (entry == null) {
+                throw new RuntimeException(xmlPath + " 不存在");
+            }
+
+            try (InputStream xmlInputStream = zipFile.getInputStream(entry)) {
+                return new String(xmlInputStream.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+        }
+    }
 }

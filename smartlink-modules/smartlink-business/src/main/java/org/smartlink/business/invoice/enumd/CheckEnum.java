@@ -1,14 +1,20 @@
 package org.smartlink.business.invoice.enumd;
 
 
-import org.smartlink.business.invoice.service.impl.RegenaiCheckStrategy;
+import org.smartlink.business.invoice.check.abstractd.RegenaiCheckStrategy;
+import org.smartlink.business.invoice.autoinvcheck.AutoinvCheckStrategy;
 
 public enum CheckEnum {
 
     /**
      * 睿真
      */
-    HANG_XIN("RuiZhen", RegenaiCheckStrategy.class);
+    HANG_XIN("RuiZhen", RegenaiCheckStrategy.class),
+
+    /**
+     * autoinv
+     */
+    AUTOINV("Autoinv", AutoinvCheckStrategy.class);
 
     /**
      * 百望

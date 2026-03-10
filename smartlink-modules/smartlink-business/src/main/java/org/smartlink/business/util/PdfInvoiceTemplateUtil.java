@@ -1,7 +1,7 @@
 package org.smartlink.business.util;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.pdfbox.Loader;
+//import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDResources;
@@ -41,7 +41,8 @@ public class PdfInvoiceTemplateUtil {
 
         try{
             InputStream inputStream = new ClassPathResource("templates/" + templateName).getInputStream();
-            PDDocument document = Loader.loadPDF(inputStream.readAllBytes());
+//            PDDocument document = Loader.loadPDF(inputStream.readAllBytes());
+            PDDocument document = PDDocument.load(inputStream);
 
             PDDocumentCatalog documentCatalog = document.getDocumentCatalog();
             PDAcroForm acroForm = documentCatalog.getAcroForm();

@@ -1,4 +1,4 @@
-package org.smartlink.business.invoice.service;
+package org.smartlink.business.invoice.check.abstractd;
 
 
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;

@@ -5,7 +5,6 @@ import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
 import org.smartlink.common.ocr.core.IdentificationFactory;
 import org.smartlink.common.ocr.factory.OcrFactory;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;
-import org.smartlink.common.ocr.glority.response.IdentifyResults;
 
 import java.util.List;
 
@@ -16,13 +15,13 @@ import java.util.List;
  **/
 public class ConversionFactory {
 
-    public static ChangeIdentifyInfo getConversionFactory(DataImageFilesInfo dataImageFilesInfo, List<IdentifyResults> o) {
+    public static <T> ChangeIdentifyInfo getConversionFactory(DataImageFilesInfo dataImageFilesInfo, List<T> o) {
         ChangeIdentifyInfo changeIdentifyInfo = null;
         try {
             Class<?> c = OcrFactory.instanceObj();
             Object obj = c.newInstance();
 //            if (obj instanceof IdentificationFactory) {
-                changeIdentifyInfo = ((IdentificationFactory) obj).conversionInfo(dataImageFilesInfo,o);
+                changeIdentifyInfo = ((IdentificationFactory<T>) obj).conversionInfo(dataImageFilesInfo, o);
 //            }
 
         } catch (Exception e) {

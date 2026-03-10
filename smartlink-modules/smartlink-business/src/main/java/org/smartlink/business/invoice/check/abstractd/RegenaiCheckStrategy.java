@@ -1,4 +1,4 @@
-package org.smartlink.business.invoice.service.impl;
+package org.smartlink.business.invoice.check.abstractd;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
@@ -14,8 +14,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
-import org.smartlink.business.invoice.conversion.*;
-import org.smartlink.business.invoice.service.abstractd.AbstractCheckStrategy;
+import org.smartlink.business.invoice.check.conversion.RegenaiBasicOcrInfo;
+import org.smartlink.business.invoice.check.conversion.RegenaiChangeInvoiceDetails;
+import org.smartlink.business.invoice.check.conversion.RegenaiChangeUsedCarSales;
+import org.smartlink.business.invoice.check.conversion.RegenaiMotorVehicleSale;
+import org.smartlink.business.invoice.check.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.enumd.ResponseCodeEnum;

@@ -1,14 +1,16 @@
-package org.smartlink.business.invoice.factory;
+package org.smartlink.business.invoice.check.factory;
 
 
 import lombok.extern.slf4j.Slf4j;
 import org.smartlink.business.invoice.enumd.CheckEnum;
-import org.smartlink.business.invoice.service.ICheckStrategy;
-import org.smartlink.business.invoice.service.abstractd.AbstractCheckStrategy;
+import org.smartlink.business.invoice.check.abstractd.ICheckStrategy;
+import org.smartlink.business.invoice.check.abstractd.AbstractCheckStrategy;
 import org.smartlink.common.check.constant.CheckConstant;
 import org.smartlink.common.check.exception.CheckException;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.check.properties.RuiZhenCheckProperties;
+import org.smartlink.common.check.properties.AutoinvCheckProperties;
+import cn.hutool.json.JSONObject;
 import org.smartlink.common.core.utils.SpringUtils;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.json.utils.JsonUtils;
@@ -54,7 +56,7 @@ public class CheckFactory {
     /**
      * 根据类型获取实例
      */
-    private static ICheckStrategy instance(String type) {
+    public static ICheckStrategy instance(String type) {
         CheckEnum checkEnum = CheckEnum.find(type);
         if (checkEnum == null) {
             throw new CheckException("查验服务类型无法找到!");
@@ -69,7 +71,17 @@ public class CheckFactory {
     private static void refresh(String type) {
         Object cacheMapValue = RedisUtils.getCacheMapValue(CheckConstant.CHECK_CONFIG_KEY, CheckConstant.CHECK_CONFIG);
         log.info("默认查验厂商为:{}", cacheMapValue);
-        RuiZhenCheckProperties properties = JsonUtils.parseObject(cacheMapValue.toString(), RuiZhenCheckProperties.class);
+
+        // 根据厂商类型动态选择配置类
+        Object properties;
+        if (CheckEnum.AUTOINV.getName().equals(type)) {
+            // autoinv厂商
+            properties = JsonUtils.parseObject(cacheMapValue.toString(), AutoinvCheckProperties.class);
+        } else {
+            // 默认使用睿真厂商
+            properties = JsonUtils.parseObject(cacheMapValue.toString(), RuiZhenCheckProperties.class);
+        }
+
         CheckProperties checkProperties = new CheckProperties();
         checkProperties.setDetailInfo(JsonUtils.toJsonString(properties));
         if (properties == null) {

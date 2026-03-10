@@ -4,6 +4,7 @@ package org.smartlink.business.service.Impl;
 import cn.dev33.satoken.session.SaSession;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
@@ -108,11 +109,43 @@ public class ScanImageServiceImpl implements ScanImageService {
             boolean isRotate = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_IMG_ROTATE));
             DataImageFilesInfo dataImageFilesInfo = new DataImageFilesInfo();
             dataImageFilesInfo.setFileId(IdUtil.fastSimpleUUID());
-
+            //ocr识别
+            List<IdentificationData> identificationData = null;
             //文件类型是否符合参数配置
             if (isFileTypeAllowed(fileSuffix)) {
-                //ocr识别
-                List<IdentificationData> identificationData = OcrFactory.instance().getIdentificationData(dataImageFilesInfo, Base64.getEncoder().encodeToString(multipartFile.getBytes()), fileSuffix);
+                // 获取OCR策略类型配置
+                String yesorno = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_STRATEGY_TYPE);
+                String base64 = Base64.getEncoder().encodeToString(multipartFile.getBytes());
+
+                // 优先使用自己开发的XML识别服务
+                if (fileSuffix.equals("xml")) {
+                    try {
+                        identificationData = OcrFactory.instance("XML").getIdentificationData(dataImageFilesInfo, base64, fileSuffix);
+
+                        // 检查识别结果是否成功（集合为空或所有IdentificationData的t字段为空表示识别失败）
+                        boolean isRecognitionFailed = false;
+                        if (identificationData == null || identificationData.isEmpty()) {
+                            isRecognitionFailed = true;
+                        } else {
+                            // 检查所有IdentificationData对象的t字段是否为空
+                            isRecognitionFailed = identificationData.stream()
+                                    .allMatch(item -> item == null || item.t == null);
+                        }
+
+                        if (isRecognitionFailed) {
+                            log.info("XML文件使用自研服务识别失败，自动回退到autoinv服务");
+                            // 回退到autoinv服务
+                            identificationData = OcrFactory.instance("AUTOINV").getIdentificationData(dataImageFilesInfo, base64, fileSuffix);
+                        }
+                    } catch (Exception e) {
+                        log.error("XML文件使用自研服务识别异常，自动回退到autoinv服务: {}", e.getMessage());
+                        // 发生异常时回退到autoinv服务
+                        identificationData = OcrFactory.instance("AUTOINV").getIdentificationData(dataImageFilesInfo, base64, fileSuffix);
+                    }
+                } else {
+                    // 其他文件类型（包括OFD）使用autoinv服务
+                    identificationData = OcrFactory.instance("AUTOINV").getIdentificationData(dataImageFilesInfo, base64, fileSuffix);
+                }
                 if (identificationData == null) {
                     return handleOcrFailure(multipartFile, fileSuffix,"", FileStatusEnumd.OCR_FAILED.getCode(), FileStatusEnumd.OCR_FAILED.getDesc());
                 }

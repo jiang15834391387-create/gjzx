@@ -135,6 +135,10 @@ public enum InvoiceGlorityEnumd {
      * 增值税发票清单
      */
     DIGITAL_INVOICE_LIST("10110","增值税发票清单"),
+//    /**
+//     * 通用手工发票
+//     */
+//    GLORITY_MANUAL_INVOICE_CODE("10903","通用手工发票"),
     ;
 
     InvoiceGlorityEnumd(String code, String desc) {

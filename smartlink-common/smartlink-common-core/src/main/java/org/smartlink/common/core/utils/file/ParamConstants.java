@@ -236,4 +236,14 @@ public interface ParamConstants {
      * 置信度 率 0-1 0为关闭
      */
     String INVOICE_CONFIDENCE_CODE="invoice_confidence_code";
+
+    /**
+     * OCR策略类型配置
+     */
+    String SYS_OCR_STRATEGY_TYPE="sys.ocr.strategy.ruizhen.yesorno";
+
+    /**
+     * XML文件OCR策略类型配置
+     */
+    String SYS_OCR_XML_STRATEGY_TYPE="sys.ocr.xml.strategy.type";
 }

@@ -1,7 +1,10 @@
 package org.smartlink.common.ocr.properties;
 
 import lombok.Data;
+import org.smartlink.common.ocr.autoinv.config.AutoinvOcrProperties;
 import org.smartlink.common.ocr.glority.config.GlorityOcrProperties;
+import org.smartlink.common.ocr.ofd.config.OfdOcrProperties;
+import org.smartlink.common.ocr.xml.config.XmlOcrProperties;
 
 /**
  * @author lqm
@@ -15,9 +18,21 @@ public class OcrProperties {
      */
     private String configKey;
     /**
-     * 配置详情
+     * 票小秘配置详情
      */
     private GlorityOcrProperties detailInfo;
+    /**
+     * XML发票识别配置详情
+     */
+    private XmlOcrProperties xmlDetailInfo;
+    /**
+     * OFD发票识别配置详情
+     */
+    private OfdOcrProperties ofdDetailInfo;
+    /**
+     * OFD发票识别配置详情
+     */
+    private AutoinvOcrProperties autoinvOcrProperties;
     /**
      * 状态（是否启用）
      */

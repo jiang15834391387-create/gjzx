@@ -1,7 +1,6 @@
-package org.smartlink.business.invoice.service.abstractd;
+package org.smartlink.business.invoice.check.abstractd;
 
 
-import org.smartlink.business.invoice.service.ICheckStrategy;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.check.properties.CheckProperties;
 import org.smartlink.common.entity.domain.business.domain.DataImageFilesInfo;

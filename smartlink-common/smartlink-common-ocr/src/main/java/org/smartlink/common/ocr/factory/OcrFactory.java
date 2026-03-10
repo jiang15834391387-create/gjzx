@@ -7,10 +7,12 @@ import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.core.utils.file.Constants;
 import org.smartlink.common.json.utils.JsonUtils;
 import org.smartlink.common.ocr.abstractd.AbstractOcrStrategy;
+import org.smartlink.common.ocr.autoinv.config.AutoinvOcrProperties;
 import org.smartlink.common.ocr.constant.OcrConstant;
 import org.smartlink.common.ocr.core.IOcrStrategy;
 import org.smartlink.common.ocr.enumd.OcrEnumd;
 import org.smartlink.common.ocr.exception.OcrException;
+import org.smartlink.common.ocr.glority.config.GlorityOcrProperties;
 import org.smartlink.common.ocr.properties.OcrProperties;
 import org.smartlink.common.redis.utils.RedisUtils;
 
@@ -87,7 +89,32 @@ public class OcrFactory {
     private static void refresh(String type) {
 //        Object json = RedisUtils.getCacheObject(OcrConstant.SYS_OCR_KEY + type);
         Object json = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, OcrConstant.SYS_OCR_KEY + type);
-        OcrProperties properties = JsonUtils.parseObject(json.toString(), OcrProperties.class);
+        OcrProperties properties = new OcrProperties();
+
+        // 根据厂商类型动态解析配置
+//        if (OcrEnumd.AUTOINV.getValue().equals(type)) {
+//            // autoinv厂商：Redis中存储的是AutoinvOcrProperties的直接JSON
+//            AutoinvOcrProperties autoinvProps = JsonUtils.parseObject(json.toString(), AutoinvOcrProperties.class);
+//            properties.setAutoinvOcrProperties(autoinvProps);
+//        } else {
+//            // 其他厂商：Redis中存储的是OcrProperties的JSON
+//            properties = JsonUtils.parseObject(json.toString(), OcrProperties.class);
+//        }
+
+        switch (OcrEnumd.find(type)) {
+
+            case AUTOINV:
+                AutoinvOcrProperties autoinv = JsonUtils.parseObject(json.toString(), AutoinvOcrProperties.class);
+                properties.setAutoinvOcrProperties(autoinv);
+                break;
+            case GLORITY:
+                GlorityOcrProperties ruiZhen = JsonUtils.parseObject(json.toString(), GlorityOcrProperties.class);
+                properties.setDetailInfo(ruiZhen);
+                break;
+            default:
+                throw new OcrException("未知OCR厂商: " + type);
+        }
+
         if (properties == null) {
             throw new OcrException("识别系统异常, '" + type + "'配置信息不存在!");
         }

@@ -2,6 +2,7 @@ package org.smartlink.business.invoice.check;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -9,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.shiro.util.StringUtils;
 import org.smartlink.business.enumd.CheckInvoiceStatusEnumd;
-import org.smartlink.business.invoice.factory.CheckFactory;
+import org.smartlink.business.invoice.check.factory.CheckFactory;
 import org.smartlink.business.invoice.service.IDataOcrInfoServices;
 import org.smartlink.common.check.doman.dto.InvoiceCheckParamDTO;
 import org.smartlink.common.core.domain.R;
@@ -102,6 +103,7 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setPretax_amount(ocrInfo.getPretaxAmount());
                     break;
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+                case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
                 case InvoiceConstants.GLORITY_TAX_CODE:
                 case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
@@ -118,6 +120,7 @@ public class CheckInvoice {
                             }
                         }
                     }
+                    invoiceCheckParamDTO.setPretax_amount(ocrInfos.getPretaxAmount());
                     //数电票(增值税)/普通发票处理
                     if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
                         invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
@@ -142,8 +145,22 @@ public class CheckInvoice {
                         invoiceCheckParamDTO.setCheck_code(checkCodess);
                     }
                     break;
-                    default:
-                        return R.ok();
+                case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                    final DataRailwayTicket railwayTicket = dataRailwayTicketService.getByFileId(filesInfo.getFileId());
+                    invoiceCheckParamDTO.setNumber(railwayTicket.getInvoiceNumber());
+                    invoiceCheckParamDTO.setDate(railwayTicket.getInvoiceDate());
+                    invoiceCheckParamDTO.setPretax_amount(railwayTicket.getInvoiceTotal());
+                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                    break;
+                case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                    final DataFlightItinerary flightItinerary = dataFlightItineraryService.getByFileId(filesInfo.getFileId());
+                    invoiceCheckParamDTO.setNumber(flightItinerary.getInvoiceNumber());
+                    invoiceCheckParamDTO.setDate(flightItinerary.getInvoiceDate());
+                    invoiceCheckParamDTO.setPretax_amount(flightItinerary.getInvoiceTotal());
+                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                    break;
+                default:
+                    return R.ok();
             }
 
           return this.checkInvoice(filesInfo,invoiceCheckParamDTO);
@@ -151,7 +168,7 @@ public class CheckInvoice {
  }
     //传递查验参数调用查验工厂
     public R<T> checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
-        BaseEntity baseEntity= CheckFactory.instance().checkInvoke(filesInfo, invoiceCheckParamDTO);
+        BaseEntity baseEntity= CheckFactory.instance("Autoinv").checkInvoke(filesInfo, invoiceCheckParamDTO);
         if (filesInfo.getFileStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())&&filesInfo.getCheckStatus().equals(CheckInvoiceStatusEnumd.VERIFICATION_SUCCESSFUL_CODE.getCode())) {
            //如果是增值税（专用/普通/电子专用）或增值税电子普通发票 或区块链电子发票  或机打发票 或增值税普通发票(卷票)或数电票(增值税专用发票/普通发票)
             if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_TAX_SPECIAL_CODE)
@@ -174,6 +191,16 @@ public class CheckInvoice {
             if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE)){
                 //转换后机动车销售统一发票
                 motorVehicleSaleConversionAlter(baseEntity,filesInfo);
+                return R.ok();
+            }
+            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE)){
+                //转换后铁路电子客票
+                railwayTicketConversionAlter(baseEntity,filesInfo);
+                return R.ok();
+            }
+            if (filesInfo.getInvoice().equals(InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE)){
+                //转换后航空运输电子客票行程单
+                flightItineraryConversionAlter(baseEntity,filesInfo);
                 return R.ok();
             }
         }
@@ -206,6 +233,41 @@ public class CheckInvoice {
         DataUsedCarSales dataUsedCarSales=BeanUtil.toBean(baseEntity, DataUsedCarSales.class);
         //根据fileId进行修改
         usedCarSalesMapper.update(dataUsedCarSales,new LambdaUpdateWrapper<DataUsedCarSales>().eq(DataUsedCarSales::getFileId, filesInfo.getFileId()));
+    }
+
+    //转换后铁路电子客票
+    private void railwayTicketConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
+        if (ObjectUtil.isEmpty(baseEntity)){
+            log.error("铁路电子客票查验转换后结果为空");
+            return;
+        }
+        log.info("修改查验转换后的铁路电子客票信息：{}", baseEntity);
+        DataRailwayTicket dataRailwayTicket=BeanUtil.toBean(baseEntity, DataRailwayTicket.class);
+        //根据fileId进行修改
+        railwayTicketMapper.update(dataRailwayTicket,new LambdaUpdateWrapper<DataRailwayTicket>().eq(DataRailwayTicket::getFileId, filesInfo.getFileId()));
+    }
+
+    //转换后航空运输电子客票行程单
+    private void flightItineraryConversionAlter(BaseEntity baseEntity, DataImageFilesInfo filesInfo) throws Exception {
+        if (ObjectUtil.isEmpty(baseEntity)){
+            log.error("航空运输电子客票行程单查验转换后结果为空");
+            return;
+        }
+        log.info("修改查验转换后的航空运输电子客票行程单信息：{}", baseEntity);
+        DataFlightItinerary dataFlightItinerary=BeanUtil.toBean(baseEntity, DataFlightItinerary.class);
+        //根据fileId进行修改
+        flightItineraryMapper.update(dataFlightItinerary,new LambdaUpdateWrapper<DataFlightItinerary>().eq(DataFlightItinerary::getFileId, filesInfo.getFileId()));
+        //处理明细信息
+        if (CollectionUtil.isNotEmpty(dataFlightItinerary.getDetails())) {
+            List<DataFlightsItineraryDetail> details = dataFlightItinerary.getDetails();
+            for (DataFlightsItineraryDetail detail : details) {
+                detail.setFileId(filesInfo.getFileId());
+                flightsItineraryDetailMapper.update(detail,
+                    new LambdaUpdateWrapper<DataFlightsItineraryDetail>()
+                        .eq(DataFlightsItineraryDetail::getFileId, filesInfo.getFileId())
+                );
+            }
+        }
     }
 
     //转换后ocr信息修改
