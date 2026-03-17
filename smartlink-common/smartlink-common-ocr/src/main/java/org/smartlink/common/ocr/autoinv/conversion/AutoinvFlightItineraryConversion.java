@@ -61,6 +61,7 @@ public class AutoinvFlightItineraryConversion implements ChangeIdentifyInfo<List
             flightItinerary.setEndorsement(jsonObject.getStr("endorsements"));
             flightItinerary.setCheckCode(jsonObject.getStr("ck"));
             flightItinerary.setIssueBy(jsonObject.getStr("issued_by"));
+            flightItinerary.setElectronicMark(jsonObject.getStr("einvoice_mark"));
 
             // 处理航班详情
             List<DataFlightsItineraryDetail> flightsList = new ArrayList<>();

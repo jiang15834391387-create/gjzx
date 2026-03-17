@@ -103,7 +103,6 @@ public class CheckInvoice {
                     invoiceCheckParamDTO.setPretax_amount(ocrInfo.getPretaxAmount());
                     break;
                 case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
-                case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
                 case InvoiceConstants.GLORITY_TAX_CODE:
                 case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
                 case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
@@ -120,7 +119,6 @@ public class CheckInvoice {
                             }
                         }
                     }
-                    invoiceCheckParamDTO.setPretax_amount(ocrInfos.getPretaxAmount());
                     //数电票(增值税)/普通发票处理
                     if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
                         invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
@@ -145,20 +143,6 @@ public class CheckInvoice {
                         invoiceCheckParamDTO.setCheck_code(checkCodess);
                     }
                     break;
-                case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
-                    final DataRailwayTicket railwayTicket = dataRailwayTicketService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO.setNumber(railwayTicket.getInvoiceNumber());
-                    invoiceCheckParamDTO.setDate(railwayTicket.getInvoiceDate());
-                    invoiceCheckParamDTO.setPretax_amount(railwayTicket.getInvoiceTotal());
-                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    break;
-                case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
-                    final DataFlightItinerary flightItinerary = dataFlightItineraryService.getByFileId(filesInfo.getFileId());
-                    invoiceCheckParamDTO.setNumber(flightItinerary.getInvoiceNumber());
-                    invoiceCheckParamDTO.setDate(flightItinerary.getInvoiceDate());
-                    invoiceCheckParamDTO.setPretax_amount(flightItinerary.getInvoiceTotal());
-                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                    break;
                 default:
                     return R.ok();
             }
@@ -166,6 +150,118 @@ public class CheckInvoice {
           return this.checkInvoice(filesInfo,invoiceCheckParamDTO);
 
  }
+
+    public R<T> checkAutoInv(boolean checkOff, DataImageFilesInfo filesInfo) throws Exception {
+        //判断是否开启查验
+        if(!checkOff){
+            return R.ok("查验功能未开启!");
+        }
+        //获取发票类型
+        String invoiceType = filesInfo.getInvoice();
+        InvoiceCheckParamDTO invoiceCheckParamDTO = new InvoiceCheckParamDTO();
+        switch (invoiceType){
+            case InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE:
+                final DataMotorVehicleSale dataUsedCarSales =dataMotorVehicleSaleService.getByFileId(filesInfo.getFileId());
+                invoiceCheckParamDTO.setCode(dataUsedCarSales.getInvoiceCode());
+                invoiceCheckParamDTO.setNumber(dataUsedCarSales.getInvoiceNumber());
+                invoiceCheckParamDTO.setDate(dataUsedCarSales.getInvoiceDate());
+                invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                invoiceCheckParamDTO.setPretax_amount(dataUsedCarSales.getPreTaxAmount());
+                if (dataUsedCarSales.getElectronicMark().toString().equals("2")){// 电子票
+                    invoiceCheckParamDTO.setPretax_amount(dataUsedCarSales.getInvoiceTotal());
+                }
+                break;
+            case InvoiceConstants.GLORITY_USED_CAR_SALES_CODE:
+                final DataUsedCarSales dataMotorVehicleSale =dataUsedCarSalesService.getByFileId(filesInfo.getFileId());
+                invoiceCheckParamDTO.setCode(dataMotorVehicleSale.getInvoiceCode());
+                invoiceCheckParamDTO.setNumber(dataMotorVehicleSale.getInvoiceNumber());
+                invoiceCheckParamDTO.setDate(dataMotorVehicleSale.getInvoiceDate());
+                invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getInvoiceTotal());
+//                if (dataMotorVehicleSale.getElectronicMark().toString().equals("2")){// 电子票
+//                    invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getInvoiceTotal());
+//                }
+                break;
+            case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
+                final DataOcrInfo ocrInfo = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
+                invoiceCheckParamDTO.setCode(ocrInfo.getInvoiceCode());
+                invoiceCheckParamDTO.setNumber(ocrInfo.getInvoiceNumber());
+                invoiceCheckParamDTO.setDate(ocrInfo.getInvoiceDate());
+                invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                invoiceCheckParamDTO.setElectron_mark(Integer.valueOf(ocrInfo.getElectronicMark()));
+                invoiceCheckParamDTO.setPretax_amount(ocrInfo.getPretaxAmount());
+                if (ocrInfo.getElectronicMark().toString().equals("1")){// 全电纸质发票（增值税专用发票）
+                    invoiceCheckParamDTO.setPretax_amount(ocrInfo.getInvoiceTotal());
+                }
+                break;
+            case InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE:
+            case InvoiceConstants.GLORITY_TAX_CODE:
+            case InvoiceConstants.GLORITY_ELECTRONIC_CODE:
+            case InvoiceConstants.GLORITY_ROLL_TICKET_CODE:
+            case InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE:
+                final DataOcrInfo ocrInfos = this.dataOcrInfoService.getByFileId(filesInfo.getFileId());
+                if (StrUtil.isNotBlank(ocrInfos.getBlockChain())){
+                    if (ocrInfos.getBlockChain().equals(InvoiceConstants.ONE)){
+                        invoiceCheckParamDTO.setBlock_chain(Integer.valueOf(ocrInfos.getBlockChain()));
+                        if (StrUtil.isNotBlank(ocrInfos.getSellerNo())){
+                            invoiceCheckParamDTO.setSeller_tax_id(ocrInfos.getSellerNo());
+                        }
+                        if (StrUtil.isNotBlank(ocrInfos.getProvince())){
+                            invoiceCheckParamDTO.setArea(ocrInfos.getArea());
+                        }
+                    }
+                }
+//                invoiceCheckParamDTO.setPretax_amount(ocrInfos.getPretaxAmount());
+//                //数电票(增值税)/普通发票处理
+//                if (invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_VAT_SPECIAL_CODE)||invoiceType.equals(InvoiceConstants.DIGITAL_INVOICE_ORDINARY_INVOICE_CODE)){
+//                    invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
+//                    invoiceCheckParamDTO.setTotal(ocrInfos.getInvoiceTotal());
+//                    invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
+//                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+//                    break;
+//                }
+                //增值税普通发票/普卷/电子普通
+                invoiceCheckParamDTO.setCode(ocrInfos.getInvoiceCode());
+                invoiceCheckParamDTO.setNumber(ocrInfos.getInvoiceNumber());
+                invoiceCheckParamDTO.setDate(ocrInfos.getInvoiceDate());
+                invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                String checkCodes = ocrInfos.getCheckCode();
+                if (StringUtils.hasText(checkCodes) && checkCodes.length() > 5) {
+                    checkCodes = checkCodes.substring(checkCodes.length() - 6);
+                    invoiceCheckParamDTO.setCheck_code(checkCodes);
+                }
+                String checkCodess = ocrInfos.getCheckCode();
+                //如果长度小于6就不截取
+                if (StringUtils.hasText(checkCodess) && checkCodess.length() < 6) {
+                    invoiceCheckParamDTO.setCheck_code(checkCodess);
+                }
+                break;
+            case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
+                final DataRailwayTicket railwayTicket = dataRailwayTicketService.getByFileId(filesInfo.getFileId());
+                if (railwayTicket.getElectronicMark().equals("1")){
+                    invoiceCheckParamDTO.setNumber(railwayTicket.getInvoiceNumber());
+                    invoiceCheckParamDTO.setDate(railwayTicket.getInvoiceDate());
+                    invoiceCheckParamDTO.setPretax_amount(railwayTicket.getInvoiceTotal());
+                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                }
+                break;
+            case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
+                final DataFlightItinerary flightItinerary = dataFlightItineraryService.getByFileId(filesInfo.getFileId());
+                if (flightItinerary.getElectronicMark().equals("1")) {
+                    invoiceCheckParamDTO.setNumber(flightItinerary.getInvoiceNumber());
+                    invoiceCheckParamDTO.setDate(flightItinerary.getInvoiceDate());
+                    invoiceCheckParamDTO.setPretax_amount(flightItinerary.getInvoiceTotal());
+                    invoiceCheckParamDTO.setType(filesInfo.getInvoice());
+                }
+                break;
+            default:
+                return R.ok();
+        }
+
+        return this.checkInvoice(filesInfo,invoiceCheckParamDTO);
+
+    }
     //传递查验参数调用查验工厂
     public R<T> checkInvoice(DataImageFilesInfo filesInfo, InvoiceCheckParamDTO invoiceCheckParamDTO) throws Exception {
         BaseEntity baseEntity= CheckFactory.instance("Autoinv").checkInvoke(filesInfo, invoiceCheckParamDTO);

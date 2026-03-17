@@ -24,10 +24,12 @@ import org.apache.poi.ss.formula.functions.T;
 import org.apache.tika.Tika;
 import org.smartlink.business.doman.vo.LhdxInvoiceVo;
 import org.smartlink.business.invoice.check.CheckInvoice;
+import org.smartlink.business.invoice.enumd.CheckEnum;
 import org.smartlink.business.service.IDataOcrService;
 import org.smartlink.business.service.ScanImageService;
 import org.smartlink.business.util.MoneyToChineseUtil;
 import org.smartlink.business.util.PdfInvoiceTemplateUtil;
+import org.smartlink.common.check.constant.CheckConstant;
 import org.smartlink.common.core.domain.R;
 import org.smartlink.common.core.domain.model.LoginUser;
 import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
@@ -338,6 +340,7 @@ public class ScanImageServiceImpl implements ScanImageService {
                     dataOcrService.ocrInsert(identificationDatum.k, identificationDatum.t);
                 }
 
+                String changshang = RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, CheckConstant.CACHE_CONFIG_KEY);
                 //是否查验
                 if (checkOff){
                     //发票查验
@@ -348,7 +351,14 @@ public class ScanImageServiceImpl implements ScanImageService {
                         String CheckFileId = jsonObject.getStr("fileId");
                         dataImageFilesInfoCheck.setInvoice(identificationDatum.k);
                         dataImageFilesInfoCheck.setFileId(CheckFileId);
-                        return checkInvoice.check(checkOff, dataImageFilesInfoCheck);
+                        // 根据 Redis 值判断
+                        if (CheckEnum.AUTOINV.getName().equalsIgnoreCase(changshang)) {
+                            return checkInvoice.checkAutoInv(checkOff, dataImageFilesInfoCheck);
+                        } else if (CheckEnum.HANG_XIN.getName().equalsIgnoreCase(changshang)) {
+                            return checkInvoice.check(checkOff, dataImageFilesInfoCheck);
+                        } else {
+                            throw new RuntimeException("未知查验厂商: " + changshang);
+                        }
                     }
                 }
 

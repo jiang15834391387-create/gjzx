@@ -107,7 +107,7 @@ public class AutoinvInvoiceConversion implements ChangeIdentifyInfo<List<Autoinv
 
             // 设置数电票相关信息
             invoice.setRightInvoiceNumber(jsonObject.getStr("einvoice_no"));
-            invoice.setRightInvoiceCode(jsonObject.getStr("einvoice_mark"));
+            invoice.setElectronicMark(jsonObject.getStr("einvoice_mark"));
 
             // 根据autoinv原始类型获取系统统一类型
             String autoinvType = identifyResult.getStr("type");

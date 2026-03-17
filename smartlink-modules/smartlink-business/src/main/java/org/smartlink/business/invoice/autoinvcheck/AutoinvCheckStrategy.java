@@ -209,33 +209,41 @@ public class AutoinvCheckStrategy extends AbstractCheckStrategy {
      */
     private JSONObject buildRequestParams(InvoiceCheckParamDTO dto) {
         JSONObject params = new JSONObject();
-        params.put("Code", StrUtil.nullToEmpty(dto.getCode()));
-        params.put("No", StrUtil.nullToEmpty(dto.getNumber()));
-        params.put("VCode", "");
 
-        // 处理金额字段，根据发票类型选择合适的金额
-        String amount = StrUtil.nullToEmpty(dto.getPretax_amount());
-        if (StrUtil.isEmpty(amount)) {
-            amount = StrUtil.nullToEmpty(dto.getTotal());
+        // Code
+        if (StrUtil.isNotBlank(dto.getCode())) {
+            params.put("Code", dto.getCode());
         }
-        if (StrUtil.isNotEmpty(amount)) {
+
+        // No
+        if (StrUtil.isNotBlank(dto.getNumber())) {
+            params.put("No", dto.getNumber());
+        }
+
+        // VCode
+        if (StrUtil.isNotBlank(dto.getCheck_code())) {
+            params.put("VCode", dto.getCheck_code());
+        }
+
+        // Amount（优先 pretax_amount，其次 total）
+        String amount = dto.getPretax_amount();
+        if (StrUtil.isNotBlank(amount)) {
             try {
                 params.put("Amount", Double.parseDouble(amount));
             } catch (NumberFormatException e) {
                 log.error("金额格式转换失败：{}", amount);
-                params.put("Amount", 0.0);
             }
-        } else {
-            params.put("Amount", 0.0);
         }
 
-        // 转换日期格式：从"2017年03月28日"转换为"20170328"
-        String dateStr = dto.getDate();
-        if (StrUtil.isNotEmpty(dateStr)) {
-            // 移除所有非数字字符
-            dateStr = dateStr.replaceAll("\\D", "");
+        // Date（只保留数字）
+        if (StrUtil.isNotBlank(dto.getDate())) {
+            String dateStr = dto.getDate().replaceAll("\\D", "");
+            if (StrUtil.isNotBlank(dateStr)) {
+                params.put("Date", dateStr);
+            }
         }
-        params.put("Date", StrUtil.nullToEmpty(dateStr));
+
+        // PermitCode（必传）
         params.put("PermitCode", autoinvCheckProperties.getPermitCode());
 
         return params;

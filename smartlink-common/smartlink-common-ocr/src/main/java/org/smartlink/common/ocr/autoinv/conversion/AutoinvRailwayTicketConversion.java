@@ -53,6 +53,7 @@ public class AutoinvRailwayTicketConversion implements ChangeIdentifyInfo<List<A
             railwayTicket.setStationGetOff(jsonObject.getStr("station_to"));
             railwayTicket.setInvoiceDate(jsonObject.getStr("date_time"));
             railwayTicket.setTicketContent(jsonObject.getStr("issuing_no"));
+            railwayTicket.setElectronicMark(jsonObject.getStr("einvoice_mark"));
 //            railwayTicket.setPurchaseType(jsonObject.getStr("purchase_type"));
 //            railwayTicket.setIssuingStation(jsonObject.getStr("issuing_station"));
 //            railwayTicket.setTicketType(jsonObject.getStr("ticket_type"));
