@@ -73,7 +73,7 @@
              )  t ${ew.getCustomSqlSegment}
     </select>
 
-    <select id="getTaskFinishByPage2" resultMap="TaskVoResult">
+    <select id="getTaskFinishByPage" resultMap="TaskVoResult">
         select *
         from (SELECT HTI.*,
                      AHP.BUSINESS_STATUS_,
@@ -93,7 +93,7 @@
              ) t ${ew.getCustomSqlSegment}
     </select>
 
-    <select id="getTaskFinishByPage" resultMap="TaskVoResult">
+    <select id="getTaskFinishByPage2" resultMap="TaskVoResult">
         SELECT *
         FROM (
                  SELECT HTI.*,
