@@ -2,6 +2,7 @@ package org.smartlink.common.ocr.autoinv.conversion;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
@@ -61,6 +62,10 @@ public class AutoinvManualInvoiceConversion implements ChangeIdentifyInfo<List<A
             invoice.setCity(jsonObject.getStr("city"));
             invoice.setCompanySeal(jsonObject.getStr("seal"));
 
+            dataImageFilesInfo.setInvoice(InvoiceConstants.GLORITY_MANUAL_INVOICE_CODE);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(InvoiceConstants.GLORITY_MANUAL_INVOICE_CODE, invoice, null, identifyResult.getStr("msg")));
 

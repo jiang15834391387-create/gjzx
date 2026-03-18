@@ -2,6 +2,7 @@ package org.smartlink.common.ocr.autoinv.conversion;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataPassengerCar;
 import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
@@ -59,6 +60,10 @@ public class AutoinvPassengerTicketConversion implements ChangeIdentifyInfo<List
             // 设置其他信息
             passengerCar.setCompanySeal(jsonObject.getStr("company_seal"));
 
+            dataImageFilesInfo.setInvoice(InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(InvoiceConstants.GLORITY_PASSENGER_TICKET_CODE, passengerCar, null, identifyResult.getStr("msg")));
 

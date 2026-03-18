@@ -2,6 +2,7 @@ package org.smartlink.common.ocr.autoinv.conversion;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataRailwayTicket;
 import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
@@ -51,13 +52,17 @@ public class AutoinvRailwayTicketConversion implements ChangeIdentifyInfo<List<A
             railwayTicket.setSeat(jsonObject.getStr("seat_class"));
             railwayTicket.setStationGetOn(jsonObject.getStr("station_from"));
             railwayTicket.setStationGetOff(jsonObject.getStr("station_to"));
-            railwayTicket.setInvoiceDate(jsonObject.getStr("date_time"));
+//            railwayTicket.setInvoiceDate(jsonObject.getStr("date_time"));
             railwayTicket.setTicketContent(jsonObject.getStr("issuing_no"));
             railwayTicket.setElectronicMark(jsonObject.getStr("einvoice_mark"));
 //            railwayTicket.setPurchaseType(jsonObject.getStr("purchase_type"));
 //            railwayTicket.setIssuingStation(jsonObject.getStr("issuing_station"));
 //            railwayTicket.setTicketType(jsonObject.getStr("ticket_type"));
 
+            dataImageFilesInfo.setInvoice(InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE, railwayTicket, null, identifyResult.getStr("msg")));
 

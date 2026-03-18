@@ -4,6 +4,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.core.utils.StringUtils;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
@@ -51,7 +52,7 @@ public class AutoinvInvoiceConversion implements ChangeIdentifyInfo<List<Autoinv
             invoice.setInvoiceNumber(jsonObject.getStr("invoice_no"));
             invoice.setInvoiceDate(jsonObject.getStr("invoice_open_date"));
             invoice.setSumTax(jsonObject.getStr("tax_amount"));
-            invoice.setSumAmount(jsonObject.getStr("pretax_amount"));
+            invoice.setPretaxAmount(jsonObject.getStr("pretax_amount"));
             invoice.setInvoiceTotal(jsonObject.getStr("sum_amount_lowercase"));
             invoice.setTotalUppercase(jsonObject.getStr("sum_amount_capital"));
             invoice.setCheckCode(jsonObject.getStr("check_code"));
@@ -117,6 +118,10 @@ public class AutoinvInvoiceConversion implements ChangeIdentifyInfo<List<Autoinv
                 systemType = InvoiceConstants.GLORITY_TAX_SPECIAL_CODE;
             }
             invoice.setDetails(ocrDetailsList);
+            dataImageFilesInfo.setInvoice(systemType);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(systemType, invoice, null, identifyResult.getStr("msg")));
 

@@ -2,6 +2,7 @@ package org.smartlink.common.ocr.autoinv.conversion;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataUsedCarSales;
 import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
@@ -69,8 +70,24 @@ public class AutoinvUsedCarSalesConversion implements ChangeIdentifyInfo<List<Au
             usedCarSales.setCarCode(jsonObject.getStr("vehicle_vin"));
             usedCarSales.setLicensePlate(jsonObject.getStr("vehicle_plate_no"));
             usedCarSales.setRegisTrationNumber(jsonObject.getStr("register_no"));
+            usedCarSales.setElectronicMark(jsonObject.getStr("einvoice_mark"));
+            usedCarSales.setElectronicNumber(jsonObject.getStr("einvoice_no"));
+            usedCarSales.setCompanyName(jsonObject.getStr("market_name"));
+            usedCarSales.setCompanyTaxId(jsonObject.getStr("market_tax_id"));
+            usedCarSales.setLemonMarketAddress(jsonObject.getStr("market_address"));
+            usedCarSales.setLemonMarketBankAndCcount(jsonObject.getStr("market_bank_account"));
+            usedCarSales.setLemonMarketPhone(jsonObject.getStr("market_phone"));
+            usedCarSales.setBusinessUnit(jsonObject.getStr("auction_company"));
+            usedCarSales.setBusinessUnitAddress(jsonObject.getStr("auction_company_address"));
+            usedCarSales.setBusinessUnitTaxNo(jsonObject.getStr("auction_company_tax_id"));
+            usedCarSales.setSellerAccount(jsonObject.getStr("auction_company_bank_account"));
+            usedCarSales.setBusinessUnitPhone(jsonObject.getStr("auction_company_phone"));
 
 
+            dataImageFilesInfo.setInvoice(InvoiceConstants.GLORITY_USED_CAR_SALES_CODE);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(InvoiceConstants.GLORITY_USED_CAR_SALES_CODE, usedCarSales, null, identifyResult.getStr("msg")));
 

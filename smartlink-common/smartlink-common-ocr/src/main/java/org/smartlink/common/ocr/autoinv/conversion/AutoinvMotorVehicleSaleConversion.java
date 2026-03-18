@@ -2,6 +2,7 @@ package org.smartlink.common.ocr.autoinv.conversion;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataMotorVehicleSale;
 import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
@@ -90,6 +91,10 @@ public class AutoinvMotorVehicleSaleConversion implements ChangeIdentifyInfo<Lis
             motorVehicleSale.setElectronicNumber(jsonObject.getStr("einvoice_no"));
             motorVehicleSale.setElectronicMark(jsonObject.getStr("einvoice_mark"));
 
+            dataImageFilesInfo.setInvoice(InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(InvoiceConstants.GLORITY_MOTOR_VEHICLE_SALE_CODE, motorVehicleSale, null, identifyResult.getStr("msg")));
 

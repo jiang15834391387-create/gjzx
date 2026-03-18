@@ -178,9 +178,9 @@ public class CheckInvoice {
                 invoiceCheckParamDTO.setDate(dataMotorVehicleSale.getInvoiceDate());
                 invoiceCheckParamDTO.setType(filesInfo.getInvoice());
                 invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getInvoiceTotal());
-//                if (dataMotorVehicleSale.getElectronicMark().toString().equals("2")){// 电子票
-//                    invoiceCheckParamDTO.setPretax_amount(dataMotorVehicleSale.getInvoiceTotal());
-//                }
+                if (dataMotorVehicleSale.getElectronicMark().toString().equals("2")){// 电子票
+                    invoiceCheckParamDTO.setCode("");
+                }
                 break;
             case InvoiceConstants.GLORITY_TAX_SPECIAL_CODE:
             case InvoiceConstants.GLORITY_ELECTRON_TAX_SPECIAL_CODE:
@@ -239,21 +239,24 @@ public class CheckInvoice {
                 break;
             case InvoiceConstants.GLORITY_RAILWAY_TICKET_CODE:
                 final DataRailwayTicket railwayTicket = dataRailwayTicketService.getByFileId(filesInfo.getFileId());
-                if (railwayTicket.getElectronicMark().equals("1")){
+                // 不是电子票，直接返回，不查验
+                if (!"1".equals(railwayTicket.getElectronicMark())) {
+                    return R.ok("非电子发票（铁路电子客票）无法查验！");
+                }
                     invoiceCheckParamDTO.setNumber(railwayTicket.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(railwayTicket.getInvoiceDate());
                     invoiceCheckParamDTO.setPretax_amount(railwayTicket.getInvoiceTotal());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                }
                 break;
             case InvoiceConstants.GLORITY_FLIGHT_ITINERARY_CODE:
                 final DataFlightItinerary flightItinerary = dataFlightItineraryService.getByFileId(filesInfo.getFileId());
-                if (flightItinerary.getElectronicMark().equals("1")) {
+                if (!"1".equals(flightItinerary.getElectronicMark())) {
+                    return R.ok("非电子发票（航空运输电子客票行程单）无法查验！");
+                }
                     invoiceCheckParamDTO.setNumber(flightItinerary.getInvoiceNumber());
                     invoiceCheckParamDTO.setDate(flightItinerary.getInvoiceDate());
                     invoiceCheckParamDTO.setPretax_amount(flightItinerary.getInvoiceTotal());
                     invoiceCheckParamDTO.setType(filesInfo.getInvoice());
-                }
                 break;
             default:
                 return R.ok();

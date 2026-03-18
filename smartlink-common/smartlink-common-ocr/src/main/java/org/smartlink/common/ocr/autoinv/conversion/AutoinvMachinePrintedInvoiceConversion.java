@@ -3,6 +3,7 @@ package org.smartlink.common.ocr.autoinv.conversion;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataOcrDetails;
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
@@ -98,6 +99,10 @@ public class AutoinvMachinePrintedInvoiceConversion implements ChangeIdentifyInf
             // 设置明细数据到发票对象
             invoice.setDetails(ocrDetailsList);
 
+            dataImageFilesInfo.setInvoice(InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(InvoiceConstants.GLORITY_AIRCRAFT_INVOICE_CODE, invoice, null, identifyResult.getStr("msg")));
 

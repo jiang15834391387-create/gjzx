@@ -2,6 +2,7 @@ package org.smartlink.common.ocr.autoinv.conversion;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.json.JSONObject;
+import org.smartlink.common.core.enums.CheckInvoiceStatusEnumd;
 import org.smartlink.common.ocr.constant.InvoiceConstants;
 import org.smartlink.common.entity.domain.business.domain.DataOcrInfo;
 import org.smartlink.common.ocr.core.ChangeIdentifyInfo;
@@ -46,7 +47,7 @@ public class AutoinvInvoiceListConversion implements ChangeIdentifyInfo<List<Aut
             invoice.setInvoiceNumber(jsonObject.getStr("invoice_no"));
             invoice.setInvoiceDate(jsonObject.getStr("invoice_open_date"));
             invoice.setSumTax(jsonObject.getStr("tax_amount"));
-            invoice.setSumAmount(jsonObject.getStr("pretax_amount"));
+            invoice.setPretaxAmount(jsonObject.getStr("pretax_amount"));
             invoice.setInvoiceTotal(jsonObject.getStr("sum_amount_lowercase"));
             invoice.setTotalUppercase(jsonObject.getStr("sum_amount_capital"));
 
@@ -70,6 +71,10 @@ public class AutoinvInvoiceListConversion implements ChangeIdentifyInfo<List<Aut
             invoice.setIssuer(jsonObject.getStr("invoice_opener"));
             invoice.setRemark(jsonObject.getStr("notes"));
 
+            dataImageFilesInfo.setInvoice(InvoiceConstants.DIGITAL_INVOICE_LIST);
+            dataImageFilesInfo.setMessage(identifyResult.getStr("msg"));
+            //发票待查验
+            dataImageFilesInfo.setCheckStatus(CheckInvoiceStatusEnumd.TO_BE_VERIFIED_CODE.getCode());
             // 添加到结果列表
             resultsList.add(new IdentificationData<>(InvoiceConstants.DIGITAL_INVOICE_LIST, invoice, null, identifyResult.getStr("msg")));
 
