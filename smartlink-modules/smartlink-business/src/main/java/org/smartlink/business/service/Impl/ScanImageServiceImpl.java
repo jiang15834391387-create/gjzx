@@ -101,8 +101,8 @@ public class ScanImageServiceImpl implements ScanImageService {
             fileSuffix = FileUtils.getFileSuffix(multipartFile.getOriginalFilename());
         }
         //是否OCR
-//        boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_OFF));
-        boolean ocrOff = true;
+        boolean ocrOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_OCR_OFF));
+//        boolean ocrOff = true;
         if (ocrOff){
             //是否查验
             boolean checkOff = Boolean.parseBoolean(RedisUtils.getCacheMapValue(Constants.SYS_CONFIG_KEY, ParamConstants.SYS_CHECK_OFF));
