@@ -335,10 +335,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
                     historyInfoVo.setEndTime(infoVo.getEndTime() == null ? null : infoVo.getEndTime());
                     historyInfoVo.setRunDuration(infoVo.getEndTime() == null ? null : infoVo.getRunDuration());
                     if (ObjectUtil.isEmpty(infoVo.getAssignee())) {
-                        ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(infoVo.getId(), userService);
-                        if (ObjectUtil.isNotEmpty(participantVo) && CollUtil.isNotEmpty(participantVo.getCandidate())) {
-                            historyInfoVo.setAssignee(StreamUtils.join(participantVo.getCandidate(), Convert::toStr));
-                        }
+                        fillParticipantInfo(historyInfoVo, infoVo.getId());
                     }
                 }
             } else {
@@ -350,10 +347,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
                         historyInfoVo.setEndTime(e.getEndTime() == null ? null : e.getEndTime());
                         historyInfoVo.setRunDuration(e.getEndTime() == null ? null : e.getRunDuration());
                         if (ObjectUtil.isEmpty(e.getAssignee())) {
-                            ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(e.getId(), userService);
-                            if (ObjectUtil.isNotEmpty(participantVo) && CollUtil.isNotEmpty(participantVo.getCandidate())) {
-                                historyInfoVo.setAssignee(StreamUtils.join(participantVo.getCandidate(), Convert::toStr));
-                            }
+                            fillParticipantInfo(historyInfoVo, e.getId());
                         }
                     });
 
@@ -406,10 +400,7 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
             }
             //设置人员id
             if (ObjectUtil.isEmpty(historicTaskInstance.getAssignee())) {
-                ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(historicTaskInstance.getId(), userService);
-                if (ObjectUtil.isNotEmpty(participantVo) && CollUtil.isNotEmpty(participantVo.getCandidate())) {
-                    actHistoryInfoVo.setAssignee(StreamUtils.join(participantVo.getCandidate(), Convert::toStr));
-                }
+                fillParticipantInfo(actHistoryInfoVo, historicTaskInstance.getId());
             }
             actHistoryInfoVoList.add(actHistoryInfoVo);
         }
@@ -443,6 +434,19 @@ public class ActProcessInstanceServiceImpl implements IActProcessInstanceService
             });
         }
         return recordList;
+    }
+
+    private void fillParticipantInfo(ActHistoryInfoVo actHistoryInfoVo, String taskId) {
+        ParticipantVo participantVo = WorkflowUtils.getCurrentTaskParticipant(taskId, userService);
+        if (ObjectUtil.isEmpty(participantVo)) {
+            return;
+        }
+        if (CollUtil.isNotEmpty(participantVo.getCandidate())) {
+            actHistoryInfoVo.setAssignee(StreamUtils.join(participantVo.getCandidate(), Convert::toStr));
+        }
+        if (CollUtil.isNotEmpty(participantVo.getCandidateName())) {
+            actHistoryInfoVo.setNickName(String.join(",", participantVo.getCandidateName()));
+        }
     }
 
     @Override

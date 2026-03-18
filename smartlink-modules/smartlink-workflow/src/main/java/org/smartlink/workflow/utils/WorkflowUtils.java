@@ -178,7 +178,8 @@ public class WorkflowUtils {
             PROCESS_ENGINE.getHistoryService().getHistoricIdentityLinksForTask(taskId);
 
         Task task = QueryUtils.taskQuery().taskId(taskId).singleResult();
-        if (task == null || CollUtil.isEmpty(linksForTask)) {
+        HistoricTaskInstance historicTaskInstance = QueryUtils.hisTaskInstanceQuery().taskId(taskId).singleResult();
+        if ((task == null && historicTaskInstance == null) || CollUtil.isEmpty(linksForTask)) {
             return participantVo;
         }
 
@@ -249,7 +250,8 @@ public class WorkflowUtils {
                 participantVo.setCandidate(finalIds);
                 participantVo.setCandidateName(finalNames);
 
-                participantVo.setClaim(StringUtils.isNotBlank(task.getAssignee()));
+                String assignee = task != null ? task.getAssignee() : historicTaskInstance.getAssignee();
+                participantVo.setClaim(StringUtils.isNotBlank(assignee));
             }
         }
 
