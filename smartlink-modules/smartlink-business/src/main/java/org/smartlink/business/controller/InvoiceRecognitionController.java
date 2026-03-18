@@ -31,7 +31,7 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@SaIgnore
+//@SaIgnore
 @RequestMapping("/business/InvoiceRecognition")
 public class InvoiceRecognitionController {
 
